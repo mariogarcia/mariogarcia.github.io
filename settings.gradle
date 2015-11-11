@@ -1,0 +1,3 @@
+include 'blog'
+
+rootProject.name = 'janus-blog'

@@ -1,0 +1,7 @@
+module hof.Data where
+
+data Person = Person { name :: String, age :: Integer }
+
+people :: [Person]
+people = [Person { name = "John", age = 22},
+          Person { name = "Konn", age = 34}]

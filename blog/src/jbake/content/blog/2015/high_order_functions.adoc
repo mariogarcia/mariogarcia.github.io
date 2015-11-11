@@ -1,0 +1,130 @@
+= High Order Functions
+Janus Lynd
+2015-11-10
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: frege, hof
+:idprefix:
+:sources: ../../../../../../sources/frege-hof/src/main/frege/hof
+
+"...is a function that does at least one of the following: takes one
+or more functions as arguments or returns a function as its result."
+-- Wikipedia
+
+For me high order functions are like a tool box, a swiss-army-knife
+that you can apply to many situations. But like everything in life you
+have to know when to use it :P
+
+=== Usual suspects
+
+The most used high order functions are **map** (transforms),
+**filter** (filters) and **fold** (aggregates). Many other functions
+are built on top of them.
+
+==== `map`
+
+The **map** function is normally used to transform elements in a list
+to create a new list with the transformed elements. It takes a
+function and applies that function to all elements of a list to return
+a new list. The signature is:
+
+[source, haskell]
+----
+map :: (a -> b) -> [a] -> [b]
+----
+
+We can read this signature as the following:
+
+- `(a -> b)` : means this is a parameter representing a function
+receiving an element of type `a` and returning as result an element of
+type `b`
+
+- `[a]`: Then we will receive a list of elements of type `a`
+- `[b]`: As final result we'll get a list of elements of type `b`
+
+A silly example could be to increase all numbers within a given
+collection.
+
+[source, haskell]
+----
+include::{sources}/MapExamples.fr[tags=increase]
+----
+
+We're using a partially applied function `(+1)` which is going to be
+applied by `map` to every element of the list and finally return a new
+list with all increased values.
+
+Another example could be to ask whether all numbers within a list are
+even numbers or not.
+
+[source, haskell]
+----
+include::{sources}/MapExamples.fr[tags=allEven]
+----
+
+Here we apply the function `even` to every element in the list and
+that will result in a new list with `Bool` values. Then is when the
+`and` function comes to check whether all values are `true` or not.
+
+If all elements are true, then the result is true, false otherwise.
+
+==== `filter`
+
+The **filter** function, takes a function as an argument to decide which
+elements of the list taken as second argument will be filtered and
+which ones won't.
+
+[source, haskell]
+----
+filter :: (a -> Bool) -> [a] -> [a]
+----
+
+- `(a -> Bool)`: This function is often called the `predicate`. It
+will return true if the element matches a given condition or not.
+- `[a]`: The source list
+- `[a]`: The result list with the non discarded elements
+
+If the element **doesn't match** the condition **it will be
+discarded**. Or in other words, **only those matching the condition, 
+will pass**.
+
+A trivial example could be getting only the even numbers of a list of
+integers.
+
+[source, haskell]
+----
+include::{sources}/FilterExamples.fr[tags=filterEven]
+----
+
+Of course you can always use a *lambda expression*:
+
+[source, haskell]
+----
+include::{sources}/FilterExamples.fr[tags=filterLambda]
+----
+
+==== `foldr`
+
+The **foldr** can be used to aggregate all values from a given list
+using a given function.
+
+[source, haskell]
+----
+foldr :: (a -> b -> b) -> b -> [a] -> b
+----
+
+- `(a -> b -> b)`: a function taking a new element from the list
+and the accumulated value and mix both to get a new accumulator.
+- `b`: a initial value to serve as initial accumulator.
+- `[a]`: The list of elements we want to reduce
+- `b`: The result
+
+Lets say I want to sum all ages from a list of people:
+
+[source, haskell]
+----
+include::{sources}/FoldrExamples.fr[tags=sumAges]
+----
+
+See how I'm using here a lambda expression to get only the `age` value
+from the record `Person` and add it up to the accumulator.

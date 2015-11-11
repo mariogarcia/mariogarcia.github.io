@@ -1,0 +1,21 @@
+= Devoxx 2015 (Day 2) 
+Janus Lynd
+2015-11-10
+:jbake-type: post
+:jbake-status: draft
+:jbake-tags: blog, asciidoc
+:idprefix:
+
+== University Sessions
+
+==== 9:30 - 12:30 Get a Taste of Lambdas and Get Addicted to Streams
+
+Speakers: Venkat Subramaniam https://twitter.com/@venkat_s
+
+image::/img/2015/devoxx/day_02/devoxx_ud_venkat.jpg[width="350"]
+
+==== 13:30 - 16:30 Modular Development with JDK 9
+
+Speakers: Mark Reinhold https://twitter.com/@mreinhold and Alan Bateman 
+
+image::/img/2015/devoxx/day_02/devoxx_ud_jdk9.jpg[width="350"]
