@@ -1,0 +1,341 @@
+= Property based testing
+Janus Lynd
+2015-11-20
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: frege, scala, clojure, groovy
+:idprefix:
+:sources: ../../../../../../../sources/2015/11/quick-check/
+
+=== What is __Property Based Testing__ ?
+
+"Property-based tests make statements about the output of your code
+based on the input, and these statements are verified for many
+different possible inputs."
+-- Source: http://blog.jessitron.com/2013/04/property-based-testing-what-is-it.html
+
+=== The problem
+
+Fortunately nowadays we are used to do testing. But sometimes tests
+are hard to do, hard to maintain and hard to reason about. Even if we
+try our best, sometimes we forgot to add that case that has make the
+app to crash in the worst possible moment.
+
+Property based testing claims to be able to help us to fill this gap
+and make our tests easier to maintain. But I've also heard it is also
+harder to write and grasp. In this entry I'm reviewing how property
+based testing is handle in different programming languages. From a
+more imperative like Java or Groovy to more functional languages like
+Clojure, Scala and finally Frege. During this journey I'll try to
+figure out which are the patterns and best practices to get advantage
+of property based testing.
+
+==== Java
+https://github.com/januslynd/blog/tree/master/sources/quick-check/qc-java[Code at Github]
+
+"Assumptions => Theories/Properties => Proof"
+-- Use case
+
+For the Java sample I've tried
+https://github.com/pholser/junit-quickcheck[junit-quickcheck]. This
+library is meant to be used with http://junit.org/[junit] tests.
+
+[source,groovy]
+.dependencies
+----
+include::{sources}/qc-java/build.gradle[tags=dependencies]
+----
+
+The sample is a silly example about loans. If somebody ask for a loan,
+depending on how much this person is asking, the state of the loan may
+vary. The Java library works on top of the concept of theories and
+assumptions.
+
+- **1st theory**: If the loan is less than or equals to 200 EUR then the
+loan is `ACCEPTED` right away.
+- **2nd theory**: If the loan is between 201 and 1000 then it should be
+  marked as `PENDING` until the request is studied in detail
+- **3rd theory**: All loans beyond 1000 will be automatically
+  `REJECTED`.
+
+Theories aree annotated with the `@Theory` annotation. Follow up the
+theory for the automatically accepted loans:
+
+[source,java]
+.less or equals to 200
+----
+include::{sources}/qc-java/src/test/java/qc/SupervisorTheories.java[tags=accepted]
+----
+
+<1> This is a `@Theory`
+<2> `@ForAll` cases in this theory (by default are 100) the amount
+will be provided by a `@InRange` and it will be a number between 0 and
+200 (It doesn't make sense to grant a loan of 0 EUR right ? :P)
+<3> Building a new loan with the provided amount
+<4> Assuming the new loan state is `PENDING` and the amount is less
+than or equals 200
+<5> Processing that loan
+<6> The result should be an accepted loan
+
+Then we can create theories for the remaining use cases:
+
+[source,java]
+.between 200 and 100
+----
+include::{sources}/qc-java/src/test/java/qc/SupervisorTheories.java[tags=pending]
+----
+
+and...
+
+[source,java]
+.beyond 1000
+----
+include::{sources}/qc-java/src/test/java/qc/SupervisorTheories.java[tags=rejected]
+----
+
+I could have created a generator for Loan instances, but it seemed
+overkill for such a little example. It was easier to call to a
+predefined generator to feed a given Loan property.
+
+==== Groovy
+https://github.com/januslynd/blog/tree/master/sources/quick-check/qc-groovy[Code at Github]
+
+"Know the output => Check a certain set of inputs give the right output"
+-- Use case
+
+To use property based testing with Groovy I'm using
+https://github.com/spockframework/spock[Spock] as testing framework and
+https://github.com/Bijnagte/spock-genesis[Spock Genesis] which has a
+set of value generators.
+
+[source,groovy]
+.dependencies
+----
+include::{sources}/qc-groovy/build.gradle[tags=dependencies]
+----
+
+This time we have a function building URIs that should follow certain
+rules. First of all the final URI should follow these rules:
+
+[source,groovy]
+.Rules
+----
+include::{sources}/qc-groovy/src/test/groovy/qc/URIComposerSpec.groovy[tags=composerRules]
+----
+
+Then we build the function that would match that rules:
+
+[source,groovy]
+.Composer
+----
+include::{sources}/qc-groovy/src/main/groovy/qc/URIComposer.groovy[tags=composer]
+----
+
+And finally lets execute a test checking that function:
+
+[source,groovy]
+.Test
+----
+include::{sources}/qc-groovy/src/test/groovy/qc/URIComposerSpec.groovy[tags=composerTest]
+----
+
+<1> Result should be a valid (upon our rules) URI
+<2> Bucket/Root path should follow the valid fragment property
+<3> Rest of paths should follow the valid fragment property
+
+It's clear, I could have forgotten to add many of the possible cases
+if I would have written those cases manually. This way I'm taking
+advantage of the declared rules to generate a bunch of use cases for
+me.
+
+==== Scala
+https://github.com/januslynd/blog/tree/master/sources/quick-check/qc-scala[Code at Github]
+
+"Assumptions => Theories/Properties => Proof"
+-- Use case
+
+Because I'm not yet used to Scala I've taken the same example I did in
+Java and tried to translate it to Scala to see how it looks like.
+
+So we also have a function to process a given Loan:
+
+[source,scala]
+----
+include::{sources}/qc-scala/src/main/scala/qc/Supervisor.scala[tags=process]
+----
+
+<1> For a given loan amount
+<2> If the amount is 0 < amount < 201
+<3> If the amount is 201 < amount < 1000
+<4> If the amount is anything else
+
+And dependending on the requested amount we should be receiving different
+state. For amounts automatically accepted:
+
+[source,scala]
+----
+include::{sources}/qc-scala/src/test/scala/qc/SupervisorSpecification.scala[tags=acceptedLoans]
+----
+
+<1> Using a number generator for getting amounts from 0 to 200
+<2> Building instances of Loan with State.PENDING and 0 < amount < 200
+<3> For all provided loans once processed they all should be ACCEPTED
+
+For those which are directly rejected:
+
+[source,scala]
+----
+include::{sources}/qc-scala/src/test/scala/qc/SupervisorSpecification.scala[tags=rejectableLoans]
+----
+
+<1> Using a number generator for getting amounts from 1000 to 1999
+<2> Building instances of Loan with State.PENDING and 1000 < amount < 1999
+<3> For all provided loans once processed they all should be REJECTED
+
+==== Clojure
+https://github.com/januslynd/blog/tree/master/sources/quick-check/qc-clojure[Code at Github]
+
+"Check behavior"
+-- Use case
+
+Clojure has a complete-like quick-check testing framework called
+https://github.com/clojure/test.check[Test Check]. It can be used
+standalone but I'll be using it withing a `clojure.test` thanks
+to the `defspec` macro.
+
+[source,clojure]
+.dependencies
+----
+include::{sources}/qc-clojure/project.clj[tags=dependencies]
+----
+
+The Clojure example has to do with numbers. Lets say I'm reading a CSV
+file with lines of numbers. Those lines may have numbers or
+characters. I'm only interested in adding up all numbers of each line.
+
+What are the properties ? Well, Given a line with elements separated by `,`...
+
+- Numbers are all elements minus the non numeric values
+- Adding up all numeric elements should follow the commutativity rule
+
+In our test we're declaring that for all possible values of a possible
+empty vector of alphanumeric values, once we join those values in a
+csv-like string, it doesn't matter which is the order of the included
+digits, the outcome should remain the same.
+
+[source,clojure]
+.Test
+----
+include::{sources}/qc-clojure/test/qc/core_test.clj[]
+----
+
+<1> Number of iterations
+<2> Generators (It generates vectors of alphanumeric characters, sometimes could be empty)
+<3> Setting a sample line and a reversed version of that line
+<4> The result should be the same despite the order
+
+A simple implementation of the required function:
+
+[source,clojure]
+.Sum
+----
+include::{sources}/qc-clojure/src/qc/core.clj[tags=sumnumbers]
+----
+
+<1> Checking if the argument is empty
+<2> Splitting values
+<3> Filtering digits
+<4> Converting to integers
+<5> Adding up all integers
+
+==== Frege
+https://github.com/januslynd/blog/tree/master/sources/quick-check/qc-frege[Code at Github]
+
+"Reversible processes"
+-- Use case
+
+Finally I will be coding a very simple example representing how to
+test some process that you know that applied twice gives you the
+original value. The most used example for this is to reverse a string:
+
+[source,haskell]
+.reverse string
+----
+include::{sources}/qc-frege/src/main/frege/qc/Reverse.fr[]
+----
+
+I'm defining two properties that should hold for the `reverseString`
+function:
+
+[source,haskell]
+.properties
+----
+include::{sources}/qc-frege/src/test/frege/qc/TestReverse.fr[]
+----
+
+<1> `reversible`: The function applied twice to the same word should
+return the original value.
+<2> `no effect to a single character`: original word The function
+applied to a single character should return the same character
+
+In this Frege example I've not used any generator explicitly, but
+declaring the functions that are going to be used with the `property`
+function is enough for the compiler to infer what type of values
+should provided to our function to test it.
+
+=== Conclusion
+
+About **languages** and **frameworks**:
+
+- All languages and testing framewors have `generators`, and most of
+them are pretty similar
+- Only Groovy and Java examples don't have the concept of `minimum
+  failure sample` but at least Groovy has the advantage of Spock which
+  helps a lot defining the specification.
+
+About **use cases**:
+
+* Some detected types:
+** `Based on defined rules`: generate value ranges to prove a set of
+   pre-defined rules
+** `Based on reversible processes`: Some problems can be solved by
+asking a process to execute twice: reverse is a good example of this.
+** `Based on known output`: Problems requiring to check a wide range
+of values to give the expected output.
+** `Not aimed to test result but behavior`: Like commutativity over
+sums (Clojure example).
+  
+* A set of `properties` can be considered a `specification`. Both
+Groovy and Scala languages mimic that line of thought very well.
+* If properties are difficult to define, then it may lead to
+indeterministic checking and different test results.
+
+Well I've just started and my feeling is that I've seen just the tip
+of the iceberg. I really like the idea about trying to define what are
+the general properties that a given function should obey and let the
+testing framework to provide a set of possible values to challenge
+those properties.
+
+=== Resources
+
+- **Java**
+- https://github.com/pholser/junit-quickcheck[junit-quickcheck]
+- http://junit.org/[junit]
+
+- **Groovy**
+- https://github.com/spockframework/spock[Spock]
+- https://github.com/Bijnagte/spock-genesis[Spock Genesis]
+
+- **Scala**
+- http://www.scalatest.org/[Scala Test]
+- https://www.scalacheck.org/[Scala Check]
+
+- **Clojure**
+- https://github.com/clojure/test.check[Test Check]
+
+- **Frege**
+- https://www.frege-lang.org[Frege site]
+
+- **Talks**
+- http://blog.jessitron.com/2013/04/property-based-testing-what-is-it.html
+- https://www.youtube.com/watch?v=Z8qddDUt4hI

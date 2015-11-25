@@ -1,0 +1,17 @@
+apply plugin: 'java'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile 'org.slf4j:slf4j-api:1.7.12'
+
+    // tag::dependencies[]
+    testCompile 'com.pholser:junit-quickcheck-core:0.5'
+    testCompile 'com.pholser:junit-quickcheck-generators:0.5'
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.hamcrest:hamcrest-junit:2.0.0.0'
+    // end::dependencies[]
+
+}
