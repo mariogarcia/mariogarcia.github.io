@@ -5,7 +5,7 @@ Janus Lynd
 :jbake-status: published
 :jbake-tags: frege, hof
 :idprefix:
-:sources: ../../../../../../sources/frege-hof/src/main/frege/hof
+:sources: ../../../../../../../sources/2015/11/frege-hof/src/main/frege/hof
 
 "...is a function that does at least one of the following: takes one
 or more functions as arguments or returns a function as its result."
