@@ -1,0 +1,5 @@
+module qc.Reverse where
+
+-- Reverses a string
+reverseString :: String -> String
+reverseString = packed . reverse . toList
