@@ -1,0 +1,16 @@
+module ListComprehensions where
+
+-- tag::map[]
+produceInc0 :: (Num a) => [a] -> [a]
+produceInc0 xs = map (+1) xs
+-- end::map[]
+
+-- tag::list[]
+produceInc1 :: (Num a) => [a] -> [a]
+produceInc1 xs = [x + 1 | x <- xs ]
+-- end::list[]
+
+-- tag::incremental[]
+produceInc2 :: (Num a) => [a] -> [a]
+produceInc2 xs = [(+1)] <*> xs
+-- end::incremental[]

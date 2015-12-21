@@ -1,0 +1,126 @@
+= Some applicative style examples
+Janus Lynd
+2015-12-21
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: frege, haskell
+:idprefix:
+:sources: ../../../../../../../sources/2015/12/frege-applicative
+
+I'm not going to define what an applicative functor is, (See
+references), but I would like to share some `applicative style`
+examples. After reading a bit about applicative functors I've coined
+the definition:
+
+"functors that can be applied, meaning functors containing functions"
+-- My own :P
+
+== `fmap` on steroids ?
+
+First step to use applicative functor style is to understand `fmap`
+and the infix notation `<$>`. When I try to apply a function to a
+value wrapped in a `Functor` normally I use `fmap`:
+
+[source,haskell]
+----
+fmap (+1) (Just 1) == Just 2
+----
+
+But there's the `applicative style` which uses the `<$>` symbol. The
+`<$>` symbol is just the `fmap` function, nothing else. The only
+difference is that you can use this symbol `infix`. That means the
+following would work the same:
+
+[source,haskell]
+----
+(+1) <$> (Just 1) == Just 2
+----
+
+And there is another feature, `<$>` is left associative, that means
+among other things, you can avoid wrapping the right operand in
+parenthesis.
+
+== The magical `<*>`
+
+But what if I wanted to do operations over wrapped values. And most of
+the time I use the `do` notation:
+
+[source, haskell]
+----
+include::{sources}/src/main/frege/Sum.fr[tags=donotation]
+----
+
+This function means that for any applicative functor it would take
+the contained function () and the contained value (f a) and will
+return a contained value (f b).
+
+.Applicative
+[source,haskell]
+----
+Apply f => f (a->b) -> f a -> f b
+----
+
+You can also use `<*>` in combination with `<$>` or in other words
+with `fmap`:
+
+[source, haskell]
+----
+include::{sources}/src/main/frege/Sum.fr[tags=applicative]
+----
+
+Sometimes is easy to think that whenever you used to have a function
+receiving plain values you can use the same function but combining it
+as an applicative functor.
+
+E.g here we have a function that creates a `Band`:
+
+[source, haskell]
+----
+include::{sources}/src/main/frege/Bands.fr[tags=simpleBand]
+----
+
+That's perfect, but what happens when have to create a Band from Maybe
+instances ? No problem, let's use applicative functors:
+
+[source, haskell]
+----
+include::{sources}/src/main/frege/Bands.fr[tags=wrapped]
+----
+
+What I'm doing is to partially apply the applied function with the
+first parameter, then with the second, and finally we resolve the
+function within the context.
+
+== List comprehensions
+
+There is another use I've found specially interesting. The use of
+applicative functors for list comprehensions. Lets say I would like to
+increment every value from a given list. We can use `map`:
+
+.Using map
+[source, haskell]
+----
+include::{sources}/src/main/frege/ListComprehensions.fr[tags=map]
+----
+
+Or you may use list comprehensions:
+
+.Using comprehensions
+[source, haskell]
+----
+include::{sources}/src/main/frege/ListComprehensions.fr[tags=list]
+----
+
+But there is still another way thanks to the applicative functor
+function `<*>`:
+
+.Using applicative functor style
+[source, haskell]
+----
+include::{sources}/src/main/frege/ListComprehensions.fr[tags=incremental]
+----
+
+== References
+
+* https://pbrisbin.com/posts/applicative_functors/
+* http://learnyouahaskell.com/functors-applicative-functors-and-monoids
