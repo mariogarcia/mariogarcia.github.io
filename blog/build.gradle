@@ -1,5 +1,4 @@
 buildscript {
-
   repositories {
       mavenLocal()
       mavenCentral()
@@ -7,24 +6,39 @@ buildscript {
   }
 
   dependencies {
+      // Jbake + Asciidoctor
       classpath 'me.champeau.gradle:jbake-gradle-plugin:0.2'
       classpath 'org.jbake:jbake-core:2.4.0'
       classpath 'org.freemarker:freemarker:2.3.19'
       classpath 'org.pegdown:pegdown:1.4.2'
       classpath 'org.asciidoctor:asciidoctorj:1.5.1'
-  }
 
+      classpath 'org.ajoberstar:gradle-git:1.4.2'
+  }
 }
 
 apply plugin: 'groovy'
 apply plugin: 'me.champeau.jbake'
+apply plugin: 'org.ajoberstar.github-pages'
 
 jbake {
-
    input      = file('src/jbake')
    output     = file('build/jbake')
    clearCache = true
 
    configuration['render.tag'] = 'true'
+}
 
+githubPages {
+    repoUri = 'git@github.com:januslynd/blog.git'
+
+    pages {
+        from file('build/jbake')
+    }
+
+    //https://github.com/ajoberstar/gradle-git/wiki/Travis-CI-Authentication
+    credentials {
+        username = System.getenv('GH_TOKEN')
+        password = ''
+    }
 }
