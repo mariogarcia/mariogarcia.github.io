@@ -30,7 +30,7 @@ jbake {
 }
 
 githubPages {
-    repoUri = 'git@github.com:januslynd/blog.git'
+    repoUri = 'https://github.com/januslynd/blog.git'
 
     pages {
         from file('build/jbake')
