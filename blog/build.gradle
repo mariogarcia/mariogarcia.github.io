@@ -30,7 +30,8 @@ jbake {
 }
 
 githubPages {
-    repoUri = 'https://github.com/januslynd/blog.git'
+    repoUri             = 'https://github.com/januslynd/blog.git'
+    deleteExistingFiles = true
 
     pages {
         from file('build/jbake')
