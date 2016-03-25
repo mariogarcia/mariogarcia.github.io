@@ -5,7 +5,19 @@ html,
 body {
   height: 100%;
   /* The html and body elements cannot have any padding or margin. */
- font-size:12pt;
+ font-size:11pt;
+}
+
+.navbar-default {
+    background-color:#000040;
+}
+
+.navbar-default .navbar-brand {
+   color:#FFFFFF;
+}
+
+.navbar-default .navbar-nav>li>a {
+    color:#FFFFFF;
 }
 
 /* Wrapper for page content to push down footer */
@@ -51,3 +63,21 @@ body {
 /* code {
   font-size: 110%;
 } */
+
+
+blockquote, blockquote p {
+    color: #907320;
+    font-style: italic;
+}
+
+div.listingblock {
+    margin-top: 1.25em;
+}
+
+div.listingblock div.title {
+    font-variant: small-caps;
+}
+
+h2 code {
+    font-size: 0.8em;
+}
