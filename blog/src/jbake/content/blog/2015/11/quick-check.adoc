@@ -18,13 +18,13 @@ different possible inputs."
 
 Fortunately nowadays we are used to do testing. But sometimes tests
 are hard to do, hard to maintain and hard to reason about. Even if we
-try our best, sometimes we forgot to add that case that has make the
+try our best, sometimes we forgot to add that case that made the
 app to crash in the worst possible moment.
 
 Property based testing claims to be able to help us to fill this gap
 and make our tests easier to maintain. But I've also heard it is also
 harder to write and grasp. In this entry I'm reviewing how property
-based testing is handle in different programming languages. From a
+based testing is handled in different programming languages. From a
 more imperative like Java or Groovy to more functional languages like
 Clojure, Scala and finally Frege. During this journey I'll try to
 figure out which are the patterns and best practices to get advantage
@@ -43,7 +43,7 @@ library is meant to be used with http://junit.org/[junit] tests.
 [source,groovy]
 .dependencies
 ----
-include::{sources}/qc-java/build.gradle[tags=dependencies]
+include::{sources}/qc-java/build.gradle[tags=dependencies,indent=0]
 ----
 
 The sample is a silly example about loans. If somebody ask for a loan,
@@ -64,7 +64,7 @@ theory for the automatically accepted loans:
 [source,java]
 .less or equals to 200
 ----
-include::{sources}/qc-java/src/test/java/qc/SupervisorTheories.java[tags=accepted]
+include::{sources}/qc-java/src/test/java/qc/SupervisorTheories.java[tags=accepted,indent=0]
 ----
 
 <1> This is a `@Theory`
@@ -82,7 +82,7 @@ Then we can create theories for the remaining use cases:
 [source,java]
 .between 200 and 100
 ----
-include::{sources}/qc-java/src/test/java/qc/SupervisorTheories.java[tags=pending]
+include::{sources}/qc-java/src/test/java/qc/SupervisorTheories.java[tags=pending,indent=0]
 ----
 
 and...
@@ -90,7 +90,7 @@ and...
 [source,java]
 .beyond 1000
 ----
-include::{sources}/qc-java/src/test/java/qc/SupervisorTheories.java[tags=rejected]
+include::{sources}/qc-java/src/test/java/qc/SupervisorTheories.java[tags=rejected,indent=0]
 ----
 
 I could have created a generator for Loan instances, but it seemed
@@ -111,7 +111,7 @@ set of value generators.
 [source,groovy]
 .dependencies
 ----
-include::{sources}/qc-groovy/build.gradle[tags=dependencies]
+include::{sources}/qc-groovy/build.gradle[tags=dependencies,indent=0]
 ----
 
 This time we have a function building URIs that should follow certain
@@ -120,7 +120,7 @@ rules. First of all the final URI should follow these rules:
 [source,groovy]
 .Rules
 ----
-include::{sources}/qc-groovy/src/test/groovy/qc/URIComposerSpec.groovy[tags=composerRules]
+include::{sources}/qc-groovy/src/test/groovy/qc/URIComposerSpec.groovy[tags=composerRules,indent=0]
 ----
 
 Then we build the function that would match that rules:
@@ -128,7 +128,7 @@ Then we build the function that would match that rules:
 [source,groovy]
 .Composer
 ----
-include::{sources}/qc-groovy/src/main/groovy/qc/URIComposer.groovy[tags=composer]
+include::{sources}/qc-groovy/src/main/groovy/qc/URIComposer.groovy[tags=composer,indent=0]
 ----
 
 And finally lets execute a test checking that function:
@@ -136,7 +136,7 @@ And finally lets execute a test checking that function:
 [source,groovy]
 .Test
 ----
-include::{sources}/qc-groovy/src/test/groovy/qc/URIComposerSpec.groovy[tags=composerTest]
+include::{sources}/qc-groovy/src/test/groovy/qc/URIComposerSpec.groovy[tags=composerTest,indent=0]
 ----
 
 <1> Result should be a valid (upon our rules) URI
@@ -161,7 +161,7 @@ So we also have a function to process a given Loan:
 
 [source,scala]
 ----
-include::{sources}/qc-scala/src/main/scala/qc/Supervisor.scala[tags=process]
+include::{sources}/qc-scala/src/main/scala/qc/Supervisor.scala[tags=process, indent=0]
 ----
 
 <1> For a given loan amount
@@ -174,7 +174,7 @@ state. For amounts automatically accepted:
 
 [source,scala]
 ----
-include::{sources}/qc-scala/src/test/scala/qc/SupervisorSpecification.scala[tags=acceptedLoans]
+include::{sources}/qc-scala/src/test/scala/qc/SupervisorSpecification.scala[tags=acceptedLoans,indent=0]
 ----
 
 <1> Using a number generator for getting amounts from 0 to 200
@@ -185,7 +185,7 @@ For those which are directly rejected:
 
 [source,scala]
 ----
-include::{sources}/qc-scala/src/test/scala/qc/SupervisorSpecification.scala[tags=rejectableLoans]
+include::{sources}/qc-scala/src/test/scala/qc/SupervisorSpecification.scala[tags=rejectableLoans,indent=0]
 ----
 
 <1> Using a number generator for getting amounts from 1000 to 1999
@@ -206,7 +206,7 @@ to the `defspec` macro.
 [source,clojure]
 .dependencies
 ----
-include::{sources}/qc-clojure/project.clj[tags=dependencies]
+include::{sources}/qc-clojure/project.clj[tags=dependencies,indent=0]
 ----
 
 The Clojure example has to do with numbers. Lets say I'm reading a CSV
@@ -226,7 +226,7 @@ digits, the outcome should remain the same.
 [source,clojure]
 .Test
 ----
-include::{sources}/qc-clojure/test/qc/core_test.clj[]
+include::{sources}/qc-clojure/test/qc/core_test.clj[indent=0]
 ----
 
 <1> Number of iterations
@@ -239,7 +239,7 @@ A simple implementation of the required function:
 [source,clojure]
 .Sum
 ----
-include::{sources}/qc-clojure/src/qc/core.clj[tags=sumnumbers]
+include::{sources}/qc-clojure/src/qc/core.clj[tags=sumnumbers,indent=0]
 ----
 
 <1> Checking if the argument is empty
@@ -261,7 +261,7 @@ original value. The most used example for this is to reverse a string:
 [source,haskell]
 .reverse string
 ----
-include::{sources}/qc-frege/src/main/frege/qc/Reverse.fr[]
+include::{sources}/qc-frege/src/main/frege/qc/Reverse.fr[indent=0]
 ----
 
 I'm defining two properties that should hold for the `reverseString`
@@ -270,7 +270,7 @@ function:
 [source,haskell]
 .properties
 ----
-include::{sources}/qc-frege/src/test/frege/qc/TestReverse.fr[]
+include::{sources}/qc-frege/src/test/frege/qc/TestReverse.fr[indent=0]
 ----
 
 <1> `reversible`: The function applied twice to the same word should
@@ -304,7 +304,7 @@ asking a process to execute twice: reverse is a good example of this.
 of values to give the expected output.
 ** `Not aimed to test result but behavior`: Like commutativity over
 sums (Clojure example).
-  
+
 * A set of `properties` can be considered a `specification`. Both
 Groovy and Scala languages mimic that line of thought very well.
 * If properties are difficult to define, then it may lead to
