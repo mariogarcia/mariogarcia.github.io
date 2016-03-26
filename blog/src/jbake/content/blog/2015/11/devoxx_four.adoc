@@ -1,0 +1,123 @@
+= Devoxx 2015 notes (Day 4)
+Janus Lynd
+2015-11-12
+:jbake-type: post
+:jbake-status: draft
+:jbake-tags: devoxx
+:idprefix:
+
+== Conference Day
+
+==== 9:30 - 10:30 Plugin Gradle: take the control of the build
+
+Speakers: Eyal Lezmy
+
+==== 10:50 - 11:50
+
+???
+
+==== 12:00 - 13:00 $HOME Sweet $HOME
+
+Speakers: Xavier Mertens
+
+Very interesting talk by Xavier Mertens about what he called "The
+internet of terror". Xavier is a security expert. Basically he
+remarked how good developers are building things without thinking
+about security, and how that behavior can only lead to disaster.
+
+There must be a balance between `features`, `security` and `ease of
+use`.
+
+He also mentioned that there are many big companies giving things `for
+free`, and how we should be very suspicious about this. Our
+information is not free at all.
+
+He gave a tip about how to sort our information, when developing a new
+app:
+
+- Open
+- Restricted
+- Confidential
+
+==== ???? Need for async
+
+Speakers: Konrad Malawski (http://www.project13.pl)
+
+Some interesting rules:
+
+[source,groovy]
+----
+latency != response time
+----
+
+[source, groovy]
+----
+response time = latency + service time
+----
+
+- Benchmark everything!!!
+
+Another rule to take into account:
+
+[source, groovy]
+----
+concurrent < lock-free < wait-free
+----
+
+Lock-free better than concurrent and wait-free better than lock-free.
+
+- "Zero copy" - send file instruction kernel.
+- Michael and Scott implementation of LinkedQueue (concurrent)
+
+Names:
+
+- Martin Thompson
+- Leslie Lamport
+
+==== 14:00 - 15:00 Building modern DSLs in Groovy
+
+Speakers: Cedric Champeau
+
+==== 15:10 - 16:10 Java Generics: Past, Present, and Future
+
+Speakers: Richard Warburton and Raoul-Gabriel Urma
+
+==== 16:40 - 17:40
+
+???
+
+17:50 - 18:50 Project Jigsaw: Under the hood
+
+Speakers: Mark Reinhold, Alan Bateman
+
+[source,shell]
+.jigwaw builds
+----
+java -listmods
+----
+
+[source,shell]
+.sequence of dirs
+----
+java -modulepath dir1:dir2
+----
+
+- Use `-Xdlog:resolver` to trace dependencies.
+- `jdep` (is available in jdk8)
+
+`jlink` will eventually make wrappers to make java apps be executables
+(natively).
+
+[source,groovy]
+----
+classpath != modulePath
+----
+
+[source,groovy]
+----
+automatic modules != explicit modules
+----
+
+19:00 - 20:00 20 Years of Java - A video Retrospective
+
+Speakers: Stephen Chin

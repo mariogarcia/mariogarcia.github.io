@@ -1,0 +1,21 @@
+= Devoxx 2015 notes (Day 5)
+Janus Lynd
+2015-11-13
+:jbake-type: post
+:jbake-status: draft
+:jbake-tags: devoxx
+:idprefix:
+
+== Conference Day
+
+==== 9:30 - 10:30 Software architecture as code
+
+Speakers: Simon Brown
+
+==== 10:45 - 11:45 HTTP 2.0 & Java: Current Status
+
+Speakers: Simone Bordet
+
+==== 11:50 - 12:50 The intelligence of your things
+
+Speakers: Amy Nicholson

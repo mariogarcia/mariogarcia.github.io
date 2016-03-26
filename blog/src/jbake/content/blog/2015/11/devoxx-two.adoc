@@ -1,9 +1,9 @@
-= Devoxx 2015 (Day 2) 
+= Devoxx 2015 notes (Day 2)
 Janus Lynd
 2015-11-10
 :jbake-type: post
 :jbake-status: draft
-:jbake-tags: blog, asciidoc
+:jbake-tags: devoxx, jdk8, jdk9
 :idprefix:
 
 == University Sessions
@@ -16,6 +16,6 @@ image::/img/2015/devoxx/day_02/devoxx_ud_venkat.jpg[width="350"]
 
 ==== 13:30 - 16:30 Modular Development with JDK 9
 
-Speakers: Mark Reinhold https://twitter.com/@mreinhold and Alan Bateman 
+Speakers: Mark Reinhold https://twitter.com/@mreinhold and Alan Bateman
 
 image::/img/2015/devoxx/day_02/devoxx_ud_jdk9.jpg[width="350"]

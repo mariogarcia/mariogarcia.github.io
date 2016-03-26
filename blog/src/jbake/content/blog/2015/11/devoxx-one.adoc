@@ -1,9 +1,9 @@
-= Devoxx 2015 (Day 1) 
+= Devoxx 2015 notes (Day 1)
 Janus Lynd
 2015-11-09
 :jbake-type: post
 :jbake-status: draft
-:jbake-tags: blog, asciidoc
+:jbake-tags: devoxx, spark, scala, vault
 :idprefix:
 
 == University Sessions
@@ -60,14 +60,12 @@ The first part of the session was fully dedicated to the Streams API.
 
 Speaker: Tom Vleminckx https://twitter.com/@tomvleminckx
 
-#TODO
+- Stack information
+- Examples: % How long are your threads blocked/running ?
 
 ==== 17:25 - 17:55 Writing Groovy AST Transformations: Getting Practical in an hour!
 
-
 Speaker: Baruch Sadogursky https://twitter.com/@JBaruch
-
-#TODO
 
 ==== 18:05 - 18:35 Secrets are secrets. Please maintain them as secrets.
 
@@ -75,4 +73,4 @@ Speaker: Alex Soto https://twitter.com/@alexsotob
 
 image::/img/2015/devoxx/day_01/devoxx_ud_vault.jpg[width="350"]
 
-#TODO
+Talk about https://www.hashicorp.com/blog/vault.html[Vault].

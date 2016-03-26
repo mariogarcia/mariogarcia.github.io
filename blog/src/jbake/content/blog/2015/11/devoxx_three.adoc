@@ -1,0 +1,42 @@
+= Devoxx 2015 notes (Day 3)
+Janus Lynd
+2015-11-11
+:jbake-type: post
+:jbake-status: draft
+:jbake-tags: devoxx
+:idprefix:
+
+== Conference Day
+
+==== 9:30 - 11:30 Keynote
+
+Speakers: Stephan Janssen, Lawrence Krauss, and Mark Reinhold
+
+==== 12:00 - 13:00 Asynchronous programming in Java 8: how to use CompletableFuture
+
+- Async vs Sync
+- Lambda expressions great as callbacks
+- CompletionStage
+- Handling exceptions (Handle exception, exceptionally, get() throwing an exception)
+
+==== Quickies
+
+JFROG/JSHELL/KUBERNETES
+
+==== 14:00 - 15:00 Dive into Spark Streaming
+
+- Micro batching - interval based RDDs
+- Developer should be aware where code is executed
+- Window: every time I will get data
+- Explained how to use yarn - mesos locally
+- Recommended to cache if you need to compute an RDD more than once
+
+==== 16:40 - 17:40 Frege a Haskell for the JVM
+
+Speakers:
+
+A brief introduction about Frege, and how functional programming could
+reduce some of the pitfalls we do in imperative programming.
+
+- Example: Swapping variable values to increment a counter.
+- Example: Fizz-Buzz (A lot easier in functional programming)
