@@ -1,0 +1,76 @@
+= Java: Method Reference composition
+Janus Lynd
+2016-03-28
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: jdk, lambdas, method reference
+:idprefix:
+:sources: ../../../../../../../sources/2016/03/jdk-methodref-comp
+
+=== Introduction
+
+Since JDK 8 there is the **java.util.function** package responsible to
+abstract everything that has to do with functions. Most of the time
+you will find yourself creating your own functions but sometimes, if
+you're aware of **method references** you will find out that many of
+those functions you were about to create were already in the jdk, or
+at least you will be able to use function composition to create new
+ones.
+
+=== Silly example
+
+Lets say we would like to sum two numbers and then add ten to the
+result and finally return the result as a **String**. Ok a first naive
+implementation would be:
+
+[source, java]
+----
+include::{sources}/src/main/java/methodref/Transformations.java[tags=first,indent=0]
+----
+
+It's just horrible, everything mixed up, we cannot reuse
+anything. Although we can create a lambda expression to represent a
+sum, there's no need for that. You can use the `Integer::sum` method
+reference that can exactly do that. The problem is that you can't do
+something like:
+
+[source, java]
+----
+// THIS WON'T COMPILE
+(Integer::sum).andThen((Integer a) -> a + 10).andThen(Object::toString);
+----
+
+But the solution is very close. We can create a pair of utility
+functions receiving a **Function** or a **BiFunction** to **"catch"**
+the method reference and use it like any of these type of
+functions. Here are the utility functions:
+
+[source, java]
+----
+include::{sources}/src/main/java/methodref/Transformations.java[tags=use,indent=0]
+----
+
+And then you can, for example, compose functions with `andThen` flavor:
+
+[source, java]
+----
+include::{sources}/src/main/java/methodref/Transformations.java[tags=second,indent=0]
+----
+
+NOTE: `andThen` seems to be more familiar to imperative programmers
+because it follows a logical path: *first this, and then that, and
+then that...*. It describes a sequence of events.
+
+Or using `compose` flavor:
+
+[source, java]
+----
+include::{sources}/src/main/java/methodref/Transformations.java[tags=third,indent=0]
+----
+
+<1> Composing functions using `compose`
+<2> Applying previous composed functions after the result of the **sum** function
+
+NOTE: `compose` is the type of composition you could find in languages
+as Haskell where the composition evaluation is read from right to
+left (first function is the one in the right hand side).
