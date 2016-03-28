@@ -1,1 +1,1 @@
-Blog at http://januslynd.com
+Blog at http://januslynd.github.io/blog/
