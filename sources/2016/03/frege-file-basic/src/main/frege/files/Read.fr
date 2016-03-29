@@ -1,0 +1,19 @@
+module files.Read where
+
+-- tag::read1[]
+readLines :: String -> IO [String]
+readLines path = do
+  reader   <- openReader path
+  reader.getLines
+-- end::read1[]
+
+-- tag::read2[]
+readLines' :: String -> IO [String]
+readLines' path = openReader path >>= _.getLines
+-- end::read2[]
+
+-- tag::safer[]
+safeReadLines :: String -> IO [String]
+safeReadLines path = openReader path >>= _.getLines
+    `catch` (\(e :: FileNotFoundException) -> return [])
+-- end::safer[]
