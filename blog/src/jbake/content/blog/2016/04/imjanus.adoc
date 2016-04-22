@@ -1,0 +1,24 @@
+= I am Janus Lynd
+@marioggar
+2016-04-22
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: general
+:idprefix:
+
+Today I've moved all my Frege projects to my usual account.
+
+Some time ago, I created another account
+https://github.com/januslynd[Janus Lynd] for playing with the
+http://frege-lang.com[Frege] programming language. The thing is that
+my initial experiments have last like a year and have been really
+rewarding, like https://github.com/fregelab/chinook[Chinook] and
+https://github.com/fregelab/chinook[Sirocco], but now it has become
+really a problem to maintain both accounts, specially because it makes
+no sense.
+I've sent a message to the Frege mailing list explaining what happened
+and I've moved all Frege related projects to
+https://github.com/fregelab[FregeLab] and the rest to my account. I
+think is a lesson learned.
+
+Mario
