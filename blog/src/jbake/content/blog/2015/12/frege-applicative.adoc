@@ -1,5 +1,5 @@
 = Some applicative style examples
-Janus Lynd
+@marioggar
 2015-12-21
 :jbake-type: post
 :jbake-status: published

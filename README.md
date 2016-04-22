@@ -1,1 +1,1 @@
-Blog at http://januslynd.github.io/blog/
+Blog at http://mariogarcia.github.io/blog/

@@ -1,6 +1,6 @@
 (defproject qc-clojure "0.1.0-SNAPSHOT"
   :description "Property based testing"
-  :url "http://januslynd.com"
+  :url "http://github.com/mariogarcia"
   :license {:name "Apache 2.0 License"
             :url "http://www.apache.org/licenses/LICENSE-2.0"}
   ;; tag::dependencies[]

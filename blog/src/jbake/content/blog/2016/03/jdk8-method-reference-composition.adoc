@@ -1,5 +1,5 @@
 = Java: Method Reference composition
-Janus Lynd
+@marioggar
 2016-03-28
 :jbake-type: post
 :jbake-status: published

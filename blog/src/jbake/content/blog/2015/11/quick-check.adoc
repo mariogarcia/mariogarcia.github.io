@@ -1,5 +1,5 @@
 = Property based testing
-Janus Lynd
+@marioggar
 2015-11-20
 :jbake-type: post
 :jbake-status: published
@@ -31,7 +31,7 @@ figure out which are the patterns and best practices to get advantage
 of property based testing.
 
 ==== Java
-https://github.com/januslynd/blog/tree/master/sources/2015/11/quick-check/qc-java[Code at Github]
+https://github.com/mariogarcia/blog/tree/master/sources/2015/11/quick-check/qc-java[Code at Github]
 
 "Assumptions => Theories/Properties => Proof"
 -- Use case
@@ -98,7 +98,7 @@ overkill for such a little example. It was easier to call to a
 predefined generator to feed a given Loan property.
 
 ==== Groovy
-https://github.com/januslynd/blog/tree/master/sources/2015/11/quick-check/qc-groovy[Code at Github]
+https://github.com/mariogarcia/blog/tree/master/sources/2015/11/quick-check/qc-groovy[Code at Github]
 
 "Know the output => Check a certain set of inputs give the right output"
 -- Use case
@@ -149,7 +149,7 @@ advantage of the declared rules to generate a bunch of use cases for
 me.
 
 ==== Scala
-https://github.com/januslynd/blog/tree/master/sources/2015/11/quick-check/qc-scala[Code at Github]
+https://github.com/mariogarcia/blog/tree/master/sources/2015/11/quick-check/qc-scala[Code at Github]
 
 "Assumptions => Theories/Properties => Proof"
 -- Use case
@@ -193,7 +193,7 @@ include::{sources}/qc-scala/src/test/scala/qc/SupervisorSpecification.scala[tags
 <3> For all provided loans once processed they all should be REJECTED
 
 ==== Clojure
-https://github.com/januslynd/blog/tree/master/sources/2015/11/quick-check/qc-clojure[Code at Github]
+https://github.com/mariogarcia/blog/tree/master/sources/2015/11/quick-check/qc-clojure[Code at Github]
 
 "Check behavior"
 -- Use case
@@ -249,7 +249,7 @@ include::{sources}/qc-clojure/src/qc/core.clj[tags=sumnumbers,indent=0]
 <5> Adding up all integers
 
 ==== Frege
-https://github.com/januslynd/blog/tree/master/sources/2015/11/quick-check/qc-frege[Code at Github]
+https://github.com/mariogarcia/blog/tree/master/sources/2015/11/quick-check/qc-frege[Code at Github]
 
 "Reversible processes"
 -- Use case

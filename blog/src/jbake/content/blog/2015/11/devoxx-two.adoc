@@ -1,5 +1,5 @@
 = Devoxx 2015 notes (Day 2)
-Janus Lynd
+@marioggar
 2015-11-10
 :jbake-type: post
 :jbake-status: draft

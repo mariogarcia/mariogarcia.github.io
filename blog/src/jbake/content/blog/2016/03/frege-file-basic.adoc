@@ -1,5 +1,5 @@
 = Frege basics: File I/O
-Janus Lynd
+@marioggar
 2016-03-29
 :jbake-type: post
 :jbake-status: published

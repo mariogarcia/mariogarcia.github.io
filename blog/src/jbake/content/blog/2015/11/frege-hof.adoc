@@ -1,5 +1,5 @@
 = High Order Functions
-Janus Lynd
+@marioggar
 2015-11-10
 :jbake-type: post
 :jbake-status: published
@@ -85,7 +85,7 @@ will return true if the element matches a given condition or not.
 - `[a]`: The result list with the non discarded elements
 
 If the element **doesn't match** the condition **it will be
-discarded**. Or in other words, **only those matching the condition, 
+discarded**. Or in other words, **only those matching the condition,
 will pass**.
 
 A trivial example could be getting only the even numbers of a list of
