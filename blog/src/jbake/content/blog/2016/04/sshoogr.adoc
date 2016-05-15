@@ -1,0 +1,149 @@
+= Rasperry Pi + SSHoogr
+@marioggar
+2016-04-24
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: groovy, ssh, sshoogr
+:idprefix:
+:sources: ../../../../../../../sources/2016/04/sshoogr
+
+== The idea
+
+Well some time ago I wanted to build a mini raspberry pi mini tower to
+do some proofs of concept about distributed computing. The time passed
+and I didn't do anything...until today. But the thing is attending
+last http://www.greachconf.es[GreachConf] I saw sshoogr (pronounced
+"sugar"). `sshoogr` is a Groovy-based DSL library for working with
+remote servers through SSH.
+
+It seemed something easy to use and most importantly...fun! It may
+well be not as powerful as Ansible but I don't really need that (at
+least at the moment) and I thought it would be nice to do some devops
+while using Groovy.
+
+So steps are:
+
+* Installing OS
+* Initializing systems
+* Install ssh keys
+* Install Docker
+
+== OS
+
+First of all I had to install the OS. Although many people is using
+https://www.raspberrypi.org/downloads/[Raspbian], or
+http://blog.hypriot.com/[HypriotOS], I chose
+https://archlinuxarm.org/[ArchlinuxARM]. Among other things I liked
+the idea of using the same linux flavor I'm using everyday, and Arch
+normally is lighter than Debian distros.
+
+To install the OS for a `rpi-2` you can find a step-by-step
+https://archlinuxarm.org/platforms/armv7/broadcom/raspberry-pi-2[here]. Of
+course there are distros for many **ARM** micros.
+
+Of course once I have install it in the first `rpi-2` then clone it to
+the other 3 machines.
+
+== Commons
+
+=== Base script
+
+Because I'm dealing with Groovy scripts I'm using **Grapes** to get
+**sshoogr** dependencies. However I don't want to repeat the
+dependencies all over again in every script, so I created a base
+script, and I will be using it through the rest of scripts.
+
+[source, haskell]
+.Base script
+----
+include::{sources}/common/Sshoogr.groovy[indent=0]
+----
+
+**How to use this script in the other scripts ?** Well because we are
+only interested in methods within `DefaultSsh` then we should add a
+static import in your script:
+
+[source, haskell]
+.Static import
+----
+include::{sources}/install_docker_machine.groovy[tags=staticimport,indent=0]
+----
+
+=== Common variables
+
+At this point we can only access the `rpi2` using the default
+usernames and passwords. In order to avoid copy-pasting the user names
+and password every time, I put all of them in the same place.
+
+
+[source, haskell]
+.Common variables
+----
+include::{sources}/common/secrets.groovy[indent=0]
+----
+
+<1> Ip of the host we're setting
+<2> Sudo prefix
+<3> Default usernames and passwords
+<4> New credentials used to replace default ones
+<5> Path to ssh key files
+<6> A way of gaining root access through `su -`
+
+**How these variables are included in the rest of scripts ?** Throug
+the `evaluate` method:
+
+[source, haskell]
+.Evaluating other scripts
+----
+include::{sources}/install_docker_machine.groovy[tags=evaluate,indent=0]
+----
+
+When invoking the `evaluate` method, that script will be evaluated and
+included in the current script scope.
+
+== Install new credentials
+
+First time you access a machine it could be normal to access through
+user/password, but once you've entered the first time afterwards you
+should be accessing using a ssh key. The following script will be
+installing our public ssh key as an authorized key in the remote host.
+
+[source, haskell]
+.Install new credentials
+----
+include::{sources}/install_new_credentials.groovy[indent=0]
+----
+
+NOTE: Because hosts at this point doesn't have a valid ssl
+certification we are telling ssh to trust a server anyway.
+
+NOTE: the `--noconfirm` flag should be used when you don't want the
+process to ask for confirmation.
+
+== Install firewall
+
+Now it's time to protect your machine, install the firewall, this time
+I will be using `ufw`:
+
+[source, haskell]
+.Firewall
+----
+include::{sources}/install_firewall.groovy[indent=0]
+----
+
+<1> Install **ufw**
+<2> Add ssh exception
+<3> Enable **ufw** on startup
+<4> Start **ufw** service now
+
+== Install Docker
+
+[source, haskell]
+.Docker
+----
+include::{sources}/install_docker.groovy[indent=0]
+----
+
+== Check it out!
+
+You can find `Sshoogr` at https://github.com/aestasit/sshoogr
