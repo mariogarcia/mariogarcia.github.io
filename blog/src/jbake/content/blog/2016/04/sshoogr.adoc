@@ -53,7 +53,7 @@ Because I'm dealing with Groovy scripts I'm using **Grapes** to get
 dependencies all over again in every script, so I created a base
 script, and I will be using it through the rest of scripts.
 
-[source, haskell]
+[source, groovy]
 .Base script
 ----
 include::{sources}/common/Sshoogr.groovy[indent=0]
@@ -63,7 +63,7 @@ include::{sources}/common/Sshoogr.groovy[indent=0]
 only interested in methods within `DefaultSsh` then we should add a
 static import in your script:
 
-[source, haskell]
+[source, groovy]
 .Static import
 ----
 include::{sources}/install_docker_machine.groovy[tags=staticimport,indent=0]
@@ -76,7 +76,7 @@ usernames and passwords. In order to avoid copy-pasting the user names
 and password every time, I put all of them in the same place.
 
 
-[source, haskell]
+[source, groovy]
 .Common variables
 ----
 include::{sources}/common/secrets.groovy[indent=0]
@@ -92,7 +92,7 @@ include::{sources}/common/secrets.groovy[indent=0]
 **How these variables are included in the rest of scripts ?** Throug
 the `evaluate` method:
 
-[source, haskell]
+[source, groovy]
 .Evaluating other scripts
 ----
 include::{sources}/install_docker_machine.groovy[tags=evaluate,indent=0]
@@ -108,7 +108,7 @@ user/password, but once you've entered the first time afterwards you
 should be accessing using a ssh key. The following script will be
 installing our public ssh key as an authorized key in the remote host.
 
-[source, haskell]
+[source, groovy]
 .Install new credentials
 ----
 include::{sources}/install_new_credentials.groovy[indent=0]
@@ -125,7 +125,7 @@ process to ask for confirmation.
 Now it's time to protect your machine, install the firewall, this time
 I will be using `ufw`:
 
-[source, haskell]
+[source, groovy]
 .Firewall
 ----
 include::{sources}/install_firewall.groovy[indent=0]
@@ -138,7 +138,7 @@ include::{sources}/install_firewall.groovy[indent=0]
 
 == Install Docker
 
-[source, haskell]
+[source, groovy]
 .Docker
 ----
 include::{sources}/install_docker.groovy[indent=0]
