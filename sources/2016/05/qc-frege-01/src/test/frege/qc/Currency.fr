@@ -1,0 +1,33 @@
+module qc.Currency where
+
+---
+data BigDecimal = pure native java.math.BigDecimal where
+    pure native currency java.math.BigDecimal.valueOf  :: Double -> BigDecimal
+    pure native withScale setScale                     :: BigDecimal -> Int -> Int -> BigDecimal
+    pure native toString                               :: BigDecimal -> String
+    pure native plus add                               :: BigDecimal -> BigDecimal -> BigDecimal
+    pure native doubleValue                            :: BigDecimal -> Double
+
+    fromDouble :: Double -> Int -> BigDecimal
+    fromDouble from scale = BigDecimal.withScale currency scale 0
+      where currency = BigDecimal.currency from
+
+---
+instance Show BigDecimal where
+  show x = x.toString
+
+---
+data Currency = Currency { amount :: Double, scale :: Int }
+
+add :: Currency -> Currency -> Currency
+add a b = Currency result.doubleValue scale
+   where aBig   = BigDecimal.fromDouble a.amount a.scale
+         bBig   = BigDecimal.fromDouble b.amount b.scale
+         result = aBig.plus bBig
+         scale  = if (a.scale < b.scale)
+                  then a.scale
+                  else b.scale
+
+instance Show Currency where
+  show (Currency x scale) = show bigNumber
+    where bigNumber = BigDecimal.fromDouble x scale

@@ -1,0 +1,4 @@
+module qc.Basics where
+
+-- Cannot have an empty module
+value = 1

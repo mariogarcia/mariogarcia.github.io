@@ -1,0 +1,238 @@
+= Frege and QuickCheck: Intro
+@marioggar
+2016-05-15
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: frege, testing
+:idprefix:
+:sources: ../../../../../../../sources/2016/05/qc-frege-01/src
+
+== What is QuickCheck ?
+
+**QuickCheck** is a property based testing library capable of
+generating values for those properties in order to find out if that
+property holds for the domain problem.
+
+QuickCheck was born from a paper by __Koen Claessen__ and __John
+Hughes__. They created __QuickCheck__ to look for a different way of
+testing. They observed that around the 50% of the software development
+was dedicated to testing. That was a huge cost and mostly due to the
+fact that it was done almost manually. The goal was to reduce that
+percentage by automating testing. How they planned to do so ?
+
+In order to understand how it
+works and how to use it some concepts must be introduced first:
+`Property`, `Generator`, `Output Feedback`, and `Shrinking`.
+
+NOTE: BTW The __QuickCheck__ paper is also a good source to start. You
+can find the QuickCheck paper at
+http://www.cs.tufts.edu/~nr/cs257/archive/john-hughes/quick.pdf
+
+=== Properties
+
+What is a property? After reviewing some definitions out there I
+really liked this one:
+
+"Properties are essentially executable specifications that can be
+universally quantified over. They specify what you expect of your
+program and can be executed against the program to ensure that it
+conforms to the spec"
+-- http://www.stuartgunter.org/intro-to-quickcheck/
+
+NOTE: `executable specification` means a function that holds for a set
+of values using the program (function or set of functions) you want to
+test.
+
+Lets see a basic example. When adding up two numbers `commutativity`
+must hold: __a binary operation is commutative if changing the order
+of the operands does not change the result__. That means that if the
+**sum** function has been implemented property it should follow the
+**commutativity** property.
+
+[source, haskell]
+.commutativity
+----
+include::{sources}/test/frege/qc/BasicsCheck.fr[tags=sumcommutativity,indent=0]
+----
+
+NOTE: Think of this example as if the `commutativity` rule had one and
+only property that must hold
+
+Executing `fregeQuickCheck` will show the following output:
+
+[source,shell]
+.quickCheck output
+----
+qc.BasicsCheck.commutativity: +++ OK, passed 100 tests
+----
+
+NOTE: to execute quickCheck from the console go to the project folder
+and execute `./gradlew fregeQuickCheck`
+
+A 100 tests ? Wow, how is that ? By default, __QuickCheck__ `generates` a
+100 sets of values for the specification under test. This is a huge
+difference between what we had in previous testing approaches. We
+don't generate a given set of values, values are generated for us
+depending on the types and the properties defined. **That makes tests
+cleaner and easier to reason about**
+
+A __property__ in __QuickCheck__ is a value of type `Property`.
+
+As a rule of thumb The easiest way of creating a property is to create
+a function that returns a `Bool` (like the propertyOne function). A
+function retuning a Bool can be treated as a `Testable` value. Then
+use the `Testable` function as argument to the `property` function to
+get a `Property` value and leave __QuickCheck__ to do the rest. In
+summary:
+
+* Create a function that returns `Bool`
+* Invoke `property` passing the previous function
+* Invoke __QuickCheck__
+
+If you check the `property` function type in the **frege repl** you'll
+notice that it receives a value of type `Testable` and returns a
+`Property`. `Bool` defines an instance of `Testable`.
+
+[source,shell]
+.Checking property function type
+----
+frege> import Test.QuickCheck
+...
+frege> :t property
+frege> Testable prop => prop -> Property
+----
+
+NOTE: To open `fregeRepl` in to load this project examples, go to the
+project folder and execute `./gradlew -q fregeRepl`
+
+=== Generators
+
+By default __QuickCheck__ knows how to generate values for the most used
+types: Int, Double, String... That's perfect, but if you create a more
+complex type, or you would like to control the way values are
+generated, Frege will complain because it won't be able to `generate`
+new values of that type.
+
+Lets say we are sure a function will only be receiving values from 0
+to 100 so it makes no sense to use any other value range. We'll be
+restricting the input values like:
+
+[source, haskell]
+.Controlling generation
+----
+include::{sources}/test/frege/qc/BasicsCheck.fr[tags=controllingeneration,indent=0]
+----
+
+<1> Defining the property
+<2> Define the type of values __QuickCheck__ should generate
+<3> Define the executable specification
+
+In this simple example we've built our own generator of list of
+numbers between 0 and 100. Easy isn't it ?
+
+=== Output feedback
+
+Sometimes we would like to see some information while tests are
+executed. There're functions to help you printing out useful
+information about the execution.
+
+In the following example we're using `collect`.
+
+[source, haskell]
+.Feedback
+----
+include::{sources}/test/frege/qc/BasicsCheck.fr[tags=outputfeedback,indent=0]
+----
+
+<1> Notice now it returns a `Property`
+<2> The `collect` function shows information about the data under tests.
+<3> The way we invoke the specification is the same as before.
+
+The execution shows the length of the list and what percentage of test
+cases were executed with lists of this length.
+
+[source,shell]
+.collect output
+----
+qc.BasicsCheck.rangeRestrictionWithFeedback: +++ OK, passed 100 tests:
+ 8% 0
+ 7% 6
+ 6% 4
+ 6% 16
+ 5% 1
+ 4% 49
+ 3% 7
+ 3% 58
+ 3% 43
+...
+----
+
+Taking a look at this output sample, first thing came to mind is that
+is looks a very fair distribution. First column represent the test
+case in the overall suite and the second the number of elements used
+in current test case. For instance `8% 0` means 8% of the time
+__QuickCheck__ was using 0 element lists to check the property.
+
+NOTE: In Frege `repl` you can execute your specification with
+`quickCheckVerbose`, it works the same as `quickCheck` but it will
+print out all generated values used.
+
+=== Shrinking
+
+When a given specification fails, __QuickCheck__ tries to find the smaller
+input that can make the specification fail. That comes very handy
+specially where we're dealing either a big data set or a complex data
+model.
+
+Lets create a `fregeRepl` session to see __QuickCheck__ in action over
+a wrong defined function. This time we're messing around some basic
+math rule we learnt in school:
+
+[source, shell]
+.failing specification
+----
+frege> :{
+> substract :: Int -> Int -> Int
+> substract x y = x - y
+> :}
+
+function substract :: Int -> Int -> Int
+
+frege> substractProperty x y = substract x y == substract y x
+function substractProperty :: Int -> Int -> Bool
+
+frege> quickCheck $ property substractProperty
+*** Failed! (after 2 tests and 1 shrink):
+Falsifiable
+1
+0
+()
+----
+
+Like we expected this must fail, but __QuickCheck__ did more than
+confirming the failure, it gave us a set of values to check our own: 1
+and 0. Not only that, it's supposed to be the minimum set of values
+that will make your property fail.
+
+=== This is only the beginning
+
+Although I went through the basic concepts of __QuickCheck__ my
+feeling is that I haven't even touched the surface. the idea is to keep
+digging in every topic, so stay tuned!
+
+== Resources
+
+* Blog entry code
+** https://github.com/mariogarcia/blog/tree/master/sources/2016/05/qc-frege-01
+* Useful References
+** http://www.stuartgunter.org/intro-to-quickcheck/ (Very impressive
+   blog entry. I've taken many ideas from it)
+** http://tab.snarc.org/posts/haskell/2010-12-02-using_quickcheck.html (blog post)
+** http://www.cs.tufts.edu/~nr/cs257/archive/john-hughes/quick.pdf (blog post)
+** http://tab.snarc.org/posts/haskell/2010-12-02-using_quickcheck.html (blog post)
+* StackOverflow
+** http://stackoverflow.com/questions/16968549/what-is-a-shrink-with-regard-to-haskells-quickcheck (Explains shrinking)
+* Haskell
+** https://wiki.haskell.org/Introduction_to_QuickCheck1 (An introduction to __QuickCheck__)
+** https://hackage.haskell.org/package/QuickCheck
+** https://hackage.haskell.org/package/QuickCheck-2.8.2/docs/Test-QuickCheck.html
