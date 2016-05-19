@@ -23,7 +23,7 @@ Lets say we would like to sum two numbers and then add ten to the
 result and finally return the result as a **String**. Ok a first naive
 implementation would be:
 
-[source, java]
+[source, java, numbered]
 ----
 include::{sources}/src/main/java/methodref/Transformations.java[tags=first,indent=0]
 ----
@@ -34,7 +34,7 @@ sum, there's no need for that. You can use the `Integer::sum` method
 reference that can exactly do that. The problem is that you can't do
 something like:
 
-[source, java]
+[source, java,numbered]
 ----
 // THIS WON'T COMPILE
 (Integer::sum).andThen((Integer a) -> a + 10).andThen(Object::toString);
@@ -45,14 +45,14 @@ functions receiving a **Function** or a **BiFunction** to **"catch"**
 the method reference and use it like any of these type of
 functions. Here are the utility functions:
 
-[source, java]
+[source, java,numbered]
 ----
 include::{sources}/src/main/java/methodref/Transformations.java[tags=use,indent=0]
 ----
 
 And then you can, for example, compose functions with `andThen` flavor:
 
-[source, java]
+[source, java,numbered]
 ----
 include::{sources}/src/main/java/methodref/Transformations.java[tags=second,indent=0]
 ----
@@ -63,7 +63,7 @@ then that...*. It describes a sequence of events.
 
 Or using `compose` flavor:
 
-[source, java]
+[source, java,numbered]
 ----
 include::{sources}/src/main/java/methodref/Transformations.java[tags=third,indent=0]
 ----
