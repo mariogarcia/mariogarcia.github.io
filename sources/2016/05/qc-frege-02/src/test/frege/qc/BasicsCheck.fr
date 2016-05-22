@@ -12,18 +12,9 @@ alwaysPositiveCheck   = property (alwaysPositive)
 -- end::badImplementation[]
 --}
 
-{-
 -- tag::goodImplementation[]
 alwaysPositive :: Int -> Bool
 alwaysPositive    x   = goodImplementation x >= 0
 
 alwaysPositiveCheck   = property (alwaysPositive)
 -- end::goodImplementation[]
---}
-
--- tag::betterImplementation[]
-alwaysPositive :: Int -> Bool
-alwaysPositive    x   = betterImplementation x >= 0
-
-alwaysPositiveCheck   = property (alwaysPositive)
---end::betterImplementation[]

@@ -7,11 +7,8 @@ badImplementation    x    = x * 2
 
 -- tag::goodImplementation[]
 goodImplementation :: Int -> Int
-goodImplementation    x   = ((*2) . abs) x
+goodImplementation    x
+  | x >= 0 && x <= limit = x * 2
+  | otherwise       = 0
+  where limit = 10
 -- end::goodImplementation[]
-
--- tag::betterImplementation[]
-betterImplementation :: Int -> Int
-betterImplementation    x   = if result >= 0 then result else 0
-  where result = ((*2) . abs) x
--- end::betterImplementation[]

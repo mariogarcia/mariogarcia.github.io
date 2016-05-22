@@ -30,13 +30,26 @@ leave __QuickCheck__ to do the rest. In summary:
 * Invoke `property` passing the previous function
 * Invoke __QuickCheck__
 
-Lets create a simple function. This function should double the
-absolute value of the number passed as argument.
+Lets create a simple function. This function has certain properties:
 
-NOTE: I'm using `frege-gradle-plugin` for these examples,
-actually I'm executing `./gradlew fregeQuickCheck --t` which executes
-and waits until the source code changes to launch the tests
-again. Very useful while developing.
+* Should double the absolute value of the number passed as argument if
+that number is greater than 0 and less or equals than 10
+* Otherwise returns 0
+
+NOTE: I'm using `frege-gradle-plugin` for these examples, actually I'm
+executing `./gradlew fregeQuickCheck --t` which executes and waits
+until the source code changes to launch the tests again. Very useful
+while developing.
+
+This is the specification we have to respect:
+
+[source,haskell,numbered]
+.Specification
+----
+include::{sources}/test/frege/qc/BasicsCheck.fr[tags=badImplementation,indent=0]
+----
+
+Lets try a first version of our function:
 
 [source,haskell,numbered]
 .Bad Implementation
@@ -44,14 +57,7 @@ again. Very useful while developing.
 include::{sources}/main/frege/qc/Basics.fr[tags=badImplementation,indent=0]
 ----
 
-And the property we're checking is: **all results should be positive
-numbers greater or equal to 0**
-
-[source,haskell,numbered]
-.Specification
-----
-include::{sources}/test/frege/qc/BasicsCheck.fr[tags=badImplementation,indent=0]
-----
+And now execute __QuickCheck__ to see if this first version holds:
 
 [source,shell]
 .Output
@@ -75,32 +81,6 @@ include::{sources}/main/frege/qc/Basics.fr[tags=goodImplementation,indent=0]
 .Specification
 ----
 include::{sources}/test/frege/qc/BasicsCheck.fr[tags=goodImplementation,indent=0]
-----
-
-[source,shell]
-.Output
-----
-c.BasicsCheck.alwaysPositiveCheck: *** Failed!                                                                                                                                                (after 79 tests and 17 shrinks):
-Falsifiable
-1073741824
-Properties passed: 0, failed: 1
-:fregeQuickCheck FAILED
-----
-
-No way! I didn't count on doubling something like Int.maxBound
-:P. Well I guess the function should try to double the value, in case
-it couldn't, it will return 0. Does this last implementation holds ?.
-
-[source,haskell,numbered]
-.Better Implementation
-----
-include::{sources}/main/frege/qc/Basics.fr[tags=betterImplementation,indent=0]
-----
-
-[source,haskell,numbered]
-.Specification
-----
-include::{sources}/test/frege/qc/BasicsCheck.fr[tags=betterImplementation,indent=0]
 ----
 
 [source,shell]
