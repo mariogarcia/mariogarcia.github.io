@@ -1,0 +1,24 @@
+module qc.Combine where
+
+-- tag::loandata[]
+data Risk = PENDING | NORMAL | RISKY | REJECTED
+
+derive Eq   Risk
+derive Show Risk
+derive Enum Risk
+
+data Loan = Loan { name :: Maybe String , amount :: Double, risk :: Risk }
+
+derive Show Loan
+-- end::loandata[]
+
+inRange :: Ord a => (a,a) -> a -> Bool
+inRange (min,max) value = value >= min && value <= max
+
+-- tag::calculateRisk1[]
+calculateRisk :: Loan -> Loan
+calculateRisk loan
+  | inRange (1,9999) loan.amount         = loan.{ risk = NORMAL }
+  | inRange (10_000,100_000) loan.amount = loan.{ risk = RISKY }
+  | otherwise                            = loan.{ risk = REJECTED }
+-- end::calculateRisk1[]

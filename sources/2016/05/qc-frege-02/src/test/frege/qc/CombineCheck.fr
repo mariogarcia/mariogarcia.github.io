@@ -1,0 +1,56 @@
+module qc.CombineCheck where
+
+import Test.QuickCheck
+import qc.Combine (Risk, Loan, calculateRisk)
+
+instance Arbitrary Loan where
+  arbitrary = genLoan
+
+genLoan :: Gen Loan
+genLoan = liftM3 Loan nameGen amountGen riskGen
+  where nameGen   = genName
+        amountGen = choose (0,100_000)
+        riskGen   = elements [PENDING .. REJECTED]
+
+genName :: Gen (Maybe String)
+genName = suchThatMaybe genString $ \word -> length word == 3
+
+genString :: Gen String
+genString = liftM packed $ listOf $ elements ['a'..'z']
+
+-- tag::rejectNegative[]
+rejectNegative :: Loan -> Bool
+rejectNegative loan = if isNegative
+                      then statusResult == Risk.REJECTED
+                      else true
+  where isNegative   = loan.amount < 0
+        loanResult   = calculateRisk loan
+        statusResult = loanResult.risk
+-- end::rejectNegative[]
+
+-- tag::rejectBeyondMax[]
+rejectBeyondMax :: Loan -> Bool
+rejectBeyondMax loan = if isBeyondMax
+                       then statusResult == Risk.REJECTED
+                       else true
+  where isBeyondMax  = loan.amount > 100_000
+        loanResult   = calculateRisk loan
+        statusResult = loanResult.risk
+-- end::rejectBeyondMax[]
+
+-- tag::checkNegativeOrMax[]
+checkRejectNegative  = property rejectNegative
+checkRejectBeyondMax = property rejectBeyondMax
+-- end::checkNegativeOrMax[]
+
+--rejectAnonymous :: Loan -> Bool
+--rejectAnonymous loan = if isAnonymous
+--                       then statusResult == Risk.REJECTED
+--                       else true
+--  where isAnonymous  = loan.name == Nothing
+--        loanResult   = calculateRisk loan
+--        statusResult = loanResult.risk
+--
+--checkRejectAnonymous        = property rejectAnonymous
+--
+--calculateRiskCheck = conjoin [rejectNegative, rejectBeyondMax, rejectAnonymous]

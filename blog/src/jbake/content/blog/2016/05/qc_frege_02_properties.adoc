@@ -109,3 +109,77 @@ frege> Testable prop => prop -> Property
 ----
 
 ****
+
+=== Combining properties
+
+Sometimes our function should follow more than one property at the
+same time. How can I apply both functions in a given specification?
+In the following example we're pretending to be a small financial
+institution that lends money.
+
+So we have a `Loan`:
+
+[source,haskell,numbered]
+.Loan
+----
+include::{sources}/main/frege/qc/Combine.fr[tags=loandata,indent=0]
+----
+
+NOTE: This is an example, please don't use this data as reference for
+any financial development :P
+
+We need to build a function processing an incoming loan. At this point
+we only know which are the properties to reject a loan. It will be
+rejected:
+
+* When it has a negative amount
+* When it goes outside the company defined boundaries (min: 0, max:
+  100000)
+
+Lets define these properties:
+
+[source,haskell]
+.Reject negative
+----
+include::{sources}/test/frege/qc/CombineCheck.fr[tags=rejectNegative,indent=0]
+----
+
+[source,haskell]
+.Reject max
+----
+include::{sources}/test/frege/qc/CombineCheck.fr[tags=rejectBeyondMax,indent=0]
+----
+
+Lets see how we've defined our function with these requirements in
+mind:
+
+[source,haskell,numbered]
+.First implementation
+----
+include::{sources}/main/frege/qc/Combine.fr[tags=calculateRisk1,indent=0]
+----
+
+Basically only `NORMAL` and `RISKY` loans are within the boundaries
+the rest are `REJECTED`.
+
+Ok, lets see if the function holds for these two properties:
+
+[source,haskell,numbered]
+.Testing properties
+----
+include::{sources}/test/frege/qc/CombineCheck.fr[tags=checkNegativeOrMax,indent=0]
+----
+
+[source,shell]
+.quickCheck result
+----
+c.CombineCheck.checkRejectNegative: +++ OK, passed 100 tests
+...
+c.CombineCheck.checkRejectBeyondMax: +++ OK, passed 100 tests
+----
+
+Nice but there is a new requirement:
+
+**All loans without name will be rejected as well**
+
+Easy right ?, first refactor our function:
