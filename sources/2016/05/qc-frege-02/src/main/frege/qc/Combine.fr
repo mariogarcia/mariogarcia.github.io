@@ -15,10 +15,18 @@ derive Show Loan
 inRange :: Ord a => (a,a) -> a -> Bool
 inRange (min,max) value = value >= min && value <= max
 
--- tag::calculateRisk1[]
-calculateRisk :: Loan -> Loan
-calculateRisk loan
+-- tag::calculateRisk[]
+calculateAmountRisk :: Loan -> Loan -- <1>
+calculateAmountRisk loan
   | inRange (1,9999) loan.amount         = loan.{ risk = NORMAL }
   | inRange (10_000,100_000) loan.amount = loan.{ risk = RISKY }
   | otherwise                            = loan.{ risk = REJECTED }
--- end::calculateRisk1[]
+
+calculateAnonymousRisk :: Loan -> Loan -- <2>
+calculateAnonymousRisk loan = case loan of
+  Loan Nothing _ _ -> loan.{ risk = REJECTED }
+  _                -> loan
+
+calculateRisk :: Loan -> Loan -- <3>
+calculateRisk loan = (calculateAnonymousRisk . calculateAmountRisk) loan
+-- end::calculateRisk[]

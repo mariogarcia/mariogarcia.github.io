@@ -1,0 +1,124 @@
+= Frege and QuickCheck: Combine properties
+@marioggar
+2016-05-25
+:jbake-type: post
+:jbake-status: draft
+:jbake-tags: frege, testing
+:idprefix:
+:sources: ../../../../../../../sources/2016/05/qc-frege-02/src
+
+Sometimes our function should follow more than one property at the
+same time. How can I check more than one property in a given
+specification?
+
+=== Combining properties
+
+In the following example we're pretending to be a small financial
+institution that lends money.
+
+So we have a `Loan`:
+
+[source,haskell,numbered]
+.Loan
+----
+include::{sources}/main/frege/qc/Combine.fr[tags=loandata,indent=0]
+----
+
+NOTE: This is an example, please don't use this data as reference for
+any financial development :P
+
+We need to build a function to process an incoming loan. At this point
+we only know which are the properties to reject a loan. It will be
+rejected:
+
+* `When it has a negative amount`
+* `When it goes outside the company defined boundaries` (min: 0, max:
+  100000)
+* `When it has no name`
+
+Lets define these properties:
+
+[source,haskell]
+.Min property
+----
+include::{sources}/test/frege/qc/CombineCheck.fr[tags=rejectNegative,indent=0]
+----
+
+[source,haskell]
+.Max property
+----
+include::{sources}/test/frege/qc/CombineCheck.fr[tags=rejectBeyondMax,indent=0]
+----
+
+[source,haskell]
+.Name property
+----
+include::{sources}/test/frege/qc/CombineCheck.fr[tags=checkAnonymous,indent=0]
+----
+
+Lets see how we've defined our function with these requirements in
+mind:
+
+[source,haskell,numbered]
+.Implementation
+----
+include::{sources}/main/frege/qc/Combine.fr[tags=calculateRisk,indent=0]
+----
+
+<1> Function to calculate risk based on the `loan ammount`
+<2> Function to calculate risk based on the `loan name`
+<3> Function `combining previous two` functions
+
+IMPORTANT: Please notice I'm not mutating the data structure when
+doing `loan.{ risk = Risk.REJECTED}`. In this case, changing a field
+means copying the data structure and setting the new value in the new
+copy.
+
+Ok, lets see if the function holds for these properties:
+
+[source,haskell,numbered]
+.Testing properties
+----
+include::{sources}/test/frege/qc/CombineCheck.fr[tags=checkIndividually,indent=0]
+----
+
+[source,shell]
+.quickCheck result
+----
+qc.CombineCheck.checkName: +++ OK, passed 100 tests
+qc.CombineCheck.checkMin: +++ OK, passed 100 tests
+qc.CombineCheck.checkMax: +++ OK, passed 100 tests
+----
+
+So far we have tested our properties isolated, but in the real world I
+would make sure that a given loan passes those properties all at
+once. How do I do that ?
+
+Well there's a function called `conjoin` which takes care of it:
+
+[source,haskell,numbered]
+.Check several properties at once
+----
+include::{sources}/test/frege/qc/CombineCheck.fr[tags=conjoin,indent=0]
+----
+
+[source,haskell]
+.Name property check
+----
+qc.CombineCheck.calculateRiskCheck: +++ OK, passed 100 tests
+----
+
+Now I'm sure the loan passes if all properties over a loan pass the
+test.
+
+[sidebar]
+****
+You can also use the conjuntion `infix` function `.&&.`:
+
+[source,haskell,numbered]
+.Check several properties at once
+----
+include::{sources}/test/frege/qc/CombineCheck.fr[tags=conjoin2,indent=0]
+----
+
+****

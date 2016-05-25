@@ -38,19 +38,26 @@ rejectBeyondMax loan = if isBeyondMax
         statusResult = loanResult.risk
 -- end::rejectBeyondMax[]
 
--- tag::checkNegativeOrMax[]
-checkRejectNegative  = property rejectNegative
-checkRejectBeyondMax = property rejectBeyondMax
--- end::checkNegativeOrMax[]
+-- tag::checkAnonymous[]
+rejectAnonymous :: Loan -> Bool
+rejectAnonymous loan = if isAnonymous
+                       then statusResult == Risk.REJECTED
+                       else true
+  where isAnonymous  = loan.name == Nothing
+        loanResult   = calculateRisk loan
+        statusResult = loanResult.risk
+-- end::checkAnonymous[]
 
---rejectAnonymous :: Loan -> Bool
---rejectAnonymous loan = if isAnonymous
---                       then statusResult == Risk.REJECTED
---                       else true
---  where isAnonymous  = loan.name == Nothing
---        loanResult   = calculateRisk loan
---        statusResult = loanResult.risk
---
---checkRejectAnonymous        = property rejectAnonymous
---
---calculateRiskCheck = conjoin [rejectNegative, rejectBeyondMax, rejectAnonymous]
+-- tag::checkIndividually[]
+checkName = property rejectAnonymous
+checkMin  = property rejectNegative
+checkMax  = property rejectBeyondMax
+-- end::checkIndividually[]
+
+-- tag::conjoin[]
+calculateRiskCheck = conjoin [rejectNegative, rejectBeyondMax, rejectAnonymous]
+-- end::conjoin[]
+
+-- tag::conjoin2[]
+calculateRiskCheck2 = rejectNegative .&&.rejectBeyondMax .&&. rejectAnonymous
+-- end::conjoin2[]
