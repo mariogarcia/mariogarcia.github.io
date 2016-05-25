@@ -2,7 +2,7 @@
 @marioggar
 2016-05-25
 :jbake-type: post
-:jbake-status: draft
+:jbake-status: published
 :jbake-tags: frege, testing
 :idprefix:
 :sources: ../../../../../../../sources/2016/05/qc-frege-02/src
