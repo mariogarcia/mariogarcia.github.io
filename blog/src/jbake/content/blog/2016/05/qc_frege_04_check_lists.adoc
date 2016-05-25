@@ -1,0 +1,12 @@
+= Frege and QuickCheck: Check properties over a list
+@marioggar
+2016-05-26
+:jbake-type: post
+:jbake-status: draft
+:jbake-tags: frege, testing
+:idprefix:
+:sources: ../../../../../../../sources/2016/05/qc-frege-02/src
+
+Blablablal
+
+=== Over a list
