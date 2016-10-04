@@ -1,0 +1,53 @@
+= Generate pdf slides from reveal.js html
+@marioggar
+2016-10-03
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: reveal.js, slides
+:idprefix:
+:sources: ../../../../../../../sources/2016/10/async/src
+
+A year ago I started using http://lab.hakim.se/reveal-js/#/[Reveal JS]
+for my presentations. It's really cool to use asciidoctor and gradle
+to create my presentations and change them `on-the-fly`.
+
+=== The problem
+
+Well it's not really a problem. But once a conference ends organizer
+want you to send him/her your slides. Because **reveal.js** is just
+html + js, it doesn't qualify as something to send them. To do so I
+have to convert them first to pdf. And that's why I need `decktape`.
+
+=== Decktape
+
+DeckTape is a high-quality PDF exporter for HTML5 presentation
+frameworks. You can find the project at
+https://github.com/astefanutti/decktape[Github]
+
+**Docker image**
+
+Nowadays every time I can I use docker containers. Instead of
+following a given installation guide, I can have it all just pulling
+the docker image from docker hub.
+
+[source, shell]
+----
+docker pull astefanutti/decktape
+----
+
+**Execute docker image**
+
+Once you've executed `asciidoctor` task go to your
+`build/asciidoc/revealjs/` folder (where you should find the
+`index.html` file` and execute the following command:
+
+[source, shell]
+----
+docker run --rm \
+       -v `pwd`:/home/user \
+       astefanutti/decktape /home/user/index.html /home/user/slides.pdf
+----
+
+That will create a file `slides.pdf` in the same folder. Anyway there
+are plenty of other options. For further information check out the
+https://github.com/astefanutti/decktape[project's docker hub page]
