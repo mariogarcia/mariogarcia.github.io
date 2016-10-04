@@ -1,0 +1,15 @@
+plugins {
+    id "org.frege-lang" version "0.8"
+}
+
+compileFrege {
+    target = '1.7'
+}
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile 'org.frege-lang:frege:3.24-7.100'
+}

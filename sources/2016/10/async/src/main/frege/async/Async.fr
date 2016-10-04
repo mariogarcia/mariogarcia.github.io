@@ -1,0 +1,47 @@
+module async.Async where
+
+import frege.control.Concurrent
+
+-- tag::divideAndConquer[]
+divideAndConquer = do
+  slowerOpRef <- async slowerOp -- <1>
+  quickOpRef  <- async quickOp -- <2>
+  xs          <- sequence $ map extractValue [slowerOpRef, quickOpRef] -- <3>
+  return $ sum xs -- <4>
+-- end::divideAndConquer[]
+
+-- tag::extractValue[]
+extractValue :: MVar (Exception | Int) -> IO Int
+extractValue var = do
+  value <- var.take -- <1>
+  case value of
+    Left  _ -> return 0
+    Right x -> return x
+-- end::extractValue[]
+
+-- tag::extractValueAlternatives[]
+extractValue2 :: MVar (Exception | a) -> a -> IO a
+extractValue2 mv defaultValue = do
+  value <- mv.take
+  return $ either (\_ -> defaultValue) id value
+
+extractValue3 :: MVar (Exception | a) -> a -> IO a
+extractValue3 mv defaultValue = do
+  value <- mv.take
+  case value of
+    Left  _ -> return defaultValue
+    Right x -> return x
+-- end::extractValueAlternatives[]
+
+-- tag::operations[]
+slowerOp :: IO Int
+slowerOp = do
+  Thread.sleep(2000)
+  println "Returning first op"
+  return 20
+
+quickOp :: IO Int
+quickOp = do
+  println "Returning second op"
+  return 40
+-- end::operations[]
