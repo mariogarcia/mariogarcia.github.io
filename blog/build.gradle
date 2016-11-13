@@ -31,7 +31,7 @@ jbake {
     configuration['asciidoctor.attributes'] = [
         "sourceDir=src/jbake",
         "outputDir=build/jbake",
-        "imagesdir=img",
+        "imagesdir=/blog/img",
         "imagesoutdir=${projectDir}/build/jbake/img",
         "source-highlighter=highlight.js",
         "icons=font"
