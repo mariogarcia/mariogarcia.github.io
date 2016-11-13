@@ -1,0 +1,42 @@
+= Linux LVM: Resize logical volumes
+@marioggar
+2016-11-14
+:jbake-type: draft
+:jbake-status: published
+:jbake-tags: linux, lvm
+:idprefix:
+
+One of the most (if not the most) important reasons you might end
+using LVM is the ability to resize volumes. In this entry I'll be
+covering only the task of resizing `logical volumes` (LV).
+
+== Initial State
+
+I've created two `logical volumes`: `books` and `music`, but it turns
+out, I'm running out of space in the `music` volume whereas I still
+have plenty of space in `books`.
+
+[source, shell]
+----
+user@computer> sudo lvs
+  LV          VG        Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  books       mymedia   -wi-a-----  14.39g
+  music       mymedia   -wi-a-----  14.39g
+----
+
+Both logical volumes belong to the `mymedia` volume group. The problem
+is that both logical volumes took all the `volume group` space. That
+forces me to shrink one volume in favor of the other.
+
+=== Shrink
+
+When resizing a `logical` volume the most difficult task is to shrink
+the volume.
+
+In this example I'm using `ext4` filesystems. The first thing I would
+like to do is to shrink `myvideos` to give more space to `mybooks`.
+
+IMPORTANT: This translates to 8 blocks per Megabyte, or 8192 per
+Gigabyte. According to various google results 1 block is 128kb.
+
+=== Extend
