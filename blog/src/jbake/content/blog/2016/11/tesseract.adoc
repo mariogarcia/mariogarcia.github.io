@@ -1,0 +1,200 @@
+= Tesseract OCR
+@marioggar
+2016-11-14
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: linux, ocr
+:idprefix:
+
+"Tesseract is an open source Optical Character Recognition (OCR)
+Engine, available under the Apache 2.0 license. It can be used
+directly, or (for programmers) using an API to extract typed,
+handwritten or printed text from images. It supports a wide variety of
+languages."
+-- Tesseract Wiki at Github
+
+== Docker
+
+I'm keeping a docker repository with a Debian system with tesseract
+and some other handy utilities installed. Unfortunately is not
+available at DockerHub so if you want to use it to follow this entry
+just follow these steps:
+
+Clone repository.
+
+[source, shell]
+----
+git clone https://github.com/mariogarcia/docker.git
+----
+
+Go to the tesseract directory
+
+[source, shell]
+----
+cd docker/tesseract
+----
+
+Build the docker image
+
+[source, shell]
+----
+./bin/build.sh
+----
+
+Run image
+
+[source, shell]
+----
+docker run -it mgg/tesseract
+----
+
+That will open a `tmux` session where you can execute all the commands
+I'm using for this entry.
+
+== Basics
+
+To practice a little bit I'm using spanish president Mariano Rajoy
+public records found at http://www.congreso.es
+
+NOTE: All records related to congressmen official incomes, properties
+and taxes are available from http://www.congreso.es in pdf
+documents. Unfortunately the way these documents are fulfilled are
+different from one another.
+
+=== Tesseract doesn't read PDFs
+
+In order to enable Tesseract to read PDF documents you have to convert
+them to images. The easiest way to do so is by using `imagemagick`. You
+should make sure to convert pdf to image with the best quality you could:
+
+[source, shell]
+----
+convert -density 290 image.pdf image.png
+----
+
+Where XX is >72 such as 288 (which is 4x). If the resulting image is
+too big, then you can do:
+
+[source, shell]
+----
+convert -density 288 image.pdf -resize 25% image.png
+----
+
+Where `resize`=25% or larger when `density`=288
+
+[source, shell]
+----
+ls -l
+total 288
+-rw-r--r-- 1 dev dev 196746 Nov 13 21:49 document.pdf
+-rw-r--r-- 1 dev dev  17657 Nov 13 22:01 output-0.png
+-rw-r--r-- 1 dev dev  17003 Nov 13 22:01 output-1.png
+-rw-r--r-- 1 dev dev  16590 Nov 13 22:01 output-2.png
+-rw-r--r-- 1 dev dev   9819 Nov 13 22:01 output-3.png
+-rw-r--r-- 1 dev dev  10569 Nov 13 22:01 output-4.png
+----
+
+NOTE: There is a very wellknown script to improve converted text image
+called
+http://www.fmwconcepts.com/imagemagick/textcleaner/index.php[TEXTCLEANER]
+
+=== First attempt
+
+I'm getting the first output to get document headers:
+
+[source, shell]
+----
+tesseract output-0.png header
+----
+
+That would create a `header.txt` output with all the recognized
+data. Unless you're processing a book, most of the form-like documents
+could end up as a non-sense result.
+
+[source, shell]
+----
+cat header.txt
+
+51
+
+
+
+
+
+C.DTP 319 07/07/2016 10
+
+
+
+
+
+CORTES GENERALES XII LEGISLATURA
+DECLARACIDN1 DE BIENES Y RENTAS DE DIPUTADOS Y SENADORES2
+
+Nombre y apellidos
+MARIANO RAJOY BREY
+
+Estado civil Régimen econémico matrimonial
+
+CASADO GANANCIALES
+...
+----
+
+Still you can use this processing for indexing purposes. However if
+you happen to need to process a set of documents with certain
+structure you can make use of a `uzn` file.
+
+== UZN
+
+"uzn is a simple text file format for describing sections of a scanned
+image. The migneuzn tool outputs in this format for its segmentation."
+-- https://github.com/OpenGreekAndLatin/greek-dev/wiki/uzn-format
+
+For this example I'm using a UZN file to get only the first output
+headers in a more guided way. I will tell `tesseract` where to get
+every field I'm interested in.
+
+The `uzn` file is like a `csv` file with the following fields
+separated by tab/spaces:x, y, width, height, tag.
+
+[source, text]
+.output-0.uzn
+----
+140 302 600 66 name
+143 416 454 66 civil state
+776 614 824 52 city
+----
+
+In order to make tesseract to be aware of the uzn file you have to
+make the uzn file to have the same name of the processed file and also
+use a certain segmentation mode (-psm 4):
+
+[source, shell]
+----
+tesseract output-0.png result_with_uzn -psm 4
+----
+
+And the content of `result_with_uzn.txt` is:
+
+[source, text]
+----
+MARIANO RAJOY BREY
+
+CASADO
+
+MADRID ""n"—Tv…- r—- … ñ" “ “
+----
+
+Not bad, but I still need a little bit of tuning to get Tesseract to
+recognize these fields without the current noise, but hey this is just
+a preliminary research.
+
+My overall impression is that Tesseract is a great project but
+requires from you a deeper knowledge before getting acceptable
+results. Also much of the processing has to do with image processing
+before even using Tesseract: contrast, bluring, quality... I will
+problably continuing looking into it to know more about this
+interesting tool.
+
+=== References
+
+- Tesseract wiki: https://github.com/tesseract-ocr/tesseract/wiki
