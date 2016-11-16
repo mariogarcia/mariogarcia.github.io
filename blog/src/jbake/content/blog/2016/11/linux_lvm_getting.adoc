@@ -1,4 +1,4 @@
-= Linux LVM: Getting started
+= Linux LVM: Getting started (ext4)
 @marioggar
 2016-11-13
 :jbake-type: post
@@ -219,8 +219,13 @@ https://www.centos.org/docs/5/html/Cluster_Logical_Volume_Manager/LV_create.html
 === Use logical volumes
 
 Once we've created a logical volume, the only thing remaining is to
-format our logical volumes and start using them. While I'm formatting
-books with `ext4`...
+format our logical volumes as `ext4` filesystems and use them.
+
+NOTE: Why `ext4` ? Well because once I wanted to see how shrink/extend
+works right after this entry. And the easiest way to do it is by
+formatting your `logical volume` as `ext4`. Other filesystems may
+require extra manual steps. But of course, if you're sure about the
+type of filesystem you want, go ahead!
 
 [source, shell]
 ----
@@ -239,12 +244,11 @@ Writing superblocks and filesystem accounting information:
 done
 ----
 
-...I'll be formatting `music` volume with `fat` instead:
-
 [source, shell]
 ----
-user@computer> sudo mkfs.fat /dev/mymedia/music
-mkfs.fat 4.0 (2016-05-06)
+user@computer> sudo mkfs.ext4 /dev/mymedia/music
+mke2fs 1.43.3 (04-Sep-2016)
+....
 ----
 
 Now you should be able to mount them and start using them.

@@ -1,14 +1,19 @@
-= Linux LVM: Resize logical volumes
+= Linux LVM: Resize logical volumes (ext4)
 @marioggar
-2016-11-14
-:jbake-type: draft
+2016-11-16
+:jbake-type: post
 :jbake-status: published
 :jbake-tags: linux, lvm
 :idprefix:
 
 One of the most (if not the most) important reasons you might end
 using LVM is the ability to resize volumes. In this entry I'll be
-covering only the task of resizing `logical volumes` (LV).
+covering only the task of resizing `logical volumes` (LV) with `ext4`
+filesystems.
+
+NOTE: Why `EXT4` ? We'll because it's easy. Other filesystems require
+at least two manual steps. If you don't match blocks or sizes between
+these two steps, you could ruin your data.
 
 == Initial State
 
@@ -26,17 +31,92 @@ user@computer> sudo lvs
 
 Both logical volumes belong to the `mymedia` volume group. The problem
 is that both logical volumes took all the `volume group` space. That
-forces me to shrink one volume in favor of the other.
+forces me to shrink one volume in favor of the other. I think I'll be
+giving 'music` 5GB from `books`.
+
+=== First umount the FS
+
+[source, shell]
+----
+user@computer> sudo umount /dev/mymedia/books
+----
 
 === Shrink
 
-When resizing a `logical` volume the most difficult task is to shrink
-the volume.
+There's always a rule of thumb you must follow when resizing your
+logical volumes, to reduce the underlying file system first. You can
+do that manually and take the risk of losing your data or just use one
+single command to do both resizing the filesystem and resizing the
+logical volume at once with `lvresize`.
 
-In this example I'm using `ext4` filesystems. The first thing I would
-like to do is to shrink `myvideos` to give more space to `mybooks`.
+IMPORTANT: Please, please, please, don't forget to add `--resizefs` to
+the following command.
 
-IMPORTANT: This translates to 8 blocks per Megabyte, or 8192 per
-Gigabyte. According to various google results 1 block is 128kb.
+[source, shell]
+----
+user@computer> sudo lvresize --resizefs -L-5GB /dev/mymedia/books
+fsck from util-linux 2.28.2
+/dev/mapper/mymedia-books: clean, 11/944704 files, 85936/3772416 blocks
+resize2fs 1.43.3 (04-Sep-2016)
+Resizing the filesystem on /dev/mapper/mymedia-books to 2461696 (4k) blocks.
+The filesystem on /dev/mapper/mymedia-books is now 2461696 (4k) blocks long.
+
+  Size of logical volume mymedia/books changed from 14.39 GiB (3684 extents) to 9.39 GiB (2404 extents).
+  Logical volume mymedia/books successfully resized.
+----
+
+- `--resizefs`: Use resize2fs to reduce the underlying filesystem
+- `-L-5GB`: Reduces in 5GB the actual size.
+
+NOTE: It's important to notice the `-` or `+` between the `L` and
+`5GB`. If the volume is 10GB and you write `-L 5GB` the final size of
+the `logical volume` will be `5GB whereas if you write `-L-1GB` the
+final size will be 4GB. The same goes for the `+` (increment)
+operator.
+
+Then if I list the logical volumes of `mymedia` I should see that
+`books` now has 9.39GB.
+
+[source, shell]
+----
+user@computer> sudo lvs mymedia
+  LV    VG      Attr       LSize  Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  books mymedia -wi-a-----  9.39g
+  music mymedia -wi-a----- 14.39g
+----
 
 === Extend
+
+We'll be using the same `lvresize` command, but this time instead of
+shrinking 5GB (`-L-5GB`) I would like to increment
+`/dev/mymedia/music` 5GB (`-L+5GB`):
+
+[source, shell]
+----
+user@computer> sudo lvresize --resizefs -L+5GB /dev/mymedia/music
+fsck from util-linux 2.28.2
+/dev/mapper/mymedia-music: clean, 11/944704 files, 85936/3772416 blocks
+  Size of logical volume mymedia/music changed from 14.39 GiB (3684 extents) to 19.39 GiB (4964 extents).
+  Logical volume mymedia/music successfully resized.
+resize2fs 1.43.3 (04-Sep-2016)
+Resizing the filesystem on /dev/mapper/mymedia-music to 5083136 (4k) blocks.
+The filesystem on /dev/mapper/mymedia-music is now 5083136 (4k) blocks long.
+----
+
+And in the end I will end up having the following layout:
+
+[source, shell]
+----
+user@computer> sudo lvs mymedia
+  LV    VG      Attr       LSize  Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  books mymedia -wi-a-----  9.39g
+  music mymedia -wi-a----- 19.39g
+----
+
+=== References
+
+The following references show both automatic and manual resizing of an
+`ext4` filesystem on LVM in Linux.
+
+- http://www.systutorials.com/124416/shrinking-a-ext4-file-system-on-lvm-in-linux/[Shrink an ext4 File System on LVM in Linux]
+- http://www.systutorials.com/5621/extending-a-mounted-ext4-file-system-on-lvm-in-linux/[Extend a mounted ext4 file system on LVM in Linux]
