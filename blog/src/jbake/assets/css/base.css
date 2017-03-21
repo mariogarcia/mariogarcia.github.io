@@ -1,24 +1,15 @@
 /* Sticky footer styles
 -------------------------------------------------- */
-@import url(http://fonts.googleapis.com/css?family=Raleway:200,300,400,500);
+
 html,
 body {
   height: 100%;
   /* The html and body elements cannot have any padding or margin. */
-  font-size:14pt;
-  font-family: 'Raleway', sans-serif;
 }
 
-.navbar-default {
-    background-color:#000040;
-}
-
-.navbar-default .navbar-brand {
-   color:#FFFFFF;
-}
-
-.navbar-default .navbar-nav>li>a {
-    color:#FFFFFF;
+p {
+    font-size: 110%;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 /* Wrapper for page content to push down footer */
@@ -61,54 +52,13 @@ body {
   margin: 20px 0;
 }
 
-blockquote, blockquote p {
-    color: #907320;
-    font-style: italic;
-}
-
-div.listingblock div.title {
-    font-variant: small-caps;
-}
-
-h2 code {
-    font-size: 0.8em;
-}
+/*code {
+  font-size: 80%;
+}*/
 
 .breadcrumb {
     padding: 0px;
     margin: 0px;
     list-style: none;
     background: none;
-}
-
-.page-header {
-    margin: 40px 0 10px;
-}
-
-a.tags {
-    color:#907320;
-}
-
-code {
-    color:#333;
-    background-color:#F5F5F5;
-}
-
-pre code {
-    font-size: 11pt;
-}
-
-ol {
-    margin-left:0.5em;
-}
-
-ol.linenums {
-    color:#999999;
-    font-size:smaller;
-
-}
-
-ol.linenums li {
-    background: white;
-    padding-left: 0.6em;
 }
