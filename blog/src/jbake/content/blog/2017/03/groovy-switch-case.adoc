@@ -201,10 +201,12 @@ have value destructuring, which is very useful in data structures such
 as lists.
 
 The good news is that https://twitter.com/bsideup[Sergei Egorov] wrote
-some years ago a
-https://github.com/bsideup/groovy-pattern-match/blob/master/src/test/groovy/ru/trylogic/groovy/pattern/PatternMatchingMacroMethodsTest.groovy[library]
-bringing pattern matching to Groovy. I strongly recommend to check it
-out.
+some years ago a library bringing pattern matching to Groovy. I
+strongly recommend to check it out. These are some examples of what
+can be achieved with this library:
+
+- https://github.com/bsideup/groovy-pattern-match/blob/feature/dsl-like-matching/src/test/groovy/ru/trylogic/groovy/pattern/PatternMatchingMacroMethodsTest.groovy[Examples (I)]
+- https://github.com/bsideup/groovy-pattern-match/blob/master/src/test/groovy/ru/trylogic/groovy/pattern/PatternMatchingMacroMethodsTest.groovy[Examples (II)]
 
 == Resources
 
