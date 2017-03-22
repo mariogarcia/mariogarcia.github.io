@@ -1,4 +1,4 @@
-= Groovy Switch Case
+= Groovy Switch Case with Closures
 @marioggar
 2017-03-22
 :jbake-type: post
@@ -8,12 +8,20 @@
 :sources: ../../../../../../../sources/2017/03/groovy-switch-case/src/
 
 == Intro
-Yesterday I talked to my dear friend
+Yesterday I was talking to my dear friend
 https://twitter.com/ilopmar[@ilopmar] about his Greach presentation
 about Javaslang. It was when we were comparing Javaslang's pattern
-matching module and Groovy's switch case when my Groovy instinct made
-me realise how underated Groovy's switch-case statement is. Let me
-show you my point.  Lets say we have the `Person` type:
+matching module vs Groovy's switch case when my Groovy instinct made
+me realise how underated Groovy's switch-case statement is, specially
+how closures can be applied to Groovy's switch/case statements to
+create limited pattern-matching expressions.
+
+NOTE: BTW, Don't get me wrong I think Javaslang is an A-M-A-Z-I-N-G
+library, and I've been using it in my projects since the very
+beginning. This entry is just a claim to use the full potential of
+Groovy's switch case statement.
+
+Let me show you my point. Lets say we have the `Person` type:
 
 [source, groovy]
 .Person
@@ -106,13 +114,8 @@ Eventually it will take the person instance to evaluate and it will
 execute both patterns with the same value and if both executions are
 correct then case expression will succeed.
 
-[source, groovy]
-.Person w Closure
-----
-include::{sources}/main/groovy/pm/Example1.groovy[tags=PersonClosures,indent=0]
-----
-
-Lets see how I built the patterns I used:
+Let me show you how I built the patterns `any`, `gt`, `lt`, and
+`endsWith`:
 
 [source, groovy]
 .any
@@ -189,6 +192,19 @@ include::{sources}/main/groovy/pm/Example2.groovy[tags=example0,indent=0]
 <2> Matches if it is a specific Cat
 <3> Matches if it is a Cat following certain patterns
 <4> Matches if it is any Cat
+
+== A more advance pattern matching in Groovy ?
+
+As I said at the beggining, Groovy's switch/case is not a full pattern
+matching solution. I would point out at least the fact that it doesn't
+have value destructuring, which is very useful in data structures such
+as lists.
+
+The good news is that https://twitter.com/bsideup[Sergei Egorov] wrote
+some years ago a
+https://github.com/bsideup/groovy-pattern-match/blob/master/src/test/groovy/ru/trylogic/groovy/pattern/PatternMatchingMacroMethodsTest.groovy[library]
+bringing pattern matching to Groovy. I strongly recommend to check it
+out.
 
 == Resources
 
