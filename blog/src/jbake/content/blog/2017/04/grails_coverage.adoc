@@ -1,0 +1,133 @@
+= Grails 3 code coverage
+@marioggar
+2017-04-11
+:jbake-type: post
+:jbake-status: draft
+:jbake-tags: groovy, jvm, code coverage, cobertura, jacoco
+:idprefix:
+:sources: ../../../../../../../sources/2017/04/grails-coverage/
+
+== Intro
+
+Last http://greachconf.com[Greach] I had the oportunity to talk to
+https://twitter.com/sdelamo[@sdelamo] and
+https://twitter.com/jeffscottbrown[@jeffbrown] about the behavior of
+existing code coverage tools with Grails 3.
+
+=== The problem
+
+At work, we've recently migrated a pretty big Grails application from
+2.5.4 to 3.2.5. While migrating the application somebody from another
+team asked me about how we were dealing with code coverage, because he
+couldn't get reasonable metrics from any open source code coverage
+tool.
+
+At that moment I had't checked the code coverage yet, but then I did
+and I realized things had changed.
+
+Code coverage reports showed red where in previous versions of Grails
+and with the same code they were green. What had happened ? Let's see
+what have changed between Grails 2.5.X and Grails 3.X.
+
+==== Grails 2.5.X
+
+TODO
+
+==== Grails 3.X
+
+TODO
+
+=== Tools
+
+It's sad but the truth is there're not so many open source code
+coverage tools out there. I guess the most popular in the JVM world
+are cobertura and jacoco.
+
+==== Cobertura
+
+[quote, http://cobertura.github.io/cobertura/]
+Cobertura is a free Java tool that calculates the percentage of code
+accessed by tests. It can be used to identify which parts of your Java
+program are lacking test coverage. It is based on jcoverage.
+
+Lets configure cobertura:
+
+[source, groovy]
+.build.gradle (fragment)
+----
+
+----
+
+NOTE: I really encourage everybody to take a look at the section:
+https://github.com/cobertura/cobertura/wiki/Line-Coverage-Explained[Line
+coverage explained].
+
+==== Jacoco
+
+[quote, http://www.jacoco.org/jacoco/]
+JaCoCo is a free code coverage library for Java, which has been
+created by the EclEmma team based on the lessons learned from using
+and integration existing libraries for many years.
+
+Lets configure Jacoco:
+
+[source, groovy]
+.build.gradle (fragment)
+----
+
+----
+
+NOTE: I really encourage everybody to take a look at the section:
+http://www.jacoco.org/jacoco/trunk/doc/counters.html[Coverage
+counters] to have a hint on how Jacoco create its metrics.
+
+=== Controllers
+
+==== Cobertura
+
+Ok, let's implement our controller:
+
+[source, groovy]
+.controller
+----
+
+----
+
+So there should be two tests, one for the command object and another
+for the controller itself.
+
+[source, groovy]
+.command spec
+----
+
+----
+
+[source, groovy]
+.controller spec
+----
+
+----
+
+Now after making sure both tests pass, we would like to know which
+part of the code we forgot to cover. Lets configure **cobertura**
+https://github.com/stevesaliman/gradle-cobertura-plugin[Gradle
+plugin].
+
+Ok the run the code coverage:
+
+[source, shell]
+.build.gradle (fragment)
+----
+./gradlew :app:cobertura
+----
+
+==== Jacoco
+
+=== Conclusions
+
+TODO
+
+=== Other resources
+
+- http://kyleboon.org/blog/2014/04/17/code-coverage-with-groovy/[Code coveage with Groovy]
+- https://liviutudor.com/2015/05/15/cobertura-issue-with-ignoring-annotated-methods[Cobertura ignoring annotated methods]
