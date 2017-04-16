@@ -36,7 +36,8 @@ and integration existing libraries for many years.
 
 === Project
 
-The structure of the project used to follow this entry is the following:
+The structure of the project used as example is a gradle multimodule
+with the following modules:
 
 [ditaa, "2017/04/grails_coverage/project-modules-diagram", "png", align=center, indent=0]
 ----
@@ -82,6 +83,13 @@ can change the Jacoco version. I'll show that later on.
 ----
 ./gradlew :api:check :api:jacocoTestReport
 ----
+
+[cols="2", options=""]
+.Initial state
+|===
+a| image::2017/04/grails_coverage/cobertura_no_tests_no_filters.png[]
+a| image::2017/04/grails_coverage/jacoco_no_tests_no_filters.png[]
+|===
 
 === Reducing the noise
 

@@ -2,6 +2,7 @@ package api
 
 import spock.lang.Specification
 
+@spock.lang.Ignore
 class PersonCommandSpec extends Specification {
 
     // tag::successful[]
