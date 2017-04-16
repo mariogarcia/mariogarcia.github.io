@@ -87,8 +87,8 @@ can change the Jacoco version. I'll show that later on.
 [cols="2", options=""]
 .Initial state
 |===
-a| image::2017/04/grails_coverage/cobertura_no_tests_no_filters.png[]
-a| image::2017/04/grails_coverage/jacoco_no_tests_no_filters.png[]
+a| image::2017/04/grails_coverage/cobertura_init.png[]
+a| image::2017/04/grails_coverage/jacoco_init.png[]
 |===
 
 === Reducing the noise
