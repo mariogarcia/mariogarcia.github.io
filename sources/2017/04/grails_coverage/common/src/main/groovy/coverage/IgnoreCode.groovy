@@ -1,3 +1,0 @@
-package coverage
-
-@interface IgnoreCode { }

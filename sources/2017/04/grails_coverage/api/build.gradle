@@ -10,6 +10,13 @@ buildscript {
     }
 }
 
+// tag::cobertura_plugin[]
+plugins {
+    id "net.saliman.cobertura" version "2.4.0" // <1>
+    id "jacoco" // <2>
+}
+// end::cobertura_plugin[]
+
 version "0.1"
 group "api"
 
@@ -34,6 +41,8 @@ dependencyManagement {
 dependencies {
 
     compile project(':common')
+
+    testCompile 'com.nagternal:spock-genesis:0.6.0'
 
     compile "org.springframework.boot:spring-boot-starter-logging"
     compile "org.springframework.boot:spring-boot-autoconfigure"
@@ -68,4 +77,41 @@ dependencies {
 
 bootRun {
     jvmArgs('-Dspring.output.ansi.enabled=always')
+}
+
+cobertura {
+    // tag::coverageExcludes[]
+    coverageExcludes = ['.*Application.*',
+                        '.*BootStrap.*',
+                        '.*UrlMappings.*']
+    // end::coverageExcludes[]
+
+    coverageIgnoreMethodAnnotations = ['coverage.Ignore']
+}
+
+
+test {
+    jacoco {
+        includeNoLocationClasses = false
+    }
+}
+
+jacocoTestReport {
+    reports {
+        html {
+            enabled true
+        }
+    }
+    executionData = fileTree(dir: "$buildDir/jacoco")
+
+    // tag::excludeClassesJacoco[]
+    afterEvaluate {
+        classDirectories = files(classDirectories.files.collect {
+            fileTree(dir: it,
+                     exclude: ['**/Application**',
+                               '**/BootStrap**',
+                               '**/UrlMappings**'])
+        })
+    }
+    // end::excludeClassesJacoco[]
 }
