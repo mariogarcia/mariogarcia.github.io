@@ -81,9 +81,9 @@ bootRun {
 
 cobertura {
     // tag::coverageExcludes[]
-    //    coverageExcludes = ['.*Application.*',
-                         //                        '.*BootStrap.*',
-                         //                        '.*UrlMappings.*']
+    coverageExcludes = ['.*Application.*',
+                        '.*BootStrap.*',
+                        '.*UrlMappings.*']
     // end::coverageExcludes[]
 
     coverageIgnoreMethodAnnotations = ['coverage.Ignore']

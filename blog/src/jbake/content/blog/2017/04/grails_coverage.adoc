@@ -84,9 +84,11 @@ can change the Jacoco version. I'll show that later on.
 ./gradlew :api:check :api:jacocoTestReport
 ----
 
-[cols="2", options=""]
+[cols="2", options="header"]
 .Initial state
 |===
+| cobertura
+| jacoco
 a| image::2017/04/grails_coverage/cobertura_init.png[]
 a| image::2017/04/grails_coverage/jacoco_init.png[]
 |===
@@ -182,6 +184,15 @@ And then jacoco:
 
 Now I got rid of the noise and I can focus on the classes that are
 really important to my application.
+
+[cols="2", options="header"]
+.Initial state
+|===
+| cobertura
+| jacoco
+a| image::2017/04/grails_coverage/cobertura_reduce_class_noise.png[]
+a| image::2017/04/grails_coverage/jacoco_reduce_class_noise.png[]
+|===
 
 === A simple controller
 
