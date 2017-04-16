@@ -186,7 +186,7 @@ Now I got rid of the noise and I can focus on the classes that are
 really important to my application.
 
 [cols="2", options="header"]
-.Initial state
+.Reducing class noise
 |===
 | cobertura
 | jacoco
@@ -230,6 +230,15 @@ And then jacoco:
 ----
 ./gradlew :api:check :api:jacocoReport
 ----
+
+[cols="2", options="header"]
+.Naive test coverage
+|===
+| cobertura
+| jacoco
+a| image::2017/04/grails_coverage/cobertura_greetings_first.png[]
+a| image::2017/04/grails_coverage/jacoco_greetings_first.png[]
+|===
 
 Lets see the metrics.
 

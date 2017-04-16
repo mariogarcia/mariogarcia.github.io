@@ -4,7 +4,6 @@ import spock.lang.Specification
 import spock.genesis.Gen
 import grails.test.mixin.TestFor
 
-@spock.lang.Ignore
 @TestFor(GreetingsController)
 class GreetingsControllerSpec extends Specification {
 
