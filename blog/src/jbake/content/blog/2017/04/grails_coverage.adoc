@@ -77,13 +77,13 @@ Now you can execute `cobertura` and `jacoco`.
 [source, groovy]
 .execute cobertura
 ----
-./gradlew :api:cobertura
+./gradlew cobertura
 ----
 
 [source, groovy]
 .execute jacoco
 ----
-./gradlew :api:check :api:jacocoTestReport
+./gradlew check jacocoTestReport
 ----
 
 In order to save time and execute both tools one after the other
@@ -134,7 +134,7 @@ touch, or we think it doesn't make sense to test, we can tell
 
 Before showing how to omit those clases, I need to mention that all
 cobertura related configuration will be included in the `cobertura {
-}` scope inside the `:api` module, `build.gradle` file:
+}` configuration:
 
 [source, groovy]
 .Cobertura configuration
@@ -159,7 +159,7 @@ classes don't appear anymore.
 [source, groovy]
 .Executing cobertura
 ----
-./gradlew :api:cobertura
+./gradlew codeCoverage
 ----
 
 ==== Omiting classes with jacoco
@@ -173,8 +173,7 @@ NOTE: This part has been taken from this post:
 https://liviutudor.com/2016/02/11/jacoco-gradle-excluding-source-files-and-classes
 
 In order to exclude a give class from both the analysis and the report
-you need to add the following to your **jacoco** configuration file in
-the `build.gradle` file of the `:api` module.
+you need to add the following to your **jacoco** configuration:
 
 Inside the jacocoReport configuration:
 
@@ -194,12 +193,11 @@ Add inside the following:
 include::{sources}/gradle/jacoco.gradle[tags=excludeClassesJacoco, indent=0]
 ----
 
-And then jacoco:
+And then execute code coverage again:
 
 [source, groovy]
-.Running cobertura
 ----
-./gradlew :api:check :api:jacocoReport
+./gradlew codeCoverage
 ----
 
 Now I got rid of the noise and I can focus on the classes that are
@@ -238,17 +236,8 @@ include::{sources}/api/src/test/groovy/api/GreetingsControllerSpec.groovy[tags=s
 Now I'm running both `cobertura` and `jacoco` to see how covered my code is:
 
 [source, groovy]
-.Running cobertura
 ----
-./gradlew :api:cobertura
-----
-
-And then jacoco:
-
-[source, groovy]
-.Running cobertura
-----
-./gradlew :api:check :api:jacocoReport
+./gradlew codeCoverage
 ----
 
 [cols="2", options="header"]
