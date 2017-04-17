@@ -90,8 +90,8 @@ can change the Jacoco version. I'll show that later on.
 |===
 | cobertura
 | jacoco
-a| image::2017/04/grails_coverage/cobertura_init.png[]
-a| image::2017/04/grails_coverage/jacoco_init.png[]
+a| image::2017/04/grails_coverage/cobertura_init.png[link="http://mariogarcia.github.io/blog/img/2017/04/grails_coverage/cobertura_init.png", role="external", window="_blank"]
+a| image::2017/04/grails_coverage/jacoco_init.png[link="http://mariogarcia.github.io/blog/img/2017/04/grails_coverage/jacoco_init.png", role="external", window="_blank"]
 |===
 
 === Reducing the noise
@@ -191,8 +191,8 @@ really important to my application.
 |===
 | cobertura
 | jacoco
-a| image::2017/04/grails_coverage/cobertura_reduce_class_noise.png[]
-a| image::2017/04/grails_coverage/jacoco_reduce_class_noise.png[]
+a| image::2017/04/grails_coverage/cobertura_reduce_class_noise.png[link="http://mariogarcia.github.io/blog/img/2017/04/grails_coverage/cobertura_reduce_class_noise.png"]
+a| image::2017/04/grails_coverage/jacoco_reduce_class_noise.png[link="http://mariogarcia.github.io/blog/img/2017/04/grails_coverage/jacoco_reduce_class_noise.png"]
 |===
 
 === A simple controller
@@ -237,8 +237,8 @@ And then jacoco:
 |===
 | cobertura
 | jacoco
-a| image::2017/04/grails_coverage/cobertura_greetings_first.png[]
-a| image::2017/04/grails_coverage/jacoco_greetings_first.png[]
+a| image::2017/04/grails_coverage/cobertura_greetings_first.png[link="http://mariogarcia.github.io/blog/img/2017/04/grails_coverage/cobertura_greetings_first.png"]
+a| image::2017/04/grails_coverage/jacoco_greetings_first.png[link="http://mariogarcia.github.io/blog/img/2017/04/grails_coverage/jacoco_greetings_first.png"]
 |===
 
 Lets see the metrics.
