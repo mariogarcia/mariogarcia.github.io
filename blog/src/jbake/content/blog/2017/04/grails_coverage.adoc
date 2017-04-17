@@ -59,15 +59,16 @@ Lets add both plugins to Gradle configuration. First declare plugins
 in module `:api` in file `build.gradle`:
 
 [source, groovy]
-.build.gradle
+.gradle/cobertura.gradle
 ----
-include::{sources}/api/build.gradle[tags=cobertura_plugin, indent=0]
+include::{sources}/gradle/cobertura.gradle[tags=applyCobertura, indent=0]
 ----
-<1> Cobertura plugin
-<2> Jacoco plugin
 
-WARNING: You must declare the `plugins { }` block before the other
-plugin declarations
+[source, groovy]
+.gradle/jacoco.gradle
+----
+include::{sources}/gradle/jacoco.gradle[tags=applyJacoco, indent=0]
+----
 
 NOTE: Jacoco is bundled with Gradle, and it has a default version. You
 can change the Jacoco version. I'll show that later on.
@@ -130,7 +131,7 @@ Ok, now, in order to tell cobertura to omit classes like `Application` or
 [source, groovy]
 .Adding classes exclusions
 ----
-include::{sources}/api/build.gradle[tags=coverageExcludes, indent=0]
+include::{sources}/gradle/cobertura.gradle[tags=coverageExcludes, indent=0]
 ----
 
 If we execute the cobertura report again, we'll see that the excluded
@@ -171,7 +172,7 @@ Add inside the following:
 [source, groovy]
 .Excluding classes
 ----
-include::{sources}/api/build.gradle[tags=excludeClassesJacoco, indent=0]
+include::{sources}/gradle/jacoco.gradle[tags=excludeClassesJacoco, indent=0]
 ----
 
 And then jacoco:

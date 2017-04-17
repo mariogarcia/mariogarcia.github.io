@@ -5,3 +5,4 @@
 output/
 secrets.groovy
 .asciidoctor
+.DS_Store
