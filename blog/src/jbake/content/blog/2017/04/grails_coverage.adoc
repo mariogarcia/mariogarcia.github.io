@@ -51,27 +51,28 @@ grails_coverage-+
 - `api`: Grails 3.2.4 application
 - `common`: Groovy 2.4.10 library for common utilities
 
-IMPORTANT: All the code coverage mention in the entry is about the `api` module.
-
 === Initial configuration
 
-Lets add both plugins to Gradle configuration. First declare plugins
-in module `:api` in file `build.gradle`:
+First you have to add both plugins to Gradle configuration in your
+file `build.gradle`:
 
 [source, groovy]
-.gradle/cobertura.gradle
+.cobertura
 ----
 include::{sources}/gradle/cobertura.gradle[tags=applyCobertura, indent=0]
 ----
 
 [source, groovy]
-.gradle/jacoco.gradle
+.jacoco
 ----
 include::{sources}/gradle/jacoco.gradle[tags=applyJacoco, indent=0]
 ----
 
 NOTE: Jacoco is bundled with Gradle, and it has a default version. You
-can change the Jacoco version. I'll show that later on.
+can change the Jacoco version. Check oficial Jacoco/Gradle documentation
+at https://docs.gradle.org/current/userguide/jacoco_plugin.html
+
+Now you can execute `cobertura` and `jacoco`.
 
 [source, groovy]
 .execute cobertura
@@ -83,6 +84,24 @@ can change the Jacoco version. I'll show that later on.
 .execute jacoco
 ----
 ./gradlew :api:check :api:jacocoTestReport
+----
+
+In order to save time and execute both tools one after the other
+there's a task (thanks to https://twitter.com/sdelamo[@sdelamo]) that
+execute both sequentially:
+
+[source, groovy]
+.codeCoverage task
+----
+include::{sources}/build.gradle[tags=codeCoverage, indent=0]
+----
+
+Therefore from now on, I'll do:
+
+[source, groovy]
+.execute both
+----
+./gradlew codeCoverage
 ----
 
 [cols="2", options="header"]

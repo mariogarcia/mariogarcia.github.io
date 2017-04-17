@@ -10,10 +10,11 @@ subprojects { project ->
     apply from: "${rootProject.projectDir}/gradle/cobertura.gradle"
     apply from: "${rootProject.projectDir}/gradle/jacoco.gradle"
 
+    // tag::codeCoverage[]
     task codeCoverage {
         dependsOn 'cobertura'
         dependsOn 'check'
         dependsOn 'jacocoTestReport'
     }
+    // end::codeCoverage[]
 }
-
