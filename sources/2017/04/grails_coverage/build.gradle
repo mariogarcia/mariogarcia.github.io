@@ -4,17 +4,6 @@ buildscript {
     }
     dependencies {
         classpath "net.saliman:gradle-cobertura-plugin:$coberturaPluginVersion"
+        classpath 'com.bmuschko:gradle-clover-plugin:2.1.0'
     }
-}
-subprojects { project ->
-    apply from: "${rootProject.projectDir}/gradle/cobertura.gradle"
-    apply from: "${rootProject.projectDir}/gradle/jacoco.gradle"
-
-    // tag::codeCoverage[]
-    task codeCoverage {
-        dependsOn 'cobertura'
-        dependsOn 'check'
-        dependsOn 'jacocoTestReport'
-    }
-    // end::codeCoverage[]
 }

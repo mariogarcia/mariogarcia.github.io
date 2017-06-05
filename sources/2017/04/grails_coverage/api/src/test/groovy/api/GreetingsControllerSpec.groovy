@@ -24,7 +24,7 @@ class GreetingsControllerSpec extends Specification {
     }
     // end::successful_message[]
 
-    @spock.lang.Ignore
+    //    @spock.lang.Ignore
     void 'check a successful greetings message'() {
         given: 'a proper person information'
         params.name = name
@@ -45,8 +45,8 @@ class GreetingsControllerSpec extends Specification {
     }
 
     // tag::many_scenarios[]
-    @spock.lang.Ignore
-    @spock.lang.Unroll
+    //    @spock.lang.Ignore
+    //    @spock.lang.Unroll
     void 'check wrong scenarios'() {
         when: 'passing wrong parameters'
         params.name = name

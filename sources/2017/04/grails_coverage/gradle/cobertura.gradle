@@ -3,11 +3,10 @@ apply plugin: 'net.saliman.cobertura'
 // end::applyCobertura[]
 
 cobertura {
-    // tag::coverageExcludes[]
-    coverageExcludes = ['.*Application.*',
-                        '.*BootStrap.*',
-                        '.*UrlMappings.*']
-    // end::coverageExcludes[]
 
-    coverageIgnoreMethodAnnotations = ['coverage.Ignore']
 }
+
+//    coverageExcludes = ['.*Application.*',
+//                        '.*BootStrap.*',
+//                        '.*UrlMappings.*']
+//coverageIgnoreMethodAnnotations = ['coverage.Ignore']
