@@ -1,0 +1,38 @@
+= Kubernetes: Deploy first POD
+@marioggar
+2018-05-05
+:jbake-type: post
+:jbake-status: draft
+:jbake-tags: kubernetes, devops
+:idprefix:
+:sources: ../../../../../../../sources/2018/05/kubernetes_02
+
+== Intro
+
+[source, yaml]
+----
+include::{sources}/nodejs-pod.yml
+----
+
+== Deploy my first pod
+
+=== Deploy pod
+
+[source, shell]
+----
+kubectl create -f nodejs-pod.yml
+----
+
+=== Describe pod
+
+[source, shell]
+----
+kubectl describe pods/nodejs-pod.yml
+----
+
+=== Destroy pod
+
+[source, shell]
+----
+kubectl delete pods nodejs-pod.yml
+----

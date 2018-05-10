@@ -1,0 +1,3 @@
+[submodule "sources/2018/05/kubernetes_installation"]
+	path = sources/2018/05/kubernetes_installation
+	url = git@github.com:mariogarcia/kubernetes_gs.git
