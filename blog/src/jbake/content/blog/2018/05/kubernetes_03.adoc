@@ -1,6 +1,6 @@
 = Kubernetes: Load balancing in Baremetal with MetalLB
 @marioggar
-2018-05-05
+2018-05-07
 :jbake-type: post
 :jbake-status: published
 :jbake-tags: kubernetes, devops

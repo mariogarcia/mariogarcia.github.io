@@ -1,6 +1,6 @@
 = Kubernetes: Deploy first POD
 @marioggar
-2018-05-05
+2018-05-06
 :jbake-type: post
 :jbake-status: draft
 :jbake-tags: kubernetes, devops
@@ -9,30 +9,34 @@
 
 == Intro
 
+Once we have our Kubernetes cluster, it's time to deploy something in
+it. I'm going to follow a simple deploying a Ratpack application I did
+sometime ago and that I packed as a docker image at Bintray.
+
+=== Pod declaration
+
 [source, yaml]
 ----
-include::{sources}/nodejs-pod.yml
+include::{sources}/pnlp-pod.yml[indent=0]
 ----
 
-== Deploy my first pod
-
-=== Deploy pod
+=== How to deploy my POD
 
 [source, shell]
 ----
-kubectl create -f nodejs-pod.yml
+kubectl create -f pnlp-pod.yml
 ----
 
-=== Describe pod
-
-[source, shell]
-----
-kubectl describe pods/nodejs-pod.yml
-----
-
-=== Destroy pod
+=== How to see deployed  POD details
 
 [source, shell]
 ----
-kubectl delete pods nodejs-pod.yml
+kubectl describe pods/pnlp-pod.yml
+----
+
+=== How to destroy my POD
+
+[source, shell]
+----
+kubectl delete pods pnlp-pod.yml
 ----

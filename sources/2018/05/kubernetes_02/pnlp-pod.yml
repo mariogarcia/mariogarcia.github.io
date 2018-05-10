@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pnlp-pod
+spec:
+  containers:
+    - name: pnlp-pod
+      image: pacotheai-docker-public.bintray.io/pnlp:0.1.0
+      ports:
+        containerPort: 5050
