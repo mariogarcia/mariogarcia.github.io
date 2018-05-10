@@ -2,7 +2,7 @@
 @marioggar
 2018-05-05
 :jbake-type: post
-:jbake-status: draft
+:jbake-status: published
 :jbake-tags: kubernetes, devops
 :idprefix:
 :sources: ../../../../../../../sources/2018/05/kubernetes_installation
@@ -45,13 +45,13 @@ barebone machines.
 kubernetes_installation-+
                 +----> machines/
                 |          |
-                |          +----> sherlock/
+                |          +----> 01_sherlock/
                 |          |       |
                 |          |       +------>Vagrantfile
-                |          +----> watson/
+                |          +----> 02_watson/
                 |          |       |
                 |          |       +------>Vagrantfile
-                |          +----> mycroft/
+                |          +----> 03_mycroft/
                 |                  |
                 |                  +------>Vagrantfile
                 |
@@ -64,23 +64,28 @@ kubernetes_installation-+
 ----
 
 [source, ruby]
-./kubernetes_installation/master/Vagrantfile
+./kubernetes_installation/machines/01_sherlock/Vagrantfile
 ----
-include::{sources}/master/Vagrantfile[indent=0]
+include::{sources}/machines/01_sherlock/Vagrantfile[indent=0]
 ----
 
 [source, ruby]
-./kubernetes_installation/slave/Vagrantfile
+./kubernetes_installation/machines/02_watson/Vagrantfile
 ----
-include::{sources}/slave/Vagrantfile[indent=0]
+include::{sources}/machines/02_watson/Vagrantfile[indent=0]
 ----
 
-The most important thing here is to be aware of the IPs because we'll
-need them afterwards when creating the Kubernetes cluster.
+The third node is the same as the second one. The most important thing
+here is to be aware of the IPs because we'll need them afterwards when
+creating the Kubernetes cluster.
 
 IMPORTANT: Make sure master and slave hostnames are different
 otherwise Kubernetes won't show the slave machine when listing
 available nodes.
+
+IMPORTANT: Make sure you've installed the `vagrant-disksize` plugin
+before building vagrant boxes: `vagrant plugin install
+vagrant-disksize`
 
 === Ansible provisioning
 
@@ -92,16 +97,30 @@ the system requirements in order Kubernetes to work.
 [source, yaml]
 .playbook
 ----
-include::{sources}/master/playbook.yml[indent=0]
+include::{sources}/provisioning/playbook.yml[indent=0]
 ----
 
-The playbook only points at the role containing the tasks to be
+The playbook only points to two roles containing the tasks to be
 applied:
 
 [source, yaml]
 .roles/base/tasks/main.yml
 ----
-include::{sources}/master/roles/base/tasks/main.yml[indent=0]
+include::{sources}/provisioning/roles/base/tasks/main.yml[indent=0]
+----
+
+Which creates an operations user `kubi`.
+
+NOTE: This is not important as you can execute any of the following
+commands as the `vagrant` user, which is the default when you enter
+the VM by executing `vagrant ssh`.
+
+Then there's the kubernetes role:
+
+[source, yaml]
+.roles/kubernetes/tasks/main.yml
+----
+include::{sources}/provisioning/roles/kubernetes/tasks/main.yml[indent=0]
 ----
 
 Basically the base role:
@@ -113,12 +132,12 @@ Basically the base role:
 
 Once we have the Vagrantfile and the Ansible playbook we can then
 create and provision the virtual machines. For the master virtual
-machine, in your host, go to `master` directory and execute:
+machine, in your host, go to `01_sherlock` directory and execute:
 
 [source, shell]
 .master
 ----
-/home/mario/kubernetes_installation/master@mario> vagrant up
+/home/mario/kubernetes_installation/machines/01_sherlock@mario> vagrant up
 ----
 
 Do the same to create the slave machine:
@@ -126,7 +145,7 @@ Do the same to create the slave machine:
 [source, shell]
 .slave
 ----
-/home/mario/kubernetes_installation/slave@mario> vagrant up
+/home/mario/kubernetes_installation/machines/02_watson@mario> vagrant up
 ----
 
 It'll take a while so go and take a coffee.
@@ -147,7 +166,7 @@ we can enter the master machine:
 [source, shell]
 .vagrant ssh
 ----
-/home/mario/kubernetes_installation/master@mario> vagrant ssh
+/home/mario/kubernetes_installation/machines/01_sherlock@mario> vagrant ssh
 ----
 
 That'll give us a console in the master machine.
@@ -159,14 +178,17 @@ including etcd (the cluster database) and the API server (which the
 kubectl CLI communicates with)."
 -- https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/
 
-But because we're using a specific IP we'd like to set the master IP
-and
+But because we're using a specific IP we'd like to set the netmask of
+the PODs and the IP where nodes would be capable of joining the master
+node:
 
 [source, shell]
 .kubeadm init
 ----
 sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=192.168.250.38
 ----
+
+First lets talk about the POD network mask:
 
 - `--pod-network-cidr=10.244.0.0/16`
 
@@ -177,6 +199,8 @@ IMPORTANT: This parameter and its specific value is also required for
 the `Flannel` pod network. We'll see what is that for a little bit
 later.
 
+Then the IP where slave nodes will be able to join master:
+
 - `--apiserver-advertise-address=192.168.250.38`
 
 The IP address the API Server will advertise it's listening
@@ -184,8 +208,10 @@ on. Specify '0.0.0.0' to use the address of the default network
 interface. Because the VM has several network interfaces I want to
 make sure it uses the one that I want.
 
-The command output will give us a couple of interesting things. First
-how to use kubectl withouth being root:
+IMPORTANT: Keep the POD networks away from public IPs
+
+The execution of the `kubeadm` command output will give us a couple of
+interesting things. First how to use kubectl withouth being root:
 
 [source, shell]
 .Enable kubectl execution for non root user
@@ -213,8 +239,8 @@ NOTE: In case you lost this line you can always recover it executing `kubeadm to
 
 === Installing pod network
 
-NOTE: This is based on Calico Pod network documentation:
-https://docs.projectcalico.org/v3.1/getting-started/kubernetes/
+NOTE: This is based on the Kubernetes documentation:
+https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init/
 
 "You MUST install a pod network add-on so that your pods can
 communicate with each other."
@@ -253,7 +279,7 @@ Confirm that all of the pods are running with the following command.
 
 [source, shell]
 ----
-vagrant@kubmaster:~$ watch kubectl get pods --all-namespaces
+vagrant@sherlock:~$ watch kubectl get pods --all-namespaces
 ----
 
 Wait until each pod has the STATUS of Running.
@@ -273,20 +299,20 @@ kube-system   kube-scheduler-sherlock            1/1       Running   0          
 Press CTRL+C to exit watch. Now you have the master node installed and
 configured. It's time to make the slave node join the master.
 
-=== Slave joins Master
+=== Slave nodes joins Master
 
 From your host machine enter slave node:
 
 [source, shell]
 ----
-/home/mario/kubernetes_installation/slave@mario> vagrant ssh
+/home/mario/kubernetes_installation/01_watson@mario> vagrant ssh
 ----
 
 Now as a sudo user paste the **join** command copied from the **kubeadm init** output:
 
 [source, shell]
 ----
-vagrant@kubslave:~$ sudo kubeadm join 192.168.250.38:6443 --token uvdk4i.7ie6cil14w722gf5 --discovery-token-ca-cert-hash sha256:ea60fce4ffcc2b928e9f505f5ba84eb8d5151048eafb655cf1b4bd60fa009fce
+vagrant@watson:~$ sudo kubeadm join 192.168.250.38:6443 --token uvdk4i.7ie6cil14w722gf5 --discovery-token-ca-cert-hash sha256:ea60fce4ffcc2b928e9f505f5ba84eb8d5151048eafb655cf1b4bd60fa009fce
 ----
 
 If everything went ok you should see and output like this:
@@ -314,11 +340,12 @@ Then if you execute the following command **from master** you should see both no
 
 [source, shell]
 ----
-vagrant@kubmaster:~$ kubectl get nodes -o wide
+vagrant@sherlock:~$ kubectl get nodes -o wide
 NAME        STATUS    ROLES     AGE       VERSION   EXTERNAL-IP   OS-IMAGE                       KERNEL-VERSION   CONTAINER-RUNTIME
-kubmaster   Ready     master    19h       v1.10.2   <none>        Debian GNU/Linux 9 (stretch)   4.9.0-6-amd64    docker://18.3.1
-kubslave    Ready     <none>    19h       v1.10.2   <none>        Debian GNU/Linux 9 (stretch)   4.9.0-6-amd64    docker://18.3.1
+sherlock   Ready     master    19h       v1.10.2   <none>        Ubuntu/Xenial                   4.9.0-6-amd64    docker://18.3.1
+watson     Ready     <none>    19h       v1.10.2   <none>        Ubuntu/Xenial                   4.9.0-6-amd64    docker://18.3.1
 ----
 
 Now you have a Kubernetes cluster up and running with one master and a
-one slave nodes.
+one slave nodes. You can go to the third node and repeat the joining
+procedure.
