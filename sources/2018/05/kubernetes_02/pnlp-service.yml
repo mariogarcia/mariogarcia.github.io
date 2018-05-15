@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: node-js
+  name: pnlp-pod
   labels:
-    name: node-js
+    name: pnlp-pod
 spec:
   type: LoadBalancer
   ports:
     - port: 80
   selector:
-    name: node-js
+    name: pnlp-pod

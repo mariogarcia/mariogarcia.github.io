@@ -1,21 +1,40 @@
-= Install Virtualbox in Debian 9
+= Virtualbox: Installation in Debian 9
 @marioggar
-2018-05-05
+2018-05-01
 :jbake-type: post
-:jbake-status: draft
+:jbake-status: published
 :jbake-tags: virtualbox, vm, devops
 :idprefix:
 
-== Intro
+== Steps
 
-==
+=== Add source list
 
-Add the following line to your /etc/apt/sources.list. According to your distribution, replace '<mydist>' with 'artful', 'zesty', 'yakkety', 'xenial', 'trusty', 'stretch', 'jessie', or 'wheezy' (older versions of VirtualBox supported different distributions):
+Add the following line to your /etc/apt/sources.list. According to
+your distribution, replace '<mydist>' with 'artful', 'zesty',
+'yakkety', 'xenial', 'trusty', 'stretch', 'jessie', or 'wheezy' (older
+versions of VirtualBox supported different distributions):
 
+[source, shell]
+----
 deb https://download.virtualbox.org/virtualbox/debian stretch contrib
+----
 
+=== Add sources signatures
+
+[source, shell]
+----
 wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
+----
+
+and
+
+[source, shell]
+----
 wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | sudo apt-key add -
+----
+
+=== Check signatures (optional)
 
 The key fingerprint for oracle_vbox_2016.asc is
 
@@ -27,16 +46,27 @@ The key fingerprint for oracle_vbox.asc is
 7B0F AB3A 13B9 0743 5925  D9C9 5442 2A4B 98AB 5139
 Oracle Corporation (VirtualBox archive signing key) <info@virtualbox.org>
 
+=== Install
+
 To install VirtualBox, do
 
+[source, shell]
+----
 sudo apt-get update
 sudo apt-get install virtualbox-5.2
+----
 
-What to do when experiencing The following signatures were invalid: BADSIG ... when refreshing the packages from the repository?
+=== Troubleshooting
 
-# sudo -s -H
-# apt-get clean
-# rm /var/lib/apt/lists/*
-# rm /var/lib/apt/lists/partial/*
-# apt-get clean
-# apt-get update
+What to do when experiencing The following signatures were invalid:
+BADSIG ... when refreshing the packages from the repository?
+
+[source, shell]
+----
+sudo -s -H
+apt-get clean
+rm /var/lib/apt/lists/*
+rm /var/lib/apt/lists/partial/*
+apt-get clean
+apt-get update
+----
