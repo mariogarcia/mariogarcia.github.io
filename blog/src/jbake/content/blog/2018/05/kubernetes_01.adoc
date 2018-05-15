@@ -20,10 +20,11 @@ important is https://kubernetes.io[Kubernetes].
 scaling, and management of containerized applications."
 -- kubernetes.io
 
-This entry is the result of some trial and error trying to set a
-minimal Kubernetes cluster: 1 master + 1 slave.
+As a result I've created a Vagrant installation to ease the creation
+of a Kubernetes cluster with `flannel` as a POD network and `metallb`
+as load balancer. The source code can be found at **TODO**
 
-== Installation
+== Structure
 
 Before creating the cluster I need to create two virtual machines
 (master + slave) and install the required libraries in order
@@ -42,42 +43,22 @@ barebone machines.
 
 [ditaa, "2018/05/kubernetes_installation/project-structure", "png", align=center, indent=0]
 ----
-kubernetes_installation-+
-                +----> machines/
-                |          |
-                |          +----> 01_sherlock/
-                |          |       |
-                |          |       +------>Vagrantfile
-                |          +----> 02_watson/
-                |          |       |
-                |          |       +------>Vagrantfile
-                |          +----> 03_mycroft/
-                |                  |
-                |                  +------>Vagrantfile
+kubernetes-+
+     +-----> Vagrantfile
+     +-----> ansible
                 |
-                +-----> provisioning
-                           |
-                           +----> roles/
-                           |
-                           +----> playbook.yml
-
+                +----> roles/
+                |
+                +----> playbook-master.yml
+                |
+                +----> playbook-slave.yml
 ----
 
 [source, ruby]
-./kubernetes_installation/machines/01_sherlock/Vagrantfile
+.Vagrantfile
 ----
-include::{sources}/machines/01_sherlock/Vagrantfile[indent=0]
+include::{sources}/kubernetes/Vagrantfile[indent=0]
 ----
-
-[source, ruby]
-./kubernetes_installation/machines/02_watson/Vagrantfile
-----
-include::{sources}/machines/02_watson/Vagrantfile[indent=0]
-----
-
-The third node is the same as the second one. The most important thing
-here is to be aware of the IPs because we'll need them afterwards when
-creating the Kubernetes cluster.
 
 IMPORTANT: Make sure master and slave hostnames are different
 otherwise Kubernetes won't show the slave machine when listing
@@ -92,260 +73,55 @@ vagrant-disksize`
 NOTE: For more information about Ansible go to https://www.ansible.com/
 
 The Vagrant files are using an Ansible playbook in order to install
-the system requirements in order Kubernetes to work.
+the system requirements in order Kubernetes to work. Depending on
+whether the node has been declared as master or slave it will make use
+of one playbook or the other. Master playbook:
 
 [source, yaml]
-.playbook
+.master playbook
 ----
-include::{sources}/provisioning/playbook.yml[indent=0]
+include::{sources}/kubernetes/ansible/playbook-master.yml[indent=0]
 ----
 
-The playbook only points to two roles containing the tasks to be
-applied:
+- Base libraries
+- Kubernetes related libraries: kubeadm, kubectl...
+- Kubernetes cluster initialization
+- Kubernetes POD network installation
+- Kubernetes MetalLB (Load Balancer) installation
+
+And for the slave nodes:
 
 [source, yaml]
-.roles/base/tasks/main.yml
+.slave playbook
 ----
-include::{sources}/provisioning/roles/base/tasks/main.yml[indent=0]
-----
-
-Which creates an operations user `kubi`.
-
-NOTE: This is not important as you can execute any of the following
-commands as the `vagrant` user, which is the default when you enter
-the VM by executing `vagrant ssh`.
-
-Then there's the kubernetes role:
-
-[source, yaml]
-.roles/kubernetes/tasks/main.yml
-----
-include::{sources}/provisioning/roles/kubernetes/tasks/main.yml[indent=0]
+include::{sources}/kubernetes/ansible/playbook-slave.yml[indent=0]
 ----
 
-Basically the base role:
+- Base libraries
+- Kubernetes related libraries: kubeadm, kubectl...
+- Kubernetes slave node joins master node
 
-- Installs **base libraries** to deal with apt repositories and keys
-- Installs Docker and Kubernetes **official repositories**
-- Installs **Docker** and **Docker compose**
-- Installs **Kubernetes** base requirements
+== Installation
 
-Once we have the Vagrantfile and the Ansible playbook we can then
-create and provision the virtual machines. For the master virtual
-machine, in your host, go to `01_sherlock` directory and execute:
-
-[source, shell]
-.master
-----
-/home/mario/kubernetes_installation/machines/01_sherlock@mario> vagrant up
-----
-
-Do the same to create the slave machine:
-
-[source, shell]
-.slave
-----
-/home/mario/kubernetes_installation/machines/02_watson@mario> vagrant up
-----
-
-It'll take a while so go and take a coffee.
-
-NOTE: If something goes wrong you can check and fix the error and then
-execute the provisioning without rebooting the VM with `vagrant up
---provision`
-
-== Creating a cluster
-
-NOTE: This is based on the Kubernetes documentation:
-https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init/
-
-Now that we have two machines ready to be part of a kubernetes
-cluster, it's time to **initialize the cluster in the master VM**. So
-we can enter the master machine:
-
-[source, shell]
-.vagrant ssh
-----
-/home/mario/kubernetes_installation/machines/01_sherlock@mario> vagrant ssh
-----
-
-That'll give us a console in the master machine.
-
-=== Initialize master
-
-"The master is the machine where the control plane components run,
-including etcd (the cluster database) and the API server (which the
-kubectl CLI communicates with)."
--- https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/
-
-But because we're using a specific IP we'd like to set the netmask of
-the PODs and the IP where nodes would be capable of joining the master
-node:
-
-[source, shell]
-.kubeadm init
-----
-sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=192.168.250.38
-----
-
-First lets talk about the POD network mask:
-
-- `--pod-network-cidr=10.244.0.0/16`
-
-Specify range of IP addresses for the pod network. If set, the control
-plane will automatically allocate CIDRs for every node.
-
-IMPORTANT: This parameter and its specific value is also required for
-the `Flannel` pod network. We'll see what is that for a little bit
-later.
-
-Then the IP where slave nodes will be able to join master:
-
-- `--apiserver-advertise-address=192.168.250.38`
-
-The IP address the API Server will advertise it's listening
-on. Specify '0.0.0.0' to use the address of the default network
-interface. Because the VM has several network interfaces I want to
-make sure it uses the one that I want.
-
-IMPORTANT: Keep the POD networks away from public IPs
-
-The execution of the `kubeadm` command output will give us a couple of
-interesting things. First how to use kubectl withouth being root:
-
-[source, shell]
-.Enable kubectl execution for non root user
-----
-mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
-----
-
-Execute those lines before going any further. That way you'll keep
-executing the rest of the commands with your non root user.
-
-The command line will also show how to join the
-master machine from a cluster slave, something like the following:
+Go to the /kubernetes directory and execute:
 
 [source, shell]
 ----
-kubeadm join 192.168.250.38:6443 --token uvdk4i.7ie6cil14w722gf5 --discovery-token-ca-cert-hash sha256:ea60fce4ffcc2b928e9f505f5ba84eb8d5151048eafb655cf1b4bd60fa009fce
+vagrant up
 ----
 
-You should copy that line somewhere else in order to use it later when
-configuring the cluster slave.
-
-NOTE: In case you lost this line you can always recover it executing `kubeadm token create --print-join-command` in the **master node**
-
-=== Installing pod network
-
-NOTE: This is based on the Kubernetes documentation:
-https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init/
-
-"You MUST install a pod network add-on so that your pods can
-communicate with each other."
--- https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/
-
-"The network must be deployed before any applications. Also, kube-dns,
-an internal helper service, will not start up before a network is
-installed. kubeadm only supports Container Network Interface (CNI)
-based networks (and does not support kubenet)."
--- https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/
-
-Among the different choices provided I've chosen the **Flannel** pod
-network. To install the **Flannel** network it is required to use the
-flag `--pod-network-cidr` when initializing the cluster with **kubeadm
-init**, that's why we did it from the beginning. So now the only thing
-remaining is executing:
-
-[source, shell]
-.Latest Flannel distribution
-----
-kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.10.0/Documentation/kube-flannel.yml
-----
-
-You should see the following output.
+The process will prompt you in order to choose which network device
+will be used as a bridged connection. Once the process has finished
+you can log in the master vm:
 
 [source, shell]
 ----
-clusterrole.rbac.authorization.k8s.io "flannel" created
-clusterrolebinding.rbac.authorization.k8s.io "flannel" created
-serviceaccount "flannel" created
-configmap "kube-flannel-cfg" created
-daemonset.extensions "kube-flannel-ds" created
+vagrant ssh sherlock
 ----
 
-Confirm that all of the pods are running with the following command.
+And make sure both nodes are up and ready:
 
 [source, shell]
 ----
-vagrant@sherlock:~$ watch kubectl get pods --all-namespaces
+kubectl get nodes
 ----
-
-Wait until each pod has the STATUS of Running.
-
-[source, shell]
-----
-NAMESPACE    NAME                                       READY  STATUS   RESTARTS  AGE
-kube-system   etcd-sherlock                      1/1       Running   0          2m
-kube-system   kube-apiserver-sherlock            1/1       Running   0          2m
-kube-system   kube-controller-manager-sherlock   1/1       Running   0          2m
-kube-system   kube-dns-86f4d74b45-gjlsh          3/3       Running   0          3m
-kube-system   kube-flannel-ds-2hx4q              1/1       Running   0          2m
-kube-system   kube-proxy-25c58                   1/1       Running   0          3m
-kube-system   kube-scheduler-sherlock            1/1       Running   0          3m
-----
-
-Press CTRL+C to exit watch. Now you have the master node installed and
-configured. It's time to make the slave node join the master.
-
-=== Slave nodes joins Master
-
-From your host machine enter slave node:
-
-[source, shell]
-----
-/home/mario/kubernetes_installation/01_watson@mario> vagrant ssh
-----
-
-Now as a sudo user paste the **join** command copied from the **kubeadm init** output:
-
-[source, shell]
-----
-vagrant@watson:~$ sudo kubeadm join 192.168.250.38:6443 --token uvdk4i.7ie6cil14w722gf5 --discovery-token-ca-cert-hash sha256:ea60fce4ffcc2b928e9f505f5ba84eb8d5151048eafb655cf1b4bd60fa009fce
-----
-
-If everything went ok you should see and output like this:
-
-[source, shell]
-----
-[preflight] Running pre-flight checks.
-        [WARNING FileExisting-crictl]: crictl not found in system path
-Suggestion: go get github.com/kubernetes-incubator/cri-tools/cmd/crictl
-[discovery] Trying to connect to API Server "192.168.250.38:6443"
-[discovery] Created cluster-info discovery client, requesting info from "https://192.168.250.38:6443"
-[discovery] Requesting info from "https://192.168.250.38:6443" again to validate TLS against the pinned public key
-[discovery] Cluster info signature and contents are valid and TLS certificate validates against pinned roots, will use API Server "192.168.250.38:6443"
-[discovery] Successfully established connection with API Server "192.168.250.38:6443"
-
-This node has joined the cluster:
-* Certificate signing request was sent to master and a response
-  was received.
-* The Kubelet was informed of the new secure connection details.
-
-Run 'kubectl get nodes' on the master to see this node join the cluster.
-----
-
-Then if you execute the following command **from master** you should see both nodes:
-
-[source, shell]
-----
-vagrant@sherlock:~$ kubectl get nodes -o wide
-NAME        STATUS    ROLES     AGE       VERSION   EXTERNAL-IP   OS-IMAGE                       KERNEL-VERSION   CONTAINER-RUNTIME
-sherlock   Ready     master    19h       v1.10.2   <none>        Ubuntu/Xenial                   4.9.0-6-amd64    docker://18.3.1
-watson     Ready     <none>    19h       v1.10.2   <none>        Ubuntu/Xenial                   4.9.0-6-amd64    docker://18.3.1
-----
-
-Now you have a Kubernetes cluster up and running with one master and a
-one slave nodes. You can go to the third node and repeat the joining
-procedure.

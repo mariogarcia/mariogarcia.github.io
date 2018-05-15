@@ -2,7 +2,7 @@
 @marioggar
 2018-05-06
 :jbake-type: post
-:jbake-status: draft
+:jbake-status: published
 :jbake-tags: kubernetes, devops
 :idprefix:
 :sources: ../../../../../../../sources/2018/05/kubernetes_02
