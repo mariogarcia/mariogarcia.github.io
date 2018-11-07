@@ -20,9 +20,10 @@ important is https://kubernetes.io[Kubernetes].
 scaling, and management of containerized applications."
 -- kubernetes.io
 
-As a result I've created a Vagrant installation to ease the creation
-of a Kubernetes cluster with `flannel` as a POD network and `metallb`
-as load balancer. The source code can be found at **TODO**
+As a result I've created a
+https://github.com/mariogarcia/vagrant_images/tree/master/kubernetes[Vagrant
+installation] to ease the creation of a Kubernetes cluster with
+`flannel` as a POD network and `metallb` as load balancer.
 
 == Structure
 
@@ -57,7 +58,116 @@ kubernetes-+
 [source, ruby]
 .Vagrantfile
 ----
-include::{sources}/kubernetes/Vagrantfile[indent=0]
+###########################
+###### UTIL METHODS #######
+###########################
+
+# Extracts the ip of a given node by its role name
+def get_ip_by_role(nodes, role)
+  node = nodes.find { |name, ndata|
+    ndata[:role] == role
+  }
+
+  return node.last()[:ip]
+end
+
+# Extracts master node ip from the list of nodes
+def get_master_ip(nodes)
+  return get_ip_by_role(nodes, "master")
+end
+
+# Extracts nfs server ip
+def get_nfs_ip(nodes)
+  return get_ip_by_role(nodes, "nfs")
+end
+
+# Returns true if there is a node with :role => 'nfs'
+def is_nfs_active(nodes)
+  is_there_nfs = nodes
+            .select { |name, ndata| ndata[:role] == 'nfs'}
+            .size() > 0
+
+  return is_there_nfs ? "yes" : "no"
+end
+
+###########################
+####### VARIABLES #########
+###########################
+
+# nodes to be built
+nodes = {
+  "baker": {
+    ip: "192.168.250.104",
+    role: 'nfs',
+    memory: "1024",
+    disk: "10GB"
+  },
+  "sherlock": {
+    ip: "192.168.250.102",
+    role: 'master',
+    memory: "4096",
+    disk: "10GB"
+  },
+  "watson": {
+    ip: "192.168.250.103",
+    role: 'slave',
+    memory: "4096",
+    disk: "10GB"
+  }
+}
+
+# cluster default gateway ip
+gateway_ip = "192.168.250.1"
+
+# metallb network mask to get ips from the pool
+metallb_netmask = "192.168.250.112/29"
+
+# master_ip
+master_ip = get_master_ip(nodes)
+
+# mount nfs
+nfs_active = is_nfs_active(nodes)
+nfs_ip = get_nfs_ip(nodes)
+nfs_netmask = "192.168.250.0/24"
+
+# shell provisioning
+del_default_gateway = "route del default gw 0"
+add_gateway_command = "route add default gw #{ gateway_ip }"
+
+###########################
+#### VAGRANT CONFIGURE ####
+###########################
+
+Vagrant.configure("2") do |config|
+  # loop through all configured nodes
+  nodes.each { |name, ndata|
+    config.vm.define name do |node|
+
+      node.vm.box = "ubuntu/xenial64"
+      node.disksize.size = ndata[:disk]
+
+      node.vm.hostname = name
+      node.vm.network "public_network", ip: ndata[:ip]
+      node.vm.provision "shell", inline: del_default_gateway
+      node.vm.provision "shell", inline: add_gateway_command
+      node.vm.provider "virtualbox" do |vb|
+        vb.memory = ndata[:memory]
+      end
+
+      node.vm.provision "ansible" do |ansible|
+        ansible.playbook = "ansible/playbook-#{ ndata[:role] }.yml"
+        ansible.extra_vars = {
+          master_ip: master_ip,
+          metallb_addresses: metallb_netmask,
+          nfs_active: nfs_active,
+          nfs_netmask: nfs_netmask,
+          nfs_ip: nfs_ip
+        }
+      end
+
+    end
+  }
+end
 ----
 
 IMPORTANT: Make sure master and slave hostnames are different
@@ -80,7 +190,19 @@ of one playbook or the other. Master playbook:
 [source, yaml]
 .master playbook
 ----
-include::{sources}/kubernetes/ansible/playbook-master.yml[indent=0]
+- hosts: all
+  become: true
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+
+  roles:
+    - base
+    - kubernetes
+    - init
+    - podnet
+    - metallb
+    - nfs_common
+    - nfs_client
 ----
 
 - Base libraries
@@ -94,7 +216,17 @@ And for the slave nodes:
 [source, yaml]
 .slave playbook
 ----
-include::{sources}/kubernetes/ansible/playbook-slave.yml[indent=0]
+- hosts: all
+  become: true
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+
+  roles:
+    - base
+    - kubernetes
+    - join
+    - nfs_common
+    - nfs_client
 ----
 
 - Base libraries
@@ -125,3 +257,7 @@ And make sure both nodes are up and ready:
 ----
 kubectl get nodes
 ----
+
+== Resources
+
+- https://github.com/mariogarcia/vagrant_images/tree/master/kubernetes[Vagrant & Ansible source files]
