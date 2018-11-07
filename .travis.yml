@@ -7,9 +7,6 @@ cache:
   directories:
   - "$HOME/.gradle/caches/"
   - "$HOME/.gradle/wrapper/"
-env:
-  global:
-    secure: Uzb94KNL81Jk8BaJCFn4ovrZIccE0D5j02yT1J0UNcQrli3ZAQD9I52WQeEeUsEjczULuSCvNNONiChgRK2qBUXUHTKPec9FGZwbn80SsjST7KmY9GJBXe3HcefRef4wg47F/8Gg43AUyXUabBFY+ftTzgm4byHmHc1GRim6Sq/byJXGdCMmmn7irl9VE95vPkofX7ML2hj66Of+UnOy7wjl3CZFc/+Dhu278p6teugey5kDNgoCTefnsGXP9Y/ipTlRnFn5gmlEUVc/b88rv9ERk9/A2wXnhe+XRe0MB4CeaThIZ7WnlenXHosPM446lydblI83v+vJGq7i7umv6Kg/BMPOPtWV91u3YVfSLLkjlC2M8lSFV/mu8XbGa343EuV6RoVlGlKfjyWP8NTMeRrlaN3YMAGMh/OBrj3lS2rcsbrzvVtV0KysobBtOSMbeJARHpk6VtxZh1nHSaRii8+346BB1s/X9Xdl1sICXNoXwMeojhPAv+vUFrgTGNw/3nBPbVQzkBIHqhSKaKDz7x84W0GDbunZiGxsUPH0DgYwrjGSJRv348BTxmeyyOCbcy2ZPDtiU2ir33yCfl++pCiAOSl0+zbn6y25KY8LBQKS9/xcuDxt4kmxgD/NK7mQPqC/eOQ+E+Vq5f9qJU+zSh57hJtCz6j7xA1gvayns0c=
 script: "./gradlew clean :blog:bake :blog:publishGhPages"
 branches:
   only:
