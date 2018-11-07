@@ -1,0 +1,1 @@
+includeGroovy 'index.tpl'
