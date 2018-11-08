@@ -3,3 +3,24 @@
 table td {
     border: 0;
 }
+
+.tags {
+    display: flex;
+    flex-direction: row;
+    list-style: none;
+    margin: 0;
+    margin-top: 1rem;
+    padding: 0;
+}
+
+.tags li {
+    font-weight: bold;
+    margin-right: .2rem;
+    padding: .2rem .5rem;
+    background: #000;
+    border-radius: .5rem;
+}
+
+.tags a {
+    color: #ebd247;
+}
