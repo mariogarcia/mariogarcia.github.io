@@ -33,7 +33,6 @@ jbake {
         "outputDir=build/jbake",
         "imagesdir=/blog/img",
         "imagesoutdir=${projectDir}/build/jbake/img",
-        "source-highlighter=highlight.js",
         "icons=font"
     ]
 }
