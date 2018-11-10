@@ -1,0 +1,138 @@
+= Writing JS posts with JBake
+@marioggar
+2018-11-10
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: js, jbake
+:scripts: https://cdnjs.cloudflare.com/ajax/libs/echarts/4.1.0/echarts.js|https://cdnjs.cloudflare.com/ajax/libs/echarts/4.1.0/echarts-en.min.js|https://cdnjs.cloudflare.com/ajax/libs/echarts/4.1.0/echarts.common.min.js
+:sources: ../../../../../../../blog/src/jbake/templates/
+:idprefix:
+
+== Intro
+
+During this year I've been working as a front-end developer, and now
+that I've revamped the blog I was wondering how to include blog
+entries with embedded html + js.
+
+=== Change Jbake templates
+
+In order to load extra custom js scripts in the document header of the
+blog entry, I've changed the template responsible for rendering the
+`head` html tag.
+
+[source, groovy]
+.header.tpl
+----
+include::{sources}/header.tpl[indent=0]
+----
+
+<1> Taking `scripts` variable uris (in case there's any)
+<2> Default resources
+<3> Loading specific js resources for a given post
+
+Basically if the entry has a `scripts` variable with a list of scripts
+uris, the html document will render them within the `head` tag.
+
+=== Add extra JS uris to the blog entry
+
+Then it's up to us to use the `scripts` tag adding as many script uris
+as we need.
+
+[source, text]
+.Post entry header
+----
+= Title of the new entry
+@bla
+2018-11-09
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: js, jbake
+:scripts: https://cdnjs.cloudflare.com/ajax/libs/echarts/4.1.0/echarts.js|https://cdnjs.cloudflare.com/ajax/libs/echarts/4.1.0/echarts-en.min.js
+:idprefix:
+
+== Intro
+...
+----
+
+You can add as many script entries just separated by the `|` character.
+
+=== Add embedded html with Asciidoctor
+
+To include raw html in asciidoctor you have to use a special block
+delimited by *++++&#43&#43++++* rows.
+
+[source, html]
+.Embedded html
+----
+++++
+<div id="main" style="width: 600px;height:400px;"></div>
+<script type="text/javascript">
+    window.onload = () => {
+        // based on prepared DOM, initialize echarts instance
+        var myChart = echarts.init(document.getElementById('main'));
+
+        // specify chart configuration item and data
+        var option = {
+            tooltip: {},
+            legend: {
+                data:['Sales']
+            },
+            xAxis: {
+                data: ["shirt","cardign","chiffon shirt","pants","heels","socks"]
+            },
+            yAxis: {},
+            series: [{
+                name: 'Sales',
+                type: 'bar',
+                data: [5, 20, 36, 10, 10, 20]
+            }]
+        };
+
+        // use configuration item and data specified to show chart
+        myChart.setOption(option);
+    }
+</script>
+++++
+----
+
+=== Result
+
+As an example I'm showing a basic example of
+Echarts. https://ecomfe.github.io/echarts-doc/public/en/index.html[Echarts]
+is a charting js library from the chinese search engine Baidu.
+
+++++
+<div id="main" style="width: 600px;height:400px;"></div>
+<script type="text/javascript">
+    window.onload = () => {
+        // based on prepared DOM, initialize echarts instance
+        var myChart = echarts.init(document.getElementById('main'));
+
+        // specify chart configuration item and data
+        var option = {
+            tooltip: {},
+            legend: {
+                data:['Sales']
+            },
+            xAxis: {
+                data: ["shirt","cardign","chiffon shirt","pants","heels","socks"]
+            },
+            yAxis: {},
+            series: [{
+                name: 'Sales',
+                type: 'bar',
+                data: [5, 20, 36, 10, 10, 20]
+            }]
+        };
+
+        // use configuration item and data specified to show chart
+        myChart.setOption(option);
+    }
+</script>
+++++
+
+=== References
+
+- https://asciidoctor.org/docs/asciidoc-syntax-quick-reference/#escaping-text[Asciidoctor reference about escaping html]
+- http://mrhaki.blogspot.com/2014/06/awesome-asciidoc-include-raw-html.html[Mr Haki entry about escaping html with Asciidoctor]
+- https://ecomfe.github.io/echarts-doc/public/en/index.html[Echarts site]
