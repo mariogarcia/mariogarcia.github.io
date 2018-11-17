@@ -18,17 +18,16 @@ entries with embedded html + js.
 
 In order to load extra custom js scripts in the document header of the
 blog entry, I've changed the template responsible for rendering the
-`head` html tag.
+footer part.
 
 [source, groovy]
-.header.tpl
+.footer.tpl
 ----
-include::{sources}/header.tpl[indent=0]
+include::{sources}/footer.tpl[indent=0]
 ----
 
 <1> Taking `scripts` variable uris (in case there's any)
-<2> Default resources
-<3> Loading specific js resources for a given post
+<2> Creating `script` tags
 
 Basically if the entry has a `scripts` variable with a list of scripts
 uris, the html document will render them within the `head` tag.

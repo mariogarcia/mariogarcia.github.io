@@ -27,6 +27,7 @@ html {
                     }
                 }
             }
+            includeGroovy 'footer.tpl'
         }
     }
 }
