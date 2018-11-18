@@ -167,6 +167,6 @@ Now everything works as expected
 
 === Resources
 
-- https://mariogarcia.github.io/blog/blog/2018/11/elisp-ert.html[Source Code]
+- https://github.com/mariogarcia/blog/tree/master/sources/2018/11/elisp-ert[Source Code]
 - https://www.gnu.org/software/emacs/manual/html_node/ert/index.html[ERT main page]
 - https://www.emacswiki.org/emacs/UnitTesting[EMACS unit testing tools]
