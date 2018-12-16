@@ -1,4 +1,4 @@
-= Logic: Predicate logic
+= Logic: Propositional logic
 @marioggar
 2018-12-16
 :jbake-type: post
@@ -7,40 +7,44 @@
 :sources: ../../../../../../../sources/2018/12/logic
 :idprefix:
 
+"Logic will get you from A to B. Imagination will take you everywhere"
+-- Albert Einstein
+
 === Intro
 
-The use of logic could help us to establish the validity of a given
+The use of logic helps us to establish the validity of a given
 statement. It's important to notice that a logical statement doesn't
 have to make any sense, it only has to be structured following certain
-formal steps.
+rules or formal steps.
 
-There're also two types of logic systems, *propositional logic* and
-*predicate logic*. This article is based in the latter. In a predicate
-logic system formal steps make use of *logical operators* and *logical
-variables*.
+There're two main types of logic systems, *propositional logic*, and
+*predicate logic*. This article talks about the former. In a
+propositional system, formal steps make use of *propositions*
+connected with *logical operators*.
 
-- *Logical variables* are things we want to assess
-- *Logical operators* are the way the former variables are related to each
-  other.
+- *propositions*: things we want to assess. They can only be true or
+   false.
+- *Logical operators*: the way the former variables are related to
+  each other.
 
 === Initial statement
 
 [.text-center]
-`IF THE NEXT PROJECT USES JAVA, I'M IN`
+`IF THE NEXT PROJECT USES JAVA, THEN I'M IN`
  +
  +
 
-The first thing we should do is to map the expression to *logical
-variables*. Those are the parts of the expression we want to
-evaluate. In this case we have:
+The first thing we should do is to map the expression to
+*propositions* or *logical variables*. Those are the parts of the
+expression we want to evaluate. In this case we have:
 
 * `A`: IF THE NEXT PROJECT USES JAVA
-* `B`: I'M IN
+* `B`: THEN I'M IN
 
 You can also say that the conditional statement has a *hypothesis*
 (IF...) and a clause (I'm in). We can also notice the dependency
-between both variables. *A* implies that *B* can happen. This can be
-expressed as:
+between both propositions. *A* implies that *B* can happen. This can
+be expressed as:
 
 [mathx, width=150, height=120]
 ----
@@ -53,7 +57,7 @@ We can also express just the opposite of a given *logical variable*,
 with the negation operator:
 
 * `!A`: IF THE NEXT PROJECT DOESN'T USE JAVA
-* `!B`: I'M NOT IN
+* `!B`: THEN I'M NOT IN
 
 NOTE: It's important to notice that here I'm using the `!` operator as
 a conditional variable operator, that's because most of the time we
@@ -66,7 +70,7 @@ What if I would like to represent the same statement in a negative
 way:
 
 [.text-center]
-`IF THE NEXT PROJECT DOESN'T USE JAVA, I'M OUT`
+`IF THE NEXT PROJECT DOESN'T USE JAVA, THEN I'M OUT`
  +
  +
 
@@ -91,16 +95,33 @@ A \implies B = \neg A \implies \neg B
 === Biconditional
 
 Lets remind our initial propositional sentence: *IF THE NEXT PROJECT
-USES JAVA, I'M IN*. That doesn't mean necessarily that if the next
-project uses, lets say Python I wouldn't join as well right ? So if I
-want to be very explicit about the fact that I'm only willing to do
-the next project if Java is on the table, then I have to express the
-statement using the biconditional operator.
+USES JAVA, THEN I'M IN*. What if I also say:
+
+[.text-center]
+`IF THE NEXT PROJECT USE PYTHON, THEN I'M I'M`
+ +
+ +
+
+Am I saying something contradictory to the previous sentence ? Not at
+all. I could be interested in a project using Python or Java. So if I
+wanted to be very explicit about the fact that I'm willing to do the
+next project *only if* Java is on the table, then I have to express
+the statement using the biconditional operator.
 
 [mathx, width=150, height=120]
 ----
 A \iff B
 ----
+
+This expression now reflects that:
+
+[.text-center]
+`IF, AND ONLY IF THE NEXT PROJECT USE JAVA, THEN I'M IN`
+ +
+ +
+
+So now you've narrowed the posibilities of interpretation of your
+initial proposition.
 
 === References
 
