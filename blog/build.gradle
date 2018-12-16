@@ -1,6 +1,7 @@
 buildscript {
   repositories {
       maven { url "http://dl.bintray.com/calmdev/gradle-plugins" }
+      maven { url "https://dl.bintray.com/grooviter/maven" }
       mavenLocal()
       mavenCentral()
       jcenter()
@@ -14,6 +15,7 @@ buildscript {
       classpath 'org.pegdown:pegdown:1.4.2'
       classpath 'org.asciidoctor:asciidoctorj:1.5.1'
       classpath 'org.asciidoctor:asciidoctorj-diagram:1.5.0'
+      classpath 'com.github.grooviter:asciidoctor-mathx-extension:0.1.2'
 
       classpath 'org.ajoberstar:gradle-git:1.4.2'
   }
