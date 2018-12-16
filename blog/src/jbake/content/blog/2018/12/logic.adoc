@@ -1,6 +1,6 @@
 = Logic
 @marioggar
-2018-11-10
+2018-12-16
 :jbake-type: post
 :jbake-status: published
 :jbake-tags: cs, maths, algebra
@@ -9,26 +9,33 @@
 
 === Intro
 
-The use of logic help us to establish the validity of a given
-statement. In order to achieve that, we may know to make use of the
-`logical operators` and map correctly the things we want to asses to
-`logical variables`.
+The use of logic could help us to establish the validity of a given
+statement. It's important to notice that a logical statement doesn't
+have to make any sense, it only has to be structured following certain
+formal steps.
+
+These formal steps make use of *logical operators* and *logical
+variables*.
+
+- *Logical variables* are things we want to assess
+- *Logical operators* are the way the former variables are related to each
+  other.
 
 === First example
 
 [.text-center]
-IF THE NEXT PROJECT USES JAVA, I'M IN
+`IF THE NEXT PROJECT USES JAVA, I'M IN`
  +
  +
 
-The first thing we should do is to map the expression to `logical
-variables`. Those are the parts of the expression we want to
+The first thing we should do is to map the expression to *logical
+variables*. Those are the parts of the expression we want to
 evaluate. In this case we have:
 
-* A: IF THE NEXT PROJECT USES JAVA
-* B: I'M IN
+* `A`: IF THE NEXT PROJECT USES JAVA
+* `B`: I'M IN
 
-You can also say that the conditional statement has a `hypothesis`
+You can also say that the conditional statement has a *hypothesis*
 (IF...) and a clause (I'm in). We can also notice the dependency
 between both variables. *A* implies that *B* can happen. This can be
 expressed as:
@@ -40,21 +47,36 @@ A \implies B
 
 === Negation
 
-We can also express just the opposite of a given `logical variable`,
+We can also express just the opposite of a given *logical variable*,
 with the negation operator:
 
-* !A: IF THE NEXT PROJECT DOESN'T USE JAVA
-* !B: I'M NOT IN
+* `!A`: IF THE NEXT PROJECT DOESN'T USE JAVA
+* `!B`: I'M NOT IN
 
 === Contrapositive
 
-If I'd like to represent the situation where I the next project didn't
-use Java. That automatically implies that I didn't join the project.
+What if I would like to represent the same statement in a negative
+way:
 
-[mathx, width=300, height=200]
+[.text-center]
+`IF THE NEXT PROJECT DOESN'T USE JAVA, I'M OUT`
+ +
+ +
+
+This would imply that I didn't join the project, because the next
+project is not using Java.
+
+[mathx, width=150, height=120]
+----
+\neg A \implies \neg B
+----
+
+This is the *contrapositive* version of our initial statement. This
+means that both try to express the same thing but from different
+perspectives, positive and negative. Every conditional expression has
+its contrapositive equivalent. In mathematical syntax:
+
+[mathx, width=300, height=120]
 ----
 A \implies B = \neg A \implies \neg B
 ----
-
-As bottom line bear in mind that every conditional expression has its
-contrapositive equivalent.
