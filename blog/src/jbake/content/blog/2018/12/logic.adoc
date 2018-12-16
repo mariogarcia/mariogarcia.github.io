@@ -18,16 +18,47 @@ have to make any sense, it only has to be structured following certain
 rules or formal steps.
 
 There're two main types of logic systems, *propositional logic*, and
-*predicate logic*. This article talks about the former. In a
-propositional system, formal steps make use of *propositions*
-connected with *logical operators*.
+*predicate logic*. In a propositional system, formal steps make use of
+*propositions* sometimes connected with *logical operators* to make
+new propositions.
 
-- *propositions*: things we want to assess. They can only be true or
-   false.
-- *Logical operators*: the way the former variables are related to
+- *propositions*: things we want to assess. Statements that can only
+   be true or false.
+- *Logical operators*: the way the former variables are connected to
   each other.
 
-=== Initial statement
+=== Simple propositions
+
+As I was saying a *proposition* is a sentence that can only represent
+true or false but can't represent both at the same time. Examples of
+this could be:
+
+- 2 x 2 = 4
+- A Ferrari F450 is faster than a Volkswagen Polo
+- The capital of Spain is Seville
+
+These three statements are propositions. However while the two first
+propositions are true, and the last one is obviously false.
+
+On the other hand there're sentences that can't be considered as
+propositions because *they don't represent a true/false kind of
+statements*. For example:
+
+- Are you happy ?
+- Do the right thing!
+- x + y = 2
+
+=== Complex propositions
+
+We can build up new propositions from pre-existent ones combining them
+with the use of *logical operators*.
+
+=== Conditional statements
+
+Conditional statements are a very common form of complex propositions
+having the form of an hyphotesis followed by a conclusion
+
+NOTE: Think of conditional statements as if/then type statements.
 
 [.text-center]
 `IF THE NEXT PROJECT USES JAVA, THEN I'M IN`
@@ -53,8 +84,8 @@ A \implies B
 
 === Negation
 
-We can also express just the opposite of a given *logical variable*,
-with the negation operator:
+We can also express just the opposite of a given *proposition* with
+the negation operator. Lets negate the propositions at hand:
 
 * `!A`: IF THE NEXT PROJECT DOESN'T USE JAVA
 * `!B`: THEN I'M NOT IN
@@ -63,6 +94,16 @@ NOTE: It's important to notice that here I'm using the `!` operator as
 a conditional variable operator, that's because most of the time we
 programmers use it to negate boolean expressions. However the
 mathematical symbol of boolean negation is `&#x00AC;`.
+
+So how the statement looks like with its propositions negated ?
+
+[mathx, width=150, height=120]
+----
+\neg A \implies \neg B
+----
+
+Which leads me to the next concept, the *contrapositive* of the
+initial statement.
 
 === Contrapositive
 
@@ -82,10 +123,11 @@ project is not using Java.
 \neg A \implies \neg B
 ----
 
-This is the *contrapositive* version of our initial statement. This
-means that both try to express the same thing but from different
-perspectives, positive and negative. Every conditional expression has
-its contrapositive equivalent. In mathematical syntax:
+This is the *contrapositive* version of our initial statement. In
+logic a conditional statement and its contrapositive are logically
+equivalents, meaning that that both try to express the same thing but
+from different perspectives, positive and negative. In mathematical
+syntax:
 
 [mathx, width=300, height=120]
 ----
@@ -128,3 +170,4 @@ initial proposition.
 - http://mfleck.cs.illinois.edu/building-blocks/[Building Blocks for Theoretical of Computer Science] by Margaret M. Fleck
 - https://pragprog.com/book/mcmath/good-math[Good Maths] by Mark C. Chu-Carroll
 - https://code.energy/computer-science-distilled[Computer Science Distilled] by Wladston Ferreira Filno
+- https://en.wikipedia.org/wiki/Contraposition[Wikipedia: Contraposition]
