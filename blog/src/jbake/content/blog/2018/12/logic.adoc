@@ -1,4 +1,4 @@
-= Logic
+= Logic: Predicate logic
 @marioggar
 2018-12-16
 :jbake-type: post
@@ -14,14 +14,16 @@ statement. It's important to notice that a logical statement doesn't
 have to make any sense, it only has to be structured following certain
 formal steps.
 
-These formal steps make use of *logical operators* and *logical
+There're also two types of logic systems, *propositional logic* and
+*predicate logic*. This article is based in the latter. In a predicate
+logic system formal steps make use of *logical operators* and *logical
 variables*.
 
 - *Logical variables* are things we want to assess
 - *Logical operators* are the way the former variables are related to each
   other.
 
-=== First example
+=== Initial statement
 
 [.text-center]
 `IF THE NEXT PROJECT USES JAVA, I'M IN`
@@ -53,6 +55,11 @@ with the negation operator:
 * `!A`: IF THE NEXT PROJECT DOESN'T USE JAVA
 * `!B`: I'M NOT IN
 
+NOTE: It's important to notice that here I'm using the `!` operator as
+a conditional variable operator, that's because most of the time we
+programmers use it to negate boolean expressions. However the
+mathematical symbol of boolean negation is `&#x00AC;`.
+
 === Contrapositive
 
 What if I would like to represent the same statement in a negative
@@ -80,3 +87,23 @@ its contrapositive equivalent. In mathematical syntax:
 ----
 A \implies B = \neg A \implies \neg B
 ----
+
+=== Biconditional
+
+Lets remind our initial propositional sentence: *IF THE NEXT PROJECT
+USES JAVA, I'M IN*. That doesn't mean necessarily that if the next
+project uses, lets say Python I wouldn't join as well right ? So if I
+want to be very explicit about the fact that I'm only willing to do
+the next project if Java is on the table, then I have to express the
+statement using the biconditional operator.
+
+[mathx, width=150, height=120]
+----
+A \iff B
+----
+
+=== References
+
+- http://mfleck.cs.illinois.edu/building-blocks/[Building Blocks for Theoretical of Computer Science] by Margaret M. Fleck
+- https://pragprog.com/book/mcmath/good-math[Good Maths] by Mark C. Chu-Carroll
+- https://code.energy/computer-science-distilled[Computer Science Distilled] by Wladston Ferreira Filno
