@@ -83,6 +83,42 @@ not-blue & not-white & F \\
 \end{tabular}
 ----
 
+WARNING: Here I'm not using the `p` and `q` variables in the truth
+table. However in general I should be using them to keep the verbosity
+to a minimum.
+
+Now what if we would like to express that some two propositions
+together are true, if any of them is true. We can express that with
+the `OR` operator (`&#x2228;`). Imagine you're at a raffle, they're
+giving away a car, and you and your couple have tickets. I guess, it's
+a win whether she/he has a winner ticket or you have a ticket
+winner. The worst case scenario would be that neither of you have a
+winner ticket.
+
+Long story short, if we consider `p` your couple having a winner
+ticket and `q` you having a winner ticket, a proposition will be true
+if any of you have a winner ticket. Mathematically:
+
+[mathx, width=100, height=120]
+----
+p \lor q
+----
+
+But, if you would like to go through all the possibilities then you
+can write down the truth table:
+
+[mathx, width=300, 150]
+----
+\begin{tabular}{cc|c}
+p & q & p \lor q \\
+\hline
+win & win & T \\
+win & lose & T \\
+lose & win & T \\
+lose & lose & F \\
+\end{tabular}
+----
+
 === Conditional statements
 
 Conditional statements are a very common form of complex propositions
