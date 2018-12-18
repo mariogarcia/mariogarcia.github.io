@@ -3,7 +3,7 @@
 2018-12-16
 :jbake-type: post
 :jbake-status: published
-:jbake-tags: cs, maths, algebra
+:jbake-tags: cs, logic
 :sources: ../../../../../../../sources/2018/12/logic
 :idprefix:
 
@@ -26,6 +26,16 @@ new propositions.
    be true or false.
 - *Logical operators*: the way the former variables are connected to
   each other.
+
+This entry will cover the following topics:
+
+- <<Simple propositions>>
+- <<Complex propositions>>
+- <<Conditional propositions>>
+- <<Negation>>
+- <<Contrapositive>>
+- <<Biconditional>>
+- <<References>>
 
 === Simple propositions
 
@@ -119,7 +129,7 @@ lose & lose & F \\
 \end{tabular}
 ----
 
-=== Conditional statements
+=== Conditional propositions
 
 Conditional statements are a very common form of complex propositions
 having the form of an hyphotesis followed by a conclusion
