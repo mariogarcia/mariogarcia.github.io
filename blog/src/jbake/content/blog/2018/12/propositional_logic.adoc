@@ -1,4 +1,4 @@
-= Logic: Propositional logic
+= Propositional logic
 @marioggar
 2018-12-16
 :jbake-type: post
