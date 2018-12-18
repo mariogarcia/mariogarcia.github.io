@@ -63,8 +63,12 @@ statements*. For example:
 We can build up new propositions from pre-existent ones combining them
 with the use of *logical operators*. When dealing with complex
 sequences of statements, instead of repeating all of them all over
-again, we use variables. For instance the proposition "*The sky is blue
-and the snow is white*" has two parts:
+again, we use variables.
+
+==== AND
+
+For instance the proposition "*The sky is blue and the snow is white*"
+has two parts:
 
 * `p`: The sky is blue
 * `q`: The snow is white
@@ -97,6 +101,8 @@ WARNING: Here I'm not using the `p` and `q` variables in the truth
 table. However in general I should be using them to keep the verbosity
 to a minimum.
 
+==== OR
+
 Now what if we would like to express that some two propositions
 together are true, if any of them is true. We can express that with
 the `OR` operator (`&#x2228;`). Imagine you're at a raffle, they're
@@ -128,6 +134,13 @@ lose & win & T \\
 lose & lose & F \\
 \end{tabular}
 ----
+
+==== XOR
+
+Sometimes there could be a situation when we may want to assess that
+two propositions are incompatible. So the result of that proposition
+should be true every time one of the propositions is true and the
+other is false.
 
 === Conditional propositions
 
