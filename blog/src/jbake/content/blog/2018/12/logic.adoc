@@ -62,22 +62,14 @@ and the snow is white*" has two parts:
 And both parts are combined using the `AND` operator (`&#x2227;`). Mathematically can be
 expressed as:
 
-[mathx, width=150, height=120]
+[mathx, width=100, height=120]
 ----
 p \land q
 ----
 
 The use of the `&#x2227;` means that the proposition is true when both *p*
-and *q* are true.
-
-[source, groovy]
-.Programming AND
-----
-String sky = "blue"
-String snow = "white"
-
-assert sky == "blue" && snow == "white" // TRUE
-----
+and *q* are true. Another way to represent the possible values for this
+propositions is using a *truth table*:
 
 [mathx, width=300, 150]
 ----
