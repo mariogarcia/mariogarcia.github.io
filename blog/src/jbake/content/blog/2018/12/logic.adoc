@@ -51,7 +51,45 @@ statements*. For example:
 === Complex propositions
 
 We can build up new propositions from pre-existent ones combining them
-with the use of *logical operators*.
+with the use of *logical operators*. When dealing with complex
+sequences of statements, instead of repeating all of them all over
+again, we use variables. For instance the proposition "*The sky is blue
+and the snow is white*" has two parts:
+
+* `p`: The sky is blue
+* `q`: The snow is white
+
+And both parts are combined using the `AND` operator (`&#x2227;`). Mathematically can be
+expressed as:
+
+[mathx, width=150, height=120]
+----
+p \land q
+----
+
+The use of the `&#x2227;` means that the proposition is true when both *p*
+and *q* are true.
+
+[source, groovy]
+.Programming AND
+----
+String sky = "blue"
+String snow = "white"
+
+assert sky == "blue" && snow == "white" // TRUE
+----
+
+[mathx, width=300, 150]
+----
+\begin{tabular}{cc|c}
+sky & snow & sky \land snow \\
+\hline
+blue & white & T \\
+blue & not-white & F \\
+not-blue & white & F \\
+not-blue & not-white & F \\
+\end{tabular}
+----
 
 === Conditional statements
 
