@@ -81,7 +81,7 @@ The use of the `&#x2227;` means that the proposition is true when both *p*
 and *q* are true. Another way to represent the possible values for this
 propositions is using a *truth table*:
 
-[mathx, width=350, 200]
+[mathx, width=350, 250]
 ----
 \begin{tabular}{cc|c}
 sky & snow & sky \land snow \\
@@ -117,7 +117,7 @@ p \lor q
 But, if you would like to go through all the possibilities then you
 can write down the truth table:
 
-[mathx, width=250, 100]
+[mathx, width=250, height=250]
 ----
 \begin{tabular}{cc|c}
 p & q & p \lor q \\
