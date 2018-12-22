@@ -1,0 +1,63 @@
+= Propositional logic: exercises
+@marioggar
+2018-12-21
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: cs, logic
+:sources: ../../../../../../../sources/2018/12/logic_exercises
+:idprefix:
+
+=== Exercises
+
+==== Exercise 1
+
+Let's consider a *propositional language* where:
+
+- `p`: Is Monday
+- `q`: John goes running
+- `r`: Elsa goes running
+
+Formalize the following sentences:
+
+"If it's Monday, John and Elsa go running"
+-- A
+
+"If it's Monday John goes running"
+-- B
+
+"If it's other day than Monday, Elsa goes running, but John doesn't"
+-- C
+
+*Solutions*:
+
+[mathx, width=200, height=120]
+.A
+----
+p \implies q \land r
+----
+
+[mathx, width=150, height=120]
+.B
+----
+p \implies q
+----
+
+[mathx, width=200, height=120]
+.C
+----
+\neg p \implies r \land \neg q
+----
+
+*Table of truth*
+
+[mathx, width=450, height=450]
+----
+\begin{tabular}{ccc|c|c}
+p & q & r & p \implies q \land r & \neg p \implies \neg q \land r \\
+\hline
+T & T & T & T & F \\
+T & F & T & F & F \\
+F & F & T & F & T \\
+F & F & F & F & F \\
+\end{tabular}
+----
