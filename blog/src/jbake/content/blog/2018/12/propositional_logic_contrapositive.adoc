@@ -1,0 +1,33 @@
+= Propositional logic: Contrapositive note
+@marioggar
+2018-12-23
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: cs, logic
+:sources: ../../../../../../../sources/2018/12/logic
+:idprefix:
+
+Just a quick note about the `contrapositive` is that it's very useful
+to prove some statement. For example:
+
+"All drivers in Madrid, drive a bike"
+-- original statement
+
+[mathx, width=100, height=120]
+----
+A \implies B
+----
+
+Now if we can prove that the *contrapositive* is true, then we can
+prove that the original statement was wrong.
+
+"All non-bike drivers, live outside Madrid"
+-- contrapositive
+
+[mathx, width=100, height=120]
+----
+\neg B \implies \neg A
+----
+
+Only proving that at leat one non-bike driver lives in Madrid will
+prove the initial statement to be wrong.
