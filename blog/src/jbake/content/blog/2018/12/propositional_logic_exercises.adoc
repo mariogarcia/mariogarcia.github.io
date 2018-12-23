@@ -57,13 +57,13 @@ p \implies q
 
 [mathx, width=450, height=450]
 ----
-\begin{tabular}{ccc|c|c}
-p & q & r & p \implies q \land r & \neg p \implies \neg q \land r \\
+\begin{tabular}{cc|c|c}
+q & r & p \implies q \land r & \neg p \implies \neg q \land r \\
 \hline
-T & T & T & T & F \\
-T & F & T & F & F \\
-F & F & T & F & T \\
-F & F & F & F & F \\
+T & T & T & F \\
+F & T & F & T \\
+T & F & F & F \\
+F & F & F & F \\
 \end{tabular}
 ----
 
@@ -81,12 +81,9 @@ Formalize the following sentences:
 tickets"
 -- A
 
-"If it's not Christmas, and John feels lucky, then he buys lottery"
--- B
-
 "If it's not Christmas, and John doesn't feel lucky, he doesn't buy
 lottery"
--- C
+-- B
 
 *Solutions*:
 
@@ -96,14 +93,22 @@ lottery"
 p \implies q \lor r
 ----
 
-[mathx, width=150, height=120]
+[mathx, width=200, height=120]
 .B
 ----
-p \implies \neg q \land r
+\neg p \implies \neg q \land \neg r
 ----
 
-[mathx, width=200, height=120]
-.C
+*Table of truth*
+
+[mathx, width=450, height=450]
 ----
-\neg p \implies \neg q \land \neg r
+\begin{tabular}{cc|c|c}
+q & r &  p \implies q \lor r &  \neg p \implies \neg q \land \neg r \\
+\hline
+T & T & T & F \\
+F & T & T & F \\
+T & F & T & F \\
+F & F & F & T \\
+\end{tabular}
 ----
