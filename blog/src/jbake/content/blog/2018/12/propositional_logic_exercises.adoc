@@ -1,6 +1,6 @@
 = Propositional logic: exercises
 @marioggar
-2018-12-21
+2018-12-22
 :jbake-type: post
 :jbake-status: published
 :jbake-tags: cs, logic
@@ -8,6 +8,11 @@
 :idprefix:
 
 === Exercises
+
+Some exercises to train propositional logic.
+
+NOTE: If anyone sees an error please raise an issue in the blog
+repository, thanks :).
 
 ==== Exercise 1
 
@@ -60,4 +65,45 @@ T & F & T & F & F \\
 F & F & T & F & T \\
 F & F & F & F & F \\
 \end{tabular}
+----
+
+==== Exercise 2
+
+Let's consider a *propositional language* where:
+
+- `p`: John buys lottery tickets
+- `q`: Is Christmas time
+- `r`: John feels lucky
+
+Formalize the following sentences:
+
+"If is Christmas time, or John feels lucky, then John buys lottery
+tickets"
+-- A
+
+"If it's not Christmas, and John feels lucky, then he buys lottery"
+-- B
+
+"If it's not Christmas, and John doesn't feel lucky, he doesn't buy
+lottery"
+-- C
+
+*Solutions*:
+
+[mathx, width=200, height=120]
+.A
+----
+p \implies q \lor r
+----
+
+[mathx, width=150, height=120]
+.B
+----
+p \implies \neg q \land r
+----
+
+[mathx, width=200, height=120]
+.C
+----
+\neg p \implies \neg q \land \neg r
 ----
