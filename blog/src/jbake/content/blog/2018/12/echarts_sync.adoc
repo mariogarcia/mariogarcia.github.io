@@ -1,0 +1,168 @@
+= echarts: Linking charts
+@marioggar
+2018-12-27
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: js, charts, echarts
+:scripts: https://cdnjs.cloudflare.com/ajax/libs/echarts/4.1.0/echarts.js|https://cdnjs.cloudflare.com/ajax/libs/echarts/4.1.0/echarts-en.min.js|https://cdnjs.cloudflare.com/ajax/libs/echarts/4.1.0/echarts.common.min.js
+:sources: ../../../../../../../blog/src/jbake/templates/
+:idprefix:
+
+=== Motivation
+
+I need to link two different charts at work. The motivation is that
+one chart is showing the data and the other one just quickly shows
+where you can find a peak. The chart on the top is going to be of type
+'line` and the chart at the bottom is going to be of type 'bar'.
+
+=== Requirements
+
+Both charts have to be synchronized to each other in order to show
+peaks aligned with data above and also to keep it proportional when
+using the zoom feature in the upper chart.
+
+NOTE: For the chart showing the hot areas I could have used oneof type
+`line`, and then showing the area created by those lines. The problem
+is that at the moment you can't register a click event on the area,
+and I needed to allow the user to click over the area to show more
+information.
+
+Summary:
+
+- To see a *guiding line* to see where the cursor is in both charts
+- To be able to register a click event on the chart below
+- Keep line *chart points aligned with the bars below*
+- *Keep proportionality* in the bar chart *when zooming* in the line chart
+
+=== Result
+
+++++
+<div id="main" style="width: 80%;height:400px;"></div>
+<div id="secondary" style="width: 80%;height:200px;"></div>
+<div id="info" style="width: 20%; height: 50px; border: 1px solid #ccc; padding: 10px;text-align: center;"></div>
+<script type="text/javascript">
+    window.onload = () => {
+        var firstChart = echarts.init(document.getElementById('main'));
+        var secondChart = echarts.init(document.getElementById('secondary'));
+
+        var firstOptions = {
+            tooltip: {
+              formatter: (params, ticket, callback) => {
+                const values = params[0].data
+
+                return `${values[0]} tickets sold at ${values[1]}`
+              },
+              trigger: 'axis',
+            },
+            toolbox: {
+              feature: {
+                dataZoom: {
+                    yAxisIndex: 'none',
+                    title: {
+                      zoom: 'zoom',
+                      back: 'back'
+                    }
+                }
+              }
+            },
+            xAxis: {
+               type: 'value',
+               axisPointer: {
+                 type: 'line'
+               }
+            },
+            yAxis: {
+              type: 'value'
+            },
+            series: [{
+                type: 'line',
+                data: [
+                      [5, 100],
+                      [7, 100],
+                      [10, 100],
+                      [14, 5],
+                      [16, 30],
+                      [18, 56],
+                      [26, 20],
+                      [30, 90],
+                      [40, 29],
+                      [50, 23]
+               ]
+            }],
+            grid: {
+              left: '0'
+            }
+        };
+
+        var secondOptions = {
+            tooltip: {
+              formatter: 'Click to see information <br/> on the <b>box below</b>',
+              trigger: 'axis'
+            },
+            toolbox: {
+              show: false,
+              feature: {
+                dataZoom: {}
+              }
+            },
+            xAxis: {
+               type: 'value',
+               axisTick: {
+                 show: false
+               },
+               axisLabel: {
+                 show: false
+               },
+               axisPointer: {
+                 type: 'line'
+               }
+            },
+            yAxis: {
+              show: false
+            },
+            series: [{
+                type: 'bar',
+                emphasis: {
+                  label: {
+                    show: false
+                  },
+                  itemStyle: {
+                    color: '#cd3138'
+                  }
+                },
+                itemStyle: {
+                  color: '#cd3138'
+                },
+                data: [
+                      [5, 100],
+                      [7, 100],
+                      [10, 100],
+                      [14, null],
+                      [16, null],
+                      [18, 100],
+                      [26, null],
+                      [30, 100],
+                      [40, null],
+                      [50, null]
+                ]
+            }],
+            grid: {
+              top: '0',
+              left: '0'
+            }
+        };
+
+        firstChart.setOption(firstOptions);
+        secondChart.setOption(secondOptions);
+
+        echarts.connect([firstChart, secondChart])
+        secondChart.on('click', (params) => {
+          document.querySelector('#info').textContent = `x: ${params.data[0]}`
+        })
+    }
+</script>
+++++
+
+=== References
+
+- https://ecomfe.github.io/echarts-doc/public/en/index.html[Echarts site]
