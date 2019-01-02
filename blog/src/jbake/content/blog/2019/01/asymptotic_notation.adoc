@@ -1,0 +1,52 @@
+= CS: Asymptotic notation
+@marioggar
+2019-01-02
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: cs, asymptotic-notation
+:sources: ../../../../../../../blog/src/jbake/templates/
+:idprefix:
+
+=== Omicron or Big-O (&#x1D6B6;)
+
+The Big-O sets the *upper limit of a given function f(n)*. The set of
+functions &#x1D6B6;(g(n)) is all f(n) functions defined by:
+
+[mathx, width=100, height=120]
+----
+0 \leq f(n) \leq c \times g(n), \forall{n} \geq n_0
+----
+
+Which basically means that, given `n~0~`, c * g(n) it's always greater
+equals than f(n). It's supposed to be it's upper limit. To demostrate
+that a given function is in the set of functions of `&#x1D6B6;(g(n))`:
+
+[mathx, width=100, height=120]
+----
+f(n) \in \omicron(g(n))
+----
+
+It will be neccessary to find any pair of values for `c > 0` and `n~0~
+> 0` in order to prove that:
+
+[mathx, width=100, height=120]
+----
+f(n) \leq cn, \forall{n} \geq n_0
+----
+
+"Demostrate that *6n + 2 &#x2208; &#x1D6B6;(n)*"
+-- example
+
+- Step *1*: To find the right `c` constant
+- Step *2*: To find `n > 0` so that `6n + 2 &#x2264; cn`
+- It's enough to find two possible values. For instance, a possible
+*solution* could be: `c = 6` it's valid for all `n &#x2265; 2`,
+therefore we can use `n~0~ = 2`
+
+=== Omega (&#x03A9;)
+
+TODO
+
+=== Theta (&#x03F4;)
+
+TODO
