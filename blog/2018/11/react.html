@@ -1,0 +1,265 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>Writing JS posts with JBake : React JS</h1></header><yieldScaped><div class="sect1">
+<h2 id="intro">Intro</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this second entry about adding JS programming entries to JBake
+posts I&#8217;ve included a typical React TODO item example</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+The JS example I&#8217;m using here is just a quick draft just to
+show how to include JS and CSS code in a post entry. Don&#8217;t take it too
+seriosly.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="add_required_resources">Add required resources</h3>
+<div class="paragraph">
+<p>To be able to work with react, and load the example script, I need to add the <code>scripts</code> attribute in the post header:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-adoc" data-lang="adoc">:scripts: https://unpkg.com/react@16/umd/react.development.js|https://unpkg.com/react-dom@16/umd/react-dom.development.js|js/2018/11/react.js</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Basically, I&#8217;ve included the <code>react</code>, <code>react-dom</code> libraries at the
+header of the document, and then the example dependency inside the
+blog project&#8217;s assets <code>js/2018/11/react.js</code> . If I would like to add a
+custom css, you can add as well a <code>css</code> entry in the post header:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-adoc" data-lang="adoc">:css: css/2018/11/react.css</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="no_jsx_when_using_plain_js">No JSX when using plain JS</h3>
+<div class="paragraph">
+<p>Because JSX can&#8217;t be included through a `&lt;script/&gt;' import, I had to
+create a helper function to create new elements.</p>
+</div>
+<div class="listingblock">
+<div class="title">helper</div>
+<div class="content">
+<pre class="highlight"><code class="language-js" data-lang="js">const e = React.createElement;</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="todopanel">TodoPanel</h3>
+<div class="listingblock">
+<div class="title">TodoPanel</div>
+<div class="content">
+<pre class="highlight"><code class="language-js" data-lang="js">class TodoPanel extends React.Component {
+    constructor(props) { <i class="conum" data-value="1"></i><b>(1)</b>
+        super(props);
+        this.state = {
+            task: '',
+            tasks: []
+        };
+    }
+
+    handleChange (e) { <i class="conum" data-value="2"></i><b>(2)</b>
+        this.setState({task: e.target.value})
+    }
+
+    addItem () { <i class="conum" data-value="3"></i><b>(3)</b>
+        this.setState({
+            tasks: [...this.state.tasks, this.state.task],
+            task: ''
+        })
+    }
+
+    deleteItem (item) { <i class="conum" data-value="4"></i><b>(4)</b>
+        this.setState({tasks: this.state.tasks.filter(x =&gt; x !== item)})
+    }
+
+    render() {  <i class="conum" data-value="5"></i><b>(5)</b>
+        return e('div', {id: 'todo'},
+                 e('input', {type: 'text', onChange: (ev) =&gt; this.handleChange(ev), value: this.state.task}),
+                 e('button', {onClick: () =&gt; this.addItem() }, 'Add'),
+                 e(TodoItems, {tasks: this.state.tasks, delete: (item) =&gt; this.deleteItem(item)})
+        );
+    }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Create default state</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Sets which is the current item to add</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Adds the current item to the tasks list</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Deletes the clicked item from the tasks list</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>renders the tasks panel</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="creating_items">Creating items</h3>
+<div class="paragraph">
+<p>The <code>TodoItems</code> component represents the tasks list. It only renders
+an <code>ul</code> elements containing as many items as tasks found in the task
+list.</p>
+</div>
+<div class="listingblock">
+<div class="title">TodoItems</div>
+<div class="content">
+<pre class="highlight"><code class="language-js" data-lang="js">class TodoItems extends React.Component {
+    createTask (item) {
+        return e(TodoItem, {key: item, delete: this.props.delete, item: item}, null)
+    }
+
+    render () {
+        return e('ul', {key: 'items', className: 'items'}, this.props.tasks.map(x =&gt; this.createTask(x)))
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Every item of the task list is built using the <code>TodoItem</code> component</p>
+</div>
+<div class="listingblock">
+<div class="title">TodoItem</div>
+<div class="content">
+<pre class="highlight"><code class="language-js" data-lang="js">class TodoItem extends React.Component {
+    render () {
+        const { item } = this.props
+        const itemSpan = e('p', {key: `item-p-${item}`}, item)
+        const deleteButton = e('button',
+                               {value: 'delete', key: `item-delete-${item}`, onClick: () =&gt; this.props.delete(item)},
+                               'Delete')
+
+        return e('li', {key: item},
+                 e('span', {className: 'item'}, [itemSpan, deleteButton]))
+    }
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="render_example">Render example</h3>
+<div class="paragraph">
+<p>Finally, in order to render the <code>TodoPanel</code> in this document we need
+to link the component with an available dom element.</p>
+</div>
+<div class="listingblock">
+<div class="title">Render</div>
+<div class="content">
+<pre class="highlight"><code class="language-js" data-lang="js">const domContainer = document.querySelector('#like_button_container');
+ReactDOM.render(e(TodoPanel), domContainer);</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="result">Result</h3>
+<div id="like_button_container"></div>
+<div class="paragraph">
+<p>It seems easy to add simple vanilla JS examples to a post. However
+trying to create more complex examples would require a proper build
+tool such as plain npm scripts or webpack.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="resources">Resources</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://reactjs.org/">React</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script><script src="https://unpkg.com/react@16/umd/react.development.js"></script><script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script><script src="/js/2018/11/react.js"></script>
+        </div>
+    </body>
+</html>

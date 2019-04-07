@@ -1,0 +1,281 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>Frege and QuickCheck: Combine properties</h1></header><yieldScaped><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Sometimes our function should follow more than one property at the
+same time. How can I check more than one property in a given
+specification?</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="combining_properties">Combining properties</h3>
+<div class="paragraph">
+<p>In the following example we&#8217;re pretending to be a small financial
+institution that lends money.</p>
+</div>
+<div class="paragraph">
+<p>So we have a <code>Loan</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Loan</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">data Risk = PENDING | NORMAL | RISKY | REJECTED
+
+derive Eq   Risk
+derive Show Risk
+derive Enum Risk
+
+data Loan = Loan { name :: Maybe String , amount :: Double, risk :: Risk }
+
+derive Show Loan</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This is an example, please don&#8217;t use this data as reference for
+any financial development :P
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>We need to build a function to process an incoming loan. At this point
+we only know which are the properties to reject a loan. It will be
+rejected:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>When it has a negative amount</code></p>
+</li>
+<li>
+<p><code>When it goes outside the company defined boundaries</code> (min: 0, max:
+100000)</p>
+</li>
+<li>
+<p><code>When it has no name</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Lets define these properties:</p>
+</div>
+<div class="listingblock">
+<div class="title">Min property</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">rejectNegative :: Loan -&gt; Bool
+rejectNegative loan = if isNegative
+                      then statusResult == Risk.REJECTED
+                      else true
+  where isNegative   = loan.amount &lt; 0
+        loanResult   = calculateRisk loan
+        statusResult = loanResult.risk</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Max property</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">rejectBeyondMax :: Loan -&gt; Bool
+rejectBeyondMax loan = if isBeyondMax
+                       then statusResult == Risk.REJECTED
+                       else true
+  where isBeyondMax  = loan.amount &gt; 100_000
+        loanResult   = calculateRisk loan
+        statusResult = loanResult.risk</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Name property</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">rejectAnonymous :: Loan -&gt; Bool
+rejectAnonymous loan = if isAnonymous
+                       then statusResult == Risk.REJECTED
+                       else true
+  where isAnonymous  = loan.name == Nothing
+        loanResult   = calculateRisk loan
+        statusResult = loanResult.risk</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Lets see how we&#8217;ve defined our function with these requirements in
+mind:</p>
+</div>
+<div class="listingblock">
+<div class="title">Implementation</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">calculateAmountRisk :: Loan -&gt; Loan <i class="conum" data-value="1"></i><b>(1)</b>
+calculateAmountRisk loan
+  | inRange (1,9999) loan.amount         = loan.{ risk = NORMAL }
+  | inRange (10_000,100_000) loan.amount = loan.{ risk = RISKY }
+  | otherwise                            = loan.{ risk = REJECTED }
+
+calculateAnonymousRisk :: Loan -&gt; Loan <i class="conum" data-value="2"></i><b>(2)</b>
+calculateAnonymousRisk loan = case loan of
+  Loan Nothing _ _ -&gt; loan.{ risk = REJECTED }
+  _                -&gt; loan
+
+calculateRisk :: Loan -&gt; Loan <i class="conum" data-value="3"></i><b>(3)</b>
+calculateRisk loan = (calculateAnonymousRisk . calculateAmountRisk) loan</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Function to calculate risk based on the <code>loan ammount</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Function to calculate risk based on the <code>loan name</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Function <code>combining previous two</code> functions</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Please notice I&#8217;m not mutating the data structure when
+doing <code>loan.{ risk = Risk.REJECTED}</code>. In this case, changing a field
+means copying the data structure and setting the new value in the new
+copy.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Ok, lets see if the function holds for these properties:</p>
+</div>
+<div class="listingblock">
+<div class="title">Testing properties</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">checkName = property rejectAnonymous
+checkMin  = property rejectNegative
+checkMax  = property rejectBeyondMax</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">quickCheck result</div>
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">qc.CombineCheck.checkName: +++ OK, passed 100 tests
+qc.CombineCheck.checkMin: +++ OK, passed 100 tests
+qc.CombineCheck.checkMax: +++ OK, passed 100 tests</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>So far we have tested our properties isolated, but in the real world I
+would make sure that a given loan passes those properties all at
+once. How do I do that ?</p>
+</div>
+<div class="paragraph">
+<p>Well there&#8217;s a function called <code>conjoin</code> which takes care of it:</p>
+</div>
+<div class="listingblock">
+<div class="title">Check several properties at once</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">calculateRiskCheck = conjoin [rejectNegative, rejectBeyondMax, rejectAnonymous]</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Name property check</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">qc.CombineCheck.calculateRiskCheck: +++ OK, passed 100 tests</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now I&#8217;m sure the loan passes if all properties over a loan pass the
+test.</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph">
+<p>You can also use the conjuntion <code>infix</code> function <code>.&amp;&amp;.</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Check several properties at once</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">calculateRiskCheck2 = rejectNegative .&amp;&amp;.rejectBeyondMax .&amp;&amp;. rejectAnonymous</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>

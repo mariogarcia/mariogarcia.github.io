@@ -1,0 +1,127 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>Generate pdf slides from reveal.js html</h1></header><yieldScaped><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>A year ago I started using <a href="http://lab.hakim.se/reveal-js/#/">Reveal JS</a>
+for my presentations. It&#8217;s really cool to use asciidoctor and gradle
+to create my presentations and change them <code>on-the-fly</code>.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="the_problem">The problem</h3>
+<div class="paragraph">
+<p>Well it&#8217;s not really a problem. But once a conference ends organizer
+want you to send him/her your slides. Because <strong>reveal.js</strong> is just
+html + js, it doesn&#8217;t qualify as something to send them. To do so I
+have to convert them first to pdf. And that&#8217;s why I need <code>decktape</code>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="decktape">Decktape</h3>
+<div class="paragraph">
+<p>DeckTape is a high-quality PDF exporter for HTML5 presentation
+frameworks. You can find the project at
+<a href="https://github.com/astefanutti/decktape">Github</a></p>
+</div>
+<div class="paragraph">
+<p><strong>Docker image</strong></p>
+</div>
+<div class="paragraph">
+<p>Nowadays every time I can I use docker containers. Instead of
+following a given installation guide, I can have it all just pulling
+the docker image from docker hub.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">docker pull astefanutti/decktape</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Execute docker image</strong></p>
+</div>
+<div class="paragraph">
+<p>Once you&#8217;ve executed <code>asciidoctor</code> task go to your
+<code>build/asciidoc/revealjs/</code> folder (where you should find the
+<code>index.html</code> file` and execute the following command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">docker run --rm \
+       -v `pwd`:/home/user \
+       astefanutti/decktape /home/user/index.html /home/user/slides.pdf</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>That will create a file <code>slides.pdf</code> in the same folder. Anyway there
+are plenty of other options. For further information check out the
+<a href="https://github.com/astefanutti/decktape">project&#8217;s docker hub page</a></p>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>

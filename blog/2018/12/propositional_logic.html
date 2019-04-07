@@ -1,0 +1,459 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>Propositional logic</h1></header><yieldScaped><div id="preamble">
+<div class="sectionbody">
+<div class="quoteblock">
+<blockquote>
+Logic will get you from A to B. Imagination will take you everywhere
+</blockquote>
+<div class="attribution">
+&#8212; Albert Einstein
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="intro">Intro</h3>
+<div class="paragraph">
+<p>The use of logic helps us to establish the validity of a given
+statement. It&#8217;s important to notice that a logical statement doesn&#8217;t
+have to make any sense, it only has to be structured following certain
+rules or formal steps.</p>
+</div>
+<div class="paragraph">
+<p>There&#8217;re two main types of logic systems, <strong>propositional logic</strong>, and
+<strong>predicate logic</strong>. In a propositional system, formal steps make use of
+<strong>propositions</strong> sometimes connected with <strong>logical operators</strong> to make
+new propositions.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>propositions</strong>: things we want to assess. Statements that can only
+be true or false.</p>
+</li>
+<li>
+<p><strong>Logical operators</strong>: the way the former variables are connected to
+each other.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This entry will cover the following topics:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="#simple_propositions">Simple propositions</a></p>
+</li>
+<li>
+<p><a href="#complex_propositions">Complex propositions</a></p>
+</li>
+<li>
+<p><a href="#conditional_propositions">Conditional propositions</a></p>
+</li>
+<li>
+<p><a href="#negation">Negation</a></p>
+</li>
+<li>
+<p><a href="#contrapositive">Contrapositive</a></p>
+</li>
+<li>
+<p><a href="#biconditional">Biconditional</a></p>
+</li>
+<li>
+<p><a href="#references">References</a></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="simple_propositions">Simple propositions</h3>
+<div class="paragraph">
+<p>As I was saying a <strong>proposition</strong> is a sentence that can only represent
+true or false but can&#8217;t represent both at the same time. Examples of
+this could be:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>2 x 2 = 4</p>
+</li>
+<li>
+<p>A Ferrari F450 is faster than a Volkswagen Polo</p>
+</li>
+<li>
+<p>The capital of Spain is Seville</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>These three statements are propositions. However while the two first
+propositions are true, and the last one is obviously false.</p>
+</div>
+<div class="paragraph">
+<p>On the other hand there&#8217;re sentences that can&#8217;t be considered as
+propositions because <strong>they don&#8217;t represent a true/false kind of
+statements</strong>. For example:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Are you happy ?</p>
+</li>
+<li>
+<p>Do the right thing!</p>
+</li>
+<li>
+<p>x + y = 2</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="complex_propositions">Complex propositions</h3>
+<div class="paragraph">
+<p>We can build up new propositions from pre-existent ones combining them
+with the use of <strong>logical operators</strong>. When dealing with complex
+sequences of statements, instead of repeating all of them all over
+again, we use variables.</p>
+</div>
+<div class="sect3">
+<h4 id="and">AND</h4>
+<div class="paragraph">
+<p>For instance the proposition "<strong>The sky is blue and the snow is white</strong>"
+has two parts:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>p</code>: The sky is blue</p>
+</li>
+<li>
+<p><code>q</code>: The snow is white</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>And both parts are combined using the <code>AND</code> operator (<code>&#x2227;</code>). Mathematically can be
+expressed as:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/img/4aa32bf3a4aa6239a102af7635373072.png" alt="4aa32bf3a4aa6239a102af7635373072.png" width="500" height="50">
+</div>
+</div>
+<div class="paragraph">
+<p>The use of the <code>&#x2227;</code> means that the proposition is true when both <strong>p</strong>
+and <strong>q</strong> are true. Another way to represent the possible values for this
+propositions is using a <strong>truth table</strong>:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/img/22f8f28238ea878dc92c096384f52043.png" alt="22f8f28238ea878dc92c096384f52043.png" width="450" height="450">
+</div>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Here I&#8217;m not using the <code>p</code> and <code>q</code> variables in the truth
+table. However in general I should be using them to keep the verbosity
+to a minimum.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="or">OR</h4>
+<div class="paragraph">
+<p>Now what if we would like to express that some two propositions
+together are true, if any of them is true. We can express that with
+the <code>OR</code> operator (<code>&#x2228;</code>). Imagine you&#8217;re at a raffle, they&#8217;re
+giving away a car, and you and your couple have tickets. I guess, it&#8217;s
+a win whether she/he has a winner ticket or you have a ticket
+winner. The worst case scenario would be that neither of you have a
+winner ticket.</p>
+</div>
+<div class="paragraph">
+<p>Long story short, if we consider <code>p</code> your couple having a winner
+ticket and <code>q</code> you having a winner ticket, a proposition will be true
+if any of you have a winner ticket. Mathematically:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/img/e24a5601777c447da6dcdab4efb64f53.png" alt="e24a5601777c447da6dcdab4efb64f53.png" width="100" height="120">
+</div>
+</div>
+<div class="paragraph">
+<p>But, if you would like to go through all the possibilities then you
+can write down the truth table:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/img/21606cc5359143bb8ba10398d7567961.png" alt="21606cc5359143bb8ba10398d7567961.png" width="250" height="250">
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="xor">XOR</h4>
+<div class="paragraph">
+<p>Sometimes there could be a situation when we may want to assess that
+two propositions are incompatible. So the result of that proposition
+should be true every time one of the propositions is true and the
+other is false.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="conditional_propositions">Conditional propositions</h3>
+<div class="paragraph">
+<p>Conditional statements are a very common form of complex propositions
+having the form of an hyphotesis followed by a conclusion</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Think of conditional statements as if/then type statements.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph text-center">
+<p><code>IF THE NEXT PROJECT USES JAVA, THEN I&#8217;M IN</code>
+<br>
+<br></p>
+</div>
+<div class="paragraph">
+<p>The first thing we should do is to map the expression to
+<strong>propositions</strong> or <strong>logical variables</strong>. Those are the parts of the
+expression we want to evaluate. In this case we have:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>A</code>: IF THE NEXT PROJECT USES JAVA</p>
+</li>
+<li>
+<p><code>B</code>: THEN I&#8217;M IN</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>You can also say that the conditional statement has a <strong>hypothesis</strong>
+(IF&#8230;&#8203;) and a clause (I&#8217;m in). We can also notice the dependency
+between both propositions. <strong>A</strong> implies that <strong>B</strong> can happen. This can
+be expressed as:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/img/50c8bc1a5046d2c61e4af316a3ce3777.png" alt="50c8bc1a5046d2c61e4af316a3ce3777.png" width="150" height="120">
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="negation">Negation</h3>
+<div class="paragraph">
+<p>We can also express just the opposite of a given <strong>proposition</strong> with
+the negation operator. Lets negate the propositions at hand:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>!A</code>: IF THE NEXT PROJECT DOESN&#8217;T USE JAVA</p>
+</li>
+<li>
+<p><code>!B</code>: THEN I&#8217;M NOT IN</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+It&#8217;s important to notice that here I&#8217;m using the <code>!</code> operator as
+a conditional variable operator, that&#8217;s because most of the time we
+programmers use it to negate boolean expressions. However the
+mathematical symbol of boolean negation is <code>&#x00AC;</code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>So how the statement looks like with its propositions negated ?</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/img/7d7d1fdf66bb95d608df4f75c4fb7645.png" alt="7d7d1fdf66bb95d608df4f75c4fb7645.png" width="150" height="120">
+</div>
+</div>
+<div class="paragraph">
+<p>Which leads me to the next concept, the <strong>contrapositive</strong> of the
+initial statement.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="contrapositive">Contrapositive</h3>
+<div class="paragraph">
+<p>What if I would like to represent the same statement in a negative
+way:</p>
+</div>
+<div class="paragraph text-center">
+<p><code>IF THE NEXT PROJECT DOESN&#8217;T USE JAVA, THEN I&#8217;M OUT</code>
+<br>
+<br></p>
+</div>
+<div class="paragraph">
+<p>This would imply that I didn&#8217;t join the project, because the next
+project is not using Java.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/img/7d7d1fdf66bb95d608df4f75c4fb7645.png" alt="7d7d1fdf66bb95d608df4f75c4fb7645.png" width="150" height="120">
+</div>
+</div>
+<div class="paragraph">
+<p>This is the <strong>contrapositive</strong> version of our initial statement. In
+logic a conditional statement and its contrapositive are logically
+equivalents, meaning that that both try to express the same thing but
+from different perspectives, positive and negative. In mathematical
+syntax:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/img/798c57e9c0d61965f651e302b5fb2cb1.png" alt="798c57e9c0d61965f651e302b5fb2cb1.png" width="300" height="120">
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="biconditional">Biconditional</h3>
+<div class="paragraph">
+<p>Lets remind our initial propositional sentence: <strong>IF THE NEXT PROJECT
+USES JAVA, THEN I&#8217;M IN</strong>. What if I also say:</p>
+</div>
+<div class="paragraph text-center">
+<p><code>IF THE NEXT PROJECT USE PYTHON, THEN I&#8217;M I&#8217;M</code>
+<br>
+<br></p>
+</div>
+<div class="paragraph">
+<p>Am I saying something contradictory to the previous sentence ? Not at
+all. I could be interested in a project using Python or Java. So if I
+wanted to be very explicit about the fact that I&#8217;m willing to do the
+next project <strong>only if</strong> Java is on the table, then I have to express
+the statement using the biconditional operator.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/img/5b82cec87b8710817fbc5922dbc9331b.png" alt="5b82cec87b8710817fbc5922dbc9331b.png" width="150" height="120">
+</div>
+</div>
+<div class="paragraph">
+<p>This expression now reflects that:</p>
+</div>
+<div class="paragraph text-center">
+<p><code>IF, AND ONLY IF THE NEXT PROJECT USE JAVA, THEN I&#8217;M IN</code>
+<br>
+<br></p>
+</div>
+<div class="paragraph">
+<p>So now you&#8217;ve narrowed the posibilities of interpretation of your
+initial proposition.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="references">References</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="http://mfleck.cs.illinois.edu/building-blocks/">Building Blocks for Theoretical of Computer Science</a> by Margaret M. Fleck</p>
+</li>
+<li>
+<p><a href="https://pragprog.com/book/mcmath/good-math">Good Maths</a> by Mark C. Chu-Carroll</p>
+</li>
+<li>
+<p><a href="https://code.energy/computer-science-distilled">Computer Science Distilled</a> by Wladston Ferreira Filno</p>
+</li>
+<li>
+<p><a href="https://en.wikipedia.org/wiki/Contraposition">Wikipedia: Contraposition</a></p>
+</li>
+</ul>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>

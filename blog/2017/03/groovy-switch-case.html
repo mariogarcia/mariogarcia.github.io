@@ -1,0 +1,464 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>Groovy Switch Case with Closures</h1></header><yieldScaped><div class="sect1">
+<h2 id="intro">Intro</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Yesterday I was talking to my dear friend
+<a href="https://twitter.com/ilopmar">@ilopmar</a> about his Greach presentation
+about Javaslang. It was when we were comparing Javaslang&#8217;s pattern
+matching module vs Groovy&#8217;s switch case when my Groovy instinct made
+me realise how underated Groovy&#8217;s switch-case statement is, specially
+how closures can be applied to Groovy&#8217;s switch/case statements to
+create limited pattern-matching expressions.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+BTW, Don&#8217;t get me wrong I think Javaslang is an A-M-A-Z-I-N-G
+library, and I&#8217;ve been using it in my projects since the very
+beginning. This entry is just a claim to use the full potential of
+Groovy&#8217;s switch case statement.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Let me show you my point. Lets say we have the <code>Person</code> type:</p>
+</div>
+<div class="listingblock">
+<div class="title">Person</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">package pm
+
+import groovy.transform.Canonical
+import groovy.transform.TupleConstructor
+
+@Canonical
+@TupleConstructor
+class Person {
+    String name
+    Integer age
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The next example shows how to return whether <code>john</code> or <code>carl</code>
+depending on the exact values of the properties contained in the
+<code>Person</code> object passed as parameter.</p>
+</div>
+<div class="listingblock">
+<div class="title">Initial case</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">String example0(Person person) {
+    if (person.name == 'carl' &amp;&amp; person.age == 22) {
+        return 'carl'
+    }
+
+    if (person.name == 'john' &amp;&amp; person.age == 34) {
+        return 'john'
+    }
+
+    return 'nobody'
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We all agree it&#8217;s a very verbose syntax, and bearing in mind languages
+such as Haskell or Scala have already fixed this problem using pattern
+matching, why should we suffering this type of syntax ?</p>
+</div>
+<div class="paragraph">
+<p>Although we don&#8217;t have a Scala-like pattern matching&#8230;&#8203; yet, we are
+clearly underestimating the power of Groovy&#8217;s switch/case statement.</p>
+</div>
+<div class="sect2">
+<h3 id="exact_matching">Exact Matching</h3>
+<div class="paragraph">
+<p>When trying to figure out which action to take based on properties of
+the object passed as parameter, we can trust object identity by
+creating an object with the same values.</p>
+</div>
+<div class="listingblock">
+<div class="title">Exact matching</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">String example1a(Person person) {
+    switch (person) {
+        case new Person('carl', 22): return 'carl'
+        case new Person('john', 34): return 'john'
+
+        default:
+        return 'nobody'
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It&#8217;s true that, by default, we can&#8217;t omit the new when creating a new object instance,
+but, that&#8217;s just an excuse, we can always create a method with the class name that builds
+the instance</p>
+</div>
+<div class="listingblock">
+<div class="title">Tuple Constructor without <code>new</code></div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">static Person Person(String name, Integer age) {
+    new Person(name, age)
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And then come again with this:</p>
+</div>
+<div class="listingblock">
+<div class="title">Exact matching</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">String example1(Person person) {
+    switch (person) {
+        case Person('carl', 22): return 'carl'
+        case Person('john', 34): return 'john'
+
+        default:
+        return 'nobody'
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>No magic here, this is just old plain java rules: <code>equals</code> and
+<code>hashcode</code> underneath applied to out class thanks to the <code>@Canonical</code>
+transformation. But what happens when we would like to get fancy and
+match using certain rules over the object&#8217;s properties ?</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="pattern_matching_with_closures">Pattern matching with closures</h3>
+<div class="paragraph">
+<p>In the previous example we were comparing values against values, but
+what if we would like to compare values against certain rules or
+patterns ? Now what we want is, given a data structure (an object
+here), to check if its internal values match a given set of patterns.</p>
+</div>
+<div class="paragraph">
+<p>With that in mind lets get back to the <code>Person</code> example to see if we
+can apply certain patterns to the object&#8217;s properties:</p>
+</div>
+<div class="listingblock">
+<div class="title">Pattern matching</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">String example2(Person person) {
+    switch (person) {
+        case Person(endsWith('arl'), gt(25)): return 'carl' <i class="conum" data-value="1"></i><b>(1)</b>
+        case Person(endsWith('hn'), lt(23)):  return 'john' <i class="conum" data-value="2"></i><b>(2)</b>
+        case Person(any(), gt(60)):           return 'maria' <i class="conum" data-value="3"></i><b>(3)</b>
+
+        default:
+        return 'nobody' <i class="conum" data-value="4"></i><b>(4)</b>
+    }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Matches any person whose name ends with <code>arl</code> and having an age greater than 25</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Matches any person whose name ends with <code>hn</code> and having an age less than 23</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Matches any person with any name and having an age greater than 60</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>In any other case return <code>nobody</code></td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Now, How is this working ? Well actually <code>Person(pattern, pattern)</code> is
+a method returning a <code>Closure</code> acting as a <code>predicate</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Person w Closure</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">static Closure&lt;Boolean&gt; Person(Closure&lt;Boolean&gt; name, Closure&lt;Boolean&gt; age) {
+    return { Person p -&gt;
+        name(p.name) &amp;&amp; age(p.age)
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Eventually it will take the person instance to evaluate and it will
+execute both patterns with the same value and if both executions are
+correct then case expression will succeed.</p>
+</div>
+<div class="paragraph">
+<p>Let me show you how I built the patterns <code>any</code>, <code>gt</code>, <code>lt</code>, and
+<code>endsWith</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">any</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">static Closure&lt;Boolean&gt; any() {
+    return { -&gt; true }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">endsWith</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">static Closure&lt;Boolean&gt; endsWith(String ending) {
+    return { String s -&gt;
+        s.endsWith(ending)
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">gt</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">static Closure&lt;Boolean&gt; gt(Integer lowerBound) {
+    return { Integer n -&gt; n &gt; lowerBound }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">lt</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">static Closure&lt;Boolean&gt; lt(Integer upperBound) {
+    return { Integer n -&gt; n &lt; upperBound }
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="altogether">Altogether</h3>
+<div class="paragraph">
+<p>Apart from using closures you can also use classes to check whether
+the instance evaluated in the <code>case</code> case is an instance of that class
+or not.</p>
+</div>
+<div class="paragraph">
+<p>In next example we have the following domain classes:</p>
+</div>
+<div class="listingblock">
+<div class="title">Mammal</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">package pm
+
+import groovy.transform.Canonical
+
+@Canonical
+class Mammal {
+    String name
+    Integer age
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Mammal</code> uses <code>@Canonical</code> which among other things implements
+<strong>equals</strong> and <strong>hashCode</strong> methods. And it also uses
+<code>@TupleConstructor</code> to avoid using a constructor map.</p>
+</div>
+<div class="listingblock">
+<div class="title">Dog</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">package pm
+
+import groovy.transform.InheritConstructors
+
+@InheritConstructors
+class Dog extends Mammal { }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Dog inherits <code>Mammal</code> constructors.</p>
+</div>
+<div class="listingblock">
+<div class="title">Cat</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">package pm
+
+import groovy.transform.InheritConstructors
+
+@InheritConstructors
+class Cat extends Mammal { }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Cat</code> also inherits <code>Mammal</code> constructors.</p>
+</div>
+<div class="paragraph">
+<p>Then we would like to be able to match:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Types</strong>: The evaluated parameter is of certain type (a Dog, or a Cat, or a Mammal)</p>
+</li>
+<li>
+<p><strong>Values</strong>: The evaluated parameter is a certain value (properties are equal)</p>
+</li>
+<li>
+<p><strong>Patterns</strong>: The evaluated parameter follows certain pattern rules</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Having that in mind I came up with the following code:</p>
+</div>
+<div class="listingblock">
+<div class="title">Pattern matching</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">static String check(Mammal mammal) {
+    switch (mammal) {
+        case Dog:                return 'I dont like dogs'         <i class="conum" data-value="1"></i><b>(1)</b>
+        case Cat('jonas', 4):    return 'jonas cat is still young' <i class="conum" data-value="2"></i><b>(2)</b>
+        case Cat(any(), gt(10)): return 'it should be rocky cat'   <i class="conum" data-value="3"></i><b>(3)</b>
+        case Cat:                return 'at least is a cat'        <i class="conum" data-value="4"></i><b>(4)</b>
+
+        default:
+        return 'no idea whatsoever'
+    }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Matches if it is any Dog</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Matches if it is a specific Cat</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Matches if it is a Cat following certain patterns</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Matches if it is any Cat</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="a_more_advance_pattern_matching_in_groovy">A more advance pattern matching in Groovy ?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>As I said at the beggining, Groovy&#8217;s switch/case is not a full pattern
+matching solution. I would point out at least the fact that it doesn&#8217;t
+have value destructuring, which is very useful in data structures such
+as lists.</p>
+</div>
+<div class="paragraph">
+<p>The good news is that <a href="https://twitter.com/bsideup">Sergei Egorov</a> wrote
+some years ago a library bringing pattern matching to Groovy. I
+strongly recommend to check it out. These are some examples of what
+can be achieved with this library:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://github.com/bsideup/groovy-pattern-match/blob/feature/dsl-like-matching/src/test/groovy/ru/trylogic/groovy/pattern/PatternMatchingMacroMethodsTest.groovy">Examples (I)</a></p>
+</li>
+<li>
+<p><a href="https://github.com/bsideup/groovy-pattern-match/blob/master/src/test/groovy/ru/trylogic/groovy/pattern/PatternMatchingMacroMethodsTest.groovy">Examples (II)</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="resources">Resources</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="http://www.groovy-lang.org/semantics.html#_switch_case">Groovy official documentation on switch/case</a></p>
+</li>
+<li>
+<p><a href="https://github.com/mariogarcia/blog">The blog sources</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>

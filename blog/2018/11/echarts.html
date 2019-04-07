@@ -1,0 +1,237 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>Writing JS posts with JBake</h1></header><yieldScaped><div class="sect1">
+<h2 id="intro">Intro</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>During this year I&#8217;ve been working as a front-end developer, and now
+that I&#8217;ve revamped the blog I was wondering how to include blog
+entries with embedded html + js.</p>
+</div>
+<div class="sect2">
+<h3 id="change_jbake_templates">Change Jbake templates</h3>
+<div class="paragraph">
+<p>In order to load extra custom js scripts in the document header of the
+blog entry, I&#8217;ve changed the template responsible for rendering the
+footer part.</p>
+</div>
+<div class="listingblock">
+<div class="title">footer.tpl</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">script(src:"${config.site_contextPath}js/jquery.min.js"){} newLine()
+script(src:"${config.site_contextPath}js/browser.min.js"){} newLine()
+script(src:"${config.site_contextPath}js/breakpoints.min.js"){} newLine()
+script(src:"${config.site_contextPath}js/util.js"){} newLine()
+script(src:"${config.site_contextPath}js/main.js"){} newLine()
+script(src:"${config.site_contextPath}js/highlight.pack.js"){} newLine()
+script(type: "text/javascript") {
+    yieldUnescaped """
+        document.addEventListener('DOMContentLoaded', (event) =&gt; {
+            document.querySelectorAll('pre code').forEach((block) =&gt; {
+                hljs.highlightBlock(block);
+            });
+        });
+    """
+}
+
+content.scripts?.split('\\|')?.each { uri -&gt; <i class="conum" data-value="1"></i><b>(1)</b>
+    script(src: uri ==~ 'http.*'
+        ? uri
+        : "${config.site_contextPath}${uri}", type="javascript") {}
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Takes <strong>content.scripts</strong> variable&#8217;s uris (in case there&#8217;s any)o and creates <code>script</code> tags.</p>
+</div>
+<div class="paragraph">
+<p>Basically if the entry has a <code>scripts</code> variable with a list of scripts
+uris, the html document will render them within the <code>head</code> tag.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="add_extra_js_uris_to_the_blog_entry">Add extra JS uris to the blog entry</h3>
+<div class="paragraph">
+<p>Then it&#8217;s up to us to use the <code>scripts</code> tag adding as many script uris
+as we need.</p>
+</div>
+<div class="listingblock">
+<div class="title">Post entry header</div>
+<div class="content">
+<pre class="highlight"><code class="language-text" data-lang="text">= Title of the new entry
+@bla
+2018-11-09
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: js, jbake
+:scripts: https://cdnjs.cloudflare.com/ajax/libs/echarts/4.1.0/echarts.js|https://cdnjs.cloudflare.com/ajax/libs/echarts/4.1.0/echarts-en.min.js
+:idprefix:
+
+== Intro
+...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can add as many script entries just separated by the <code>|</code> character.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="add_embedded_html_with_asciidoctor">Add embedded html with Asciidoctor</h3>
+<div class="paragraph">
+<p>To include raw html in asciidoctor you have to use a special block
+delimited by <strong>+&#43&#43+</strong> rows.</p>
+</div>
+<div class="listingblock">
+<div class="title">Embedded html</div>
+<div class="content">
+<pre class="highlight"><code class="language-html" data-lang="html">++++
+&lt;div id="echarts_main" style="width: 600px;height:400px;"&gt;&lt;/div&gt;
+&lt;script type="text/javascript"&gt;
+    window.onload = () =&gt; {
+        // based on prepared DOM, initialize echarts instance
+        var myChart = echarts.init(document.getElementById('echarts_main'));
+
+        // specify chart configuration item and data
+        var option = {
+            tooltip: {},
+            legend: {
+                data:['Sales']
+            },
+            xAxis: {
+                data: ["shirt","cardign","chiffon shirt","pants","heels","socks"]
+            },
+            yAxis: {},
+            series: [{
+                name: 'Sales',
+                type: 'bar',
+                data: [5, 20, 36, 10, 10, 20]
+            }]
+        };
+
+        // use configuration item and data specified to show chart
+        myChart.setOption(option);
+    }
+&lt;/script&gt;
+++++</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="result">Result</h3>
+<div class="paragraph">
+<p>As an example I&#8217;m showing a basic example of
+Echarts. <a href="https://ecomfe.github.io/echarts-doc/public/en/index.html">Echarts</a>
+is a charting js library from the chinese search engine Baidu.</p>
+</div>
+<div id="echarts_main" style="width: 600px;height:400px;"></div>
+<script type="text/javascript">
+    window.onload = () => {
+        // based on prepared DOM, initialize echarts instance
+        var myChart = echarts.init(document.getElementById('echarts_main'));
+
+        // specify chart configuration item and data
+        var option = {
+            tooltip: {},
+            legend: {
+                data:['Sales']
+            },
+            xAxis: {
+                data: ["shirt","cardign","chiffon shirt","pants","heels","socks"]
+            },
+            yAxis: {},
+            series: [{
+                name: 'Sales',
+                type: 'bar',
+                data: [5, 20, 36, 10, 10, 20]
+            }]
+        };
+
+        // use configuration item and data specified to show chart
+        myChart.setOption(option);
+    }
+</script>
+</div>
+<div class="sect2">
+<h3 id="references">References</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://asciidoctor.org/docs/asciidoc-syntax-quick-reference/#escaping-text">Asciidoctor reference about escaping html</a></p>
+</li>
+<li>
+<p><a href="http://mrhaki.blogspot.com/2014/06/awesome-asciidoc-include-raw-html.html">Mr Haki entry about escaping html with Asciidoctor</a></p>
+</li>
+<li>
+<p><a href="https://ecomfe.github.io/echarts-doc/public/en/index.html">Echarts site</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script><script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/4.1.0/echarts.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/4.1.0/echarts-en.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/4.1.0/echarts.common.min.js"></script>
+        </div>
+    </body>
+</html>

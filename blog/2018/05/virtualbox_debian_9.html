@@ -1,0 +1,149 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>Virtualbox: Installation in Debian 9</h1></header><yieldScaped><div class="sect1">
+<h2 id="steps">Steps</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="add_source_list">Add source list</h3>
+<div class="paragraph">
+<p>Add the following line to your /etc/apt/sources.list. According to
+your distribution, replace '&lt;mydist&gt;' with 'artful', 'zesty',
+'yakkety', 'xenial', 'trusty', 'stretch', 'jessie', or 'wheezy' (older
+versions of VirtualBox supported different distributions):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">deb https://download.virtualbox.org/virtualbox/debian stretch contrib</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="add_sources_signatures">Add sources signatures</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | sudo apt-key add -</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="check_signatures_optional">Check signatures (optional)</h3>
+<div class="paragraph">
+<p>The key fingerprint for oracle_vbox_2016.asc is</p>
+</div>
+<div class="paragraph">
+<p>B9F8 D658 297A F3EF C18D  5CDF A2F6 83C5 2980 AECF
+Oracle Corporation (VirtualBox archive signing key) &lt;<a href="mailto:info@virtualbox.org">info@virtualbox.org</a>&gt;</p>
+</div>
+<div class="paragraph">
+<p>The key fingerprint for oracle_vbox.asc is</p>
+</div>
+<div class="paragraph">
+<p>7B0F AB3A 13B9 0743 5925  D9C9 5442 2A4B 98AB 5139
+Oracle Corporation (VirtualBox archive signing key) &lt;<a href="mailto:info@virtualbox.org">info@virtualbox.org</a>&gt;</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="install">Install</h3>
+<div class="paragraph">
+<p>To install VirtualBox, do</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">sudo apt-get update
+sudo apt-get install virtualbox-5.2</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="troubleshooting">Troubleshooting</h3>
+<div class="paragraph">
+<p>What to do when experiencing The following signatures were invalid:
+BADSIG &#8230;&#8203; when refreshing the packages from the repository?</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">sudo -s -H
+apt-get clean
+rm /var/lib/apt/lists/*
+rm /var/lib/apt/lists/partial/*
+apt-get clean
+apt-get update</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>

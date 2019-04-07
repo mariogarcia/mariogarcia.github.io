@@ -1,0 +1,331 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>Tesseract OCR</h1></header><yieldScaped><div id="preamble">
+<div class="sectionbody">
+<div class="quoteblock">
+<blockquote>
+Tesseract is an open source Optical Character Recognition (OCR)
+Engine, available under the Apache 2.0 license. It can be used
+directly, or (for programmers) using an API to extract typed,
+handwritten or printed text from images. It supports a wide variety of
+languages.
+</blockquote>
+<div class="attribution">
+&#8212; Tesseract Wiki at Github
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="docker">Docker</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I&#8217;m keeping a docker repository with a Debian system with tesseract
+and some other handy utilities installed. Unfortunately is not
+available at DockerHub so if you want to use it to follow this entry
+just follow these steps:</p>
+</div>
+<div class="paragraph">
+<p>Clone repository.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">git clone https://github.com/mariogarcia/docker.git</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Go to the tesseract directory</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">cd docker/tesseract</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Build the docker image</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">./bin/build.sh</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Run image</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">docker run -it mgg/tesseract</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>That will open a <code>tmux</code> session where you can execute all the commands
+I&#8217;m using for this entry.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="basics">Basics</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To practice a little bit I&#8217;m using spanish president Mariano Rajoy
+public records found at <a href="http://www.congreso.es" class="bare">http://www.congreso.es</a></p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+All records related to congressmen official incomes, properties
+and taxes are available from <a href="http://www.congreso.es" class="bare">http://www.congreso.es</a> in pdf
+documents. Unfortunately the way these documents are fulfilled are
+different from one another.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="tesseract_doesnt_read_pdfs">Tesseract doesn&#8217;t read PDFs</h3>
+<div class="paragraph">
+<p>In order to enable Tesseract to read PDF documents you have to convert
+them to images. The easiest way to do so is by using <code>imagemagick</code>. You
+should make sure to convert pdf to image with the best quality you could:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">convert -density 290 image.pdf image.png</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Where XX is &gt;72 such as 288 (which is 4x). If the resulting image is
+too big, then you can do:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">convert -density 288 image.pdf -resize 25% image.png</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Where <code>resize</code>=25% or larger when <code>density</code>=288</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">ls -l
+total 288
+-rw-r--r-- 1 dev dev 196746 Nov 13 21:49 document.pdf
+-rw-r--r-- 1 dev dev  17657 Nov 13 22:01 output-0.png
+-rw-r--r-- 1 dev dev  17003 Nov 13 22:01 output-1.png
+-rw-r--r-- 1 dev dev  16590 Nov 13 22:01 output-2.png
+-rw-r--r-- 1 dev dev   9819 Nov 13 22:01 output-3.png
+-rw-r--r-- 1 dev dev  10569 Nov 13 22:01 output-4.png</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+There is a very wellknown script to improve converted text image
+called
+<a href="http://www.fmwconcepts.com/imagemagick/textcleaner/index.php">TEXTCLEANER</a>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="first_attempt">First attempt</h3>
+<div class="paragraph">
+<p>I&#8217;m getting the first output to get document headers:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">tesseract output-0.png header</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>That would create a <code>header.txt</code> output with all the recognized
+data. Unless you&#8217;re processing a book, most of the form-like documents
+could end up as a non-sense result.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">cat header.txt
+
+51
+
+
+
+
+
+C.DTP 319 07/07/2016 10
+
+
+
+
+
+CORTES GENERALES XII LEGISLATURA
+DECLARACIDN1 DE BIENES Y RENTAS DE DIPUTADOS Y SENADORES2
+
+Nombre y apellidos
+MARIANO RAJOY BREY
+
+Estado civil Régimen econémico matrimonial
+
+CASADO GANANCIALES
+...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Still you can use this processing for indexing purposes. However if
+you happen to need to process a set of documents with certain
+structure you can make use of a <code>uzn</code> file.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="uzn">UZN</h2>
+<div class="sectionbody">
+<div class="quoteblock">
+<blockquote>
+uzn is a simple text file format for describing sections of a scanned
+image. The migneuzn tool outputs in this format for its segmentation.
+</blockquote>
+<div class="attribution">
+&#8212; <a href="https://github.com/OpenGreekAndLatin/greek-dev/wiki/uzn-format" class="bare">https://github.com/OpenGreekAndLatin/greek-dev/wiki/uzn-format</a>
+</div>
+</div>
+<div class="paragraph">
+<p>For this example I&#8217;m using a UZN file to get only the first output
+headers in a more guided way. I will tell <code>tesseract</code> where to get
+every field I&#8217;m interested in.</p>
+</div>
+<div class="paragraph">
+<p>The <code>uzn</code> file is like a <code>csv</code> file with the following fields
+separated by tab/spaces:x, y, width, height, tag.</p>
+</div>
+<div class="listingblock">
+<div class="title">output-0.uzn</div>
+<div class="content">
+<pre class="highlight"><code class="language-text" data-lang="text">140 302 600 66 name
+143 416 454 66 civil state
+776 614 824 52 city</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In order to make tesseract to be aware of the uzn file you have to
+make the uzn file to have the same name of the processed file and also
+use a certain segmentation mode (-psm 4):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">tesseract output-0.png result_with_uzn -psm 4</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And the content of <code>result_with_uzn.txt</code> is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-text" data-lang="text">MARIANO RAJOY BREY
+
+CASADO
+
+MADRID ""n"—Tv…- r—- … ñ" “ “</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Not bad, but I still need a little bit of tuning to get Tesseract to
+recognize these fields without the current noise, but hey this is just
+a preliminary research.</p>
+</div>
+<div class="paragraph">
+<p>My overall impression is that Tesseract is a great project but
+requires from you a deeper knowledge before getting acceptable
+results. Also much of the processing has to do with image processing
+before even using Tesseract: contrast, bluring, quality&#8230;&#8203; I will
+problably continuing looking into it to know more about this
+interesting tool.</p>
+</div>
+<div class="sect2">
+<h3 id="references">References</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Tesseract wiki: <a href="https://github.com/tesseract-ocr/tesseract/wiki" class="bare">https://github.com/tesseract-ocr/tesseract/wiki</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>

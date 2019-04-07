@@ -1,0 +1,682 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>Grails 3 code coverage</h1></header><yieldScaped><div class="sect1">
+<h2 id="intro">Intro</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Last <a href="http://greachconf.com">Greach</a> I had the oportunity to talk to
+<a href="https://twitter.com/sdelamo">@sdelamo</a> and
+<a href="https://twitter.com/jeffscottbrown">@jeffbrown</a> about the behavior of
+existing code coverage tools with Grails 3.</p>
+</div>
+<div class="sect2">
+<h3 id="tools">Tools</h3>
+<div class="paragraph">
+<p>It&#8217;s sad but the truth is there&#8217;re not so many open source code
+coverage tools out there. I guess the most popular in the JVM world
+are cobertura and jacoco.</p>
+</div>
+<div class="sect3">
+<h4 id="cobertura">Cobertura</h4>
+<div class="quoteblock">
+<blockquote>
+Cobertura is a free Java tool that calculates the percentage of code
+accessed by tests. It can be used to identify which parts of your Java
+program are lacking test coverage. It is based on jcoverage.
+</blockquote>
+<div class="attribution">
+&#8212; http://cobertura.github.io/cobertura/
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="jacoco">Jacoco</h4>
+<div class="quoteblock">
+<blockquote>
+JaCoCo is a free code coverage library for Java, which has been
+created by the EclEmma team based on the lessons learned from using
+and integration existing libraries for many years.
+</blockquote>
+<div class="attribution">
+&#8212; http://www.jacoco.org/jacoco/
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="project">Project</h3>
+<div class="paragraph">
+<p>The structure of the project used as example is a gradle multimodule
+with the following modules:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2017/04/grails_coverage/project-modules-diagram.png" alt="project modules diagram" width="330" height="126">
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>api</code>: Grails 3.2.4 application</p>
+</li>
+<li>
+<p><code>common</code>: Groovy 2.4.10 library for common utilities</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="initial_configuration">Initial configuration</h3>
+<div class="paragraph">
+<p>First you have to add both plugins to Gradle configuration in your
+file <code>build.gradle</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">cobertura</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">apply plugin: 'net.saliman.cobertura'</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">jacoco</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">apply plugin: 'jacoco'</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Jacoco is bundled with Gradle, and it has a default version. You
+can change the Jacoco version. Check oficial Jacoco/Gradle documentation
+at <a href="https://docs.gradle.org/current/userguide/jacoco_plugin.html" class="bare">https://docs.gradle.org/current/userguide/jacoco_plugin.html</a>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Now you can execute <code>cobertura</code> and <code>jacoco</code>.</p>
+</div>
+<div class="listingblock">
+<div class="title">execute cobertura</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">./gradlew cobertura</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">execute jacoco</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">./gradlew check jacocoTestReport</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In order to save time and execute both tools one after the other
+there&#8217;s a task (thanks to <a href="https://twitter.com/sdelamo">@sdelamo</a>) that
+execute both sequentially:</p>
+</div>
+<div class="listingblock">
+<div class="title">codeCoverage task</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy"></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Therefore from now on, I&#8217;ll do:</p>
+</div>
+<div class="listingblock">
+<div class="title">execute both</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">./gradlew codeCoverage</code></pre>
+</div>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. Initial state</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">cobertura</th>
+<th class="tableblock halign-left valign-top">jacoco</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="imageblock external">
+<div class="content">
+<a class="image" href="http://mariogarcia.github.io/blog/img/2017/04/grails_coverage/cobertura_init.png" target="_blank" rel="noopener"><img src="/img/2017/04/grails_coverage/cobertura_init.png" alt="cobertura init"></a>
+</div>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="imageblock external">
+<div class="content">
+<a class="image" href="http://mariogarcia.github.io/blog/img/2017/04/grails_coverage/jacoco_init.png" target="_blank" rel="noopener"><img src="/img/2017/04/grails_coverage/jacoco_init.png" alt="jacoco init"></a>
+</div>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="reducing_the_noise">Reducing the noise</h3>
+<div class="paragraph">
+<p>Sometimes when creating a new project there are classes that are part
+of the framework that we rarerly consider to test. But if we don&#8217;t
+test them they could ruin our coverage reports, even though we&#8217;re sure
+they won&#8217;t affect the application behavior.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Please note that&#8217;s under your responsibility to decide which
+classes are eligible to be tested or not. As a rule of thumb I would
+say that if you have doubts about it, you should test it.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect3">
+<h4 id="omiting_classes">Omiting classes</h4>
+<div class="paragraph">
+<p>In order to get rid of classes we know for sure we don&#8217;t want to
+touch, or we think it doesn&#8217;t make sense to test, we can tell
+<strong>cobertura</strong> and <strong>jacoco</strong> to omit them from their reports.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="omiting_classes_with_cobertura">Omiting classes with cobertura</h4>
+<div class="paragraph">
+<p>Before showing how to omit those clases, I need to mention that all
+cobertura related configuration will be included in the <code>cobertura {
+}</code> configuration:</p>
+</div>
+<div class="listingblock">
+<div class="title">Cobertura configuration</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">cobertura {
+  // cobertura configuration here
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Ok, now, in order to tell cobertura to omit classes like <code>Application</code> or
+<code>UrlMappings</code>&#8230;&#8203;etc we use the property <code>coverageExcludes</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Adding classes exclusions</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy"></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If we execute the cobertura report again, we&#8217;ll see that the excluded
+classes don&#8217;t appear anymore.</p>
+</div>
+<div class="listingblock">
+<div class="title">Executing cobertura</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">./gradlew codeCoverage</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="omiting_classes_with_jacoco">Omiting classes with jacoco</h4>
+<div class="paragraph">
+<p>Well if you take a look at the documentation, you will find that the
+configuration attribute <code>excludes</code> can exclude classes from
+<strong>jacoco</strong>. But it seems what you&#8217;re really doing is excluding the
+class from the report but not from the analysis.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This part has been taken from this post:
+<a href="https://liviutudor.com/2016/02/11/jacoco-gradle-excluding-source-files-and-classes" class="bare">https://liviutudor.com/2016/02/11/jacoco-gradle-excluding-source-files-and-classes</a>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>In order to exclude a give class from both the analysis and the report
+you need to add the following to your <strong>jacoco</strong> configuration:</p>
+</div>
+<div class="paragraph">
+<p>Inside the jacocoReport configuration:</p>
+</div>
+<div class="listingblock">
+<div class="title">Jacoco report configuration</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">jacocoTestReport {
+  //...
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Add inside the following:</p>
+</div>
+<div class="listingblock">
+<div class="title">Excluding classes</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">afterEvaluate {
+    classDirectories = files(classDirectories.files.collect {
+        fileTree(dir: it,
+                 exclude: ['**/Application**',
+                           '**/BootStrap**',
+                           '**/UrlMappings**'])
+    })
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And then execute code coverage again:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">./gradlew codeCoverage</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now I got rid of the noise and I can focus on the classes that are
+really important to my application.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 2. Reducing class noise</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">cobertura</th>
+<th class="tableblock halign-left valign-top">jacoco</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="imageblock">
+<div class="content">
+<a class="image" href="http://mariogarcia.github.io/blog/img/2017/04/grails_coverage/cobertura_reduce_class_noise.png"><img src="/img/2017/04/grails_coverage/cobertura_reduce_class_noise.png" alt="cobertura reduce class noise"></a>
+</div>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="imageblock">
+<div class="content">
+<a class="image" href="http://mariogarcia.github.io/blog/img/2017/04/grails_coverage/jacoco_reduce_class_noise.png"><img src="/img/2017/04/grails_coverage/jacoco_reduce_class_noise.png" alt="jacoco reduce class noise"></a>
+</div>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="a_simple_controller">A simple controller</h3>
+<div class="paragraph">
+<p>This is a simple greetings controller. It receives a <code>name</code> and an
+<code>age</code> from a <code>PersonCommand</code> command object, and eventually it will
+return a greetings message.</p>
+</div>
+<div class="listingblock">
+<div class="title">Greetings controller</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">package api
+
+class GreetingsController {
+    def index(PersonCommand person) {
+        if (person.hasErrors()) {
+            response.status = 400
+            respond(message: "Please check name and age")
+            return
+        }
+
+        if (person.name == 'mario') {
+            respond(message: "You're awesome!")
+        } else {
+            respond(message: "You're not so awesome ${person.name} you look older than ${person.age}")
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Next I&#8217;ll create a simple test checking one possible successful
+condition, in order to get some code coverage metrics.</p>
+</div>
+<div class="listingblock">
+<div class="title">Greetings controller Spec</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">void 'check a successful greetings message for mario'() {
+    given: 'a proper person information'
+    params.name = 'mario'
+    params.age = 20
+
+    when: 'invoking the controller'
+    controller.index()
+
+    then: 'we should get the expected result'
+    response.json.message == "You're awesome!"
+
+    and: 'the correct status code'
+    response.status == 200
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now I&#8217;m running both <code>cobertura</code> and <code>jacoco</code> to see how covered my code is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">./gradlew codeCoverage</code></pre>
+</div>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 3. Naive test coverage</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">cobertura</th>
+<th class="tableblock halign-left valign-top">jacoco</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="imageblock">
+<div class="content">
+<a class="image" href="http://mariogarcia.github.io/blog/img/2017/04/grails_coverage/cobertura_greetings_first.png"><img src="/img/2017/04/grails_coverage/cobertura_greetings_first.png" alt="cobertura greetings first"></a>
+</div>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="imageblock">
+<div class="content">
+<a class="image" href="http://mariogarcia.github.io/blog/img/2017/04/grails_coverage/jacoco_greetings_first.png"><img src="/img/2017/04/grails_coverage/jacoco_greetings_first.png" alt="jacoco greetings first"></a>
+</div>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>Lets see the metrics.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 4. line coverage over GreetingsController.groovy</caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">_</th>
+<th class="tableblock halign-left valign-top">line coverage</th>
+<th class="tableblock halign-left valign-top">branch coverage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">cobertura</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">42% covered</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">18% covered</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">jacoco</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">missed 4/7 &#8658; covered 3/7 (42%)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">25% covered (based on instructions)</p></td>
+</tr>
+</tbody>
+</table>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Line coverage</strong>: If we check both reports it seems that in both
+reports line coverage remains the same. But due the fact that Jacoco
+shows percentages based on instructions makes harder to get line
+coverage metrics.</p>
+</li>
+<li>
+<p><strong>Branch coverage</strong>: Both differ mainly because I think Jacoco
+considers instructions instead of full statements.</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The number in parenthesis is the number of checks done by the
+coverage tool in that line
+</td>
+</tr>
+</table>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2017/04/grails_coverage/branch-coverage-diagram.png" alt="branch coverage diagram" width="1320" height="364">
+</div>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 5. branch coverage</caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">code</th>
+<th class="tableblock halign-left valign-top">cobertura</th>
+<th class="tableblock halign-left valign-top">jacoco</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>if (person.hasErrors())</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">50% (1/2 covered)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">50% (1/2 missed)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>response.status = 400</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>respond(errors)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>return</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0%  (0/2 covered)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0%  (2/2 missed)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>if (person.name == 'mario')</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">100% (2/2 covered)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">100% (0/2 missed)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>respond(message: "You&#8217;re awesome")</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">50%  (1/2 covered)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">50%  (1/2 missed)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>respond(message: &#8230;&#8203;.)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">12%  (1/8 covered)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">12%  (7/8 missed)</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+I really encourage everybody to take a look at the section:
+<a href="http://www.jacoco.org/jacoco/trunk/doc/counters.html">Coverage
+counters</a> to have a hint on how Jacoco create its metrics.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>All sum up 16 possible checks.  Although it seems both tools are
+considering the same branches both try to show opposite views of the
+same event. Whereas cobertura highlights the branches covered, jacoco
+informs about the missing covered branches. What do I prefer ? As long
+as I understand what they&#8217;re describing I&#8217;m fine with both approaches
+because so far, both tools are giving me the same information about my
+code coverage.</p>
+</div>
+<div class="paragraph">
+<p>Still:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>One thing I&#8217;m <strong>missing from Jacoco report</strong> is that in Cobertura&#8217;s
+class detailed view you have a progress bar that gives you a quick
+hint about the whole class. Jacoco doesn&#8217;t have that.</p>
+</li>
+<li>
+<p><strong>Jacoco is showing all Grails generated code</strong> and takes it under
+consideration for the general report. That&#8217;s a lot of code I don&#8217;t
+need to know about, and definitely I don&#8217;t want to be testing.</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+While Cobertura gives you an easy way to omit certain code at
+method level Jacoco still doesn&#8217;t have that. You can find the
+discussion about this at
+<a href="https://github.com/jacoco/jacoco/wiki/FilteringOptions" class="bare">https://github.com/jacoco/jacoco/wiki/FilteringOptions</a>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="next_step_nail_line_coverage">Next step: <code>Nail line coverage</code></h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+I really encourage everybody to take a look at the section:
+<a href="https://github.com/cobertura/cobertura/wiki/Line-Coverage-Explained">Line
+coverage explained</a>.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="conclusions">Conclusions</h3>
+<div class="paragraph">
+<p>TODO</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="other_resources">Other resources</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="http://kyleboon.org/blog/2014/04/17/code-coverage-with-groovy/">Code coveage with Groovy</a></p>
+</li>
+<li>
+<p><a href="https://liviutudor.com/2015/05/15/cobertura-issue-with-ignoring-annotated-methods">Cobertura ignoring annotated methods</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>

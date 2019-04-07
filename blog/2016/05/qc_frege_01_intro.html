@@ -1,0 +1,483 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>Frege and QuickCheck: Intro</h1></header><yieldScaped><div class="sect1">
+<h2 id="what_is_quickcheck">What is QuickCheck ?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><strong>QuickCheck</strong> is a property based testing library capable of
+generating values for those properties in order to find out if that
+property holds for the domain problem.</p>
+</div>
+<div class="paragraph">
+<p>QuickCheck was born from a paper by <em>Koen Claessen</em> and <em>John
+Hughes</em>. They created <em>QuickCheck</em> to look for a different way of
+testing. They observed that around the 50% of the software development
+was dedicated to testing. That was a huge cost and mostly due to the
+fact that it was done almost manually. The goal was to reduce that
+percentage by automating testing. How they planned to do so ?</p>
+</div>
+<div class="paragraph">
+<p>In order to understand how it
+works and how to use it some concepts must be introduced first:
+<code>Property</code>, <code>Generator</code>, <code>Output Feedback</code>, and <code>Shrinking</code>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+BTW The <em>QuickCheck</em> paper is also a good source to start. You
+can find the QuickCheck paper at
+<a href="http://www.cs.tufts.edu/~nr/cs257/archive/john-hughes/quick.pdf" class="bare">http://www.cs.tufts.edu/~nr/cs257/archive/john-hughes/quick.pdf</a>
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="properties">Properties</h3>
+<div class="paragraph">
+<p>What is a property? After reviewing some definitions out there I
+really liked this one:</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+Properties are essentially executable specifications that can be
+universally quantified over. They specify what you expect of your
+program and can be executed against the program to ensure that it
+conforms to the spec
+</blockquote>
+<div class="attribution">
+&#8212; <a href="http://www.stuartgunter.org/intro-to-quickcheck/" class="bare">http://www.stuartgunter.org/intro-to-quickcheck/</a>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<code>executable specification</code> means a function that holds for a set
+of values using the program (function or set of functions) you want to
+test.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Lets see a basic example. When adding up two numbers <code>commutativity</code>
+must hold: <em>a binary operation is commutative if changing the order
+of the operands does not change the result</em>. That means that if the
+<strong>sum</strong> function has been implemented property it should follow the
+<strong>commutativity</strong> property.</p>
+</div>
+<div class="listingblock">
+<div class="title">commutativity</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">propertyOne :: [Int] -&gt; Bool
+propertyOne xs = sum xs == (sum . reverse) xs
+
+commutativity = property (propertyOne)</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Think of this example as if the <code>commutativity</code> rule had one and
+only property that must hold
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Executing <code>fregeQuickCheck</code> will show the following output:</p>
+</div>
+<div class="listingblock">
+<div class="title">quickCheck output</div>
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">qc.BasicsCheck.commutativity: +++ OK, passed 100 tests</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+to execute quickCheck from the console go to the project folder
+and execute <code>./gradlew fregeQuickCheck</code>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>A 100 tests ? Wow, how is that ? By default, <em>QuickCheck</em> <code>generates</code> a
+100 sets of values for the specification under test. This is a huge
+difference between what we had in previous testing approaches. We
+don&#8217;t generate a given set of values, values are generated for us
+depending on the types and the properties defined. <strong>That makes tests
+cleaner and easier to reason about</strong></p>
+</div>
+<div class="paragraph">
+<p>A <em>property</em> in <em>QuickCheck</em> is a value of type <code>Property</code>.</p>
+</div>
+<div class="paragraph">
+<p>As a rule of thumb The easiest way of creating a property is to create
+a function that returns a <code>Bool</code> (like the propertyOne function). A
+function retuning a Bool can be treated as a <code>Testable</code> value. Then
+use the <code>Testable</code> function as argument to the <code>property</code> function to
+get a <code>Property</code> value and leave <em>QuickCheck</em> to do the rest. In
+summary:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Create a function that returns <code>Bool</code></p>
+</li>
+<li>
+<p>Invoke <code>property</code> passing the previous function</p>
+</li>
+<li>
+<p>Invoke <em>QuickCheck</em></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>If you check the <code>property</code> function type in the <strong>frege repl</strong> you&#8217;ll
+notice that it receives a value of type <code>Testable</code> and returns a
+<code>Property</code>. <code>Bool</code> defines an instance of <code>Testable</code>.</p>
+</div>
+<div class="listingblock">
+<div class="title">Checking property function type</div>
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">frege&gt; import Test.QuickCheck
+...
+frege&gt; :t property
+frege&gt; Testable prop =&gt; prop -&gt; Property</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+To open <code>fregeRepl</code> in to load this project examples, go to the
+project folder and execute <code>./gradlew -q fregeRepl</code>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="generators">Generators</h3>
+<div class="paragraph">
+<p>By default <em>QuickCheck</em> knows how to generate values for the most used
+types: Int, Double, String&#8230;&#8203; That&#8217;s perfect, but if you create a more
+complex type, or you would like to control the way values are
+generated, Frege will complain because it won&#8217;t be able to <code>generate</code>
+new values of that type.</p>
+</div>
+<div class="paragraph">
+<p>Lets say we are sure a function will only be receiving values from 0
+to 100 so it makes no sense to use any other value range. We&#8217;ll be
+restricting the input values like:</p>
+</div>
+<div class="listingblock">
+<div class="title">Controlling generation</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">propertyTwo :: [Int] -&gt; Bool <i class="conum" data-value="1"></i><b>(1)</b>
+propertyTwo xs = sum xs == (sum . reverse) xs
+
+dataset = listOf $ choose (0, 100) <i class="conum" data-value="2"></i><b>(2)</b>
+rangeRestriction = forAll dataset propertyTwo <i class="conum" data-value="3"></i><b>(3)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Defining the property</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Define the type of values <em>QuickCheck</em> should generate</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Define the executable specification</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>In this simple example we&#8217;ve built our own generator of list of
+numbers between 0 and 100. Easy isn&#8217;t it ?</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="output_feedback">Output feedback</h3>
+<div class="paragraph">
+<p>Sometimes we would like to see some information while tests are
+executed. There&#8217;re functions to help you printing out useful
+information about the execution.</p>
+</div>
+<div class="paragraph">
+<p>In the following example we&#8217;re using <code>collect</code>.</p>
+</div>
+<div class="listingblock">
+<div class="title">Feedback</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">propertyThree :: [Int] -&gt; Property <i class="conum" data-value="1"></i><b>(1)</b>
+propertyThree xs = collect (length xs) $ sum xs == (sum . reverse) xs  <i class="conum" data-value="2"></i><b>(2)</b>
+
+rangeRestrictionWithFeedback = forAll dataset propertyThree <i class="conum" data-value="3"></i><b>(3)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Notice now it returns a <code>Property</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The <code>collect</code> function shows information about the data under tests.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The way we invoke the specification is the same as before.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The execution shows the length of the list and what percentage of test
+cases were executed with lists of this length.</p>
+</div>
+<div class="listingblock">
+<div class="title">collect output</div>
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">qc.BasicsCheck.rangeRestrictionWithFeedback: +++ OK, passed 100 tests:
+ 8% 0
+ 7% 6
+ 6% 4
+ 6% 16
+ 5% 1
+ 4% 49
+ 3% 7
+ 3% 58
+ 3% 43
+...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Taking a look at this output sample, first thing came to mind is that
+is looks a very fair distribution. First column represent the test
+case in the overall suite and the second the number of elements used
+in current test case. For instance <code>8% 0</code> means 8% of the time
+<em>QuickCheck</em> was using 0 element lists to check the property.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+In Frege <code>repl</code> you can execute your specification with
+<code>quickCheckVerbose</code>, it works the same as <code>quickCheck</code> but it will
+print out all generated values used.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="shrinking">Shrinking</h3>
+<div class="paragraph">
+<p>When a given specification fails, <em>QuickCheck</em> tries to find the smaller
+input that can make the specification fail. That comes very handy
+specially where we&#8217;re dealing either a big data set or a complex data
+model.</p>
+</div>
+<div class="paragraph">
+<p>Lets create a <code>fregeRepl</code> session to see <em>QuickCheck</em> in action over
+a wrong defined function. This time we&#8217;re messing around some basic
+math rule we learnt in school:</p>
+</div>
+<div class="listingblock">
+<div class="title">failing specification</div>
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">frege&gt; :{
+&gt; substract :: Int -&gt; Int -&gt; Int
+&gt; substract x y = x - y
+&gt; :}
+
+function substract :: Int -&gt; Int -&gt; Int
+
+frege&gt; substractProperty x y = substract x y == substract y x
+function substractProperty :: Int -&gt; Int -&gt; Bool
+
+frege&gt; quickCheck $ property substractProperty
+*** Failed! (after 2 tests and 1 shrink):
+Falsifiable
+1
+0
+()</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Like we expected this must fail, but <em>QuickCheck</em> did more than
+confirming the failure, it gave us a set of values to check our own: 1
+and 0. Not only that, it&#8217;s supposed to be the minimum set of values
+that will make your property fail.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="this_is_only_the_beginning">This is only the beginning</h3>
+<div class="paragraph">
+<p>Although I went through the basic concepts of <em>QuickCheck</em> my
+feeling is that I haven&#8217;t even touched the surface. the idea is to keep
+digging in every topic, so stay tuned!</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="resources">Resources</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Blog entry code</p>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://github.com/mariogarcia/blog/tree/master/sources/2016/05/qc-frege-01" class="bare">https://github.com/mariogarcia/blog/tree/master/sources/2016/05/qc-frege-01</a></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Useful References</p>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="http://www.stuartgunter.org/intro-to-quickcheck/" class="bare">http://www.stuartgunter.org/intro-to-quickcheck/</a> (Very impressive
+blog entry. I&#8217;ve taken many ideas from it)</p>
+</li>
+<li>
+<p><a href="http://tab.snarc.org/posts/haskell/2010-12-02-using_quickcheck.html" class="bare">http://tab.snarc.org/posts/haskell/2010-12-02-using_quickcheck.html</a> (blog post)</p>
+</li>
+<li>
+<p><a href="http://www.cs.tufts.edu/~nr/cs257/archive/john-hughes/quick.pdf" class="bare">http://www.cs.tufts.edu/~nr/cs257/archive/john-hughes/quick.pdf</a> (blog post)</p>
+</li>
+<li>
+<p><a href="http://tab.snarc.org/posts/haskell/2010-12-02-using_quickcheck.html" class="bare">http://tab.snarc.org/posts/haskell/2010-12-02-using_quickcheck.html</a> (blog post)</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>StackOverflow</p>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="http://stackoverflow.com/questions/16968549/what-is-a-shrink-with-regard-to-haskells-quickcheck" class="bare">http://stackoverflow.com/questions/16968549/what-is-a-shrink-with-regard-to-haskells-quickcheck</a> (Explains shrinking)</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Haskell</p>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://wiki.haskell.org/Introduction_to_QuickCheck1" class="bare">https://wiki.haskell.org/Introduction_to_QuickCheck1</a> (An introduction to <em>QuickCheck</em>)</p>
+</li>
+<li>
+<p><a href="https://hackage.haskell.org/package/QuickCheck" class="bare">https://hackage.haskell.org/package/QuickCheck</a></p>
+</li>
+<li>
+<p><a href="https://hackage.haskell.org/package/QuickCheck-2.8.2/docs/Test-QuickCheck.html" class="bare">https://hackage.haskell.org/package/QuickCheck-2.8.2/docs/Test-QuickCheck.html</a></p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>

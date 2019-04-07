@@ -1,0 +1,242 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>Some applicative style examples</h1></header><yieldScaped><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>I&#8217;m not going to define what an applicative functor is, (See
+references), but I would like to share some <code>applicative style</code>
+examples. After reading a bit about applicative functors I&#8217;ve coined
+the definition:</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+functors that can be applied, meaning functors containing functions
+</blockquote>
+<div class="attribution">
+&#8212; My own :P
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="fmap_on_steroids"><code>fmap</code> on steroids ?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>First step to use applicative functor style is to understand <code>fmap</code>
+and the infix notation <code>&lt;$&gt;</code>. When I try to apply a function to a
+value wrapped in a <code>Functor</code> normally I use <code>fmap</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">fmap (+1) (Just 1) == Just 2</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>But there&#8217;s the <code>applicative style</code> which uses the <code>&lt;$&gt;</code> symbol. The
+<code>&lt;$&gt;</code> symbol is just the <code>fmap</code> function, nothing else. The only
+difference is that you can use this symbol <code>infix</code>. That means the
+following would work the same:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">(+1) &lt;$&gt; (Just 1) == Just 2</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And there is another feature, <code>&lt;$&gt;</code> is left associative, that means
+among other things, you can avoid wrapping the right operand in
+parenthesis.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="the_magical">The magical <code>&lt;*&gt;</code></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>But what if I wanted to do operations over wrapped values. And most of
+the time I use the <code>do</code> notation:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">sumMaybe :: (Num a) =&gt; Maybe a -&gt; Maybe a -&gt; Maybe a
+sumMaybe b c = do
+  x &lt;- b
+  y &lt;- c
+  return (x + y)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This function means that for any applicative functor it would take
+the contained function () and the contained value (f a) and will
+return a contained value (f b).</p>
+</div>
+<div class="listingblock">
+<div class="title">Applicative</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">Apply f =&gt; f (a-&gt;b) -&gt; f a -&gt; f b</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can also use <code>&lt;*&gt;</code> in combination with <code>&lt;$&gt;</code> or in other words
+with <code>fmap</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">sumMaybe2 :: (Num a) =&gt; Maybe a -&gt; Maybe a -&gt; Maybe a
+sumMaybe2 b c = (+) &lt;$&gt; b &lt;*&gt; c</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Sometimes is easy to think that whenever you used to have a function
+receiving plain values you can use the same function but combining it
+as an applicative functor.</p>
+</div>
+<div class="paragraph">
+<p>E.g here we have a function that creates a <code>Band</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">data Band = Band { id :: Long,
+                   name :: String,
+                   year :: Int}
+
+createBand :: Long -&gt; String -&gt; Int -&gt; Band
+createBand id name year = Band { id = id, name = name, year = year }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>That&#8217;s perfect, but what happens when have to create a Band from Maybe
+instances ? No problem, let&#8217;s use applicative functors:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">createBand2 :: Maybe Long -&gt; Maybe String -&gt; Maybe Int -&gt; Maybe Band
+createBand2 id name year = createBand &lt;$&gt; id &lt;*&gt; name &lt;*&gt; year</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>What I&#8217;m doing is to partially apply the applied function with the
+first parameter, then with the second, and finally we resolve the
+function within the context.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="list_comprehensions">List comprehensions</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>There is another use I&#8217;ve found specially interesting. The use of
+applicative functors for list comprehensions. Lets say I would like to
+increment every value from a given list. We can use <code>map</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Using map</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">produceInc0 :: (Num a) =&gt; [a] -&gt; [a]
+produceInc0 xs = map (+1) xs</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Or you may use list comprehensions:</p>
+</div>
+<div class="listingblock">
+<div class="title">Using comprehensions</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">produceInc1 :: (Num a) =&gt; [a] -&gt; [a]
+produceInc1 xs = [x + 1 | x &lt;- xs ]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>But there is still another way thanks to the applicative functor
+function <code>&lt;*&gt;</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Using applicative functor style</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">produceInc2 :: (Num a) =&gt; [a] -&gt; [a]
+produceInc2 xs = [(+1)] &lt;*&gt; xs</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="references">References</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://pbrisbin.com/posts/applicative_functors/" class="bare">https://pbrisbin.com/posts/applicative_functors/</a></p>
+</li>
+<li>
+<p><a href="http://learnyouahaskell.com/functors-applicative-functors-and-monoids" class="bare">http://learnyouahaskell.com/functors-applicative-functors-and-monoids</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>

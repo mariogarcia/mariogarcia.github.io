@@ -1,9 +1,0 @@
-*.class
-*.hprof
-.gradle/
-.build/
-**/build/
-output/
-secrets.groovy
-.asciidoctor
-.DS_Store

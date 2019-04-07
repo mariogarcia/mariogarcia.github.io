@@ -1,3 +1,0 @@
-include 'blog'
-
-rootProject.name = 'mario-blog'

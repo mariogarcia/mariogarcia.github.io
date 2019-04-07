@@ -1,9 +1,0 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath "net.saliman:gradle-cobertura-plugin:$coberturaPluginVersion"
-        classpath 'com.bmuschko:gradle-clover-plugin:2.1.0'
-    }
-}

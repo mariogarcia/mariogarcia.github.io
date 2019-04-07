@@ -1,0 +1,222 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>Kubernetes: Using MetalLB to expose a service</h1></header><yieldScaped><div class="sect1">
+<h2 id="intro">Intro</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Once we have our Kubernetes cluster, it&#8217;s time to deploy something in
+it. I&#8217;m going to follow a simple deploying a Ratpack application I did
+sometime ago and that I packed as a docker image at Bintray.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="installing_pod">Installing POD</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="pod_declaration">Pod declaration</h3>
+<div class="paragraph">
+<p>In the POD declaration I&#8217;m defining the Docker image url. And the port
+where the application is exposed.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: pnlp-pod
+spec:
+  containers:
+    - name: pnlp-pod
+      image: pacotheai-docker-public.bintray.io/pnlp:0.1.0
+      ports:
+        containerPort: 5050</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="how_to_deploy_my_pod">How to deploy my POD</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">kubectl create -f pnlp-pod.yml</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="how_to_see_deployed_pod_details">How to see deployed  POD details</h3>
+<div class="paragraph">
+<p>If we want to see things like which private IP is the app exposed, we
+can use:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">kubectl describe pods/pnlp-pod.yml</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="how_to_destroy_my_pod">How to destroy my POD</h3>
+<div class="paragraph">
+<p>In case we would like to terminate the POD:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">kubectl delete pods pnlp-pod.yml</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="installing_service">Installing service</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>We&#8217;re using a <code>Load Balancer</code> to expose our service to a public IP.</p>
+</div>
+<div class="sect2">
+<h3 id="metallb_configuration">MetalLB configuration</h3>
+<div class="paragraph">
+<p>MetalLB is nowadays the only load balancer available for a barebone
+Kubernetes solution. It will expose our application in the available
+public IPs. In order to provide MetalLB with a range of available IPs
+we can deploy a MetalLB configuration to Kubernetes like the
+following:</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+I&#8217;m using my Vagrant Kubernetes image which already has
+MetalLB installed and configured.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: metallb-system
+  name: config
+data:
+  config: |
+    address-pools:
+    - name: my-ip-space
+      protocol: layer2
+      addresses:
+      - 192.168.250.112/29</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="service_definition">Service definition</h3>
+<div class="paragraph">
+<p>Ok so we&#8217;ve already deployed our application but it&#8217;s not publicly
+available, it would be nice to publish it to the outside world. In order
+to do that we need to define a service of type <code>LoadBalancer</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">apiVersion: v1
+kind: Service
+metadata:
+  name: pnlp-pod
+  labels:
+    name: pnlp-pod
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+  selector:
+    name: pnlp-pod</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="how_to_deploy_service">How to deploy service</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">kubectl create -f pnlp-service.yml</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="check_where_the_services_been_deployed">Check where the service&#8217;s been deployed ?</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">kubectl get services</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>

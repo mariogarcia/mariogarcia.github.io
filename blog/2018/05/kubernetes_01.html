@@ -1,0 +1,410 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>Kubernetes: Installation</h1></header><yieldScaped><div class="sect1">
+<h2 id="intro">Intro</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I&#8217;ve been working with Docker containers for a while, even my
+development environment has been <strong>dockerized</strong>, but apart from
+creating and running Docker images, I haven&#8217;t gone any further than
+that. Nowadays containers are everywhere, and there&#8217;re many products
+for provisioning and orchestrating containers. I&#8217;d say that the most
+important is <a href="https://kubernetes.io">Kubernetes</a>.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+Kubernetes is an open-source system for automating deployment,
+scaling, and management of containerized applications.
+</blockquote>
+<div class="attribution">
+&#8212; kubernetes.io
+</div>
+</div>
+<div class="paragraph">
+<p>As a result I&#8217;ve created a
+<a href="https://github.com/mariogarcia/vagrant_images/tree/master/kubernetes">Vagrant
+installation</a> to ease the creation of a Kubernetes cluster with
+<code>flannel</code> as a POD network and <code>metallb</code> as load balancer.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="structure">Structure</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Before creating the cluster I need to create two virtual machines
+(master + slave) and install the required libraries in order
+Kubernetes to work. Because I&#8217;m using
+<a href="https://www.vagrantup.com/">Vagrant</a> and
+<a href="https://www.ansible.com/">Ansible</a> to create and provision master and
+slave virtual machines, it&#8217;s required to install both before going any
+further.</p>
+</div>
+<div class="sect2">
+<h3 id="vagrant_images">Vagrant images</h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+For more information about Vagrant go to <a href="https://www.vagrantup.com/" class="bare">https://www.vagrantup.com/</a>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>For this POC I&#8217;ve created a couple of VMs with Vagrant to mimic
+barebone machines.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2018/05/kubernetes_installation/project-structure.png" alt="project structure" width="460" height="182">
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Vagrantfile</div>
+<div class="content">
+<pre class="highlight"><code class="language-ruby" data-lang="ruby">###########################
+###### UTIL METHODS #######
+###########################
+
+# Extracts the ip of a given node by its role name
+def get_ip_by_role(nodes, role)
+  node = nodes.find { |name, ndata|
+    ndata[:role] == role
+  }
+
+  return node.last()[:ip]
+end
+
+# Extracts master node ip from the list of nodes
+def get_master_ip(nodes)
+  return get_ip_by_role(nodes, "master")
+end
+
+# Extracts nfs server ip
+def get_nfs_ip(nodes)
+  return get_ip_by_role(nodes, "nfs")
+end
+
+# Returns true if there is a node with :role =&gt; 'nfs'
+def is_nfs_active(nodes)
+  is_there_nfs = nodes
+            .select { |name, ndata| ndata[:role] == 'nfs'}
+            .size() &gt; 0
+
+  return is_there_nfs ? "yes" : "no"
+end
+
+###########################
+####### VARIABLES #########
+###########################
+
+# nodes to be built
+nodes = {
+  "baker": {
+    ip: "192.168.250.104",
+    role: 'nfs',
+    memory: "1024",
+    disk: "10GB"
+  },
+  "sherlock": {
+    ip: "192.168.250.102",
+    role: 'master',
+    memory: "4096",
+    disk: "10GB"
+  },
+  "watson": {
+    ip: "192.168.250.103",
+    role: 'slave',
+    memory: "4096",
+    disk: "10GB"
+  }
+}
+
+# cluster default gateway ip
+gateway_ip = "192.168.250.1"
+
+# metallb network mask to get ips from the pool
+metallb_netmask = "192.168.250.112/29"
+
+# master_ip
+master_ip = get_master_ip(nodes)
+
+# mount nfs
+nfs_active = is_nfs_active(nodes)
+nfs_ip = get_nfs_ip(nodes)
+nfs_netmask = "192.168.250.0/24"
+
+# shell provisioning
+del_default_gateway = "route del default gw 0"
+add_gateway_command = "route add default gw #{ gateway_ip }"
+
+###########################
+#### VAGRANT CONFIGURE ####
+###########################
+
+Vagrant.configure("2") do |config|
+  # loop through all configured nodes
+  nodes.each { |name, ndata|
+    config.vm.define name do |node|
+
+      node.vm.box = "ubuntu/xenial64"
+      node.disksize.size = ndata[:disk]
+
+      node.vm.hostname = name
+      node.vm.network "public_network", ip: ndata[:ip]
+      node.vm.provision "shell", inline: del_default_gateway
+      node.vm.provision "shell", inline: add_gateway_command
+      node.vm.provider "virtualbox" do |vb|
+        vb.memory = ndata[:memory]
+      end
+
+      node.vm.provision "ansible" do |ansible|
+        ansible.playbook = "ansible/playbook-#{ ndata[:role] }.yml"
+        ansible.extra_vars = {
+          master_ip: master_ip,
+          metallb_addresses: metallb_netmask,
+          nfs_active: nfs_active,
+          nfs_netmask: nfs_netmask,
+          nfs_ip: nfs_ip
+        }
+      end
+
+    end
+  }
+end</code></pre>
+</div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Make sure master and slave hostnames are different
+otherwise Kubernetes won&#8217;t show the slave machine when listing
+available nodes.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Make sure you&#8217;ve installed the <code>vagrant-disksize</code> plugin
+before building vagrant boxes: <code>vagrant plugin install
+vagrant-disksize</code>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="ansible_provisioning">Ansible provisioning</h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+For more information about Ansible go to <a href="https://www.ansible.com/" class="bare">https://www.ansible.com/</a>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The Vagrant files are using an Ansible playbook in order to install
+the system requirements in order Kubernetes to work. Depending on
+whether the node has been declared as master or slave it will make use
+of one playbook or the other. Master playbook:</p>
+</div>
+<div class="listingblock">
+<div class="title">master playbook</div>
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">- hosts: all
+  become: true
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+
+  roles:
+    - base
+    - kubernetes
+    - init
+    - podnet
+    - metallb
+    - nfs_common
+    - nfs_client</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Base libraries</p>
+</li>
+<li>
+<p>Kubernetes related libraries: kubeadm, kubectl&#8230;&#8203;</p>
+</li>
+<li>
+<p>Kubernetes cluster initialization</p>
+</li>
+<li>
+<p>Kubernetes POD network installation</p>
+</li>
+<li>
+<p>Kubernetes MetalLB (Load Balancer) installation</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>And for the slave nodes:</p>
+</div>
+<div class="listingblock">
+<div class="title">slave playbook</div>
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">- hosts: all
+  become: true
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+
+  roles:
+    - base
+    - kubernetes
+    - join
+    - nfs_common
+    - nfs_client</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Base libraries</p>
+</li>
+<li>
+<p>Kubernetes related libraries: kubeadm, kubectl&#8230;&#8203;</p>
+</li>
+<li>
+<p>Kubernetes slave node joins master node</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="installation">Installation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Go to the /kubernetes directory and execute:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">vagrant up</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The process will prompt you in order to choose which network device
+will be used as a bridged connection. Once the process has finished
+you can log in the master vm:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">vagrant ssh sherlock</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And make sure both nodes are up and ready:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">kubectl get nodes</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="resources">Resources</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://github.com/mariogarcia/vagrant_images/tree/master/kubernetes">Vagrant &amp; Ansible source files</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>High Order Functions</h1></header><yieldScaped><div id="preamble">
+<div class="sectionbody">
+<div class="quoteblock">
+<blockquote>
+&#8230;&#8203;is a function that does at least one of the following: takes one
+or more functions as arguments or returns a function as its result.
+</blockquote>
+<div class="attribution">
+&#8212; Wikipedia
+</div>
+</div>
+<div class="paragraph">
+<p>For me high order functions are like a tool box, a swiss-army-knife
+that you can apply to many situations. But like everything in life you
+have to know when to use it :P</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="usual_suspects">Usual suspects</h3>
+<div class="paragraph">
+<p>The most used high order functions are <strong>map</strong> (transforms),
+<strong>filter</strong> (filters) and <strong>fold</strong> (aggregates). Many other functions
+are built on top of them.</p>
+</div>
+<div class="sect3">
+<h4 id="map"><code>map</code></h4>
+<div class="paragraph">
+<p>The <strong>map</strong> function is normally used to transform elements in a list
+to create a new list with the transformed elements. It takes a
+function and applies that function to all elements of a list to return
+a new list. The signature is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">map :: (a -&gt; b) -&gt; [a] -&gt; [b]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can read this signature as the following:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>(a &#8594; b)</code> : means this is a parameter representing a function
+receiving an element of type <code>a</code> and returning as result an element of
+type <code>b</code></p>
+</li>
+<li>
+<p><code>[a]</code>: Then we will receive a list of elements of type <code>a</code></p>
+</li>
+<li>
+<p><code>[b]</code>: As final result we&#8217;ll get a list of elements of type <code>b</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>A silly example could be to increase all numbers within a given
+collection.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">increase :: Num a =&gt; [a] -&gt; [a]
+increase xs = map (+1) xs</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We&#8217;re using a partially applied function <code>(+1)</code> which is going to be
+applied by <code>map</code> to every element of the list and finally return a new
+list with all increased values.</p>
+</div>
+<div class="paragraph">
+<p>Another example could be to ask whether all numbers within a list are
+even numbers or not.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">allEven :: [Int] -&gt; Bool
+allEven xs = and $ map even xs</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here we apply the function <code>even</code> to every element in the list and
+that will result in a new list with <code>Bool</code> values. Then is when the
+<code>and</code> function comes to check whether all values are <code>true</code> or not.</p>
+</div>
+<div class="paragraph">
+<p>If all elements are true, then the result is true, false otherwise.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="filter"><code>filter</code></h4>
+<div class="paragraph">
+<p>The <strong>filter</strong> function, takes a function as an argument to decide which
+elements of the list taken as second argument will be filtered and
+which ones won&#8217;t.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">filter :: (a -&gt; Bool) -&gt; [a] -&gt; [a]</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>(a &#8594; Bool)</code>: This function is often called the <code>predicate</code>. It
+will return true if the element matches a given condition or not.</p>
+</li>
+<li>
+<p><code>[a]</code>: The source list</p>
+</li>
+<li>
+<p><code>[a]</code>: The result list with the non discarded elements</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>If the element <strong>doesn&#8217;t match</strong> the condition <strong>it will be
+discarded</strong>. Or in other words, <strong>only those matching the condition,
+will pass</strong>.</p>
+</div>
+<div class="paragraph">
+<p>A trivial example could be getting only the even numbers of a list of
+integers.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">filterEven :: [Int] -&gt; [Int]
+filterEven = filter even</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Of course you can always use a <strong>lambda expression</strong>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">filterLongNames :: [String] -&gt; [String]
+filterLongNames = filter (\x -&gt; (length x) &gt; 20)</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="foldr"><code>foldr</code></h4>
+<div class="paragraph">
+<p>The <strong>foldr</strong> can be used to aggregate all values from a given list
+using a given function.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">foldr :: (a -&gt; b -&gt; b) -&gt; b -&gt; [a] -&gt; b</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>(a &#8594; b &#8594; b)</code>: a function taking a new element from the list
+and the accumulated value and mix both to get a new accumulator.</p>
+</li>
+<li>
+<p><code>b</code>: a initial value to serve as initial accumulator.</p>
+</li>
+<li>
+<p><code>[a]</code>: The list of elements we want to reduce</p>
+</li>
+<li>
+<p><code>b</code>: The result</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Lets say I want to sum all ages from a list of people:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">sumPeopleAge :: [Person] -&gt; Integer
+sumPeopleAge = foldr (\next \acc -&gt; next.age + acc) 0</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>See how I&#8217;m using here a lambda expression to get only the <code>age</code> value
+from the record <code>Person</code> and add it up to the accumulator.</p>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>

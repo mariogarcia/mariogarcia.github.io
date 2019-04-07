@@ -1,0 +1,464 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>Rasperry Pi + SSHoogr</h1></header><yieldScaped><div class="sect1">
+<h2 id="the_idea">The idea</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Well some time ago I wanted to build a mini raspberry pi mini tower to
+do some proofs of concept about distributed computing. The time passed
+and I didn&#8217;t do anything&#8230;&#8203;until today. But the thing is attending
+last <a href="http://www.greachconf.es">GreachConf</a> I saw sshoogr (pronounced
+"sugar"). <code>sshoogr</code> is a Groovy-based DSL library for working with
+remote servers through SSH.</p>
+</div>
+<div class="paragraph">
+<p>It seemed something easy to use and most importantly&#8230;&#8203;fun! It may
+well be not as powerful as Ansible but I don&#8217;t really need that (at
+least at the moment) and I thought it would be nice to do some devops
+while using Groovy.</p>
+</div>
+<div class="paragraph">
+<p>So steps are:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Installing OS</p>
+</li>
+<li>
+<p>Initializing systems</p>
+</li>
+<li>
+<p>Install ssh keys</p>
+</li>
+<li>
+<p>Install Docker</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="os">OS</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>First of all I had to install the OS. Although many people is using
+<a href="https://www.raspberrypi.org/downloads/">Raspbian</a>, or
+<a href="http://blog.hypriot.com/">HypriotOS</a>, I chose
+<a href="https://archlinuxarm.org/">ArchlinuxARM</a>. Among other things I liked
+the idea of using the same linux flavor I&#8217;m using everyday, and Arch
+normally is lighter than Debian distros.</p>
+</div>
+<div class="paragraph">
+<p>To install the OS for a <code>rpi-2</code> you can find a step-by-step
+<a href="https://archlinuxarm.org/platforms/armv7/broadcom/raspberry-pi-2">here</a>. Of
+course there are distros for many <strong>ARM</strong> micros.</p>
+</div>
+<div class="paragraph">
+<p>Of course once I have install it in the first <code>rpi-2</code> then clone it to
+the other 3 machines.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="commons">Commons</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="base_script">Base script</h3>
+<div class="paragraph">
+<p>Because I&#8217;m dealing with Groovy scripts I&#8217;m using <strong>Grapes</strong> to get
+<strong>sshoogr</strong> dependencies. However I don&#8217;t want to repeat the
+dependencies all over again in every script, so I created a base
+script, and I will be using it through the rest of scripts.</p>
+</div>
+<div class="listingblock">
+<div class="title">Base script</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">package common
+
+@Grapes([
+    @Grab('com.aestasit.infrastructure.sshoogr:sshoogr:0.9.25'),
+    @Grab('commons-codec:commons-codec:1.10')
+])
+import com.aestasit.infrastructure.ssh.DefaultSsh
+
+class Sshoogr extends DefaultSsh { }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>How to use this script in the other scripts ?</strong> Well because we are
+only interested in methods within <code>DefaultSsh</code> then we should add a
+static import in your script:</p>
+</div>
+<div class="listingblock">
+<div class="title">Static import</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">import static common.Sudo.*
+import static common.Util.*
+import static common.Sshoogr.*</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="common_variables">Common variables</h3>
+<div class="paragraph">
+<p>At this point we can only access the <code>rpi2</code> using the default
+usernames and passwords. In order to avoid copy-pasting the user names
+and password every time, I put all of them in the same place.</p>
+</div>
+<div class="listingblock">
+<div class="title">Common variables</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">Unresolved directive in &lt;stdin&gt; - include::../../../../../../../sources/2016/04/sshoogr/common/secrets.groovy[indent=0]</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Ip of the host we&#8217;re setting</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Sudo prefix</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Default usernames and passwords</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>New credentials used to replace default ones</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Path to ssh key files</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>A way of gaining root access through <code>su -</code></td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p><strong>How these variables are included in the rest of scripts ?</strong> Throug
+the <code>evaluate</code> method:</p>
+</div>
+<div class="listingblock">
+<div class="title">Evaluating other scripts</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">evaluate('common/secrets.groovy' as File)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When invoking the <code>evaluate</code> method, that script will be evaluated and
+included in the current script scope.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="install_new_credentials">Install new credentials</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>First time you access a machine it could be normal to access through
+user/password, but once you&#8217;ve entered the first time afterwards you
+should be accessing using a ssh key. The following script will be
+installing our public ssh key as an authorized key in the remote host.</p>
+</div>
+<div class="listingblock">
+<div class="title">Install new credentials</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">/**
+ * 1.SSHOOGR CONFIG
+ */
+import static common.Sudo.*
+import static common.Util.*
+import static common.Sshoogr.*
+
+<i class="conum" data-value="1"></i><b>(1)</b>
+options.trustUnknownHosts = true
+
+/**
+ * 2.SHARED VARIABLES
+ */
+evaluate('common/secrets.groovy' as File)
+
+/**
+ * 3.OWN VARIABLES
+ */
+PREFIX = "echo $RPI_ROOT_PASSWORD | su -c '"
+SUFFIX = "'"
+
+/**
+ * 4.CHANGE DEFAULT CREDENTIALS
+ *
+ * This step is done without online connection to avoid
+ * any attack at this point due the fact that machines have
+ * default usernames and passwords.
+ */
+remoteSession("$DEF_RPI_USER_TUPLE@$IP"){
+    prefix("echo $DEF_RPI_ROOT_PASSWORD | su -c '") {
+        suffix(SUFFIX){
+            exec "echo \"$RPI_ROOT_TUPLE\" | chpasswd -m"
+        }
+    }
+
+    prefix(PREFIX) {
+        suffix(SUFFIX) {
+            exec "pacman --noconfirm -S sudo"
+        }
+    }
+
+    prefix(PREFIX) {
+        suffix(SUFFIX) {
+            exec "useradd -m $DOCKER_USERNAME"
+            exec "echo \"$DOCKER_TUPLE\" | chpasswd -m"
+            exec "echo \"${noPasswd(DOCKER_USERNAME)}\" &gt;&gt; /etc/sudoers"
+        }
+    }
+}
+
+/**
+ * 3.INSTALL SSH KEY
+ *
+ * Once machines have been initialized, they should be accessed via
+ * ssh key instead of using username and password. In order to do that
+ * we need to install an authorized key in every one of them.
+ */
+
+AUTHORIZED_KEYS_FILE = "/home/$DOCKER_USERNAME/.ssh/authorized_keys"
+DOCKER_PUBLIC_KEY = new File(SUPERVISOR_SSH_PUB_KEY)
+DOCKER_PRIVATE_KEY = new File(SUPERVISOR_SSH_PRI_KEY)
+DOCKER_CREDENTIALS = [keyFile: DOCKER_PRIVATE_KEY]
+
+remoteSession("$DOCKER_TUPLE@$IP") {
+    exec "mkdir -p ~/.ssh"
+    exec "touch $AUTHORIZED_KEYS_FILE"
+
+    remoteFile(AUTHORIZED_KEYS_FILE).text = DOCKER_PUBLIC_KEY.text
+}
+
+/**
+ * 5.DELETE DEFAULT USER
+ *
+ */
+remoteSession("$DOCKER_USERNAME@$IP") {
+    keyFile = DOCKER_PRIVATE_KEY
+
+    exec "history -c"
+
+    prefix(SUDO) {
+        exec "userdel -fr $DEF_RPI_USER_USERNAME"
+        exec "pacman --noconfirm -Syu"  <i class="conum" data-value="1"></i><b>(1)</b>
+        exec "reboot now"
+    }
+}</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Because hosts at this point doesn&#8217;t have a valid ssl
+certification we are telling ssh to trust a server anyway.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+the <code>--noconfirm</code> flag should be used when you don&#8217;t want the
+process to ask for confirmation.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="install_firewall">Install firewall</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Now it&#8217;s time to protect your machine, install the firewall, this time
+I will be using <code>ufw</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Firewall</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">/**
+ * 1.SSHOOGR CONFIG
+ */
+import static common.Sudo.*
+import static common.Util.*
+import static common.Sshoogr.*
+
+options.trustUnknownHosts = true
+
+/**
+ * 2.SHARED VARIABLES
+ */
+evaluate('common/secrets.groovy' as File)
+
+DOCKER_PRIVATE_KEY = new File(SUPERVISOR_SSH_PRI_KEY)
+/**
+ * 4.INSTALL FIREWALL
+ */
+remoteSession("$DOCKER_USERNAME@$IP") {
+    keyFile = DOCKER_PRIVATE_KEY
+
+    prefix(SUDO) {
+        exec "pacman --noconfirm -S ufw"  <i class="conum" data-value="1"></i><b>(1)</b>
+        exec "ufw allow ssh"              <i class="conum" data-value="2"></i><b>(2)</b>
+        exec "systemctl enable ufw"       <i class="conum" data-value="3"></i><b>(3)</b>
+        exec "systemctl start ufw"        <i class="conum" data-value="4"></i><b>(4)</b>
+    }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Install <strong>ufw</strong></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Add ssh exception</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Enable <strong>ufw</strong> on startup</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Start <strong>ufw</strong> service now</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="install_docker">Install Docker</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="title">Docker</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">/**
+ * 1.SSHOOGR CONFIG
+ */
+import static common.Sudo.*
+import static common.Util.*
+import static common.Sshoogr.*
+
+options.trustUnknownHosts = true
+
+/**
+ * 2.SHARED VARIABLES
+ */
+evaluate('common/secrets.groovy' as File)
+
+DOCKER_PRIVATE_KEY = new File(SUPERVISOR_SSH_PRI_KEY)
+/**
+ * 3.INSTALL DOCKER
+ *
+ * Installing docker engine in all machines
+ */
+remoteSession("$DOCKER_USERNAME@$IP") {
+    keyFile = DOCKER_PRIVATE_KEY
+
+    prefix(SUDO) {
+        exec "pacman --noconfirm -S docker"
+        exec "usermod -a -G docker $DOCKER_USERNAME"
+        exec "systemctl enable docker"
+        exec "systemctl start docker"
+    }
+
+    exec "history -c"
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="check_it_out">Check it out!</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You can find <code>Sshoogr</code> at <a href="https://github.com/aestasit/sshoogr" class="bare">https://github.com/aestasit/sshoogr</a></p>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>

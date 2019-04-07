@@ -1,0 +1,384 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>Linux LVM: Getting started (ext4)</h1></header><yieldScaped><div id="preamble">
+<div class="sectionbody">
+<div class="quoteblock">
+<blockquote>
+In Linux, Logical Volume Manager (LVM) is a device mapper target that
+provides logical volume management for the Linux kernel. Most modern
+Linux distributions are LVM-aware to the point of being able to have
+their root file systems on a logical volume.
+</blockquote>
+<div class="attribution">
+&#8212; Wikipedia
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="create">Create</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>LVM has a lot of features, but for now, I&#8217;ll be learning the basics of
+LVM: creating <code>logical volumes</code>. At the end of this entry I&#8217;ll have
+created two logical volumes: <strong>books</strong> and <strong>videos</strong>. In order to to that
+I have to follow these steps:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2016/11/linux_lvm/lvm-ditaa-diagram.png" alt="lvm ditaa diagram" width="420" height="294">
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Create a <code>partition</code> in the physical drive</p>
+</li>
+<li>
+<p>Create a <code>physical volume</code> (PV)</p>
+</li>
+<li>
+<p>Create a <code>volume group</code> (VG)</p>
+</li>
+<li>
+<p>Create a <code>logical volume</code> (LV)</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Because I don&#8217;t want to lose any important data from my
+hard drive, I will be using an empty SD card while learning about
+LVM. USBs or SD cards are great when learning about file systems, you
+always have one at hand, and if you do something wrong, you won&#8217;t be
+ending installing your OS again :P
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="create_a_partition">Create a partition</h3>
+<div class="paragraph">
+<p>I&#8217;ve a new SD card. Let&#8217;s see where it&#8217;s located within the system:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">user@computer&gt; sudo fdisk -l
+...
+Disk /dev/mmcblk0: 28.8 GiB, 30908350464 bytes, 60367872 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x00000000
+...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>So it is located at <code>/dev/mmcblk0</code>, perfect. Now I would like to
+create a primary partition taking the entire space. I&#8217;m sticking to
+<code>fdisk</code> on this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">user@computer&gt; sudo fdisk /dev/mmcblk0
+
+Welcome to fdisk (util-linux 2.28.2).
+Changes will remain in memory only, until you decide to write them.
+Be careful before using the write command.
+
+
+Command (m for help): n
+Partition type
+   p   primary (0 primary, 0 extended, 4 free)
+   e   extended (container for logical partitions)
+Select (default p):
+
+Using default response p.
+Partition number (1-4, default 1):
+First sector (2048-60367871, default 2048):
+Last sector, +sectors or +size{K,M,G,T,P} (2048-60367871, default 60367871):
+
+Created a new partition 1 of type 'Linux' and of size 28.8 GiB.
+
+Command (m for help): w
+The partition table has been altered.
+Calling ioctl() to re-read partition table.
+Syncing disks.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now if I run <code>sudo fdisk -l</code> again I should see the partition I&#8217;ve
+just created:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">user@computer&gt; sudo fdisk -l
+...
+Disk /dev/mmcblk0: 28.8 GiB, 30908350464 bytes, 60367872 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x00000000
+
+Device         Boot Start      End  Sectors  Size Id Type
+/dev/mmcblk0p1       2048 60367871 60365824 28.8G 83 Linux
+...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Ok at this point we&#8217;ve got our pillars, so to speak. Now we can start
+building our LVM structure.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="initialize_a_physical_volume">Initialize a physical volume</h3>
+<div class="paragraph">
+<p>In order to use a given partition as a <code>physical volume</code> you have to
+initialize it first.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">user@computer&gt; sudo pvcreate /dev/mmcblk0p1
+ Physical volume "/dev/mmcblk0p1" successfully created.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This will create a volume group descriptor at the start of the
+<code>/dev/mmcblk0p1</code>. You can check your new volume executing <code>pvdisplay</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">user@computer&gt; sudo pvdisplay
+...
+  "/dev/mmcblk0p1" is a new physical volume of "28.78 GiB"
+  --- NEW Physical volume ---
+  PV Name               /dev/mmcblk0p1
+  VG Name
+  PV Size               28.78 GiB
+  Allocatable           NO
+  PE Size               0
+  Total PE              0
+  Free PE               0
+  Allocated PE          0
+  PV UUID               NgHQAR-U92l-9GXv-cXcV-oCHL-pp0Y-MDA4b1</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="create_a_volume_group">Create a volume group</h3>
+<div class="paragraph">
+<p>Several physical volumes can be grouped into one single volume
+group. In this example I&#8217;m only doing a 1-1 relationship between a
+physical volume and a volume group.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">user@computer&gt; sudo vgcreate mymedia /dev/mmcblk0p1
+ Volume group "mymedia" successfully created</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To make sure your new group has been created, let&#8217;s list your system&#8217;s
+<code>volume groups</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">user@computer&gt; sudo vgs
+ VG        #PV #LV #SN Attr   VSize   VFree
+  MainVG      1   3   0 wz--n- 238.22g     0
+  mymedia     1   0   0 wz--n-  28.78g 28.78g</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="create_logical_volumes">Create logical volumes</h3>
+<div class="paragraph">
+<p>We can now create two <code>logical volumes</code>: <code>books</code> and <code>music</code>. I&#8217;ll
+give half of the space each. First <code>books</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">user@computer&gt; sudo lvcreate -l 50%VG -n books mymedia
+WARNING: dos signature detected on /dev/mymedia/books at offset 510. Wipe it? [y/n]: y
+  Wiping dos signature on /dev/mymedia/books.
+  Logical volume "books" created.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then <code>music</code> will take the rest available space for <code>mymedia</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">user@computer&gt; sudo lvcreate -l 100%FREE -n music mymedia
+ Logical volume "music" created.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As usual I&#8217;m checking that both <code>logical volumes</code> have been created by
+listing available logical volumes.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">user@computer&gt; sudo lvs
+  LV          VG        Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  books       mymedia   -wi-a-----  14.39g
+  music       mymedia   -wi-a-----  14.39g</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Nice! Both have exactly the same size.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Here I&#8217;ve been playing with percentages, but the <code>lvcreate</code>
+command allows you, for example, to specify MB, GB. You can find some
+examples
+<a href="https://www.centos.org/docs/5/html/Cluster_Logical_Volume_Manager/LV_create.html">here</a>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="use_logical_volumes">Use logical volumes</h3>
+<div class="paragraph">
+<p>Once we&#8217;ve created a logical volume, the only thing remaining is to
+format our logical volumes as <code>ext4</code> filesystems and use them.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Why <code>ext4</code> ? Well because once I wanted to see how shrink/extend
+works right after this entry. And the easiest way to do it is by
+formatting your <code>logical volume</code> as <code>ext4</code>. Other filesystems may
+require extra manual steps. But of course, if you&#8217;re sure about the
+type of filesystem you want, go ahead!
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">user@computer&gt; sudo mkfs.ext4 /dev/mymedia/books
+
+mke2fs 1.43.3 (04-Sep-2016)
+Creating filesystem with 3772416 4k blocks and 944704 inodes
+Filesystem UUID: a6ae793c-a735-4bae-8941-ddab3c680398
+Superblock backups stored on blocks:
+	32768, 98304, 163840, 229376, 294912, 819200, 884736, 1605632, 2654208
+
+Allocating group tables: done
+Writing inode tables: done
+Creating journal (16384 blocks): done
+Writing superblocks and filesystem accounting information:
+done</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">user@computer&gt; sudo mkfs.ext4 /dev/mymedia/music
+mke2fs 1.43.3 (04-Sep-2016)
+....</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now you should be able to mount them and start using them.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="references">References</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="http://tldp.org/HOWTO/LVM-HOWTO/index.html">The Linux Documentation Project: LVM How To</a></p>
+</li>
+<li>
+<p><a href="https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/High_Availability_Add-On_Administration/s1-LVMsetupnfs-HAAA.html">Red Hat: CONFIGURING AN LVM VOLUME WITH AN EXT4 FILE SYSTEM</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,799 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>Property based testing</h1></header><yieldScaped><div class="sect2">
+<h3 id="what_is_property_based_testing">What is <em>Property Based Testing</em> ?</h3>
+<div class="quoteblock">
+<blockquote>
+Property-based tests make statements about the output of your code
+based on the input, and these statements are verified for many
+different possible inputs.
+</blockquote>
+<div class="attribution">
+&#8212; Source: <a href="http://blog.jessitron.com/2013/04/property-based-testing-what-is-it.html" class="bare">http://blog.jessitron.com/2013/04/property-based-testing-what-is-it.html</a>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="the_problem">The problem</h3>
+<div class="paragraph">
+<p>Fortunately nowadays we are used to do testing. But sometimes tests
+are hard to do, hard to maintain and hard to reason about. Even if we
+try our best, sometimes we forgot to add that case that made the
+app to crash in the worst possible moment.</p>
+</div>
+<div class="paragraph">
+<p>Property based testing claims to be able to help us to fill this gap
+and make our tests easier to maintain. But I&#8217;ve also heard it is also
+harder to write and grasp. In this entry I&#8217;m reviewing how property
+based testing is handled in different programming languages. From a
+more imperative like Java or Groovy to more functional languages like
+Clojure, Scala and finally Frege. During this journey I&#8217;ll try to
+figure out which are the patterns and best practices to get advantage
+of property based testing.</p>
+</div>
+<div class="sect3">
+<h4 id="java">Java</h4>
+<div class="paragraph">
+<p><a href="https://github.com/mariogarcia/blog/tree/master/sources/2015/11/quick-check/qc-java">Code at Github</a></p>
+</div>
+<div class="quoteblock">
+<blockquote>
+Assumptions &#8658; Theories/Properties &#8658; Proof
+</blockquote>
+<div class="attribution">
+&#8212; Use case
+</div>
+</div>
+<div class="paragraph">
+<p>For the Java sample I&#8217;ve tried
+<a href="https://github.com/pholser/junit-quickcheck">junit-quickcheck</a>. This
+library is meant to be used with <a href="http://junit.org/">junit</a> tests.</p>
+</div>
+<div class="listingblock">
+<div class="title">dependencies</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">testCompile 'com.pholser:junit-quickcheck-core:0.5'
+testCompile 'com.pholser:junit-quickcheck-generators:0.5'
+testCompile 'junit:junit:4.12'
+testCompile 'org.hamcrest:hamcrest-junit:2.0.0.0'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The sample is a silly example about loans. If somebody ask for a loan,
+depending on how much this person is asking, the state of the loan may
+vary. The Java library works on top of the concept of theories and
+assumptions.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>1st theory</strong>: If the loan is less than or equals to 200 EUR then the
+loan is <code>ACCEPTED</code> right away.</p>
+</li>
+<li>
+<p><strong>2nd theory</strong>: If the loan is between 201 and 1000 then it should be
+marked as <code>PENDING</code> until the request is studied in detail</p>
+</li>
+<li>
+<p><strong>3rd theory</strong>: All loans beyond 1000 will be automatically
+<code>REJECTED</code>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Theories aree annotated with the <code>@Theory</code> annotation. Follow up the
+theory for the automatically accepted loans:</p>
+</div>
+<div class="listingblock">
+<div class="title">less or equals to 200</div>
+<div class="content">
+<pre class="highlight"><code class="language-java" data-lang="java">@Theory public void automaticallyApproved( <i class="conum" data-value="1"></i><b>(1)</b>
+    @ForAll @InRange(minDouble = 0d, maxDouble = 200d) Double amount) { <i class="conum" data-value="2"></i><b>(2)</b>
+
+    Loan loan = new Loan(State.PENDING, amount); <i class="conum" data-value="3"></i><b>(3)</b>
+
+    assumeThat(loan.state, equalTo(State.PENDING));
+    assumeThat(loan.amount, lessThanOrEqualTo(200d)); <i class="conum" data-value="4"></i><b>(4)</b>
+
+    Supervisor supervisor = new Supervisor();
+    Loan processedLoan = supervisor.process(loan); <i class="conum" data-value="5"></i><b>(5)</b>
+
+    assertEquals(processedLoan.state, State.ACCEPTED); <i class="conum" data-value="6"></i><b>(6)</b>
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>This is a <code>@Theory</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td><code>@ForAll</code> cases in this theory (by default are 100) the amount
+will be provided by a <code>@InRange</code> and it will be a number between 0 and
+200 (It doesn&#8217;t make sense to grant a loan of 0 EUR right ? :P)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Building a new loan with the provided amount</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Assuming the new loan state is <code>PENDING</code> and the amount is less
+than or equals 200</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Processing that loan</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>The result should be an accepted loan</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Then we can create theories for the remaining use cases:</p>
+</div>
+<div class="listingblock">
+<div class="title">between 200 and 100</div>
+<div class="content">
+<pre class="highlight"><code class="language-java" data-lang="java">@Theory public void needsAFurtherStudy(
+    @ForAll @InRange(minDouble = 201d, maxDouble = 1000d) Double amount) {
+
+    Loan loan = new Loan(State.PENDING, amount);
+
+    assumeThat(loan.state, equalTo(State.PENDING));
+    assumeThat(loan.amount, allOf(
+        greaterThan(200d),
+        lessThanOrEqualTo(1000d)
+    ));
+
+    Supervisor supervisor = new Supervisor();
+    Loan processedLoan = supervisor.process(loan);
+
+    assertEquals(processedLoan.state, State.PENDING);
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and&#8230;&#8203;</p>
+</div>
+<div class="listingblock">
+<div class="title">beyond 1000</div>
+<div class="content">
+<pre class="highlight"><code class="language-java" data-lang="java">@Theory public void automaticallyRejected(
+    @ForAll @InRange(minDouble = 1001d, maxDouble = 20000d) Double amount) {
+
+    Loan loan = new Loan(State.PENDING, amount);
+
+    assumeThat(loan.state, equalTo(State.PENDING));
+    assumeThat(loan.amount, allOf(
+        greaterThan(1000d),
+        lessThanOrEqualTo(20000d)
+    ));
+
+    Supervisor supervisor = new Supervisor();
+    Loan processedLoan = supervisor.process(loan);
+
+    assertEquals(processedLoan.state, State.REJECTED);
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I could have created a generator for Loan instances, but it seemed
+overkill for such a little example. It was easier to call to a
+predefined generator to feed a given Loan property.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="groovy">Groovy</h4>
+<div class="paragraph">
+<p><a href="https://github.com/mariogarcia/blog/tree/master/sources/2015/11/quick-check/qc-groovy">Code at Github</a></p>
+</div>
+<div class="quoteblock">
+<blockquote>
+Know the output &#8658; Check a certain set of inputs give the right output
+</blockquote>
+<div class="attribution">
+&#8212; Use case
+</div>
+</div>
+<div class="paragraph">
+<p>To use property based testing with Groovy I&#8217;m using
+<a href="https://github.com/spockframework/spock">Spock</a> as testing framework and
+<a href="https://github.com/Bijnagte/spock-genesis">Spock Genesis</a> which has a
+set of value generators.</p>
+</div>
+<div class="listingblock">
+<div class="title">dependencies</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+testCompile 'com.nagternal:spock-genesis:0.3.0'
+testCompile 'junit:junit:4.12'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This time we have a function building URIs that should follow certain
+rules. First of all the final URI should follow these rules:</p>
+</div>
+<div class="listingblock">
+<div class="title">Rules</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">static final Pattern WORD            = ~/[a-z0-9-._\-]{1,8}/
+static final Pattern OPTIONAL_SLASH  = ~/[\/]{0,1}/
+static final Pattern OPTIONAL_WORD   = ~/($WORD){0,1}/
+
+static final Pattern COMPLIANT_FRAGMENT  = ~/$OPTIONAL_SLASH$OPTIONAL_WORD$OPTIONAL_SLASH/
+static final Pattern COMPLIANT_URI       = ~/s3:\/\/$WORD($COMPLIANT_FRAGMENT){1,10}/</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then we build the function that would match that rules:</p>
+</div>
+<div class="listingblock">
+<div class="title">Composer</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">static URI compose(String host, String bucket, String path) {
+    String treatedRoot = bucket.endsWith('/') ? bucket : "$bucket/"
+    String treatedPath = path.dropWhile { it == '/' }
+
+    return URI.create("$host$treatedRoot$treatedPath")
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And finally lets execute a test checking that function:</p>
+</div>
+<div class="listingblock">
+<div class="title">Test</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">@Unroll('Getting an URI from (h: #host, r: #root, p: #path)')
+void 'composing URI fragments to get a full URI'() {
+    when: 'composing all pieces'
+    def uri = URIComposer.compose(host, root, path).toString()
+
+    then: 'we should get a compliant URI'
+    uri ==~ COMPLIANT_URI <i class="conum" data-value="1"></i><b>(1)</b>
+
+    where: 'possible values are'
+    root &lt;&lt; fragmentProperties.take(DEFAULT) <i class="conum" data-value="2"></i><b>(2)</b>
+    path &lt;&lt; fragmentProperties.take(DEFAULT) <i class="conum" data-value="3"></i><b>(3)</b>
+
+    host = "s3://username"
+}
+
+StringGenerator getFragmentProperties() {
+    return Gen.string(COMPLIANT_FRAGMENT)
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Result should be a valid (upon our rules) URI</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Bucket/Root path should follow the valid fragment property</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Rest of paths should follow the valid fragment property</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>It&#8217;s clear, I could have forgotten to add many of the possible cases
+if I would have written those cases manually. This way I&#8217;m taking
+advantage of the declared rules to generate a bunch of use cases for
+me.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="scala">Scala</h4>
+<div class="paragraph">
+<p><a href="https://github.com/mariogarcia/blog/tree/master/sources/2015/11/quick-check/qc-scala">Code at Github</a></p>
+</div>
+<div class="quoteblock">
+<blockquote>
+Assumptions &#8658; Theories/Properties &#8658; Proof
+</blockquote>
+<div class="attribution">
+&#8212; Use case
+</div>
+</div>
+<div class="paragraph">
+<p>Because I&#8217;m not yet used to Scala I&#8217;ve taken the same example I did in
+Java and tried to translate it to Scala to see how it looks like.</p>
+</div>
+<div class="paragraph">
+<p>So we also have a function to process a given Loan:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-scala" data-lang="scala">def process(loan: Loan) : Loan = loan.amount match { <i class="conum" data-value="1"></i><b>(1)</b>
+  case x if 0   until 201  contains x  =&gt; Loan(State.ACCEPTED, loan.amount) <i class="conum" data-value="2"></i><b>(2)</b>
+  case x if 201 until 1001 contains x  =&gt; Loan(State.PENDING,  loan.amount) <i class="conum" data-value="3"></i><b>(3)</b>
+  case _                               =&gt; Loan(State.REJECTED, loan.amount) <i class="conum" data-value="4"></i><b>(4)</b>
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>For a given loan amount</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>If the amount is 0 &lt; amount &lt; 201</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>If the amount is 201 &lt; amount &lt; 1000</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>If the amount is anything else</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>And dependending on the requested amount we should be receiving different
+state. For amounts automatically accepted:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-scala" data-lang="scala">val acceptableLoans = for {
+  amount &lt;- Gen.chooseNum(0,200) <i class="conum" data-value="1"></i><b>(1)</b>
+} yield Loan(State.PENDING, amount) <i class="conum" data-value="2"></i><b>(2)</b>
+
+property("accepted loans") = forAll(acceptableLoans) { (loan: Loan) =&gt;
+  Supervisor.process(loan).state == State.ACCEPTED <i class="conum" data-value="3"></i><b>(3)</b>
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Using a number generator for getting amounts from 0 to 200</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Building instances of Loan with State.PENDING and 0 &lt; amount &lt; 200</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>For all provided loans once processed they all should be ACCEPTED</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>For those which are directly rejected:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-scala" data-lang="scala">val rejectableLoans = for {
+  amount &lt;- Gen.chooseNum(1001,2000) <i class="conum" data-value="1"></i><b>(1)</b>
+} yield Loan(State.PENDING, amount) <i class="conum" data-value="2"></i><b>(2)</b>
+
+property("rejected loans") = forAll(rejectableLoans) { (loan: Loan) =&gt;
+  Supervisor.process(loan).state == State.REJECTED <i class="conum" data-value="3"></i><b>(3)</b>
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Using a number generator for getting amounts from 1000 to 1999</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Building instances of Loan with State.PENDING and 1000 &lt; amount &lt; 1999</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>For all provided loans once processed they all should be REJECTED</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="clojure">Clojure</h4>
+<div class="paragraph">
+<p><a href="https://github.com/mariogarcia/blog/tree/master/sources/2015/11/quick-check/qc-clojure">Code at Github</a></p>
+</div>
+<div class="quoteblock">
+<blockquote>
+Check behavior
+</blockquote>
+<div class="attribution">
+&#8212; Use case
+</div>
+</div>
+<div class="paragraph">
+<p>Clojure has a complete-like quick-check testing framework called
+<a href="https://github.com/clojure/test.check">Test Check</a>. It can be used
+standalone but I&#8217;ll be using it withing a <code>clojure.test</code> thanks
+to the <code>defspec</code> macro.</p>
+</div>
+<div class="listingblock">
+<div class="title">dependencies</div>
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">:dependencies [[org.clojure/clojure "1.7.0"]
+               [org.clojure/test.check "0.9.0"]]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The Clojure example has to do with numbers. Lets say I&#8217;m reading a CSV
+file with lines of numbers. Those lines may have numbers or
+characters. I&#8217;m only interested in adding up all numbers of each line.</p>
+</div>
+<div class="paragraph">
+<p>What are the properties ? Well, Given a line with elements separated by <code>,</code>&#8230;&#8203;</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Numbers are all elements minus the non numeric values</p>
+</li>
+<li>
+<p>Adding up all numeric elements should follow the commutativity rule</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In our test we&#8217;re declaring that for all possible values of a possible
+empty vector of alphanumeric values, once we join those values in a
+csv-like string, it doesn&#8217;t matter which is the order of the included
+digits, the outcome should remain the same.</p>
+</div>
+<div class="listingblock">
+<div class="title">Test</div>
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns qc.core-test
+  (:require [clojure.test :refer :all]
+            [qc.core :refer :all]
+            [clojure.string :as str]
+            [clojure.test.check :as tc]
+            [clojure.test.check.generators :as gen]
+            [clojure.test.check.properties :as prop]
+            [clojure.test.check.clojure-test :as ct :refer (defspec)]))
+
+(defn join-chars
+  [chars]
+  (str/join "," chars))
+
+(defspec check-adding-up-numbers-from-line
+  100 <i class="conum" data-value="1"></i><b>(1)</b>
+  (prop/for-all [v (gen/vector gen/char-alphanumeric)] <i class="conum" data-value="2"></i><b>(2)</b>
+                (let [line (join-chars v)
+                      reversed-line (join-chars (reverse v))]
+                  (= (sum-numbers line) <i class="conum" data-value="3"></i><b>(3)</b>
+                     (sum-numbers reversed-line))))) <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Number of iterations</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Generators (It generates vectors of alphanumeric characters, sometimes could be empty)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Setting a sample line and a reversed version of that line</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>The result should be the same despite the order</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>A simple implementation of the required function:</p>
+</div>
+<div class="listingblock">
+<div class="title">Sum</div>
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(defn sum-numbers
+  "Adds up all numbers within a CSV line expression"
+  [line]
+  (if (empty? line) 0 <i class="conum" data-value="1"></i><b>(1)</b>
+    (let [elements (str/split line #",")] <i class="conum" data-value="2"></i><b>(2)</b>
+      (-&gt;&gt; elements
+           (filter is-digit) <i class="conum" data-value="3"></i><b>(3)</b>
+           (map to-int) <i class="conum" data-value="4"></i><b>(4)</b>
+           (reduce +))))) <i class="conum" data-value="5"></i><b>(5)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Checking if the argument is empty</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Splitting values</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Filtering digits</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Converting to integers</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Adding up all integers</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="frege">Frege</h4>
+<div class="paragraph">
+<p><a href="https://github.com/mariogarcia/blog/tree/master/sources/2015/11/quick-check/qc-frege">Code at Github</a></p>
+</div>
+<div class="quoteblock">
+<blockquote>
+Reversible processes
+</blockquote>
+<div class="attribution">
+&#8212; Use case
+</div>
+</div>
+<div class="paragraph">
+<p>Finally I will be coding a very simple example representing how to
+test some process that you know that applied twice gives you the
+original value. The most used example for this is to reverse a string:</p>
+</div>
+<div class="listingblock">
+<div class="title">reverse string</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">module qc.Reverse where
+
+-- Reverses a string
+reverseString :: String -&gt; String
+reverseString = packed . reverse . toList</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I&#8217;m defining two properties that should hold for the <code>reverseString</code>
+function:</p>
+</div>
+<div class="listingblock">
+<div class="title">properties</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">module qc.TestReverse where
+
+import Test.QuickCheck
+import qc.Reverse
+
+applyTwice :: String -&gt; Bool
+applyTwice xs = ((reverseString . reverseString) xs) == xs
+
+applyToOne :: Char -&gt; Bool
+applyToOne x = ((reverseString . packed) [x]) == packed [x]
+
+reversible                 = property (applyTwice) <i class="conum" data-value="1"></i><b>(1)</b>
+noEffectToSingleCharacter  = property (applyToOne) <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>reversible</code>: The function applied twice to the same word should
+return the original value.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td><code>no effect to a single character</code>: original word The function
+applied to a single character should return the same character</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>In this Frege example I&#8217;ve not used any generator explicitly, but
+declaring the functions that are going to be used with the <code>property</code>
+function is enough for the compiler to infer what type of values
+should provided to our function to test it.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="conclusion">Conclusion</h3>
+<div class="paragraph">
+<p>About <strong>languages</strong> and <strong>frameworks</strong>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>All languages and testing framewors have <code>generators</code>, and most of
+them are pretty similar</p>
+</li>
+<li>
+<p>Only Groovy and Java examples don&#8217;t have the concept of <code>minimum
+failure sample</code> but at least Groovy has the advantage of Spock which
+helps a lot defining the specification.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>About <strong>use cases</strong>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Some detected types:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>Based on defined rules</code>: generate value ranges to prove a set of
+pre-defined rules</p>
+</li>
+<li>
+<p><code>Based on reversible processes</code>: Some problems can be solved by
+asking a process to execute twice: reverse is a good example of this.</p>
+</li>
+<li>
+<p><code>Based on known output</code>: Problems requiring to check a wide range
+of values to give the expected output.</p>
+</li>
+<li>
+<p><code>Not aimed to test result but behavior</code>: Like commutativity over
+sums (Clojure example).</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>A set of <code>properties</code> can be considered a <code>specification</code>. Both
+Groovy and Scala languages mimic that line of thought very well.</p>
+</li>
+<li>
+<p>If properties are difficult to define, then it may lead to
+indeterministic checking and different test results.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Well I&#8217;ve just started and my feeling is that I&#8217;ve seen just the tip
+of the iceberg. I really like the idea about trying to define what are
+the general properties that a given function should obey and let the
+testing framework to provide a set of possible values to challenge
+those properties.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="resources">Resources</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Java</strong></p>
+</li>
+<li>
+<p><a href="https://github.com/pholser/junit-quickcheck">junit-quickcheck</a></p>
+</li>
+<li>
+<p><a href="http://junit.org/">junit</a></p>
+</li>
+<li>
+<p><strong>Groovy</strong></p>
+</li>
+<li>
+<p><a href="https://github.com/spockframework/spock">Spock</a></p>
+</li>
+<li>
+<p><a href="https://github.com/Bijnagte/spock-genesis">Spock Genesis</a></p>
+</li>
+<li>
+<p><strong>Scala</strong></p>
+</li>
+<li>
+<p><a href="http://www.scalatest.org/">Scala Test</a></p>
+</li>
+<li>
+<p><a href="https://www.scalacheck.org/">Scala Check</a></p>
+</li>
+<li>
+<p><strong>Clojure</strong></p>
+</li>
+<li>
+<p><a href="https://github.com/clojure/test.check">Test Check</a></p>
+</li>
+<li>
+<p><strong>Frege</strong></p>
+</li>
+<li>
+<p><a href="https://www.frege-lang.org">Frege site</a></p>
+</li>
+<li>
+<p><strong>Talks</strong></p>
+</li>
+<li>
+<p><a href="http://blog.jessitron.com/2013/04/property-based-testing-what-is-it.html" class="bare">http://blog.jessitron.com/2013/04/property-based-testing-what-is-it.html</a></p>
+</li>
+<li>
+<p><a href="https://www.youtube.com/watch?v=Z8qddDUt4hI" class="bare">https://www.youtube.com/watch?v=Z8qddDUt4hI</a></p>
+</li>
+</ul>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>

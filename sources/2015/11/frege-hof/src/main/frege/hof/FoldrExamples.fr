@@ -1,8 +1,0 @@
-module hof.FoldrExamples where
-
-import hof.Data
-
--- tag::sumAges[]
-sumPeopleAge :: [Person] -> Integer
-sumPeopleAge = foldr (\next \acc -> next.age + acc) 0
--- end::sumAges[]

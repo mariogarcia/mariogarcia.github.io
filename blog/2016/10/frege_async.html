@@ -1,0 +1,397 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>Frege and parallel computation</h1></header><yieldScaped><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>While attending last <a href="https://www.lambda.world">Lambda World</a> one of the
+Haskell talks mentioned multithreading programming with Haskell. I
+immediately checked out what Frege had implemented upfront. This is
+what I&#8217;ve found so far.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="creating_a_thread">Creating a <code>Thread</code></h3>
+<div class="paragraph">
+<p>The easiest way of execute a given <code>IO</code> computation parallel to the
+main execution thread is creating a new thread using the <code>forkOS</code>
+function. First thing we have to keep in mind is that a new thread
+computation can have side effects, and therefore it has to be declared
+as an <code>IO</code> computation.</p>
+</div>
+<div class="listingblock">
+<div class="title">forkOS</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">forkOS :: IO () -&gt; IO Thread</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>So, what <code>forkOS</code> does ?: it first receives a computation <code>IO ()</code> as
+parameter, then creates a new thread and executes the computation in
+the new thread and finally, returns the new thread: <code>IO Thread</code> Lets
+see and example.</p>
+</div>
+<div class="listingblock">
+<div class="title">New Thread</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">executeInNewThread :: IO () -&gt; IO ()
+executeInNewThread action = do
+  thread &lt;- forkOS action <i class="conum" data-value="1"></i><b>(1)</b>
+  name   &lt;- thread.getName <i class="conum" data-value="2"></i><b>(2)</b>
+  Thread.sleep 2000
+  println ("Thread name: " ++ name)
+
+doSomething :: IO ()
+doSomething = do
+  println "Launching a new thread"
+  executeInNewThread ioAction
+  println "Main process continues"
+  where ioAction = (println . sum) [1..200]</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Using <code>forkOS</code> to launch a given <code>IO ()</code> action in a new thread</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Because <code>forkOS</code> returns the launched thread, we can do something
+like getting some information about the thread</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The output of this project should be something like:</p>
+</div>
+<div class="listingblock">
+<div class="title">output</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">Launching a new thread
+Main process continues
+Thread name: xxx</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="using_an_executorservice">Using an <code>ExecutorService</code></h3>
+<div class="paragraph">
+<p>When creating threads directly, you would be wasting a lot of system
+resources. A better way of creating new threads is creating threads
+through an <code>ExecutorService</code>. The <code>ExecutorService</code> keeps a thread
+pool and therefore threads could be reused. The Frege API provides
+<code>forkIO</code> function to execute a given computation in a new thread
+coming from an ExecutorService. The signature is:</p>
+</div>
+<div class="listingblock">
+<div class="title">Using an ExecutorService</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">forkIO :: IO () -&gt; IO ()</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here is an example of executing the previous computation using an
+executor service:</p>
+</div>
+<div class="listingblock">
+<div class="title">Using an ExecutorService</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">executeFromThreadPool :: IO () -&gt; IO ()
+executeFromThreadPool action = do
+  forkIO action <i class="conum" data-value="1"></i><b>(1)</b>
+  println "No information of thread is provided"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Unfortunately, as it is mentioned in the documentation, this is not
+suitable for not-ending processes, and the executor service may manage
+a fixed small number of concurrent threads only.</p>
+</div>
+<div class="paragraph">
+<p>Also it would be very hard to coordinate results from several threads,
+so I would only recommend it for cases when you would like to launch
+unrelated tasks using a thread pool. If you wanted to coordinate
+computations, then I would use <code>async</code> or make use of <code>MVar</code></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="using_mvar">Using <code>MVar</code></h3>
+<div class="paragraph">
+<p>Although neither <code>forkIO</code> nor <code>forkOS</code> return anything, the primitive
+<code>MVar</code> exposes functions to store and retrieve values in a
+multithreaded environment. I&#8217;m not going to list all of them here, for
+further details just go to
+<a href="https://github.com/Frege/frege/blob/master/frege/control/Concurrent.fr">frege.control.Concurrent</a>.</p>
+</div>
+<div class="paragraph">
+<p>My example is just launching to computations and combine them to give
+a result. First computation calculates a number and sleeps and the
+second one just return a value. Eventually both values will be added
+up.</p>
+</div>
+<div class="listingblock">
+<div class="title">MVar</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">useMVar = do
+   mvar1 &lt;- newEmptyMVar       <i class="conum" data-value="1"></i><b>(1)</b>
+   mvar2 &lt;- newEmptyMVar       <i class="conum" data-value="2"></i><b>(2)</b>
+   forkIO do                   <i class="conum" data-value="3"></i><b>(3)</b>
+     mvar1.put $ sum [2,3]     <i class="conum" data-value="4"></i><b>(4)</b>
+     Thread.sleep 5000
+     println "end computation1"
+   forkIO do                   <i class="conum" data-value="5"></i><b>(5)</b>
+     mvar2.put 10              <i class="conum" data-value="6"></i><b>(6)</b>
+     println "end computation2"
+   res1 &lt;- mvar1.take          <i class="conum" data-value="7"></i><b>(7)</b>
+   res2 &lt;- mvar2.take          <i class="conum" data-value="8"></i><b>(8)</b>
+   return $ res1 + res2        <i class="conum" data-value="9"></i><b>(9)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><strong>main</strong>: Creating <code>mvar1</code> to handle values from first computation</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td><strong>main</strong>: Creating <code>mvar2</code> to handle values from second computation</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td><strong>thr1</strong>: Launching first computation</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td><strong>thr1</strong>: setting mvar1 with computation result</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td><strong>thr2</strong>: Launching second computation</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td><strong>thr2</strong>: setting mvar2 with computation result</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td><strong>main</strong>: blocking until getting a value from mvar1</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td><strong>main</strong>: blocking until getting a value from mvar2</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="9"></i><b>9</b></td>
+<td><strong>main</strong>: return result from</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Please notice that when executing <code>mvarX.take</code> it blocks
+only until a value has been provided, then it will continue. That
+means that when the first computation begins to sleep meanwhile <code>res1
++ res2</code> is being resolved.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>You can find some good examples of using <code>MVar</code> with <code>forkOS</code> and
+<code>forkIO</code>
+<a href="https://github.com/Frege/frege/blob/master/examples/Concurrent.fr">here</a>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="make_it_easier_with_async">Make it easier with <code>async</code></h3>
+<div class="paragraph">
+<p>So far it seemed we were getting too low level in order to launch a
+computation in a new thread. Something like coordinating several
+computations in different threads seemed a daunting task and very
+difficult to reason about. The function <code>async</code> enables the execution
+of an <code>IO a</code> computation and returns a pointer to the on-going
+computation. Once you get the pointer you can choose whether to block
+until getting the result, or start new computations in parallel. This
+is the signature of <code>async</code></p>
+</div>
+<div class="listingblock">
+<div class="title">async</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">async :: IO a -&gt; IO (MVar (Exception | a))</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the following example we are launching two computations, the first
+one sleeps 2 seconds and then continues whereas the quick operation
+just return a given value.</p>
+</div>
+<div class="listingblock">
+<div class="title">Operations</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">slowerOp :: IO Int
+slowerOp = do
+  Thread.sleep(2000)
+  println "Returning first op"
+  return 20
+
+quickOp :: IO Int
+quickOp = do
+  println "Returning second op"
+  return 40</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We would like to launch both operations in parallel , eventually
+extract each computation&#8217;s value, and finally add them up.</p>
+</div>
+<div class="listingblock">
+<div class="title">Execute operations asynchronously</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">divideAndConquer = do
+  slowerOpRef &lt;- async slowerOp <i class="conum" data-value="1"></i><b>(1)</b>
+  quickOpRef  &lt;- async quickOp <i class="conum" data-value="2"></i><b>(2)</b>
+  xs          &lt;- sequence $ map extractValue [slowerOpRef, quickOpRef] <i class="conum" data-value="3"></i><b>(3)</b>
+  return $ sum xs <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Launch slow operation</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Launch quick operation</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Block until getting each computation&#8217;s values</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Sum results</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>In order to block and get the value returned by the operation I&#8217;m
+using the <code>take</code> function from the
+<a href="https://github.com/Frege/frege/blob/master/frege/control/Concurrent.fr">frege.control.Concurrent</a>
+module. Because the result of calling <code>take</code> returns an <code>MVar
+(Exception | a)</code>, meaning an <code>MVar</code> of an <code>Either Exception a</code>, I need
+to use a <code>case</code> expression.</p>
+</div>
+<div class="listingblock">
+<div class="title">Extract</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">extractValue :: MVar (Exception | Int) -&gt; IO Int
+extractValue var = do
+  value &lt;- var.take <i class="conum" data-value="1"></i><b>(1)</b>
+  case value of
+    Left  _ -&gt; return 0
+    Right x -&gt; return x</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Use <code>take</code> to extract the value wrapped in <code>MVar</code></td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>I&#8217;ve written a couple of alternatives to create a reusable
+<code>extractValue</code> function.</p>
+</div>
+<div class="listingblock">
+<div class="title">Extract alternatives</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">extractValue2 :: MVar (Exception | a) -&gt; a -&gt; IO a
+extractValue2 mv defaultValue = do
+  value &lt;- mv.take
+  return $ either (\_ -&gt; defaultValue) id value
+
+extractValue3 :: MVar (Exception | a) -&gt; a -&gt; IO a
+extractValue3 mv defaultValue = do
+  value &lt;- mv.take
+  case value of
+    Left  _ -&gt; return defaultValue
+    Right x -&gt; return x</code></pre>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>

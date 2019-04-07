@@ -1,9 +1,0 @@
-module TestSum where
-
-import Test.QuickCheck
-import Sum (sumMaybe)
-
-commutativity :: Maybe Int -> Maybe Int -> Bool
-commutativity a b = (sumMaybe a b) == (sumMaybe b a)
-
-checkCommutativity = property (commutativity)

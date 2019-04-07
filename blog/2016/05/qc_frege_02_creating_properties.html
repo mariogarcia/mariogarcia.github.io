@@ -1,0 +1,224 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>Frege and QuickCheck: Create properties</h1></header><yieldScaped><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>After going through the main parts of property base testing with
+<em>QuickCheck</em> and <em>Frege</em> now I&#8217;m focusing only in
+<strong>properties</strong>. Lets recall what was a property in the context of
+<em>QuickCheck</em>.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="what_is_a_property">What is a property</h3>
+<div class="paragraph">
+<p>A property is an executable specification meaning a function that
+holds for a set of values using the program (function or set of
+functions) you want to test.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="create_a_simple_property">Create a simple property</h3>
+<div class="paragraph">
+<p>As a rule of thumb the easiest way of creating a property is to
+create a function that returns a Bool. A function retuning a Bool
+can be treated as a <code>Testable</code> value. Then use the <code>Testable</code> function
+as argument of the <code>property</code> function, to get a <code>Property</code> value and
+leave <em>QuickCheck</em> to do the rest. In summary:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Create a function that returns <code>Bool</code></p>
+</li>
+<li>
+<p>Invoke <code>property</code> passing the previous function</p>
+</li>
+<li>
+<p>Invoke <em>QuickCheck</em></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Lets create a simple function. This function has certain properties:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Should double the absolute value of the number passed as argument if
+that number is greater than 0 and less or equals than 10</p>
+</li>
+<li>
+<p>Otherwise returns 0</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+I&#8217;m using <code>frege-gradle-plugin</code> for these examples, actually I&#8217;m
+executing <code>./gradlew fregeQuickCheck --t</code> which executes and waits
+until the source code changes to launch the tests again. Very useful
+while developing.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>This is the specification we have to respect:</p>
+</div>
+<div class="listingblock">
+<div class="title">Specification</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">alwaysPositive :: Int -&gt; Bool
+alwaysPositive    x   = badImplementation x &gt;= 0
+
+alwaysPositiveCheck   = property (alwaysPositive)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Lets try a first version of our function:</p>
+</div>
+<div class="listingblock">
+<div class="title">Bad Implementation</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">badImplementation :: Int -&gt; Int
+badImplementation    x    = x * 2</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And now execute <em>QuickCheck</em> to see if this first version holds:</p>
+</div>
+<div class="listingblock">
+<div class="title">Output</div>
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">c.BasicsCheck.alwaysPositiveBadCheck: *** Failed!                                                                                                                                             (after 7 tests and 2 shrinks):
+Falsifiable
+-1</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Error as expected. So just using a negative number as argument the
+function won&#8217;t hold. Ok, we should take the absolute number and then
+multiply by two.</p>
+</div>
+<div class="listingblock">
+<div class="title">Good Implementation</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">goodImplementation :: Int -&gt; Int
+goodImplementation    x
+  | x &gt;= 0 &amp;&amp; x &lt;= limit = x * 2
+  | otherwise       = 0
+  where limit = 10</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Specification</div>
+<div class="content">
+<pre class="highlight"><code class="language-haskell" data-lang="haskell">alwaysPositive :: Int -&gt; Bool
+alwaysPositive    x   = goodImplementation x &gt;= 0
+
+alwaysPositiveCheck   = property (alwaysPositive)</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Output</div>
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">c.BasicsCheck.alwaysPositiveCheck: +++ OK, passed 100 tests</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Perfect!! Ok this was a good warm up exercise, lets do something more
+complex.</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Testable</div>
+<div class="paragraph">
+<p>If you check the <code>property</code> function type in the <strong>frege repl</strong> you&#8217;ll
+notice that it receives a value of type <code>Testable</code> and returns a
+<code>Property</code>. <code>Bool</code> defines an instance of <code>Testable</code>.</p>
+</div>
+<div class="listingblock">
+<div class="title">Checking property function type</div>
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">frege&gt; import Test.QuickCheck
+...
+frege&gt; :t property
+frege&gt; Testable prop =&gt; prop -&gt; Property</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>
