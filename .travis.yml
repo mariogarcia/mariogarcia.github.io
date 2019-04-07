@@ -10,4 +10,4 @@ cache:
 script: "./gradlew clean :blog:bake :blog:publishGhPages"
 branches:
   only:
-  - master
+  - working
