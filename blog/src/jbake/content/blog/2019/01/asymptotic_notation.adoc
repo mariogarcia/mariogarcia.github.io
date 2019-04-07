@@ -6,13 +6,15 @@
 :jbake-tags: cs, asymptotic-notation
 :sources: ../../../../../../../blog/src/jbake/templates/
 :idprefix:
+:summary: The different notations for evaluating algorithms.
+:summary_image: computer_science.png
 
 === Omicron or Big-O (&#x039F;)
 
 The Big-O sets the *upper limit of a given function f(n)*. The set of
 functions &#x039F;(g(n)) is all f(n) functions defined by:
 
-[mathx, width=100, height=120]
+[mathx, height=50]
 ----
 0 \leq f(n) \leq c \times g(n), \forall{n} \geq n_0
 ----
@@ -21,7 +23,7 @@ Which basically means that, given `n~0~`, c * g(n) it's always greater
 equals than f(n). It's supposed to be it's upper limit. To demostrate
 that a given function is in the set of functions of `&#x039F;(g(n))`:
 
-[mathx, width=100, height=120]
+[mathx, height=50]
 ----
 f(n) \in \omicron(g(n))
 ----
@@ -29,7 +31,7 @@ f(n) \in \omicron(g(n))
 It will be neccessary to find any pair of values for `c > 0` and `n~0~
 > 0` in order to prove that:
 
-[mathx, width=100, height=120]
+[mathx, height=50]
 ----
 f(n) \leq cn, \forall{n} \geq n_0
 ----
@@ -50,3 +52,7 @@ TODO
 === Theta (&#x03F4;)
 
 TODO
+
+=== Resources
+
+- https://www.youtube.com/watch?v=v4cd1O4zkGw[Big O Notation (HackerRank)

@@ -6,6 +6,8 @@
 :jbake-tags: elisp, testing, ert
 :sources: ../../../../../../../sources/2018/11/elisp-ert
 :idprefix:
+:summary: testing with ERT
+:summary_image: test.png
 
 == Intro
 

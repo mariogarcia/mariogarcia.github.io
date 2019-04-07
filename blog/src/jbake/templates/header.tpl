@@ -1,22 +1,19 @@
 /**
  * VARIABLES
  */
-def rootPath = content.rootpath ?: ''
-def cssLinks = content.css?.split('\\|') // <1>
+def cssLinks = content?.css?.split('\\|') // <1>
 
 /**
- * TEMPLATE
- */
-head {
-    link(href: "${rootPath}css/asciidoctor.css", rel:'stylesheet')
-    link(href: "${rootPath}css/style.css", rel:'stylesheet')
-    link(href: 'https://use.fontawesome.com/releases/v5.2.0/css/all.css', rel: 'stylesheet')
-    link(href: 'https://fonts.googleapis.com/css?family=Fira+Mono:400,700', rel: 'stylesheet')
-    link(href: 'https://cdn.rawgit.com/necolas/normalize.css/master/normalize.css', rel: 'stylesheet')
+- * TEMPLATE
+- */
 
-    cssLinks.each { uri ->
-        link(href: (uri ==~ 'http.*' ? uri : "${rootPath}${uri}"), rel:'stylesheet') { }
-    }
+meta(charset:"utf-8") newLine()
+meta(name:"viewport", content:"width=device-width, initial-scale=1.0 user-scalable=no") newLine()
+title("${config.blog_title}") newLine()
+link(rel:"stylesheet", href:"${config.site_contextPath}css/main.css") newLine()
+link(rel:"stylesheet", href:"${config.site_contextPath}css/zenburn.css") newLine()
 
-    title(content.title ?: config.site_title)
+cssLinks.each { uri ->
+    link(href: (uri ==~ 'http.*' ? uri : "${config.contextPath}${uri}"), rel:'stylesheet') { }
 }
+newLine()

@@ -1,32 +1,12 @@
-def byYear = { v ->
-    v.date.format('yyyy')
-}
+// SECTION
+model.put("section", "INDEX")
 
-def onlyPublished = { post ->
-    post.status == 'published'
-}
-
-def createEntry = { post ->
-    li {
-        span(post.date?.format("MMM dd"))
-        a(href: "${content.rootpath}${post.uri}", post.title)
-    }
-}
-
-html {
-    includeGroovy 'header.tpl'
-    body {
-        main(class: 'wrapper') {
-            includeGroovy 'navigation.tpl'
-            div(class:"content") {
-                posts.groupBy(byYear).each { group ->
-                    section(class: "container list") {
-                        h1(group.key)
-                        ul {
-                            group.value.findAll(onlyPublished).each(createEntry)
-                        }
-                    }
-                }
+layout 'layout/main.tpl', true, projects: projects, bodyContents: contents {
+    section {
+        div(class: "posts") {
+            published_posts[0..5].each { post ->
+                model.put('post', post)
+                include template: 'post-brick.tpl'
             }
         }
     }

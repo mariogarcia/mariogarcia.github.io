@@ -6,7 +6,6 @@
 :jbake-tags: js, react, jbake
 :sources: ../../../../assets/js/2018/11/
 :scripts: https://unpkg.com/react@16/umd/react.development.js|https://unpkg.com/react-dom@16/umd/react-dom.development.js|js/2018/11/react.js
-:css: css/2018/11/react.css
 :idprefix:
 
 == Intro

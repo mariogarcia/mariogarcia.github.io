@@ -1,4 +1,5 @@
 *.class
+*.hprof
 .gradle/
 .build/
 **/build/

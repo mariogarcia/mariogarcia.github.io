@@ -76,7 +76,7 @@ has two parts:
 And both parts are combined using the `AND` operator (`&#x2227;`). Mathematically can be
 expressed as:
 
-[mathx, width=100, height=120]
+[mathx, height=50]
 ----
 p \land q
 ----

@@ -26,8 +26,7 @@ footer part.
 include::{sources}/footer.tpl[indent=0]
 ----
 
-<1> Taking `scripts` variable uris (in case there's any)
-<2> Creating `script` tags
+Takes *content.scripts* variable's uris (in case there's any)o and creates `script` tags.
 
 Basically if the entry has a `scripts` variable with a list of scripts
 uris, the html document will render them within the `head` tag.
@@ -64,11 +63,11 @@ delimited by *++++&#43&#43++++* rows.
 .Embedded html
 ----
 ++++
-<div id="main" style="width: 600px;height:400px;"></div>
+<div id="echarts_main" style="width: 600px;height:400px;"></div>
 <script type="text/javascript">
     window.onload = () => {
         // based on prepared DOM, initialize echarts instance
-        var myChart = echarts.init(document.getElementById('main'));
+        var myChart = echarts.init(document.getElementById('echarts_main'));
 
         // specify chart configuration item and data
         var option = {
@@ -101,11 +100,11 @@ Echarts. https://ecomfe.github.io/echarts-doc/public/en/index.html[Echarts]
 is a charting js library from the chinese search engine Baidu.
 
 ++++
-<div id="main" style="width: 600px;height:400px;"></div>
+<div id="echarts_main" style="width: 600px;height:400px;"></div>
 <script type="text/javascript">
     window.onload = () => {
         // based on prepared DOM, initialize echarts instance
-        var myChart = echarts.init(document.getElementById('main'));
+        var myChart = echarts.init(document.getElementById('echarts_main'));
 
         // specify chart configuration item and data
         var option = {
