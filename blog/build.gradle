@@ -44,6 +44,7 @@ jbake {
 githubPages {
     repoUri             = 'https://github.com/mariogarcia/blog.git'
     deleteExistingFiles = true
+    targetBranch = 'master'
 
     pages {
         from file('build/jbake')
