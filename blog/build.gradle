@@ -42,7 +42,7 @@ jbake {
 }
 
 githubPages {
-    repoUri             = 'https://github.com/mariogarcia/blog.git'
+    repoUri             = 'https://github.com/mariogarcia/mariogarcia.github.io.git'
     deleteExistingFiles = true
     targetBranch = 'master'
 
