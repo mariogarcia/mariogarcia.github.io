@@ -4,8 +4,628 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2019-04-07T21:16:55Z</updated>
-    <id>tag:null,2019:04</id>
+    <updated>2019-09-11T21:16:10Z</updated>
+    <id>tag:null,2019:09</id>
+    <entry>
+        <title>Terraform + KVM</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2019/09/terraform_kvm.html"/>
+        <updated>2019-09-11T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2019/09/terraform_kvm.html</id>
+        <category term="devops"/>
+        <category term="terraform"/>
+        <category term="kvm"/>
+        <content type="html">
+            &lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;terraformkvmlibvirt&quot;&gt;Terraform/KVM/libvirt&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.terraform.io/&quot;&gt;Terraform&lt;/a&gt; is a tool for provisioning,
+and managing infrastructure. It describes a given infrastructure
+as code, maintains the state of the infrastructure described so
+that an administrator can manage it, adding, removing or updating
+resources. One of the things I like the most about Hashicorp is that all its
+products are one executable binary in Linux. That makes incredibly
+easy to start using them. In this case I just had to download the &lt;code&gt;tar.gz&lt;/code&gt; file containing
+the executable, put the executable in my shell PATH, and checking
+that it works just executing in my shell:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;[mario@localhost]$ terraform --version&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.linux-kvm.org/page/Main_Page&quot;&gt;KVM&lt;/a&gt; or Kernel Virtual Machine is a virtualization environment consisting on a Linux
+Kernel module capable of providing a virtualization infrastructure. You have to check how to install KVM in your Linux distribution,
+in Fedora 30 is as easy as executing:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;[mario@localhost]$ sudo dnf install @virtualization&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The &lt;code&gt;@virtualization&lt;/code&gt; alias is just an aggregation of the required
+packages to start using KVM in your local machine. You can check
+which packages are included by executing:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;[mario@localhost]$ dnf group info virtualization&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;https://libvirt.org/&quot;&gt;Libvirt&lt;/a&gt; is a virtualization API, meaning an
+API able to interact with different virtualization environments such
+as KVM, Xen&amp;#8230;&amp;#8203;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;terraform_libvirt_provider&quot;&gt;Terraform libvirt provider&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Most of the time Terraform is well known for using it in cloud environments such as AWS, Azure,
+Alibaba&amp;#8230;&amp;#8203; but the truth is that it has integrations with more than 90 types of environments thanks
+to Terraform&amp;#8217;s &lt;a href=&quot;https://www.terraform.io/docs/providers/index.html&quot;&gt;providers&lt;/a&gt;. Unfortunately
+among those official providers there&amp;#8217;s none for KVM. But don&amp;#8217;t worry there&amp;#8217;s an amazing project
+providing us with the provider we need.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/dmacvicar/terraform-provider-libvirt&quot;&gt;Terraform libvirt provider&lt;/a&gt; as its Github repository says is: &quot;Terraform provider to provision infrastructure with Linux&amp;#8217;s KVM using libvirt&quot;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock note&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-note&quot; title=&quot;Note&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+Nowadays because Terraform libvirt provider is not an official provider it&amp;#8217;s to be installed manually in your system. The last
+release &lt;a href=&quot;https://github.com/dmacvicar/terraform-provider-libvirt/releases&quot;&gt;has binaries&lt;/a&gt; for some Linux distributions. Anyway you can always
+&lt;a href=&quot;https://github.com/dmacvicar/terraform-provider-libvirt#building-from-source&quot;&gt;build it from source&lt;/a&gt; and then
+&lt;a href=&quot;https://github.com/dmacvicar/terraform-provider-libvirt#installing&quot;&gt;install the resulting binary&lt;/a&gt; which happens to be what I did.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;hello_kvm&quot;&gt;Hello KVM&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The first Terraform file just creates a Debian 10 VM in
+my local KVM. The image is a &lt;code&gt;qcow2&lt;/code&gt; image file created with
+&lt;a href=&quot;https://www.packer.io/intro/&quot;&gt;Packer&lt;/a&gt; another Hashicorp tool
+for creating images (not only VMs but also Docker images as well). A simple Terraform template contains &lt;strong&gt;providers&lt;/strong&gt; and &lt;strong&gt;resources&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;A &lt;strong&gt;provider&lt;/strong&gt; is an abstraction over the final environment, and&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;A &lt;strong&gt;resource&lt;/strong&gt; is a part of the infrastructure we want to create.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;sample structure&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;provider &quot;libvirt&quot; { &lt;i class=&quot;conum&quot; data-value=&quot;1&quot;&gt;&lt;/i&gt;&lt;b&gt;(1)&lt;/b&gt;
+    ...
+}
+
+resource &quot;libvirt_volume&quot; &quot;os_image&quot; { &lt;i class=&quot;conum&quot; data-value=&quot;2&quot;&gt;&lt;/i&gt;&lt;b&gt;(2)&lt;/b&gt;
+    ...
+}
+
+resource &quot;libvirt_domain&quot; &quot;new_vm&quot; { &lt;i class=&quot;conum&quot; data-value=&quot;3&quot;&gt;&lt;/i&gt;&lt;b&gt;(3)&lt;/b&gt;
+    ...
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;colist arabic&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;1&quot;&gt;&lt;/i&gt;&lt;b&gt;1&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;The provider for dealing with libvirt compatible environments&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;2&quot;&gt;&lt;/i&gt;&lt;b&gt;2&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;A resource representing a volume in a VM&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;3&quot;&gt;&lt;/i&gt;&lt;b&gt;3&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;A resource representing the VM we want to create&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Lets see a real example creating a Debian 10 VM in my local KVM
+environment.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;hello_world.tf&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;provider &quot;libvirt&quot; { &lt;i class=&quot;conum&quot; data-value=&quot;1&quot;&gt;&lt;/i&gt;&lt;b&gt;(1)&lt;/b&gt;
+  uri = &quot;qemu:///system&quot;
+}
+
+resource &quot;libvirt_volume&quot; &quot;os_image&quot; { &lt;i class=&quot;conum&quot; data-value=&quot;2&quot;&gt;&lt;/i&gt;&lt;b&gt;(2)&lt;/b&gt;
+  name   = &quot;os_image&quot;
+  pool   = &quot;default&quot;
+  source = &quot;/home/mario/Development/devops/hashicorp-tools/packer/out/packer-buster&quot;
+}
+
+resource &quot;libvirt_domain&quot; &quot;new_vm&quot; { &lt;i class=&quot;conum&quot; data-value=&quot;3&quot;&gt;&lt;/i&gt;&lt;b&gt;(3)&lt;/b&gt;
+  name   = &quot;postgres&quot;
+  memory = &quot;1024&quot;
+  vcpu   = &quot;2&quot;
+
+  disk {
+    volume_id = &quot;${libvirt_volume.os_image.id}&quot;
+  }
+
+  network_interface {
+    hostname = &quot;postgresvm&quot;
+  }
+
+  graphics {
+    listen_type = &quot;address&quot;
+  }
+
+  console {
+    type        = &quot;pty&quot;
+    target_port = &quot;0&quot;
+    target_type = &quot;virtio&quot;
+  }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;colist arabic&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;1&quot;&gt;&lt;/i&gt;&lt;b&gt;1&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;Declaring the provider&lt;/strong&gt;: There provider knows about the underlying infrastructure. In this case, because we&amp;#8217;re creating
+VMs in an libvirt compatible environment, we&amp;#8217;re using the libvirt
+provider. This time is pointing to my local environment.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;2&quot;&gt;&lt;/i&gt;&lt;b&gt;2&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;Declaring which image to use&lt;/strong&gt;: The base of the VM created in the infrastructure is going to be a Debian 10. The image can be
+created in several ways. I&amp;#8217;ve created mine using Hashicorp&amp;#8217;s Packer.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;3&quot;&gt;&lt;/i&gt;&lt;b&gt;3&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;Describing how everything stick together&lt;/strong&gt;: Once I&amp;#8217;ve
+described the different resources that I&amp;#8217;m going to use, I should
+create a domain resource.  The domain glues all the previous resources.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Before doing anything we need &lt;strong&gt;to init the project&lt;/strong&gt;. This
+is required because Terraform checks whether it has the providers
+required to accomplish the plan:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;[mario@localhost]$ terraform init
+
+Initializing the backend...
+
+Initializing provider plugins...
+
+Terraform has been successfully initialized!
+
+You may now begin working with Terraform. Try running &quot;terraform plan&quot; to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then, altough is not mandatory, but in order to keep all templates with the
+same format I like to pass the formatter. This will format all
+Terraform files found in the current directory.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;[mario@localhost]$ terraform fmt&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Before executing the terraform plan, I can validate the template:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;[mario@localhost]$ terraform validate&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Finally we can execute our plan:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;[mario@localhost]$ terraform apply
+
+An execution plan has been generated and is shown below.
+Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # libvirt_domain.new_vm will be created
+  + resource &quot;libvirt_domain&quot; &quot;new_vm&quot; {
+      + arch        = (known after apply)
+      + emulator    = (known after apply)
+      + fw_cfg_name = &quot;opt/com.coreos/config&quot;
+...
+Plan: 2 to add, 0 to change, 0 to destroy.
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only &apos;yes&apos; will be accepted to approve.
+
+  Enter a value:&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The &lt;strong&gt;apply&lt;/strong&gt; command shows you the resources it&amp;#8217;s going to
+apply and requires from you to confirm before going any
+further. Only if you write &lt;strong&gt;yes&lt;/strong&gt; will continue. You can then
+check that the VM is up and running. I&amp;#8217;d normally open the
+Virtual Machine Manager desktop app.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock external&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;a class=&quot;image&quot; href=&quot;/img/2019/09/terraform_kvm/hello_kvm_running.png&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;&lt;img src=&quot;/img/2019/09/terraform_kvm/hello_kvm_running.png&quot; alt=&quot;hello kvm running&quot; width=&quot;550&quot;&gt;&lt;/a&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;At this point Terraform updates the state of your infrastructure so
+that if wanted to destroy everything it knows what to do:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;[mario@localhost]$ terraform destroy&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;After confirming again that you want to destroy your infrastructure
+Terraform will take over and destroy it.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;variables&quot;&gt;Variables&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;At some point we may like to reuse our templates. A first step
+could be setting some variables in the template and passing their
+values when executing the plan. We can change our initial template
+and declare some variables:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;hello_world.tf&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;variable &quot;kvm_destination_uri&quot; {
+  type        = string
+  description = &quot;kvm instance uri where the vm is going to be deployed&quot;
+}
+
+variable &quot;hostname&quot; {
+  type        = string
+  description = &quot;hostname of the vm&quot;
+}
+
+variable &quot;memory&quot; {
+  type        = string
+  description = &quot;amount of memory&quot;
+}
+
+variable &quot;image_path&quot; {
+  type        = string
+  description = &quot;where is located the qcow2 image&quot;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Once we have declared the variables we can substitue the literals
+by the variables. You only have to add the prefix &lt;code&gt;var.&lt;/code&gt; and the
+name of the variable in the part of the template you want to use it.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;hello_world.tf&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;provider &quot;libvirt&quot; {
+  uri = var.kvm_destination_uri
+}
+
+resource &quot;libvirt_volume&quot; &quot;os_image&quot; {
+  name   = &quot;os_image&quot;
+  pool   = &quot;default&quot;
+  source = var.image_path
+}
+
+resource &quot;libvirt_domain&quot; &quot;new_vm&quot; {
+  name   = var.hostname
+  memory = var.memory
+  vcpu   = &quot;2&quot;
+
+  disk {
+    volume_id = &quot;${libvirt_volume.os_image.id}&quot;
+  }
+
+  network_interface {
+    hostname = var.hostname
+  }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Finally you can execute your plan and pass the variables along
+with the command. Here for example we would like to create a VM in a remote KVM host.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;passing variables values to terraform apply&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;[mario@localhost]$ terraform apply \
+    -var=&quot;kvm_destination_uri=qemu+ssh:root@my.cloud.example.com/system&quot; \
+    -var=&quot;hostname=firewall&quot; \
+    -var=&quot;memory=1024&quot; \
+    -var=&quot;image_path=/tmp/myimage.qcow2&quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Or writing those key=value in a variables file:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;hello_world.tfvars&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;kvm_destination_uri=&quot;qemu+ssh:root@my.cloud.example.com/system&quot;
+hostname=&quot;firewall&quot;
+memory=&quot;1024&quot;
+image_path=&quot;/tmp/myimage.qcow2&quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And pass the file name to the Terraform apply command:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;passing variables filename to terraform apply&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;terraform apply -var-file=hello_world.tfvars&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock note&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-note&quot; title=&quot;Note&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+If you don&amp;#8217;t pass the variables to the command line nor
+passing a variables file, still Terraform could prompt you to give
+it the values for the required variables.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;modules&quot;&gt;Modules&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;One step further when reusing our templates is to create modules. A module represents a set of resources and variables that are meant to be used together. The basic structure of a module directory is to have three files: -&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;main.tf&lt;/code&gt;: where the resources are declared&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;variables.tf&lt;/code&gt;: where the variables are declared&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;outputs.tf&lt;/code&gt;: where the output variables are declared&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Please notice that &lt;code&gt;variables.tf&lt;/code&gt; is where the definition of the
+variables are declared, not the values, that, again could be
+in a different file &lt;code&gt;.tfvars&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I&amp;#8217;m creating the following folder structure:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-ditaa&quot; data-lang=&quot;ditaa&quot;&gt;+---modules
+       +-----debian (module)
+       |        +-----main.tf
+       |        |
+       |        +-----variables.tf
+       |
+       +-----myplan.tf&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;This structure &lt;strong&gt;modules/debian&lt;/strong&gt; represents a module called &lt;strong&gt;debian&lt;/strong&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The Terraform plan &lt;strong&gt;myplan.tf&lt;/strong&gt; will be reusing the &lt;strong&gt;debian&lt;/strong&gt; module.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In order to follow using the previous example:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Split the previous version of the terraform file &lt;strong&gt;hello_world_variables.tf&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Put the variables in the &lt;strong&gt;variables.tf&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Put the resource declaration in the &lt;strong&gt;main.tf&lt;/strong&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;These two files will be located at &lt;strong&gt;modules/debian&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;variables.tf&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;variable &quot;kvm_destination_uri&quot; {
+  type        = string
+  description = &quot;kvm instance uri where the vm is going to be deployed&quot;
+}
+
+variable &quot;hostname&quot; {
+  type        = string
+  description = &quot;hostname of the vm&quot;
+}
+
+variable &quot;memory&quot; {
+  type        = string
+  description = &quot;amount of memory&quot;
+}
+
+variable &quot;bridge_name&quot; {
+  type        = string
+  description = &quot;name of the bridge configured in the host&quot;
+}
+
+variable &quot;cpu_count&quot; {
+  type        = string
+  description = &quot;number of cpus used by vm&quot;
+}
+
+variable &quot;os_image&quot; {
+  type        = string
+  description = &quot;name of the vm volume&quot;
+}
+
+variable &quot;image_source_path&quot; {
+  type        = string
+  description = &quot;qcow2 image path&quot;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;main.tf&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;provider &quot;libvirt&quot; {
+  uri = var.kvm_destination_uri
+}
+
+resource &quot;libvirt_volume&quot; &quot;os_image&quot; {
+  name   = &quot;os_image${var.os_image}&quot;
+  pool   = &quot;default&quot;
+  source = var.image_source_path
+}
+
+resource &quot;libvirt_domain&quot; &quot;new_vm&quot; {
+  name   = var.hostname
+  memory = var.memory
+  vcpu   = var.cpu_count
+
+  disk {
+    volume_id = &quot;${libvirt_volume.os_image.id}&quot;
+  }
+
+  network_interface {
+    hostname = var.hostname
+    bridge   = var.bridge_name
+  }
+
+  graphics {
+    listen_type = &quot;address&quot;
+  }
+
+  console {
+    type        = &quot;pty&quot;
+    target_port = &quot;0&quot;
+    target_type = &quot;virtio&quot;
+  }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Finally I can reference the &lt;strong&gt;debian&lt;/strong&gt; module in my new plan overriding
+any declared variable in the module.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;myplan.tf&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;module &quot;k8s_master&quot; {
+  source = &quot;./debian&quot;
+
+  kvm_destination_uri = &quot;qemu+ssh://maintainer@future/system&quot;
+  image_source_path   = pathexpand(&quot;~/Development/devops/hashicorp-tools/packer/out/packer-buster&quot;)
+  hostname            = &quot;k8s_master&quot;
+  memory              = &quot;2048&quot;
+  cpu_count           = &quot;2&quot;
+  bridge_name         = &quot;br0&quot;
+  os_image            = &quot;master_volume&quot;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;references&quot;&gt;References&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;Terraform&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;I&amp;#8217;d recommend you to start checking the &lt;a href=&quot;https://learn.hashicorp.com/terraform/getting-started/install.html&quot;&gt;getting started&lt;/a&gt; guide&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Dealing with &lt;a href=&quot;https://www.terraform.io/docs/configuration/variables.html&quot;&gt;input variables&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;How to create &lt;a href=&quot;https://www.terraform.io/docs/modules/index.html&quot;&gt;modules&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;Terraform libvirt provider&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Official repository and docs at &lt;a href=&quot;https://github.com/dmacvicar/terraform-provider-libvirt&quot;&gt;Github&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;KVM&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.linux-kvm.org/page/Main_Page&quot;&gt;KVM site&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Check the Fedora virtualization guide at &lt;a href=&quot;https://docs.fedoraproject.org/en-US/quick-docs/getting-started-with-virtualization/&quot;&gt;Fedora virtualization guide&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.cyberciti.biz/faq/find-ip-address-of-linux-kvm-guest-virtual-machine/&quot;&gt;How to find ip address of Linux KVM guest virtual machine&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
     <entry>
         <title>CS: Asymptotic notation</title>
         <author>
