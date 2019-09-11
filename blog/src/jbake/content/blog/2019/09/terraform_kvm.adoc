@@ -1,0 +1,274 @@
+= Terraform + KVM
+@marioggar
+2019-09-11
+:jbake-type: post
+:jbake-status: draft
+:jbake-tags: devops, hashicorp, terraform, fedora
+:sources: ../../../../../../../sources/2019/09/terraform_kvm
+:idprefix:
+:summary: Using terraform to create infrastructures with KVM.
+:summary_image: devops.png
+
+=== Terraform/KVM/libvirt
+
+https://www.terraform.io/[Terraform] is a tool for provisioning,
+and managing infrastructure. It describes a given infrastructure
+as code, maintains the state of the infrastructure described so
+that an administrator can manage it, adding, removing or updating
+the given infrastructure. One of the things I like the most about Hashicorp is that all its
+products are one executable binary in Linux. That makes incredibly
+easy to start using them. In this case I just had to download the `tar.gz` file containing
+the executable, put the executable in my shell PATH, and checking
+that it works just executing in my shell:
+
+[source, shell]
+----
+terraform --version
+----
+
+
+https://www.linux-kvm.org/page/Main_Page[KVM] or Kernel Virtual Machine is a virtualization environment consisting on a Linux
+Kernel module capable of providing a virtualization infrastructure. You have to check how KVM is installed in your Linux distribution,
+in Fedora 30 is as easy as executing:
+
+[source, shell]
+----
+sudo dnf install @virtualization
+----
+
+
+The `@virtualization` alias is just an aggregation of the required
+packages to start using KVM in your local machine. You can check
+which packages are included by executing:
+
+[source, shell]
+----
+dnf group info virtualization
+----
+
+https://libvirt.org/[Libvirt] is a virtualization API, meaning an
+API able to interact with different virtualization environments such
+as KVM, Xen...
+
+=== Terraform libvirt provider
+
+https://github.com/dmacvicar/terraform-provider-libvirt[Terraform libvirt provider] as its Github repository says is: "Terraform provider to provision infrastructure with Linux's KVM using libvirt". 
+
+=== Hello KVM
+
+The first Terraform file just creates a Debian 10 machine in
+my local KVM. The image is a `qcow2` image file created with
+https://www.packer.io/intro/[Packer] another Hashicorp tool
+for creating images (not only VMs but also Docker images as well). A Terraform template contains **providers** and **resources**, the
+provider is the abstraction over the final environment, and
+the resources are the required parts describing the part
+of the infrastructure we want to create.
+
+[source, ruby]
+----
+provider "libvirt" {
+    ...
+}
+
+resource "libvirt_volume" "os_image" { 
+    ...
+}
+
+resource "libvirt_domain" "new_vm" { 
+    ...
+}
+----
+
+Lets see a simple example creating a Debian 10 VM in my local KVM
+environment.
+
+[source, ruby]
+----
+include::{sources}/simple/hello_world.tf[]
+----
+
+<1> **Declaring the provider**: There provider knows about the underlying infrastructure. In this case, because we're creating
+VMs in an libvirt compatible environment, we're using the libvirt
+provider.
+<2> **Declaring which image to use**: The base of the VM created in the infrastructure is going to be a Debian 10. The image can be
+created in several ways. I've created mine using Hashicorp's Packer.
+<3> **Describing how everything stick together**: Once I've
+described the different resources that I'm going to use, I should
+create a domain resource.  The domain glues all the previous resources.
+
+Before doing anything we need **to init the project**. This
+is required because Terraform checks whether it has the providers
+required to accomplish the plan:
+
+[source, shell]
+----
+terraform init
+
+Initializing the backend...
+
+Initializing provider plugins...
+
+Terraform has been successfully initialized!
+
+You may now begin working with Terraform. Try running "terraform plan" to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.
+----
+
+Then, altough is not mandatory, but in order to keep all templates with the
+same format I like to pass the formatter. This will format all
+Terraform files found in the current directory.
+
+[source, shell]
+----
+[mario@localhost]$ terraform fmt
+----
+
+Before executing the terraform plan, I can validate the template:
+
+[source, shell]
+----
+[mario@localhost]$ terraform validate
+----
+
+Finally we can execute our plan:
+
+[source, shell]
+----
+[mario@localhost]$ terraform apply
+
+An execution plan has been generated and is shown below.
+Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # libvirt_domain.new_vm will be created
+  + resource "libvirt_domain" "new_vm" {
+      + arch        = (known after apply)
+      + emulator    = (known after apply)
+      + fw_cfg_name = "opt/com.coreos/config"
+...
+Plan: 2 to add, 0 to change, 0 to destroy.
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: 
+----
+
+The **apply** command shows you the resources it's going to 
+apply and requires from you to confirm before going any
+further. Only if you write **yes** will continue. You can then 
+check that the VM is up and running. I'd normally open the
+Virtual Machine Manager desktop app.
+
+image::2019/09/terraform_kvm/hello_kvm_running.png[link="img/2019/09/terraform_kvm/hello_kvm_running.png", role="external", window="_blank", width="550"]
+
+At this point Terraform updates the state of your infrastructure so
+that if wanted to destroy everything it knows what to do:
+
+[source, shell]
+----
+[mario@localhost]$ terraform destroy
+----
+
+After confirming again that you want to destroy your infrastructure
+Terraform will take over and destroy it.
+
+=== Variables
+
+
+At some point we may like to reuse our templates. A first step
+could be setting some variables in the template and passing their
+values when executing the plan. We can change our initial template
+and declare some variables:
+
+[source, ruby]
+.hello_world.tf
+----
+include::{sources}/variables/hello_world.tf[tags=variables]
+----
+
+Once we have declared the variables we can substitue the literals
+by the variables. You only have to add the prefix `var.` and the
+name of the variable in the part of the template you want to use it.
+
+[source, ruby]
+.hello_world.tf
+----
+include::{sources}/variables/hello_world.tf[tags=resources]
+----
+
+Finally you can execute your plan and pass the variables along
+with the command. Here for example we would like to create a VM in a remote KVM host.
+
+[source, shell]
+.passing variables values to terraform apply
+----
+[mario@localhost]$ terraform apply \
+    -var="kvm_destination_uri=qemu+ssh:root@my.cloud.example.com/system" \
+    -var="hostname=firewall" \
+    -var="memory=1024" \
+    -var="image_path=/tmp/myimage.qcow2"
+----
+
+Or writing those key=value in a variables file:
+
+[source, ruby]
+.hello_world.tfvars
+----
+kvm_destination_uri="qemu+ssh:root@my.cloud.example.com/system"
+hostname="firewall"
+memory="1024"
+image_path="/tmp/myimage.qcow2"
+----
+
+And pass the file name to the Terraform apply command:
+
+[source, shell]
+.passing variables filename to terraform apply
+----
+terraform apply -var-file=hello_world.tfvars
+----
+
+IMPORTANT: If you don't pass the variables to the command line nor
+passing a variables file, still Terraform could prompt you to give
+it the values for the required variables.
+
+=== Modules
+
+One step further when reusing our templates is to create modules. A module is a set of resources and variables (there're two classes of variables what for the time being I'm only using input variables). The basic structure of a module directory is to have three files: -
+
+- `main.tf`: where the resources are declared
+- `variables.tf`: where the variables are declared
+- `outputs.tf`: where the output variables are declared
+
+Please notice that `variables.tf` is where the definition of the
+variables are declared, not the values, that, again could be
+in a different file `.tfvars`.
+
+[source, ruby]
+.myplan.tf
+----
+include::{sources}/modules/myplan.tf[]
+----
+
+=== References
+
+**Terraform**
+
+- https://learn.hashicorp.com/terraform/getting-started/install.html[Getting Started]
+- https://www.terraform.io/docs/configuration/variables.html[Input variables]
+- https://www.terraform.io/docs/modules/index.html[Modules]
+
+**KVM**
+
+- https://www.linux-kvm.org/page/Main_Page[KVM site]
+- Check the Fedora virtualization guide at https://docs.fedoraproject.org/en-US/quick-docs/getting-started-with-virtualization/[Fedora virtualization guide]
+- https://www.cyberciti.biz/faq/find-ip-address-of-linux-kvm-guest-virtual-machine/[How to find ip address of Linux KVM guest virtual machine]
