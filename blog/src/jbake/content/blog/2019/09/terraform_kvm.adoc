@@ -2,8 +2,8 @@
 @marioggar
 2019-09-11
 :jbake-type: post
-:jbake-status: draft
-:jbake-tags: devops, hashicorp, terraform, fedora
+:jbake-status: published
+:jbake-tags: devops, terraform, kvm
 :sources: ../../../../../../../sources/2019/09/terraform_kvm
 :idprefix:
 :summary: Using terraform to create infrastructures with KVM.
@@ -15,7 +15,7 @@ https://www.terraform.io/[Terraform] is a tool for provisioning,
 and managing infrastructure. It describes a given infrastructure
 as code, maintains the state of the infrastructure described so
 that an administrator can manage it, adding, removing or updating
-the given infrastructure. One of the things I like the most about Hashicorp is that all its
+resources. One of the things I like the most about Hashicorp is that all its
 products are one executable binary in Linux. That makes incredibly
 easy to start using them. In this case I just had to download the `tar.gz` file containing
 the executable, put the executable in my shell PATH, and checking
@@ -23,17 +23,16 @@ that it works just executing in my shell:
 
 [source, shell]
 ----
-terraform --version
+[mario@localhost]$ terraform --version
 ----
 
-
 https://www.linux-kvm.org/page/Main_Page[KVM] or Kernel Virtual Machine is a virtualization environment consisting on a Linux
-Kernel module capable of providing a virtualization infrastructure. You have to check how KVM is installed in your Linux distribution,
+Kernel module capable of providing a virtualization infrastructure. You have to check how to install KVM in your Linux distribution,
 in Fedora 30 is as easy as executing:
 
 [source, shell]
 ----
-sudo dnf install @virtualization
+[mario@localhost]$ sudo dnf install @virtualization
 ----
 
 
@@ -43,8 +42,9 @@ which packages are included by executing:
 
 [source, shell]
 ----
-dnf group info virtualization
+[mario@localhost]$ dnf group info virtualization
 ----
+
 
 https://libvirt.org/[Libvirt] is a virtualization API, meaning an
 API able to interact with different virtualization environments such
@@ -52,44 +52,61 @@ as KVM, Xen...
 
 === Terraform libvirt provider
 
-https://github.com/dmacvicar/terraform-provider-libvirt[Terraform libvirt provider] as its Github repository says is: "Terraform provider to provision infrastructure with Linux's KVM using libvirt". 
+Most of the time Terraform is well known for using it in cloud environments such as AWS, Azure,
+Alibaba... but the truth is that it has integrations with more than 90 types of environments thanks
+to Terraform's https://www.terraform.io/docs/providers/index.html[providers]. Unfortunately 
+among those official providers there's none for KVM. But don't worry there's an amazing project
+providing us with the provider we need.
+
+https://github.com/dmacvicar/terraform-provider-libvirt[Terraform libvirt provider] as its Github repository says is: "Terraform provider to provision infrastructure with Linux's KVM using libvirt".
+
+NOTE: Nowadays because Terraform libvirt provider is not an official provider it's to be installed manually in your system. The last
+release https://github.com/dmacvicar/terraform-provider-libvirt/releases[has binaries] for some Linux distributions. Anyway you can always
+https://github.com/dmacvicar/terraform-provider-libvirt#building-from-source[build it from source] and then 
+https://github.com/dmacvicar/terraform-provider-libvirt#installing[install the resulting binary] which happens to be what I did.
 
 === Hello KVM
 
-The first Terraform file just creates a Debian 10 machine in
+The first Terraform file just creates a Debian 10 VM in
 my local KVM. The image is a `qcow2` image file created with
 https://www.packer.io/intro/[Packer] another Hashicorp tool
-for creating images (not only VMs but also Docker images as well). A Terraform template contains **providers** and **resources**, the
-provider is the abstraction over the final environment, and
-the resources are the required parts describing the part
-of the infrastructure we want to create.
+for creating images (not only VMs but also Docker images as well). A simple Terraform template contains **providers** and **resources**:
+
+- A **provider** is an abstraction over the final environment, and
+- A **resource** is a part of the infrastructure we want to create.
 
 [source, ruby]
+.sample structure
 ----
-provider "libvirt" {
+provider "libvirt" { # <1>
     ...
 }
 
-resource "libvirt_volume" "os_image" { 
+resource "libvirt_volume" "os_image" { # <2>
     ...
 }
 
-resource "libvirt_domain" "new_vm" { 
+resource "libvirt_domain" "new_vm" { # <3>
     ...
 }
 ----
 
-Lets see a simple example creating a Debian 10 VM in my local KVM
+<1> The provider for dealing with libvirt compatible environments
+<2> A resource representing a volume in a VM
+<3> A resource representing the VM we want to create
+
+Lets see a real example creating a Debian 10 VM in my local KVM
 environment.
 
 [source, ruby]
+.hello_world.tf
 ----
 include::{sources}/simple/hello_world.tf[]
 ----
 
 <1> **Declaring the provider**: There provider knows about the underlying infrastructure. In this case, because we're creating
 VMs in an libvirt compatible environment, we're using the libvirt
-provider.
+provider. This time is pointing to my local environment.
 <2> **Declaring which image to use**: The base of the VM created in the infrastructure is going to be a Debian 10. The image can be
 created in several ways. I've created mine using Hashicorp's Packer.
 <3> **Describing how everything stick together**: Once I've
@@ -102,7 +119,7 @@ required to accomplish the plan:
 
 [source, shell]
 ----
-terraform init
+[mario@localhost]$ terraform init
 
 Initializing the backend...
 
@@ -168,7 +185,7 @@ further. Only if you write **yes** will continue. You can then
 check that the VM is up and running. I'd normally open the
 Virtual Machine Manager desktop app.
 
-image::2019/09/terraform_kvm/hello_kvm_running.png[link="img/2019/09/terraform_kvm/hello_kvm_running.png", role="external", window="_blank", width="550"]
+image::2019/09/terraform_kvm/hello_kvm_running.png[link="/img/2019/09/terraform_kvm/hello_kvm_running.png", role="external", window="_blank", width="550"]
 
 At this point Terraform updates the state of your infrastructure so
 that if wanted to destroy everything it knows what to do:
@@ -237,13 +254,13 @@ And pass the file name to the Terraform apply command:
 terraform apply -var-file=hello_world.tfvars
 ----
 
-IMPORTANT: If you don't pass the variables to the command line nor
+NOTE: If you don't pass the variables to the command line nor
 passing a variables file, still Terraform could prompt you to give
 it the values for the required variables.
 
 === Modules
 
-One step further when reusing our templates is to create modules. A module is a set of resources and variables (there're two classes of variables what for the time being I'm only using input variables). The basic structure of a module directory is to have three files: -
+One step further when reusing our templates is to create modules. A module represents a set of resources and variables that are meant to be used together. The basic structure of a module directory is to have three files: -
 
 - `main.tf`: where the resources are declared
 - `variables.tf`: where the variables are declared
@@ -252,6 +269,44 @@ One step further when reusing our templates is to create modules. A module is a 
 Please notice that `variables.tf` is where the definition of the
 variables are declared, not the values, that, again could be
 in a different file `.tfvars`.
+
+I'm creating the following folder structure:
+
+[source, ditaa]
+----
++---modules
+       +-----debian (module)
+       |        +-----main.tf
+       |        |
+       |        +-----variables.tf
+       |
+       +-----myplan.tf    
+----
+
+- This structure **modules/debian** represents a module called **debian**. 
+- The Terraform plan **myplan.tf** will be reusing the **debian** module. 
+
+In order to follow using the previous example:
+
+- Split the previous version of the terraform file **hello_world_variables.tf** 
+- Put the variables in the **variables.tf**
+- Put the resource declaration in the **main.tf**. 
+- These two files will be located at **modules/debian**
+
+[source, ruby]
+.variables.tf
+----
+include::{sources}/modules/debian/variables.tf[]
+----
+
+[source, ruby]
+.main.tf
+----
+include::{sources}/modules/debian/main.tf[]
+----
+
+Finally I can reference the **debian** module in my new plan overriding
+any declared variable in the module.
 
 [source, ruby]
 .myplan.tf
@@ -263,9 +318,13 @@ include::{sources}/modules/myplan.tf[]
 
 **Terraform**
 
-- https://learn.hashicorp.com/terraform/getting-started/install.html[Getting Started]
-- https://www.terraform.io/docs/configuration/variables.html[Input variables]
-- https://www.terraform.io/docs/modules/index.html[Modules]
+- I'd recommend you to start checking the https://learn.hashicorp.com/terraform/getting-started/install.html[getting started] guide
+- Dealing with https://www.terraform.io/docs/configuration/variables.html[input variables]
+- How to create https://www.terraform.io/docs/modules/index.html[modules]
+
+**Terraform libvirt provider**
+
+- Official repository and docs at https://github.com/dmacvicar/terraform-provider-libvirt[Github]
 
 **KVM**
 

@@ -2144,6 +2144,10 @@ ul li {
 	padding-left: 0.5em;
 }
 
+ul li p {
+	margin-bottom: 0;
+}
+
 ul.alt {
 	list-style: none;
 	padding-left: 0;
@@ -3626,4 +3630,23 @@ article > header > time {
 
 .button.groovy {
     background-color: #4298b8;
+}
+
+.note {
+	background-color: #288feb;
+	color: white;
+}
+
+div.note a {
+	color: yellow;
+}
+
+.important {
+	background-color: #ED4F32;
+	color: white;
+}
+
+.warning {
+	background-color: #ffba00;
+	color: #333333;
 }
