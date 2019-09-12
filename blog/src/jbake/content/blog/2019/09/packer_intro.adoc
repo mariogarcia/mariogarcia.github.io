@@ -2,7 +2,7 @@
 @marioggar
 2019-09-12
 :jbake-type: post
-:jbake-status: draft
+:jbake-status: published
 :jbake-tags: devops, hashicorp, packer, fedora
 :sources: ../../../../../../../sources/2019/09/packer_intro
 :idprefix:
@@ -14,48 +14,176 @@
 Packer is an open source tool for creating identical machine images for multiple 
 platforms from a single source configuration. One of the worst things I
 have to do when creating a new VM is to go through the installation process
-as I were doing it in a physical machine. Moreover, if you had to do it
-for different platforms (Vagrant, Xen, KVM) you have to do it n times more. 
-Packer tries to automate all this process.
+as I were doing it in a physical machine. Imagine if you had to do it
+for different platforms (Vagrant, Xen, KVM)
+
+NOTE: About how to install Packer, you can go directly to the 
+https://www.packer.io/intro/getting-started/install.html[Packer installation] page. TLDR if
+your are a Linux user you can download the binary directly and make it available in your shell PATH.
 
 === Packer builders
 
 A builder in Packer describes how the image is going to be built for a
-specific platform (AWS EC2, KVM, Docker...). For instance, in this post I'm only
-using the Qemu builder because I need to use the image in a KVM
-environment.
+specific platform (AWS EC2, KVM, Docker...). In a Packer configuration 
+file you can add as many builders as type of images you want to build.
+For instance, in this post I'm only using the Qemu builder because 
+my target environment is KVM.
 
-=== A simple Debian machine for KVM
+=== Configuration file
 
-My hello world example with Packer is to build a Debian 10 VM for Qemu environment.
-Here is Packer configuration file.
+The Packer configuration file is just a JSON file with some group of properties:
+
+- **variables**: variable declaration. You can declare variables and default values and reference
+those variables along the rest of the configuration.
+- **builders**: As I mentioned in the beggining a builder represents the way in which the image machine
+is going to be built in a given environment (qemu in here)
+- **provisioners**: Provisioners can be used to configure or install new software in the image after booting (e.g Ansible as provisioner).
+- **post-processors**: Post processors run after the image is built and provisioners have finished (e.g uploading the image to a remote registry).
+
+=== Example
+
+My hello world example is to build a Debian 10 VM for Qemu environment. The structure of the project is:
+example is:
+
+[source, shell]
+.structure
+----
++--http
+|   +
+|   |
+|   +---debian-10.cfg
+|
++--debian-10.json
+----
+
+- **debian-10.json**: Packer configuration file
+- **debian-10.cfg**: Debian 10 preseed file
+
+The Packer entry file is **debian-10.json**, is where the builders, provisioners, post-processors and variables
+are set:
 
 [source, json]
-.json configuration
+..debian-10.json
 ----
 include::{sources}/debian-10.json[]
 ----
 
-The most important blocks are:
+This Packer file configures just one builder, which builds a Qemu compatible Debian 10 qcow2 image with
+the following properties:
 
-- **variables**: variable declaration. You can declare variables and default values and reference
-those variables along the rest of the configuration using the expression `{{ user `nameofthevariable` }} "`
-- **builders**: As I mentioned in the beggining a builder represents the way in which the image machine
-is going to be built in a given environment (qemu in here)
+[source, json]
+.builder basic properties
+----
+"type": "qemu",
+"vm_name": "debian-10",
+"headless": true,
+----
 
+The builder is of type **qemu**, the resulting virtual machine will be named **debian-10** and
+the installation is automated so I don't need to see it working (**headless**).
+
+[source, json]
+.base image retrieval
+----
+"iso_url": "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-10.1.0-amd64-netinst.iso",
+"iso_checksum": "7915fdb77a0c2623b4481fc5f0a8052330defe1cde1e0834ff233818dc6f301e",
+"iso_checksum_type": "sha256",
+----
+
+I'm taking an official image from the Debian site (**iso_url**), and to make sure the image hasn't been tampered
+I'm going to check its signature (**iso_checksum**) with the right algorithm (**iso_checksum_type**).
+
+
+[source, json]
+.phisical features
+----
+"memory": "2048",
+"disk_size": "5000",
+"cpus": 2,
+----
+
+When building the image, it will have 2GB of **memory** a **disk_size** of 5G and 2 **cpus**.
+
+[source, json]
+.ssh information
+----
+"ssh_username": "admindebian",
+"ssh_password": "Pa55w0rd",
+"shutdown_command": "echo 'Pa55w0rd'|sudo -S shutdown -h now",
+"ssh_timeout": "12m",
+----
+
+The ssh information is required to help Packer to communicate with the image.
+
+WARNING: It's always a good idea to add a **ssh_timeout**, a connection loss or
+a timeout due to rebooting can happen at any time.
 
 === Preseed files
 
+Because we want to automate the whole installation step-by-step process, we would like to
+pass like a guide to the installer in order to tell it what to do. That's what the preseed
+files are for. In order to make the installer aware of the preseed file we need:
+
+- To tell Packer the directory where the preseed file is by setting the **http** property
+- To pass the **url** property to the boot command with the whole url where the preseed file is going to be available
+
+[source, json]
+.debian-10.json
+----
+{
+    ...
+    "http_directory": "http",
+    "boot_command": [
+        ...
+        "url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/debian-10.cfg ",
+        "<enter>"
+    ]
+}
+----
+
+In a preseed file you would find instructions for every step: networking, root account, setting the
+system locale, timezone... For example, here's a sample of the preseed file for my Debian 10 image:
+
 [source, properties]
-.preseed file
+.debian-10.cfg
 ----
-something/la=pascual
+include::{sources}/http/debian-10.cfg[tags=sample]
 ----
+
+NOTE: Every OS may need a different type of preseed file. Checkout some examples in this
+ https://github.com/kaorimatz/packer-templates[Github repository]
 
 === Packer provisioners
 
-TODO
+Ok, once we've built the image, we may want to install some packages, or configure some
+services...etc,  that is to say to provision the image. You can reference several ways
+and tools to provision the image: Ansible, Puppet, shell script... For this example I'm
+using a simple shell script.
+
+[source, json]
+.provisioners example
+----
+"provisioners": [
+    {
+        "type": "shell",
+        "scripts": [
+            "scripts/update.sh"            
+        ]
+    }
+]
+----
+
+As you may notice, the **provisioners** property is a list with possible provisioners. I'm
+just using the type **shell** pointing to a list with just one shell script. This script
+will be loaded to the built image and executed there (by default is copied to /tmp). The
+**update.sh** script is just updating apt indexes:
+
+[source, bash]
+----
+include::{sources}/scripts/update.sh[]
+----
 
 === References
 
 - Packer https://www.packer.io/intro/[website]
+- Github repository with a good set of https://github.com/kaorimatz/packer-templates[Packer templates]

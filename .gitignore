@@ -4,6 +4,8 @@
 .build/
 **/build/
 output/
+output-qemu
+packer_cache
 secrets.groovy
 .asciidoctor
 .DS_Store
