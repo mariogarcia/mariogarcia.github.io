@@ -1,0 +1,393 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>Packer by Hashicorp</h1></header><yieldScaped><div class="sect2">
+<h3 id="about_packer">About Packer</h3>
+<div class="paragraph">
+<p>Packer is an open source tool for creating identical machine images for multiple
+platforms from a single source configuration. One of the worst things I
+have to do when creating a new VM is to go through the installation process
+as I were doing it in a physical machine. Imagine if you had to do it
+for different platforms (Vagrant, Xen, KVM)</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+About how to install Packer, you can go directly to the
+<a href="https://www.packer.io/intro/getting-started/install.html">Packer installation</a> page. TLDR if
+your are a Linux user you can download the binary directly and make it available in your shell PATH.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="packer_builders">Packer builders</h3>
+<div class="paragraph">
+<p>A builder in Packer describes how the image is going to be built for a
+specific platform (AWS EC2, KVM, Docker&#8230;&#8203;). In a Packer configuration
+file you can add as many builders as type of images you want to build.
+For instance, in this post I&#8217;m only using the Qemu builder because
+my target environment is KVM.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="configuration_file">Configuration file</h3>
+<div class="paragraph">
+<p>The Packer configuration file is just a JSON file with some group of properties:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>variables</strong>: variable declaration. You can declare variables and default values and reference
+those variables along the rest of the configuration.</p>
+</li>
+<li>
+<p><strong>builders</strong>: As I mentioned in the beggining a builder represents the way in which the image machine
+is going to be built in a given environment (qemu in here)</p>
+</li>
+<li>
+<p><strong>provisioners</strong>: Provisioners can be used to configure or install new software in the image after booting (e.g Ansible as provisioner).</p>
+</li>
+<li>
+<p><strong>post-processors</strong>: Post processors run after the image is built and provisioners have finished (e.g uploading the image to a remote registry).</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="example">Example</h3>
+<div class="paragraph">
+<p>My hello world example is to build a Debian 10 VM for Qemu environment. The structure of the project is:
+example is:</p>
+</div>
+<div class="listingblock">
+<div class="title">structure</div>
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">+--http
+|   +
+|   |
+|   +---debian-10.cfg
+|
++--debian-10.json</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>debian-10.json</strong>: Packer configuration file</p>
+</li>
+<li>
+<p><strong>debian-10.cfg</strong>: Debian 10 preseed file</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The Packer entry file is <strong>debian-10.json</strong>, is where the builders, provisioners, post-processors and variables
+are set:</p>
+</div>
+<div class="listingblock">
+<div class="title">.debian-10.json</div>
+<div class="content">
+<pre class="highlight"><code class="language-json" data-lang="json">{
+    "builders":
+    [
+        {
+            "type": "qemu",
+            "vm_name": "debian-10-{{build_type}}",
+            "headless": true,
+
+            "iso_url": "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-10.1.0-amd64-netinst.iso",
+            "iso_checksum": "7915fdb77a0c2623b4481fc5f0a8052330defe1cde1e0834ff233818dc6f301e",
+            "iso_checksum_type": "sha256",
+
+            "memory": "2048",
+            "disk_size": "5000",
+            "cpus": 2,
+
+            "ssh_username": "admindebian",
+            "ssh_password": "Pa55w0rd",
+            "shutdown_command": "echo 'Pa55w0rd'|sudo -S shutdown -h now",
+            "ssh_timeout": "10m",
+
+            "http_directory": "http",
+            "boot_command": [
+                "&lt;esc&gt;&lt;wait&gt;&lt;wait&gt;",
+                "install ",
+                "auto=true ",
+                "priority=critical ",
+                "interface=auto ",
+                "url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/debian-10.cfg ",
+                "&lt;enter&gt;"
+            ]
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "shell",
+            "scripts": [
+                "scripts/update.sh"
+            ]
+        }
+    ]
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This Packer file configures just one builder, which builds a Qemu compatible Debian 10 qcow2 image with
+the following properties:</p>
+</div>
+<div class="listingblock">
+<div class="title">builder basic properties</div>
+<div class="content">
+<pre class="highlight"><code class="language-json" data-lang="json">"type": "qemu",
+"vm_name": "debian-10",
+"headless": true,</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The builder is of type <strong>qemu</strong>, the resulting virtual machine will be named <strong>debian-10</strong> and
+the installation is automated so I don&#8217;t need to see it working (<strong>headless</strong>).</p>
+</div>
+<div class="listingblock">
+<div class="title">base image retrieval</div>
+<div class="content">
+<pre class="highlight"><code class="language-json" data-lang="json">"iso_url": "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-10.1.0-amd64-netinst.iso",
+"iso_checksum": "7915fdb77a0c2623b4481fc5f0a8052330defe1cde1e0834ff233818dc6f301e",
+"iso_checksum_type": "sha256",</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I&#8217;m taking an official image from the Debian site (<strong>iso_url</strong>), and to make sure the image hasn&#8217;t been tampered
+I&#8217;m going to check its signature (<strong>iso_checksum</strong>) with the right algorithm (<strong>iso_checksum_type</strong>).</p>
+</div>
+<div class="listingblock">
+<div class="title">phisical features</div>
+<div class="content">
+<pre class="highlight"><code class="language-json" data-lang="json">"memory": "2048",
+"disk_size": "5000",
+"cpus": 2,</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When building the image, it will have 2GB of <strong>memory</strong> a <strong>disk_size</strong> of 5G and 2 <strong>cpus</strong>.</p>
+</div>
+<div class="listingblock">
+<div class="title">ssh information</div>
+<div class="content">
+<pre class="highlight"><code class="language-json" data-lang="json">"ssh_username": "admindebian",
+"ssh_password": "Pa55w0rd",
+"shutdown_command": "echo 'Pa55w0rd'|sudo -S shutdown -h now",
+"ssh_timeout": "12m",</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The ssh information is required to help Packer to communicate with the image.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+It&#8217;s always a good idea to add a <strong>ssh_timeout</strong>, a connection loss or
+a timeout due to rebooting can happen at any time.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="preseed_files">Preseed files</h3>
+<div class="paragraph">
+<p>Because we want to automate the whole installation step-by-step process, we would like to
+pass like a guide to the installer in order to tell it what to do. That&#8217;s what the preseed
+files are for. In order to make the installer aware of the preseed file we need:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>To tell Packer the directory where the preseed file is by setting the <strong>http</strong> property</p>
+</li>
+<li>
+<p>To pass the <strong>url</strong> property to the boot command with the whole url where the preseed file is going to be available</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="title">debian-10.json</div>
+<div class="content">
+<pre class="highlight"><code class="language-json" data-lang="json">{
+    ...
+    "http_directory": "http",
+    "boot_command": [
+        ...
+        "url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/debian-10.cfg ",
+        "&lt;enter&gt;"
+    ]
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In a preseed file you would find instructions for every step: networking, root account, setting the
+system locale, timezone&#8230;&#8203; For example, here&#8217;s a sample of the preseed file for my Debian 10 image:</p>
+</div>
+<div class="listingblock">
+<div class="title">debian-10.cfg</div>
+<div class="content">
+<pre class="highlight"><code class="language-properties" data-lang="properties">### Networking
+d-i netcfg/choose_interface select auto
+d-i netcfg/wireless_wep string
+d-i netcfg/get_hostname string unassigned-hostname
+d-i netcfg/get_domain string unassigned-domain
+d-i mirror/protocol string http
+d-i mirror/country string manual
+d-i mirror/http/hostname string httpredir.debian.org
+d-i mirror/http/directory string /debian
+d-i mirror/http/proxy string
+
+### Users
+d-i passwd/root-login boolean false
+d-i passwd/user-fullname string Debian Admin
+d-i passwd/username string admindebian
+d-i passwd/user-password password Pa55w0rd
+d-i passwd/user-password-again password Pa55w0rd</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Every OS may need a different type of preseed file. Checkout some examples in this
+ <a href="https://github.com/kaorimatz/packer-templates">Github repository</a>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="packer_provisioners">Packer provisioners</h3>
+<div class="paragraph">
+<p>Ok, once we&#8217;ve built the image, we may want to install some packages, or configure some
+services&#8230;&#8203;etc,  that is to say to provision the image. You can reference several ways
+and tools to provision the image: Ansible, Puppet, shell script&#8230;&#8203; For this example I&#8217;m
+using a simple shell script.</p>
+</div>
+<div class="listingblock">
+<div class="title">provisioners example</div>
+<div class="content">
+<pre class="highlight"><code class="language-json" data-lang="json">"provisioners": [
+    {
+        "type": "shell",
+        "scripts": [
+            "scripts/update.sh"
+        ]
+    }
+]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As you may notice, the <strong>provisioners</strong> property is a list with possible provisioners. I&#8217;m
+just using the type <strong>shell</strong> pointing to a list with just one shell script. This script
+will be loaded to the built image and executed there (by default is copied to /tmp). The
+<strong>update.sh</strong> script is just updating apt indexes:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">#!/usr/bin/env bash
+
+echo "==&gt; Provisioning image"
+echo "==&gt; Updating indexes [started]"
+
+sudo apt-get -y update
+
+echo "==&gt; Updating indexes [finished]"</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="references">References</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Packer <a href="https://www.packer.io/intro/">website</a></p>
+</li>
+<li>
+<p>Github repository with a good set of <a href="https://github.com/kaorimatz/packer-templates">Packer templates</a></p>
+</li>
+</ul>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>

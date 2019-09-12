@@ -4,8 +4,348 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2019-09-12T13:14:58Z</updated>
+    <updated>2019-09-12T23:27:52Z</updated>
     <id>tag:null,2019:09</id>
+    <entry>
+        <title>Packer by Hashicorp</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2019/09/packer_intro.html"/>
+        <updated>2019-09-12T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2019/09/packer_intro.html</id>
+        <category term="devops"/>
+        <category term="hashicorp"/>
+        <category term="packer"/>
+        <category term="fedora"/>
+        <content type="html">
+            &lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;about_packer&quot;&gt;About Packer&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Packer is an open source tool for creating identical machine images for multiple
+platforms from a single source configuration. One of the worst things I
+have to do when creating a new VM is to go through the installation process
+as I were doing it in a physical machine. Imagine if you had to do it
+for different platforms (Vagrant, Xen, KVM)&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock note&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-note&quot; title=&quot;Note&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+About how to install Packer, you can go directly to the
+&lt;a href=&quot;https://www.packer.io/intro/getting-started/install.html&quot;&gt;Packer installation&lt;/a&gt; page. TLDR if
+your are a Linux user you can download the binary directly and make it available in your shell PATH.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;packer_builders&quot;&gt;Packer builders&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A builder in Packer describes how the image is going to be built for a
+specific platform (AWS EC2, KVM, Docker&amp;#8230;&amp;#8203;). In a Packer configuration
+file you can add as many builders as type of images you want to build.
+For instance, in this post I&amp;#8217;m only using the Qemu builder because
+my target environment is KVM.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;configuration_file&quot;&gt;Configuration file&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The Packer configuration file is just a JSON file with some group of properties:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;variables&lt;/strong&gt;: variable declaration. You can declare variables and default values and reference
+those variables along the rest of the configuration.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;builders&lt;/strong&gt;: As I mentioned in the beggining a builder represents the way in which the image machine
+is going to be built in a given environment (qemu in here)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;provisioners&lt;/strong&gt;: Provisioners can be used to configure or install new software in the image after booting (e.g Ansible as provisioner).&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;post-processors&lt;/strong&gt;: Post processors run after the image is built and provisioners have finished (e.g uploading the image to a remote registry).&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;example&quot;&gt;Example&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;My hello world example is to build a Debian 10 VM for Qemu environment. The structure of the project is:
+example is:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;structure&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;+--http
+|   +
+|   |
+|   +---debian-10.cfg
+|
++--debian-10.json&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;debian-10.json&lt;/strong&gt;: Packer configuration file&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;debian-10.cfg&lt;/strong&gt;: Debian 10 preseed file&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The Packer entry file is &lt;strong&gt;debian-10.json&lt;/strong&gt;, is where the builders, provisioners, post-processors and variables
+are set:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;.debian-10.json&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-json&quot; data-lang=&quot;json&quot;&gt;{
+    &quot;builders&quot;:
+    [
+        {
+            &quot;type&quot;: &quot;qemu&quot;,
+            &quot;vm_name&quot;: &quot;debian-10-{{build_type}}&quot;,
+            &quot;headless&quot;: true,
+
+            &quot;iso_url&quot;: &quot;https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-10.1.0-amd64-netinst.iso&quot;,
+            &quot;iso_checksum&quot;: &quot;7915fdb77a0c2623b4481fc5f0a8052330defe1cde1e0834ff233818dc6f301e&quot;,
+            &quot;iso_checksum_type&quot;: &quot;sha256&quot;,
+
+            &quot;memory&quot;: &quot;2048&quot;,
+            &quot;disk_size&quot;: &quot;5000&quot;,
+            &quot;cpus&quot;: 2,
+
+            &quot;ssh_username&quot;: &quot;admindebian&quot;,
+            &quot;ssh_password&quot;: &quot;Pa55w0rd&quot;,
+            &quot;shutdown_command&quot;: &quot;echo &apos;Pa55w0rd&apos;|sudo -S shutdown -h now&quot;,
+            &quot;ssh_timeout&quot;: &quot;10m&quot;,
+
+            &quot;http_directory&quot;: &quot;http&quot;,
+            &quot;boot_command&quot;: [
+                &quot;&amp;lt;esc&amp;gt;&amp;lt;wait&amp;gt;&amp;lt;wait&amp;gt;&quot;,
+                &quot;install &quot;,
+                &quot;auto=true &quot;,
+                &quot;priority=critical &quot;,
+                &quot;interface=auto &quot;,
+                &quot;url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/debian-10.cfg &quot;,
+                &quot;&amp;lt;enter&amp;gt;&quot;
+            ]
+        }
+    ],
+    &quot;provisioners&quot;: [
+        {
+            &quot;type&quot;: &quot;shell&quot;,
+            &quot;scripts&quot;: [
+                &quot;scripts/update.sh&quot;
+            ]
+        }
+    ]
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This Packer file configures just one builder, which builds a Qemu compatible Debian 10 qcow2 image with
+the following properties:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;builder basic properties&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-json&quot; data-lang=&quot;json&quot;&gt;&quot;type&quot;: &quot;qemu&quot;,
+&quot;vm_name&quot;: &quot;debian-10&quot;,
+&quot;headless&quot;: true,&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The builder is of type &lt;strong&gt;qemu&lt;/strong&gt;, the resulting virtual machine will be named &lt;strong&gt;debian-10&lt;/strong&gt; and
+the installation is automated so I don&amp;#8217;t need to see it working (&lt;strong&gt;headless&lt;/strong&gt;).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;base image retrieval&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-json&quot; data-lang=&quot;json&quot;&gt;&quot;iso_url&quot;: &quot;https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-10.1.0-amd64-netinst.iso&quot;,
+&quot;iso_checksum&quot;: &quot;7915fdb77a0c2623b4481fc5f0a8052330defe1cde1e0834ff233818dc6f301e&quot;,
+&quot;iso_checksum_type&quot;: &quot;sha256&quot;,&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I&amp;#8217;m taking an official image from the Debian site (&lt;strong&gt;iso_url&lt;/strong&gt;), and to make sure the image hasn&amp;#8217;t been tampered
+I&amp;#8217;m going to check its signature (&lt;strong&gt;iso_checksum&lt;/strong&gt;) with the right algorithm (&lt;strong&gt;iso_checksum_type&lt;/strong&gt;).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;phisical features&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-json&quot; data-lang=&quot;json&quot;&gt;&quot;memory&quot;: &quot;2048&quot;,
+&quot;disk_size&quot;: &quot;5000&quot;,
+&quot;cpus&quot;: 2,&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;When building the image, it will have 2GB of &lt;strong&gt;memory&lt;/strong&gt; a &lt;strong&gt;disk_size&lt;/strong&gt; of 5G and 2 &lt;strong&gt;cpus&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;ssh information&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-json&quot; data-lang=&quot;json&quot;&gt;&quot;ssh_username&quot;: &quot;admindebian&quot;,
+&quot;ssh_password&quot;: &quot;Pa55w0rd&quot;,
+&quot;shutdown_command&quot;: &quot;echo &apos;Pa55w0rd&apos;|sudo -S shutdown -h now&quot;,
+&quot;ssh_timeout&quot;: &quot;12m&quot;,&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The ssh information is required to help Packer to communicate with the image.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock warning&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-warning&quot; title=&quot;Warning&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+It&amp;#8217;s always a good idea to add a &lt;strong&gt;ssh_timeout&lt;/strong&gt;, a connection loss or
+a timeout due to rebooting can happen at any time.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;preseed_files&quot;&gt;Preseed files&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Because we want to automate the whole installation step-by-step process, we would like to
+pass like a guide to the installer in order to tell it what to do. That&amp;#8217;s what the preseed
+files are for. In order to make the installer aware of the preseed file we need:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;To tell Packer the directory where the preseed file is by setting the &lt;strong&gt;http&lt;/strong&gt; property&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;To pass the &lt;strong&gt;url&lt;/strong&gt; property to the boot command with the whole url where the preseed file is going to be available&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;debian-10.json&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-json&quot; data-lang=&quot;json&quot;&gt;{
+    ...
+    &quot;http_directory&quot;: &quot;http&quot;,
+    &quot;boot_command&quot;: [
+        ...
+        &quot;url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/debian-10.cfg &quot;,
+        &quot;&amp;lt;enter&amp;gt;&quot;
+    ]
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In a preseed file you would find instructions for every step: networking, root account, setting the
+system locale, timezone&amp;#8230;&amp;#8203; For example, here&amp;#8217;s a sample of the preseed file for my Debian 10 image:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;debian-10.cfg&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-properties&quot; data-lang=&quot;properties&quot;&gt;### Networking
+d-i netcfg/choose_interface select auto
+d-i netcfg/wireless_wep string
+d-i netcfg/get_hostname string unassigned-hostname
+d-i netcfg/get_domain string unassigned-domain
+d-i mirror/protocol string http
+d-i mirror/country string manual
+d-i mirror/http/hostname string httpredir.debian.org
+d-i mirror/http/directory string /debian
+d-i mirror/http/proxy string
+
+### Users
+d-i passwd/root-login boolean false
+d-i passwd/user-fullname string Debian Admin
+d-i passwd/username string admindebian
+d-i passwd/user-password password Pa55w0rd
+d-i passwd/user-password-again password Pa55w0rd&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock note&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-note&quot; title=&quot;Note&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+Every OS may need a different type of preseed file. Checkout some examples in this
+ &lt;a href=&quot;https://github.com/kaorimatz/packer-templates&quot;&gt;Github repository&lt;/a&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;packer_provisioners&quot;&gt;Packer provisioners&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ok, once we&amp;#8217;ve built the image, we may want to install some packages, or configure some
+services&amp;#8230;&amp;#8203;etc,  that is to say to provision the image. You can reference several ways
+and tools to provision the image: Ansible, Puppet, shell script&amp;#8230;&amp;#8203; For this example I&amp;#8217;m
+using a simple shell script.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;provisioners example&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-json&quot; data-lang=&quot;json&quot;&gt;&quot;provisioners&quot;: [
+    {
+        &quot;type&quot;: &quot;shell&quot;,
+        &quot;scripts&quot;: [
+            &quot;scripts/update.sh&quot;
+        ]
+    }
+]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As you may notice, the &lt;strong&gt;provisioners&lt;/strong&gt; property is a list with possible provisioners. I&amp;#8217;m
+just using the type &lt;strong&gt;shell&lt;/strong&gt; pointing to a list with just one shell script. This script
+will be loaded to the built image and executed there (by default is copied to /tmp). The
+&lt;strong&gt;update.sh&lt;/strong&gt; script is just updating apt indexes:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;#!/usr/bin/env bash
+
+echo &quot;==&amp;gt; Provisioning image&quot;
+echo &quot;==&amp;gt; Updating indexes [started]&quot;
+
+sudo apt-get -y update
+
+echo &quot;==&amp;gt; Updating indexes [finished]&quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;references&quot;&gt;References&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Packer &lt;a href=&quot;https://www.packer.io/intro/&quot;&gt;website&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Github repository with a good set of &lt;a href=&quot;https://github.com/kaorimatz/packer-templates&quot;&gt;Packer templates&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
     <entry>
         <title>Terraform + KVM</title>
         <author>
