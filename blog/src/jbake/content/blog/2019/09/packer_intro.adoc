@@ -1,0 +1,61 @@
+= Packer by Hashicorp
+@marioggar
+2019-09-12
+:jbake-type: post
+:jbake-status: draft
+:jbake-tags: devops, hashicorp, packer, fedora
+:sources: ../../../../../../../sources/2019/09/packer_intro
+:idprefix:
+:summary: Packer is a tool to build machine images
+:summary_image: devops.png
+
+=== About Packer
+
+Packer is an open source tool for creating identical machine images for multiple 
+platforms from a single source configuration. One of the worst things I
+have to do when creating a new VM is to go through the installation process
+as I were doing it in a physical machine. Moreover, if you had to do it
+for different platforms (Vagrant, Xen, KVM) you have to do it n times more. 
+Packer tries to automate all this process.
+
+=== Packer builders
+
+A builder in Packer describes how the image is going to be built for a
+specific platform (AWS EC2, KVM, Docker...). For instance, in this post I'm only
+using the Qemu builder because I need to use the image in a KVM
+environment.
+
+=== A simple Debian machine for KVM
+
+My hello world example with Packer is to build a Debian 10 VM for Qemu environment.
+Here is Packer configuration file.
+
+[source, json]
+.json configuration
+----
+include::{sources}/debian-10.json[]
+----
+
+The most important blocks are:
+
+- **variables**: variable declaration. You can declare variables and default values and reference
+those variables along the rest of the configuration using the expression `{{ user `nameofthevariable` }} "`
+- **builders**: As I mentioned in the beggining a builder represents the way in which the image machine
+is going to be built in a given environment (qemu in here)
+
+
+=== Preseed files
+
+[source, properties]
+.preseed file
+----
+something/la=pascual
+----
+
+=== Packer provisioners
+
+TODO
+
+=== References
+
+- Packer https://www.packer.io/intro/[website]
