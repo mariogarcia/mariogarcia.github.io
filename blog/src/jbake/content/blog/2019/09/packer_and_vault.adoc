@@ -1,0 +1,139 @@
+= Packer and Vault
+@marioggar
+2019-09-15
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: devops, hashicorp, packer, vault
+:sources: ../../../../../../../sources/2019/09/packer_and_vault
+:idprefix:
+:summary: Using Vault to provide Packer's templates secrets
+:summary_image: devops.png
+
+=== Packer and Vault
+
+- https://www.packer.io[Packer] is an open source tool for creating identical machine images for multiple 
+platforms from a single source configuration. 
+- https://www.vaultproject.io[Vault] Secure, store and tightly control access 
+to tokens, passwords, certificates, encryption keys for protecting secrets and other sensitive 
+data using a UI, CLI, or HTTP API.
+
+NOTE: I wrote a little intro about Packer at link:/blog/2019/09/packer_intro.html[previous post]. 
+
+When building Packer images you have to handle secrets such as the root user/password of your new image, and
+you don't want to keep that kind of sensible data neither hardcoded in a versioned template, nor unversioned
+in your local machine. Vault could be a great partner for keeping and managing that kind of things under
+control. I'm showing an example about creating some secrets inside Vault and reference them in a Packer
+template so that Packer can ask Vault for those secrets when building a new image.
+
+=== Startup Vault
+
+First of all start up a new Vault instance. I'm starting Vault in development mode:
+
+[source, shell]
+.startup vault (dev)
+----
+[mario@localhost$] vault server -dev
+...
+WARNING! dev mode is enabled! In this mode, Vault runs entirely in-memory                     
+and starts unsealed with a single unseal key. The root token is already                                                                                                                       
+authenticated to the CLI, so you can immediately begin using Vault.                                                                                                                           
+                                                                                               
+You may need to set the following environment variable:                 
+                                                                                               
+    $ export VAULT_ADDR='http://127.0.0.1:8200'               
+                                                                                               
+The unseal key and root token are displayed below in case you want to
+seal/unseal the Vault or re-authenticate.                                                      
+                                                                                               
+Unseal Key: wYZVb0bkahGPeVdyjGWBs/UPZ4qoSLFXhubpsl7fiEM=                
+Root Token: s.3vMd4W3jEpGtbp5no1IpUt3d                                                         
+                                                                                                                                                                                              
+Development mode should NOT be used in production installations!
+...
+----
+
+IMPORTANT: Not use this development mode in production
+
+Open another shell and export **VAULT_ADDR** and **VAULT_DEV_ROOT_TOKEN_ID** (Root Token).
+That'll enable Packer to access Vault values in this shell:
+
+[source, shell]
+----
+[mario@localhost$] export VAULT_ADDR='http://127.0.0.1:8200'
+[mario@localhost$] export VAULT_DEV_ROOT_TOKEN_ID='s.3vMd4W3jEpGtbp5no1IpUt3d'
+----
+
+=== Create a Packer secret store
+
+Next step is to create a secrets store of type **kv** in the path **packer**
+
+[source, shell]
+.enable secret store
+----
+[mario@localhost$] vault secrets enable -path=packer kv
+----
+
+Not I can store the **username** and **password** I'm going to use in my
+Debian VM later on.
+
+[source, shell]
+.enter secrets in new path
+----
+[mario@localhost$] vault write packer/debian username=admindebian password=supersecret
+----
+
+Lets make sure both value are in there
+
+[source, shell]
+.checking values
+----
+[mario@localhost$] vault get kv packer/debian
+----
+
+
+=== Reference your secrets in templates
+
+Now that we've entered our secrets in Vault, we can reference those
+values in our Packer templaes:
+
+[source, json]
+.use vault values in templates
+----
+include::{sources}/debian-10-vault.json[]
+----
+
+- You can only reference vault values as default values **in variables block**
+- You have to use the **vault function** with the secret store name and the name of the value stored
+
+[source, json]
+.vault values as default variable values
+----
+"variables": {
+    "username": "{{ vault `packer/debian` `username` }}",
+    "password": "{{ vault `packer/debian` `password`}}"
+}
+----
+
+- You can then use the **user function** in the rest of the template
+
+[source, json]
+.user function
+----
+...
+"ssh_username": "{{ user `username` }}"
+...
+----
+
+
+=== Profit
+
+Now if you execute a Packer build, build will ask Vault to give it the secrets referenced
+in its templates, so that you don't have to be worried about storing or managing that kind
+of information.
+
+=== References
+
+- Vault https://www.vaultproject.io/[web site]
+- Vault https://learn.hashicorp.com/vault[getting started tutorial]
+- Packer https://www.packer.io[web site]
+- Packer https://www.packer.io/docs/templates/user-variables.html[variables]. Among other things it explains how to use Vault secrets in Packer templates

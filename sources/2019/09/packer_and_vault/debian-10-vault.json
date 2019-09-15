@@ -1,0 +1,52 @@
+{
+    "variables": {
+        "username": "{{ vault `packer/debian` `username` }}",
+        "password": "{{ vault `packer/debian` `password`}}"
+    },
+    "builders":
+    [
+        {
+            "type": "qemu",
+            "vm_name": "debian-10-{{build_type}}",
+
+            "iso_url": "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-10.1.0-amd64-netinst.iso",            
+            "iso_checksum": "7915fdb77a0c2623b4481fc5f0a8052330defe1cde1e0834ff233818dc6f301e",
+            "iso_checksum_type": "sha256",
+
+            "memory": "2048",
+            "disk_size": "5000",
+            "cpus": 2,
+
+            "ssh_username": "{{ user `username` }}",
+            "ssh_password": "{{ user `password` }}",
+            "shutdown_command": "echo '{{ user `password` }}' | sudo -S shutdown -h now",
+            "ssh_timeout": "10m",
+
+            "http_directory": "http",
+            "boot_command": [
+                "<esc><wait><wait>",
+                "install ",
+                "auto=true ",
+                "priority=critical ",
+                "interface=auto ",
+                
+                "url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/debian-10-vault.cfg ",
+
+                "passwd/user-fullname=Debian Admin ",
+                "passwd/username={{ user `username` }} ",
+                "passwd/user-password={{ user `password` }} ",
+                "passwd/user-password-again={{ user `password` }} ",
+
+                "<enter>"
+            ]
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "shell",
+            "scripts": [
+                "scripts/update.sh"            
+            ]
+        }
+    ]
+}
