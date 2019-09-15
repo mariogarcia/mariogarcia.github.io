@@ -4,8 +4,265 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2019-09-12T23:27:52Z</updated>
+    <updated>2019-09-15T18:20:00Z</updated>
     <id>tag:null,2019:09</id>
+    <entry>
+        <title>Packer and Vault</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2019/09/packer_and_vault.html"/>
+        <updated>2019-09-15T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2019/09/packer_and_vault.html</id>
+        <category term="devops"/>
+        <category term="hashicorp"/>
+        <category term="packer"/>
+        <category term="vault"/>
+        <content type="html">
+            &lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;packer_and_vault&quot;&gt;Packer and Vault&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.packer.io&quot;&gt;Packer&lt;/a&gt; is an open source tool for creating identical machine images for multiple
+platforms from a single source configuration.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.vaultproject.io&quot;&gt;Vault&lt;/a&gt; Secure, store and tightly control access
+to tokens, passwords, certificates, encryption keys for protecting secrets and other sensitive
+data using a UI, CLI, or HTTP API.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock note&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-note&quot; title=&quot;Note&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+I wrote a little intro about Packer at &lt;a href=&quot;/blog/2019/09/packer_intro.html&quot;&gt;previous post&lt;/a&gt;.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;When building Packer images you have to handle secrets such as the root user/password of your new image, and
+you don&amp;#8217;t want to keep that kind of sensible data neither hardcoded in a versioned template, nor unversioned
+in your local machine. Vault could be a great partner for keeping and managing that kind of things under
+control. I&amp;#8217;m showing an example about creating some secrets inside Vault and reference them in a Packer
+template so that Packer can ask Vault for those secrets when building a new image.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;startup_vault&quot;&gt;Startup Vault&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;First of all start up a new Vault instance. I&amp;#8217;m starting Vault in development mode:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;startup vault (dev)&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;[mario@localhost$] vault server -dev
+...
+WARNING! dev mode is enabled! In this mode, Vault runs entirely in-memory
+and starts unsealed with a single unseal key. The root token is already
+authenticated to the CLI, so you can immediately begin using Vault.
+
+You may need to set the following environment variable:
+
+    $ export VAULT_ADDR=&apos;http://127.0.0.1:8200&apos;
+
+The unseal key and root token are displayed below in case you want to
+seal/unseal the Vault or re-authenticate.
+
+Unseal Key: wYZVb0bkahGPeVdyjGWBs/UPZ4qoSLFXhubpsl7fiEM=
+Root Token: s.3vMd4W3jEpGtbp5no1IpUt3d
+
+Development mode should NOT be used in production installations!
+...&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock important&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-important&quot; title=&quot;Important&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+Not use this development mode in production
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Open another shell and export &lt;strong&gt;VAULT_ADDR&lt;/strong&gt; and &lt;strong&gt;VAULT_DEV_ROOT_TOKEN_ID&lt;/strong&gt; (Root Token).
+That&amp;#8217;ll enable Packer to access Vault values in this shell:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;[mario@localhost$] export VAULT_ADDR=&apos;http://127.0.0.1:8200&apos;
+[mario@localhost$] export VAULT_DEV_ROOT_TOKEN_ID=&apos;s.3vMd4W3jEpGtbp5no1IpUt3d&apos;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;create_a_packer_secret_store&quot;&gt;Create a Packer secret store&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Next step is to create a secrets store of type &lt;strong&gt;kv&lt;/strong&gt; in the path &lt;strong&gt;packer&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;enable secret store&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;[mario@localhost$] vault secrets enable -path=packer kv&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Not I can store the &lt;strong&gt;username&lt;/strong&gt; and &lt;strong&gt;password&lt;/strong&gt; I&amp;#8217;m going to use in my
+Debian VM later on.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;enter secrets in new path&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;[mario@localhost$] vault write packer/debian username=admindebian password=supersecret&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Lets make sure both value are in there&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;checking values&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;[mario@localhost$] vault get kv packer/debian&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;reference_your_secrets_in_templates&quot;&gt;Reference your secrets in templates&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now that we&amp;#8217;ve entered our secrets in Vault, we can reference those
+values in our Packer templaes:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;use vault values in templates&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-json&quot; data-lang=&quot;json&quot;&gt;{
+    &quot;variables&quot;: {
+        &quot;username&quot;: &quot;{{ vault `packer/debian` `username` }}&quot;,
+        &quot;password&quot;: &quot;{{ vault `packer/debian` `password`}}&quot;
+    },
+    &quot;builders&quot;:
+    [
+        {
+            &quot;type&quot;: &quot;qemu&quot;,
+            &quot;vm_name&quot;: &quot;debian-10-{{build_type}}&quot;,
+
+            &quot;iso_url&quot;: &quot;https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-10.1.0-amd64-netinst.iso&quot;,
+            &quot;iso_checksum&quot;: &quot;7915fdb77a0c2623b4481fc5f0a8052330defe1cde1e0834ff233818dc6f301e&quot;,
+            &quot;iso_checksum_type&quot;: &quot;sha256&quot;,
+
+            &quot;memory&quot;: &quot;2048&quot;,
+            &quot;disk_size&quot;: &quot;5000&quot;,
+            &quot;cpus&quot;: 2,
+
+            &quot;ssh_username&quot;: &quot;{{ user `username` }}&quot;,
+            &quot;ssh_password&quot;: &quot;{{ user `password` }}&quot;,
+            &quot;shutdown_command&quot;: &quot;echo &apos;{{ user `password` }}&apos; | sudo -S shutdown -h now&quot;,
+            &quot;ssh_timeout&quot;: &quot;10m&quot;,
+
+            &quot;http_directory&quot;: &quot;http&quot;,
+            &quot;boot_command&quot;: [
+                &quot;&amp;lt;esc&amp;gt;&amp;lt;wait&amp;gt;&amp;lt;wait&amp;gt;&quot;,
+                &quot;install &quot;,
+                &quot;auto=true &quot;,
+                &quot;priority=critical &quot;,
+                &quot;interface=auto &quot;,
+
+                &quot;url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/debian-10-vault.cfg &quot;,
+
+                &quot;passwd/user-fullname=Debian Admin &quot;,
+                &quot;passwd/username={{ user `username` }} &quot;,
+                &quot;passwd/user-password={{ user `password` }} &quot;,
+                &quot;passwd/user-password-again={{ user `password` }} &quot;,
+
+                &quot;&amp;lt;enter&amp;gt;&quot;
+            ]
+        }
+    ],
+    &quot;provisioners&quot;: [
+        {
+            &quot;type&quot;: &quot;shell&quot;,
+            &quot;scripts&quot;: [
+                &quot;scripts/update.sh&quot;
+            ]
+        }
+    ]
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;You can only reference vault values as default values &lt;strong&gt;in variables block&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;You have to use the &lt;strong&gt;vault function&lt;/strong&gt; with the secret store name and the name of the value stored&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;vault values as default variable values&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-json&quot; data-lang=&quot;json&quot;&gt;&quot;variables&quot;: {
+    &quot;username&quot;: &quot;{{ vault `packer/debian` `username` }}&quot;,
+    &quot;password&quot;: &quot;{{ vault `packer/debian` `password`}}&quot;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;You can then use the &lt;strong&gt;user function&lt;/strong&gt; in the rest of the template&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;user function&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-json&quot; data-lang=&quot;json&quot;&gt;...
+&quot;ssh_username&quot;: &quot;{{ user `username` }}&quot;
+...&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;profit&quot;&gt;Profit&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now if you execute a Packer build, build will ask Vault to give it the secrets referenced
+in its templates, so that you don&amp;#8217;t have to be worried about storing or managing that kind
+of information.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;references&quot;&gt;References&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Vault &lt;a href=&quot;https://www.vaultproject.io/&quot;&gt;web site&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Vault &lt;a href=&quot;https://learn.hashicorp.com/vault&quot;&gt;getting started tutorial&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Packer &lt;a href=&quot;https://www.packer.io&quot;&gt;web site&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Packer &lt;a href=&quot;https://www.packer.io/docs/templates/user-variables.html&quot;&gt;variables&lt;/a&gt;. Among other things it explains how to use Vault secrets in Packer templates&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
     <entry>
         <title>Packer by Hashicorp</title>
         <author>

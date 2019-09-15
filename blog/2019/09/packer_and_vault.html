@@ -1,0 +1,310 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>Packer and Vault</h1></header><yieldScaped><div class="sect2">
+<h3 id="packer_and_vault">Packer and Vault</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://www.packer.io">Packer</a> is an open source tool for creating identical machine images for multiple
+platforms from a single source configuration.</p>
+</li>
+<li>
+<p><a href="https://www.vaultproject.io">Vault</a> Secure, store and tightly control access
+to tokens, passwords, certificates, encryption keys for protecting secrets and other sensitive
+data using a UI, CLI, or HTTP API.</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+I wrote a little intro about Packer at <a href="/blog/2019/09/packer_intro.html">previous post</a>.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>When building Packer images you have to handle secrets such as the root user/password of your new image, and
+you don&#8217;t want to keep that kind of sensible data neither hardcoded in a versioned template, nor unversioned
+in your local machine. Vault could be a great partner for keeping and managing that kind of things under
+control. I&#8217;m showing an example about creating some secrets inside Vault and reference them in a Packer
+template so that Packer can ask Vault for those secrets when building a new image.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="startup_vault">Startup Vault</h3>
+<div class="paragraph">
+<p>First of all start up a new Vault instance. I&#8217;m starting Vault in development mode:</p>
+</div>
+<div class="listingblock">
+<div class="title">startup vault (dev)</div>
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">[mario@localhost$] vault server -dev
+...
+WARNING! dev mode is enabled! In this mode, Vault runs entirely in-memory
+and starts unsealed with a single unseal key. The root token is already
+authenticated to the CLI, so you can immediately begin using Vault.
+
+You may need to set the following environment variable:
+
+    $ export VAULT_ADDR='http://127.0.0.1:8200'
+
+The unseal key and root token are displayed below in case you want to
+seal/unseal the Vault or re-authenticate.
+
+Unseal Key: wYZVb0bkahGPeVdyjGWBs/UPZ4qoSLFXhubpsl7fiEM=
+Root Token: s.3vMd4W3jEpGtbp5no1IpUt3d
+
+Development mode should NOT be used in production installations!
+...</code></pre>
+</div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Not use this development mode in production
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Open another shell and export <strong>VAULT_ADDR</strong> and <strong>VAULT_DEV_ROOT_TOKEN_ID</strong> (Root Token).
+That&#8217;ll enable Packer to access Vault values in this shell:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">[mario@localhost$] export VAULT_ADDR='http://127.0.0.1:8200'
+[mario@localhost$] export VAULT_DEV_ROOT_TOKEN_ID='s.3vMd4W3jEpGtbp5no1IpUt3d'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="create_a_packer_secret_store">Create a Packer secret store</h3>
+<div class="paragraph">
+<p>Next step is to create a secrets store of type <strong>kv</strong> in the path <strong>packer</strong></p>
+</div>
+<div class="listingblock">
+<div class="title">enable secret store</div>
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">[mario@localhost$] vault secrets enable -path=packer kv</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Not I can store the <strong>username</strong> and <strong>password</strong> I&#8217;m going to use in my
+Debian VM later on.</p>
+</div>
+<div class="listingblock">
+<div class="title">enter secrets in new path</div>
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">[mario@localhost$] vault write packer/debian username=admindebian password=supersecret</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Lets make sure both value are in there</p>
+</div>
+<div class="listingblock">
+<div class="title">checking values</div>
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">[mario@localhost$] vault get kv packer/debian</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="reference_your_secrets_in_templates">Reference your secrets in templates</h3>
+<div class="paragraph">
+<p>Now that we&#8217;ve entered our secrets in Vault, we can reference those
+values in our Packer templaes:</p>
+</div>
+<div class="listingblock">
+<div class="title">use vault values in templates</div>
+<div class="content">
+<pre class="highlight"><code class="language-json" data-lang="json">{
+    "variables": {
+        "username": "{{ vault `packer/debian` `username` }}",
+        "password": "{{ vault `packer/debian` `password`}}"
+    },
+    "builders":
+    [
+        {
+            "type": "qemu",
+            "vm_name": "debian-10-{{build_type}}",
+
+            "iso_url": "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-10.1.0-amd64-netinst.iso",
+            "iso_checksum": "7915fdb77a0c2623b4481fc5f0a8052330defe1cde1e0834ff233818dc6f301e",
+            "iso_checksum_type": "sha256",
+
+            "memory": "2048",
+            "disk_size": "5000",
+            "cpus": 2,
+
+            "ssh_username": "{{ user `username` }}",
+            "ssh_password": "{{ user `password` }}",
+            "shutdown_command": "echo '{{ user `password` }}' | sudo -S shutdown -h now",
+            "ssh_timeout": "10m",
+
+            "http_directory": "http",
+            "boot_command": [
+                "&lt;esc&gt;&lt;wait&gt;&lt;wait&gt;",
+                "install ",
+                "auto=true ",
+                "priority=critical ",
+                "interface=auto ",
+
+                "url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/debian-10-vault.cfg ",
+
+                "passwd/user-fullname=Debian Admin ",
+                "passwd/username={{ user `username` }} ",
+                "passwd/user-password={{ user `password` }} ",
+                "passwd/user-password-again={{ user `password` }} ",
+
+                "&lt;enter&gt;"
+            ]
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "shell",
+            "scripts": [
+                "scripts/update.sh"
+            ]
+        }
+    ]
+}</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>You can only reference vault values as default values <strong>in variables block</strong></p>
+</li>
+<li>
+<p>You have to use the <strong>vault function</strong> with the secret store name and the name of the value stored</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="title">vault values as default variable values</div>
+<div class="content">
+<pre class="highlight"><code class="language-json" data-lang="json">"variables": {
+    "username": "{{ vault `packer/debian` `username` }}",
+    "password": "{{ vault `packer/debian` `password`}}"
+}</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>You can then use the <strong>user function</strong> in the rest of the template</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="title">user function</div>
+<div class="content">
+<pre class="highlight"><code class="language-json" data-lang="json">...
+"ssh_username": "{{ user `username` }}"
+...</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="profit">Profit</h3>
+<div class="paragraph">
+<p>Now if you execute a Packer build, build will ask Vault to give it the secrets referenced
+in its templates, so that you don&#8217;t have to be worried about storing or managing that kind
+of information.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="references">References</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Vault <a href="https://www.vaultproject.io/">web site</a></p>
+</li>
+<li>
+<p>Vault <a href="https://learn.hashicorp.com/vault">getting started tutorial</a></p>
+</li>
+<li>
+<p>Packer <a href="https://www.packer.io">web site</a></p>
+</li>
+<li>
+<p>Packer <a href="https://www.packer.io/docs/templates/user-variables.html">variables</a>. Among other things it explains how to use Vault secrets in Packer templates</p>
+</li>
+</ul>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>
