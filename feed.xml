@@ -4,8 +4,461 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2019-09-15T18:20:00Z</updated>
-    <id>tag:null,2019:09</id>
+    <updated>2019-10-13T09:19:36Z</updated>
+    <id>tag:null,2019:10</id>
+    <entry>
+        <title>Pytest and Testcontainers</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2019/10/pytest_fixtures.html"/>
+        <updated>2019-10-11T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2019/10/pytest_fixtures.html</id>
+        <category term="test"/>
+        <category term="python"/>
+        <category term="pytest"/>
+        <content type="html">
+            &lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;intro&quot;&gt;Intro&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I&amp;#8217;ve been a Java programmer for a very long time, but nowadays I&amp;#8217;m involved
+in a Python project at work. One of the things I was missing from the Java
+ecosystem was &lt;a href=&quot;https://www.testcontainers.org/&quot;&gt;TestContainers&lt;/a&gt;. Long story short
+Testcontainers is a project enabling your project to run Docker containers
+for integration testing purposes. It turns out there&amp;#8217;s a port for
+Python and I&amp;#8217;d like to figure out how to use it.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;the_challenge&quot;&gt;The challenge&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I&amp;#8217;m creating a persistence layer with SQLAlchemy and I&amp;#8217;d like to
+use TestContainers:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;to &lt;strong&gt;startup&lt;/strong&gt; a PostgreSQL container&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;to &lt;strong&gt;create the schema&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;to &lt;strong&gt;run the tests&lt;/strong&gt; against the database&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;to &lt;strong&gt;truncate all tables&lt;/strong&gt; before running each test&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;to &lt;strong&gt;stop the database&lt;/strong&gt; at the end of the test suite (end of pytest session)&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock note&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-note&quot; title=&quot;Note&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+The source code of this entry can be found at &lt;a href=&quot;https://github.com/mariogarcia/mariogarcia.github.io/tree/working/sources/2019/10/pytest_testcontainers&quot;&gt;Github&lt;/a&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Here&amp;#8217;s my Pipfile:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Dependencies&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;[[source]]
+name = &quot;pytest_testcontainers&quot;
+url = &apos;https://pypi.python.org/simple&apos;
+version = &quot;0.1.0&quot;
+description = &quot;&quot;
+
+[packages]
+sqlalchemy = &quot;&amp;gt;=1.3&quot;
+pg8000 = &quot;&amp;gt;=1.13&quot;
+psycopg2-binary = &quot;*&quot;
+
+[dev-packages]
+pytest = &quot;&amp;gt;=3.0&quot;
+pytest-cov = &quot;&amp;gt;=2.7.1&quot;
+flake8 = &quot;&amp;gt;=3.7&quot;
+testcontainers = &quot;&amp;gt;=2.5&quot;
+
+[requires]
+python = &quot;&amp;gt;=3.7&quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Notice that althoug I&amp;#8217;ve added bonth &lt;strong&gt;pg8000&lt;/strong&gt; or &lt;strong&gt;psycopg2&lt;/strong&gt;. I&amp;#8217;m
+only using the latter in this example. There&amp;#8217;s a note about
+why at the end of the blog entry.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;repository&quot;&gt;Repository&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I&amp;#8217;m creating a repository which wraps the calls to the SQLAlchemy session.
+In a Python project, or at least what I&amp;#8217;m seeing lately in some Python projects,
+the SQLAlchemy session is created statically somewhere from the configuration file
+and repositories import that reference and use it. The problem with that
+is that TestContainers by default creates a Docker container
+with your database with a &lt;strong&gt;random port&lt;/strong&gt; meaning that you won&amp;#8217;t know all
+the connection details until the container is running. Bottom line,
+the cleanest solution I could think of was dependency injection via class
+constructor injection.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock note&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-note&quot; title=&quot;Note&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+Although by default TestContainers look for a random port by default
+you can specify one port explicitly.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This is how the repository may look like:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;repository with injected session&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from blog.models import BlogEntry
+
+class BlogEntryRepository:
+    def __init__(self, session):
+        self.session = session
+
+    def find_by_id(self, id):
+        return self.session.query(BlogEntry).filter_by(id=id).first()
+
+    def find_all_by_title_starts_with(self, title_starts_with):
+        by_startswith = BlogEntry.title.startswith(title_starts_with)
+
+        return self.session.query(BlogEntry).filter(by_startswith).all()
+
+    def save(self, blog_entry):
+        self.session.add(blog_entry)
+        self.session.flush()
+
+        return blog_entry&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;pytest_fixtures_conftest_py&quot;&gt;Pytest fixtures (conftest.py)&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Next step is to optimize the creation and disposal of the database. Basically I don&amp;#8217;t
+want to create an instance of the database per each test function, that would be such
+a waste. Instead I would like to &lt;strong&gt;create an instance of the database spanning the whole
+pytest session&lt;/strong&gt; and eventually shutdown the database. Apart from that, once the database
+is up and running I need to &lt;strong&gt;create a session and pass it to every test in case they may need it&lt;/strong&gt;
+for injecting it to, for instance, a repository. So the idea is:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;to start the container&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;to create the session with the container details&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;to inject the session in every test so that it can be used to initialize the repository&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In order to do that I&amp;#8217;m using &lt;a href=&quot;https://docs.pytest.org/en/latest/fixture.html&quot;&gt;Pytest fixtures&lt;/a&gt;
+which will help me reusing some parts among my tests (SQLAlchemy session) and run the Docker
+container in a more efficient way (One database instance for all my tests). There&amp;#8217;re several
+places where you can put your fixtures so that test can be aware of them. I&amp;#8217;m using the
+&lt;strong&gt;conftest.py&lt;/strong&gt; file to put all my fixtures there.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock note&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-note&quot; title=&quot;Note&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+Although one &lt;code&gt;conftest.py&lt;/code&gt; file at the top of your project modules can be visible
+to all your tests, you can also use one &lt;code&gt;conftest.py&lt;/code&gt; file
+&lt;a href=&quot;https://docs.pytest.org/en/latest/writing_plugins.html#conftest-py-plugins&quot;&gt;per directory&lt;/a&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;These are the required imports to create my database session fixture:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;imports&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import logging
+
+import pytest
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import (scoped_session, sessionmaker)
+
+from testcontainers.postgres import PostgresContainer&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;session_fixtures&quot;&gt;Session fixtures&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Session fixtures are shared among all tests during a Pytest execution. So it makes sense to
+create a fixture starting up the Docker container, and shutting it down once the session
+ends.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;fixtures for pytest session and per function&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;log = logging.getLogger()
+
+
+@pytest.fixture(scope=&quot;session&quot;)
+def session(request):
+    log.info(&quot;[fixture] starting db container&quot;)
+
+    postgres = PostgresContainer(&quot;postgres:9.5&quot;) &lt;i class=&quot;conum&quot; data-value=&quot;1&quot;&gt;&lt;/i&gt;&lt;b&gt;(1)&lt;/b&gt;
+    postgres.start()
+
+    log.info(&quot;[fixture] connecting to: {}&quot;.format(postgres.get_connection_url()))
+
+    # create session with db container information
+    engine = create_engine(postgres.get_connection_url()) &lt;i class=&quot;conum&quot; data-value=&quot;2&quot;&gt;&lt;/i&gt;&lt;b&gt;(2)&lt;/b&gt;
+    session = scoped_session(sessionmaker(autocommit=False,autoflush=False,bind=engine))
+
+    # create schema in database
+    Base.metadata.create_all(engine) &lt;i class=&quot;conum&quot; data-value=&quot;3&quot;&gt;&lt;/i&gt;&lt;b&gt;(3)&lt;/b&gt;
+
+    def stop_db(): &lt;i class=&quot;conum&quot; data-value=&quot;4&quot;&gt;&lt;/i&gt;&lt;b&gt;(4)&lt;/b&gt;
+        log.info(&quot;[fixture] stopping db container&quot;)
+        postgres.stop()
+
+    request.addfinalizer(stop_db) &lt;i class=&quot;conum&quot; data-value=&quot;5&quot;&gt;&lt;/i&gt;&lt;b&gt;(5)&lt;/b&gt;
+
+    return session &lt;i class=&quot;conum&quot; data-value=&quot;6&quot;&gt;&lt;/i&gt;&lt;b&gt;(6)&lt;/b&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;colist arabic&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;1&quot;&gt;&lt;/i&gt;&lt;b&gt;1&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;Create and start the PostgreSQL container (9.5)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;2&quot;&gt;&lt;/i&gt;&lt;b&gt;2&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;Create database session from container&amp;#8217;s detail&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;3&quot;&gt;&lt;/i&gt;&lt;b&gt;3&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;Recreate database schema&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;4&quot;&gt;&lt;/i&gt;&lt;b&gt;4&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;Create a session finalizer to stop the container once the session ends&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;5&quot;&gt;&lt;/i&gt;&lt;b&gt;5&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;Add the finalizer to pytest&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;6&quot;&gt;&lt;/i&gt;&lt;b&gt;6&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;Returns the database session. That will inject the database session in whatever function demanding it&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock note&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-note&quot; title=&quot;Note&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+An alternative option for executing teardown code is to make use of the addfinalizer method of the
+request-context object to register finalization functions. That&amp;#8217;s why we declare the &lt;code&gt;request&lt;/code&gt; parameter
+in our fixtures, to be able to get the request-context object.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Dependency injection also works with session fixtures theirselves. If you would like
+to provide a pytest fixture that requires a previous configured pytest session fixture
+you only have to declare the dependency as a fixture parameter:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;injecting fixtures as parameters in another fixture&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;@pytest.fixture(scope=&quot;session&quot;)
+def factories(request, session):
+    return Factories(session)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Here to create some factories to create domain objects in my tests I
+need the configured database session. Declaring the dependency as
+a parameter will execute first the dependency and then pytest will
+inject it in this fixture.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;function_fixtures&quot;&gt;Function fixtures&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Something I&amp;#8217;d like to happen before I&amp;#8217;m running a new test is to make sure all data from
+other tests has been erased prior to run the current test. Therefore it seems like I good
+idea to create a function fixture that truncates all tables before each new test execution.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;fixtures for pytest session and per function&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;@pytest.fixture(scope=&quot;function&quot;,autouse=True)
+def cleanup(request, session): &lt;i class=&quot;conum&quot; data-value=&quot;1&quot;&gt;&lt;/i&gt;&lt;b&gt;(1)&lt;/b&gt;
+    log.info(&quot;[fixture] truncating all tables&quot;)
+
+    # truncating all tables
+    for table in reversed(Base.metadata.sorted_tables): &lt;i class=&quot;conum&quot; data-value=&quot;2&quot;&gt;&lt;/i&gt;&lt;b&gt;(2)&lt;/b&gt;
+        session.execute(table.delete())
+
+    def function_ends(): &lt;i class=&quot;conum&quot; data-value=&quot;3&quot;&gt;&lt;/i&gt;&lt;b&gt;(3)&lt;/b&gt;
+        log.info(&quot;[fixture] closing db session&quot;)
+        session.commit()
+        session.close()
+
+    request.addfinalizer(function_ends) &lt;i class=&quot;conum&quot; data-value=&quot;4&quot;&gt;&lt;/i&gt;&lt;b&gt;(4)&lt;/b&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;colist arabic&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;1&quot;&gt;&lt;/i&gt;&lt;b&gt;1&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;injecting database session from previous pytest session fixture&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;2&quot;&gt;&lt;/i&gt;&lt;b&gt;2&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;truncating all tables from schema&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;3&quot;&gt;&lt;/i&gt;&lt;b&gt;3&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;create a finalizer function to commit and close session after each test&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;4&quot;&gt;&lt;/i&gt;&lt;b&gt;4&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;add the finalizer function to pytest lifecycle to happen at the end of each test&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;tests&quot;&gt;Tests&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now that the database is running and the database session is created thanks
+to the pytest fixtures we just created, we can use them in our tests, just
+declaring them as test parameters.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;tests using db session and factories&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from blog.repositories import BlogEntryRepository
+
+
+def test_find_by_id(session, factories):
+    # given: a new blog entry
+    saved_entry = factories.create_blog_entry()
+
+    # and: a blog entry repository
+    repository = BlogEntryRepository(session)
+
+    # when: trying to find it by its id
+    blog_entry = repository.find_by_id(saved_entry.id)
+
+    # then: I should be able to get it back
+    assert str(blog_entry.id) == str(saved_entry.id)
+
+
+def test_find_all_by_startswith(session, factories):
+    # given: a new blog entry
+    for i in range(2):
+        factories.create_blog_entry(
+            title=&quot;Pytest introduction {}&quot;.format(i)
+        )
+
+    # and: saving all those entries
+    repository = BlogEntryRepository(session)
+
+    # when: looking for entries starting with Pytest
+    results = repository.find_all_by_title_starts_with(&quot;Pytest&quot;)
+
+    # then: there should be
+    assert len(results) == 2&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;improvements&quot;&gt;Improvements&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Well, maybe to be coherent with the rest of the application, I could create
+a test configuration file, and fullfil the container startup configuration
+with configuration values there. Most of the connection parameters are
+available programatically when bootstraping a PostgreSQL container.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock warning&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-warning&quot; title=&quot;Warning&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+In TestContainers 2.5 the PostgreSQL connection dialect is
+hardcoded to &lt;code&gt;psycopg2+postgres&lt;/code&gt; if you&amp;#8217;d like to change it to, for example,
+&lt;strong&gt;pg8000&lt;/strong&gt; you&amp;#8217;ll have to inherit from &lt;code&gt;PostgresContainer&lt;/code&gt; and
+overwrite the &lt;code&gt;get_connection_url&lt;/code&gt; function.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;resources&quot;&gt;Resources&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://docs.pytest.org/en/latest/fixture.html&quot;&gt;Pytest fixtures&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://testcontainers-python.readthedocs.io/en/latest/&quot;&gt;TestContainers for Python&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
     <entry>
         <title>Packer and Vault</title>
         <author>

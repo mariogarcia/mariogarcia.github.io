@@ -1,0 +1,507 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>Pytest and Testcontainers</h1></header><yieldScaped><div class="sect1">
+<h2 id="intro">Intro</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I&#8217;ve been a Java programmer for a very long time, but nowadays I&#8217;m involved
+in a Python project at work. One of the things I was missing from the Java
+ecosystem was <a href="https://www.testcontainers.org/">TestContainers</a>. Long story short
+Testcontainers is a project enabling your project to run Docker containers
+for integration testing purposes. It turns out there&#8217;s a port for
+Python and I&#8217;d like to figure out how to use it.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="the_challenge">The challenge</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I&#8217;m creating a persistence layer with SQLAlchemy and I&#8217;d like to
+use TestContainers:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>to <strong>startup</strong> a PostgreSQL container</p>
+</li>
+<li>
+<p>to <strong>create the schema</strong></p>
+</li>
+<li>
+<p>to <strong>run the tests</strong> against the database</p>
+</li>
+<li>
+<p>to <strong>truncate all tables</strong> before running each test</p>
+</li>
+<li>
+<p>to <strong>stop the database</strong> at the end of the test suite (end of pytest session)</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The source code of this entry can be found at <a href="https://github.com/mariogarcia/mariogarcia.github.io/tree/working/sources/2019/10/pytest_testcontainers">Github</a>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s my Pipfile:</p>
+</div>
+<div class="listingblock">
+<div class="title">Dependencies</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">[[source]]
+name = "pytest_testcontainers"
+url = 'https://pypi.python.org/simple'
+version = "0.1.0"
+description = ""
+
+[packages]
+sqlalchemy = "&gt;=1.3"
+pg8000 = "&gt;=1.13"
+psycopg2-binary = "*"
+
+[dev-packages]
+pytest = "&gt;=3.0"
+pytest-cov = "&gt;=2.7.1"
+flake8 = "&gt;=3.7"
+testcontainers = "&gt;=2.5"
+
+[requires]
+python = "&gt;=3.7"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Notice that althoug I&#8217;ve added bonth <strong>pg8000</strong> or <strong>psycopg2</strong>. I&#8217;m
+only using the latter in this example. There&#8217;s a note about
+why at the end of the blog entry.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="repository">Repository</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I&#8217;m creating a repository which wraps the calls to the SQLAlchemy session.
+In a Python project, or at least what I&#8217;m seeing lately in some Python projects,
+the SQLAlchemy session is created statically somewhere from the configuration file
+and repositories import that reference and use it. The problem with that
+is that TestContainers by default creates a Docker container
+with your database with a <strong>random port</strong> meaning that you won&#8217;t know all
+the connection details until the container is running. Bottom line,
+the cleanest solution I could think of was dependency injection via class
+constructor injection.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Although by default TestContainers look for a random port by default
+you can specify one port explicitly.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>This is how the repository may look like:</p>
+</div>
+<div class="listingblock">
+<div class="title">repository with injected session</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from blog.models import BlogEntry
+
+class BlogEntryRepository:
+    def __init__(self, session):
+        self.session = session
+
+    def find_by_id(self, id):
+        return self.session.query(BlogEntry).filter_by(id=id).first()
+
+    def find_all_by_title_starts_with(self, title_starts_with):
+        by_startswith = BlogEntry.title.startswith(title_starts_with)
+
+        return self.session.query(BlogEntry).filter(by_startswith).all()
+
+    def save(self, blog_entry):
+        self.session.add(blog_entry)
+        self.session.flush()
+
+        return blog_entry</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="pytest_fixtures_conftest_py">Pytest fixtures (conftest.py)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Next step is to optimize the creation and disposal of the database. Basically I don&#8217;t
+want to create an instance of the database per each test function, that would be such
+a waste. Instead I would like to <strong>create an instance of the database spanning the whole
+pytest session</strong> and eventually shutdown the database. Apart from that, once the database
+is up and running I need to <strong>create a session and pass it to every test in case they may need it</strong>
+for injecting it to, for instance, a repository. So the idea is:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>to start the container</p>
+</li>
+<li>
+<p>to create the session with the container details</p>
+</li>
+<li>
+<p>to inject the session in every test so that it can be used to initialize the repository</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In order to do that I&#8217;m using <a href="https://docs.pytest.org/en/latest/fixture.html">Pytest fixtures</a>
+which will help me reusing some parts among my tests (SQLAlchemy session) and run the Docker
+container in a more efficient way (One database instance for all my tests). There&#8217;re several
+places where you can put your fixtures so that test can be aware of them. I&#8217;m using the
+<strong>conftest.py</strong> file to put all my fixtures there.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Although one <code>conftest.py</code> file at the top of your project modules can be visible
+to all your tests, you can also use one <code>conftest.py</code> file
+<a href="https://docs.pytest.org/en/latest/writing_plugins.html#conftest-py-plugins">per directory</a>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>These are the required imports to create my database session fixture:</p>
+</div>
+<div class="listingblock">
+<div class="title">imports</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import logging
+
+import pytest
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import (scoped_session, sessionmaker)
+
+from testcontainers.postgres import PostgresContainer</code></pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="session_fixtures">Session fixtures</h3>
+<div class="paragraph">
+<p>Session fixtures are shared among all tests during a Pytest execution. So it makes sense to
+create a fixture starting up the Docker container, and shutting it down once the session
+ends.</p>
+</div>
+<div class="listingblock">
+<div class="title">fixtures for pytest session and per function</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">log = logging.getLogger()
+
+
+@pytest.fixture(scope="session")
+def session(request):
+    log.info("[fixture] starting db container")
+
+    postgres = PostgresContainer("postgres:9.5") <i class="conum" data-value="1"></i><b>(1)</b>
+    postgres.start()
+
+    log.info("[fixture] connecting to: {}".format(postgres.get_connection_url()))
+
+    # create session with db container information
+    engine = create_engine(postgres.get_connection_url()) <i class="conum" data-value="2"></i><b>(2)</b>
+    session = scoped_session(sessionmaker(autocommit=False,autoflush=False,bind=engine))
+
+    # create schema in database
+    Base.metadata.create_all(engine) <i class="conum" data-value="3"></i><b>(3)</b>
+
+    def stop_db(): <i class="conum" data-value="4"></i><b>(4)</b>
+        log.info("[fixture] stopping db container")
+        postgres.stop()
+
+    request.addfinalizer(stop_db) <i class="conum" data-value="5"></i><b>(5)</b>
+
+    return session <i class="conum" data-value="6"></i><b>(6)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Create and start the PostgreSQL container (9.5)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Create database session from container&#8217;s detail</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Recreate database schema</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Create a session finalizer to stop the container once the session ends</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Add the finalizer to pytest</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Returns the database session. That will inject the database session in whatever function demanding it</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+An alternative option for executing teardown code is to make use of the addfinalizer method of the
+request-context object to register finalization functions. That&#8217;s why we declare the <code>request</code> parameter
+in our fixtures, to be able to get the request-context object.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Dependency injection also works with session fixtures theirselves. If you would like
+to provide a pytest fixture that requires a previous configured pytest session fixture
+you only have to declare the dependency as a fixture parameter:</p>
+</div>
+<div class="listingblock">
+<div class="title">injecting fixtures as parameters in another fixture</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">@pytest.fixture(scope="session")
+def factories(request, session):
+    return Factories(session)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here to create some factories to create domain objects in my tests I
+need the configured database session. Declaring the dependency as
+a parameter will execute first the dependency and then pytest will
+inject it in this fixture.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="function_fixtures">Function fixtures</h3>
+<div class="paragraph">
+<p>Something I&#8217;d like to happen before I&#8217;m running a new test is to make sure all data from
+other tests has been erased prior to run the current test. Therefore it seems like I good
+idea to create a function fixture that truncates all tables before each new test execution.</p>
+</div>
+<div class="listingblock">
+<div class="title">fixtures for pytest session and per function</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">@pytest.fixture(scope="function",autouse=True)
+def cleanup(request, session): <i class="conum" data-value="1"></i><b>(1)</b>
+    log.info("[fixture] truncating all tables")
+
+    # truncating all tables
+    for table in reversed(Base.metadata.sorted_tables): <i class="conum" data-value="2"></i><b>(2)</b>
+        session.execute(table.delete())
+
+    def function_ends(): <i class="conum" data-value="3"></i><b>(3)</b>
+        log.info("[fixture] closing db session")
+        session.commit()
+        session.close()
+
+    request.addfinalizer(function_ends) <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>injecting database session from previous pytest session fixture</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>truncating all tables from schema</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>create a finalizer function to commit and close session after each test</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>add the finalizer function to pytest lifecycle to happen at the end of each test</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="tests">Tests</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Now that the database is running and the database session is created thanks
+to the pytest fixtures we just created, we can use them in our tests, just
+declaring them as test parameters.</p>
+</div>
+<div class="listingblock">
+<div class="title">tests using db session and factories</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from blog.repositories import BlogEntryRepository
+
+
+def test_find_by_id(session, factories):
+    # given: a new blog entry
+    saved_entry = factories.create_blog_entry()
+
+    # and: a blog entry repository
+    repository = BlogEntryRepository(session)
+
+    # when: trying to find it by its id
+    blog_entry = repository.find_by_id(saved_entry.id)
+
+    # then: I should be able to get it back
+    assert str(blog_entry.id) == str(saved_entry.id)
+
+
+def test_find_all_by_startswith(session, factories):
+    # given: a new blog entry
+    for i in range(2):
+        factories.create_blog_entry(
+            title="Pytest introduction {}".format(i)
+        )
+
+    # and: saving all those entries
+    repository = BlogEntryRepository(session)
+
+    # when: looking for entries starting with Pytest
+    results = repository.find_all_by_title_starts_with("Pytest")
+
+    # then: there should be
+    assert len(results) == 2</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="improvements">Improvements</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Well, maybe to be coherent with the rest of the application, I could create
+a test configuration file, and fullfil the container startup configuration
+with configuration values there. Most of the connection parameters are
+available programatically when bootstraping a PostgreSQL container.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+In TestContainers 2.5 the PostgreSQL connection dialect is
+hardcoded to <code>psycopg2+postgres</code> if you&#8217;d like to change it to, for example,
+<strong>pg8000</strong> you&#8217;ll have to inherit from <code>PostgresContainer</code> and
+overwrite the <code>get_connection_url</code> function.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="resources">Resources</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://docs.pytest.org/en/latest/fixture.html">Pytest fixtures</a></p>
+</li>
+<li>
+<p><a href="https://testcontainers-python.readthedocs.io/en/latest/">TestContainers for Python</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>
