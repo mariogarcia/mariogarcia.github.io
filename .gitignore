@@ -1,11 +1,17 @@
 *.class
 *.hprof
+
+.env
 .gradle/
 .build/
+.vscode
 **/build/
+**/__pycache__
+
 output/
 output-qemu
 packer_cache
 secrets.groovy
+
 .asciidoctor
 .DS_Store

@@ -1,0 +1,182 @@
+= Pytest and Testcontainers
+@marioggar
+2019-10-11
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: test, python, pytest
+:sources: ../../../../../../../sources/2019/10/pytest_testcontainers
+:idprefix:
+:summary: How to integrate TestContainers, SqlAlchemy and Pytest fixtures
+:summary_image: test.png
+
+
+== Intro
+
+I've been a Java programmer for a very long time, but nowadays I'm involved 
+in a Python project at work. One of the things I was missing from the Java
+ecosystem was https://www.testcontainers.org/[TestContainers]. Long story short 
+Testcontainers is a project enabling your project to run Docker containers 
+for integration testing purposes. It turns out there's a port for 
+Python and I'd like to figure out how to use it.
+
+== The challenge
+
+I'm creating a persistence layer with SQLAlchemy and I'd like to
+use TestContainers:
+
+- to **startup** a PostgreSQL container
+- to **create the schema**
+- to **run the tests** against the database
+- to **truncate all tables** before running each test
+- to **stop the database** at the end of the test suite (end of pytest session)
+
+NOTE: The source code of this entry can be found at https://github.com/mariogarcia/mariogarcia.github.io/tree/working/sources/2019/10/pytest_testcontainers[Github]
+
+Here's my Pipfile:
+
+[source, python]
+.Dependencies
+----
+include::{sources}/Pipfile[]
+----
+
+Notice that althoug I've added bonth **pg8000** or **psycopg2**. I'm
+only using the latter in this example. There's a note about 
+why at the end of the blog entry.
+
+== Repository
+
+I'm creating a repository which wraps the calls to the SQLAlchemy session.
+In a Python project, or at least what I'm seeing lately in some Python projects, 
+the SQLAlchemy session is created statically somewhere from the configuration file 
+and repositories import that reference and use it. The problem with that 
+is that TestContainers by default creates a Docker container 
+with your database with a **random port** meaning that you won't know all 
+the connection details until the container is running. Bottom line, 
+the cleanest solution I could think of was dependency injection via class 
+constructor injection. 
+
+NOTE: Although by default TestContainers look for a random port by default
+you can specify one port explicitly.  
+
+This is how the repository may look like:
+
+[source, python]
+.repository with injected session
+----
+include::{sources}/blog/repositories.py[]
+----
+
+== Pytest fixtures (conftest.py)
+
+Next step is to optimize the creation and disposal of the database. Basically I don't
+want to create an instance of the database per each test function, that would be such
+a waste. Instead I would like to **create an instance of the database spanning the whole
+pytest session** and eventually shutdown the database. Apart from that, once the database 
+is up and running I need to **create a session and pass it to every test in case they may need it** 
+for injecting it to, for instance, a repository. So the idea is:
+
+- to start the container
+- to create the session with the container details
+- to inject the session in every test so that it can be used to initialize the repository
+
+In order to do that I'm using https://docs.pytest.org/en/latest/fixture.html[Pytest fixtures]
+which will help me reusing some parts among my tests (SQLAlchemy session) and run the Docker 
+container in a more efficient way (One database instance for all my tests). There're several
+places where you can put your fixtures so that test can be aware of them. I'm using the
+**conftest.py** file to put all my fixtures there.
+
+NOTE: Although one `conftest.py` file at the top of your project modules can be visible
+to all your tests, you can also use one `conftest.py` file 
+https://docs.pytest.org/en/latest/writing_plugins.html#conftest-py-plugins[per directory]
+
+These are the required imports to create my database session fixture:
+[source, python]
+.imports
+----
+include::{sources}/blog/conftest.py[tag=imports]
+----
+
+=== Session fixtures
+
+Session fixtures are shared among all tests during a Pytest execution. So it makes sense to
+create a fixture starting up the Docker container, and shutting it down once the session
+ends.
+
+[source, python]
+.fixtures for pytest session and per function
+----
+include::{sources}/blog/conftest.py[tags=session]
+----
+
+<1> Create and start the PostgreSQL container (9.5)
+<2> Create database session from container's detail
+<3> Recreate database schema
+<4> Create a session finalizer to stop the container once the session ends
+<5> Add the finalizer to pytest
+<6> Returns the database session. That will inject the database session in whatever function demanding it
+
+NOTE: An alternative option for executing teardown code is to make use of the addfinalizer method of the 
+request-context object to register finalization functions. That's why we declare the `request` parameter
+in our fixtures, to be able to get the request-context object.
+
+Dependency injection also works with session fixtures theirselves. If you would like
+to provide a pytest fixture that requires a previous configured pytest session fixture
+you only have to declare the dependency as a fixture parameter:
+
+[source, python]
+.injecting fixtures as parameters in another fixture
+----
+include::{sources}/blog/conftest.py[tags=session_factories]
+----
+
+Here to create some factories to create domain objects in my tests I
+need the configured database session. Declaring the dependency as
+a parameter will execute first the dependency and then pytest will
+inject it in this fixture.
+
+=== Function fixtures
+
+Something I'd like to happen before I'm running a new test is to make sure all data from
+other tests has been erased prior to run the current test. Therefore it seems like I good
+idea to create a function fixture that truncates all tables before each new test execution.
+
+[source, python]
+.fixtures for pytest session and per function
+----
+include::{sources}/blog/conftest.py[tags=functions]
+----
+
+<1> injecting database session from previous pytest session fixture
+<2> truncating all tables from schema
+<3> create a finalizer function to commit and close session after each test
+<4> add the finalizer function to pytest lifecycle to happen at the end of each test
+
+== Tests
+
+Now that the database is running and the database session is created thanks
+to the pytest fixtures we just created, we can use them in our tests, just
+declaring them as test parameters.
+
+[source, python]
+.tests using db session and factories
+----
+include::{sources}/blog/test_repositories.py[]
+----
+
+== Improvements
+
+Well, maybe to be coherent with the rest of the application, I could create
+a test configuration file, and fullfil the container startup configuration
+with configuration values there. Most of the connection parameters are
+available programatically when bootstraping a PostgreSQL container.
+
+WARNING: In TestContainers 2.5 the PostgreSQL connection dialect is
+hardcoded to `psycopg2+postgres` if you'd like to change it to, for example,
+**pg8000** you'll have to inherit from `PostgresContainer` and 
+overwrite the `get_connection_url` function.
+
+== Resources
+
+- https://docs.pytest.org/en/latest/fixture.html[Pytest fixtures]
+- https://testcontainers-python.readthedocs.io/en/latest/[TestContainers for Python]
