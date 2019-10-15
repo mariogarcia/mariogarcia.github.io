@@ -7,7 +7,7 @@
 :sources: ../../../../../../../sources/2019/10/pytest_testcontainers
 :idprefix:
 :summary: How to integrate TestContainers, SqlAlchemy and Pytest fixtures
-:summary_image: test.png
+:summary_image: python.png
 
 
 == Intro
