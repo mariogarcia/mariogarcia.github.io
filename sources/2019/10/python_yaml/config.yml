@@ -1,0 +1,13 @@
+database:
+  dialect: postgres+pg8000
+  user: john
+  password: supersecret
+  host: localhost
+  port: 5432
+
+log:
+  loggers:
+    - name: security
+      level: INFO
+    - name: api
+      level: DEBUG

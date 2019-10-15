@@ -1,0 +1,15 @@
+[[source]]
+name = "pytest_testcontainers"
+url = 'https://pypi.python.org/simple'
+version = "0.1.0"
+description = ""
+
+[packages]
+PYYAML = ">=5.1.2"
+addict = ">=2.2.1"
+
+[dev-packages]
+pytest = ">=3.0"
+
+[requires]
+python = ">=3.7"

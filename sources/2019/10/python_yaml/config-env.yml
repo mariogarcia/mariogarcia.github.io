@@ -1,0 +1,6 @@
+database:
+  dialect: postgres+pg8000
+  user: !env USERNAME
+  password: !env PASSWORD
+  host: !env HOST:localhost
+  port: !env PORT

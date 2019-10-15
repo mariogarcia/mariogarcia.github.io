@@ -1,0 +1,149 @@
+= Using Yaml in a Python app
+@marioggar
+2019-10-14
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: yaml, python
+:sources: ../../../../../../../sources/2019/10/python_yaml
+:idprefix:
+:summary: Using YAML in Python with PyYAML library
+:summary_image: python.png
+
+== Introduction
+
+I'd like to load an Yaml file and get values from it 
+**without using a plain Python dictionary** syntax (which 
+I don't like much) but also **without having to map the yaml structure to classes** 
+in order to access values in a property invocation style (e.g.: a.b.c)
+Finally I'd like also to **load different config files depending on the environment**.
+
+== Using PyYaml and addict
+
+The library chosen to load yaml was https://pyyaml.org/[PyYaml].
+PyYaml works really straight forward, it loads a yaml
+file and returns a Python dictionary. The problem
+with Python dictionaries is that the syntaxis
+required to access a deep node in the tree
+structure is a little bit verbose.
+
+[source, python]
+.deep node access
+----
+config['auth']['fields']['username']
+----
+
+On the other hand, I was looking more for something like:
+
+[source, python]
+.deep node access
+----
+config.auth.fields.username
+----
+
+In order to achieve the required property-like syntax
+I found https://github.com/mewwts/addict[Addict].
+
+[source, python]
+.YamlConfigLoader
+----
+include::{sources}/ycl.py[]
+----
+<1> loads yaml with PyYaml to get a Python dictionary
+<2> converts a Python dictionary to an Addict dictionary
+
+Now lets say I have my app config file `config.yml`:
+
+[source, yaml]
+----
+include::{sources}/config.yml[]
+----
+
+We can access configuration properties using the property-dot syntax:
+
+[source, python]
+----
+include::{sources}/test_ycl.py[tags=simple]
+----
+
+== Environments
+
+It make sense in many projects to load different properties depending
+on the environment we're deploying the application to. Lets see how
+our code looks like when adding environment as a parameter:
+
+[source, python]
+.YamlConfigLoader
+----
+include::{sources}/ycl_env.py[]
+----
+
+Now our application may use some system environment variable to receive
+the name of the environment the app is going to use:
+
+[source, python]
+.using test environments
+----
+include::{sources}/test_ycl_env.py[tags=environment]
+----
+
+== Using system environment variables
+
+It's more and more common to deploy applications as containers. In this kind
+of environments usually some configuration properties are passed as 
+system environment variables. Can we create our yaml file with
+some values taken from system environment variables ? 
+
+PyYaml to the rescue!. Here we have the **config-env.yml** file with 
+that idea in mind:
+
+[source, yaml]
+.config-env.yml
+----
+include::{sources}/config-env.yml[]
+----
+
+Thanks to PyYaml we can get the values marked with **!env** and 
+process them to get the value from system environment variables. 
+Moreover, look at the logging configuration, we can also 
+provide a default value following the syntax:
+
+[source, yaml]
+----
+key: !env VARIABLE:default_value
+----
+
+In order to make it work, we're adding a constructor, which is 
+basically a yaml directive processor responsible for transforming
+the values found in a yaml node after a specific directive. 
+The constructor is applied globally to PyYaml so you can 
+add the constructor anywhere in your code via the 
+**add_constructor** function. And the use the previous
+version of **YamlConfigLoader**:
+
+[source, python]
+.adding constructor
+----
+include::{sources}/ycl_env_var.py[tags=processing_variables]
+----
+<1> checks whether it has a default value or not
+<2> if there is a default value tries to resolve env variable if not returns default value
+<3> if there is not a default value tries to resolve env variable
+
+This way we can test the whole thing with the previous **config-env.yml**:
+
+[source, python]
+.using directives
+----
+include::{sources}/test_ycl_env_var.py[tags=env_variables]
+----
+
+WARNING: When calling to `yaml.load(...)` make sure you're using the `yaml.Loader` loader as  https://github.com/yaml/pyyaml/issues/266[described here], otherwise directive processing
+wont' work
+
+== References
+
+- https://pyyaml.org/[PyYaml]: A very widely used library to load yaml.
+- https://github.com/mewwts/addict[Addict]: a library that uses a different
+  approach when dealing with dictionary structures.
+- From StackOverflow: How to https://stackoverflow.com/questions/8384737/extract-file-name-from-path-no-matter-what-the-os-path-format[Extract file name from path, no matter what the os/path format]
+- How to use https://github.com/yaml/pyyaml/issues/141[environment variables in our yaml files]
