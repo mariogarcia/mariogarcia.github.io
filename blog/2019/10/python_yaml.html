@@ -1,0 +1,415 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>Using Yaml in a Python app</h1></header><yieldScaped><div class="sect1">
+<h2 id="introduction">Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I&#8217;d like to load an Yaml file and get values from it
+<strong>without using a plain Python dictionary</strong> syntax (which
+I don&#8217;t like much) but also <strong>without having to map the yaml structure to classes</strong>
+in order to access values in a property invocation style (e.g.: a.b.c)
+Finally I&#8217;d like also to <strong>load different config files depending on the environment</strong>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="using_pyyaml_and_addict">Using PyYaml and addict</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The library chosen to load yaml was <a href="https://pyyaml.org/">PyYaml</a>.
+PyYaml works really straight forward, it loads a yaml
+file and returns a Python dictionary. The problem
+with Python dictionaries is that the syntaxis
+required to access a deep node in the tree
+structure is a little bit verbose.</p>
+</div>
+<div class="listingblock">
+<div class="title">deep node access</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">config['auth']['fields']['username']</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>On the other hand, I was looking more for something like:</p>
+</div>
+<div class="listingblock">
+<div class="title">deep node access</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">config.auth.fields.username</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In order to achieve the required property-like syntax
+I found <a href="https://github.com/mewwts/addict">Addict</a>.</p>
+</div>
+<div class="listingblock">
+<div class="title">YamlConfigLoader</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import logging
+import os
+
+from addict import Dict
+from yaml import load, Loader, YAMLError
+
+
+log = logging.getLogger("config")
+
+
+class YamlConfigLoader:
+    def load(self, path):
+        if path and os.path.exists(path):
+            with open(path, 'r') as ymlfile:
+                try:
+                    yaml = load(ymlfile, Loader=Loader) <i class="conum" data-value="1"></i><b>(1)</b>
+                    conf = Dict(yaml) <i class="conum" data-value="2"></i><b>(2)</b>
+
+                    return conf
+                except YAMLError as error:
+                    log.error("config/error/yaml: {}".format(error))
+        else:
+            log.error("config/error/not_found: {}".format(path))</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>loads yaml with PyYaml to get a Python dictionary</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>converts a Python dictionary to an Addict dictionary</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Now lets say I have my app config file <code>config.yml</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">database:
+  dialect: postgres+pg8000
+  user: john
+  password: supersecret
+  host: localhost
+  port: 5432
+
+log:
+  loggers:
+    - name: security
+      level: INFO
+    - name: api
+      level: DEBUG</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can access configuration properties using the property-dot syntax:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">def test_simple():
+    yaml = YamlConfigLoader().load("config.yml")
+
+    assert yaml.database.user     == "john"
+    assert yaml.database.password == "supersecret"
+    assert yaml.database.dialect  == "postgres+pg8000"
+    assert yaml.database.host     == "localhost"
+    assert yaml.database.port     == 5432
+
+    assert len(yaml.log.loggers) == 2</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="environments">Environments</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>It make sense in many projects to load different properties depending
+on the environment we&#8217;re deploying the application to. Lets see how
+our code looks like when adding environment as a parameter:</p>
+</div>
+<div class="listingblock">
+<div class="title">YamlConfigLoader</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import logging
+import ntpath
+import os
+
+from addict import Dict
+from yaml import load, Loader, YAMLError
+
+
+log = logging.getLogger("config")
+
+
+class YamlConfigLoader:
+    def load(self, env, path):
+        path = self.resolve_name_with_environment(env, path)
+
+        if path and os.path.exists(path):
+            with open(path, 'r') as ymlfile:
+                try:
+                    yaml = load(ymlfile, Loader=Loader) <i class="conum" data-value="1"></i><b>(1)</b>
+                    conf = Dict(yaml) <i class="conum" data-value="2"></i><b>(2)</b>
+
+                    return conf
+                except YAMLError as error:
+                    log.error("config/error/yaml: {}".format(error))
+        else:
+            log.error("config/error/not_found: {}".format(path))
+
+    def resolve_name_with_environment(self, env, path):
+        parent, filename = ntpath.split(path)
+        name, ext = filename.split(".")
+
+        if env:
+            return os.path.join(parent,"{}-{}.{}".format(name, env, ext))
+        else:
+            return os.path.join(parent, filename)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now our application may use some system environment variable to receive
+the name of the environment the app is going to use:</p>
+</div>
+<div class="listingblock">
+<div class="title">using test environments</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">def test_simple():
+    # given: a yaml loader
+    loader = YamlConfigLoader()
+
+    # when: loading a pro configuration file (myapp-pro.yml)
+    yaml_pro = loader.load("pro", "myapp.yml")
+
+    # then: we should get a value from pro environment
+    assert yaml_pro.database.user == "john_from_pro"
+
+    # when: loading a test configuration file (myapp-test.yml)
+    yaml_pro = loader.load("test", "myapp.yml")
+
+    # then: we should get a value from test environment
+    assert yaml_pro.database.user == "john_from_test"</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="using_system_environment_variables">Using system environment variables</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>It&#8217;s more and more common to deploy applications as containers. In this kind
+of environments usually some configuration properties are passed as
+system environment variables. Can we create our yaml file with
+some values taken from system environment variables ?</p>
+</div>
+<div class="paragraph">
+<p>PyYaml to the rescue!. Here we have the <strong>config-env.yml</strong> file with
+that idea in mind:</p>
+</div>
+<div class="listingblock">
+<div class="title">config-env.yml</div>
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">database:
+  dialect: postgres+pg8000
+  user: !env USERNAME
+  password: !env PASSWORD
+  host: !env HOST:localhost
+  port: !env PORT</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Thanks to PyYaml we can get the values marked with <strong>!env</strong> and
+process them to get the value from system environment variables.
+Moreover, look at the logging configuration, we can also
+provide a default value following the syntax:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">key: !env VARIABLE:default_value</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In order to make it work, we&#8217;re adding a constructor, which is
+basically a yaml directive processor responsible for transforming
+the values found in a yaml node after a specific directive.
+The constructor is applied globally to PyYaml so you can
+add the constructor anywhere in your code via the
+<strong>add_constructor</strong> function. And the use the previous
+version of <strong>YamlConfigLoader</strong>:</p>
+</div>
+<div class="listingblock">
+<div class="title">adding constructor</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import logging
+import ntpath
+import os
+
+from addict import Dict
+from yaml import add_constructor, load, Loader, YAMLError
+
+
+log = logging.getLogger("config")
+
+
+def process_env_directive(loader, node):
+    log.info("procesing !env: {}".format(node.value))
+
+    node_val = node.value
+    splitted = node_val.split(":")
+
+    if len(splitted) == 2: <i class="conum" data-value="1"></i><b>(1)</b>
+        key, value = splitted
+
+        return os.environ.get(key) or value <i class="conum" data-value="2"></i><b>(2)</b>
+    else:
+        return os.environ.get(node_val) <i class="conum" data-value="3"></i><b>(3)</b>
+
+
+add_constructor(u'!env', process_env_directive)</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>checks whether it has a default value or not</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>if there is a default value tries to resolve env variable if not returns default value</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>if there is not a default value tries to resolve env variable</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>This way we can test the whole thing with the previous <strong>config-env.yml</strong>:</p>
+</div>
+<div class="listingblock">
+<div class="title">using directives</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">def test_simple():
+    # given: a yaml loader
+    loader = YamlConfigLoader()
+
+    # when: setting a environment variable
+    os.environ["USERNAME"] = "outsider"
+
+    # and: loading a pro configuration file (config-env.yml)
+    yaml_pro = loader.load("env", "config.yml")
+
+    # then: we should get a value from environment variable
+    assert yaml_pro.database.user == "outsider"
+
+    # and: because we didn't set the logger variable we get it
+    # from the default value
+    assert yaml_pro.database.host == "localhost"</code></pre>
+</div>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+When calling to <code>yaml.load(&#8230;&#8203;)</code> make sure you&#8217;re using the <code>yaml.Loader</code> loader as  <a href="https://github.com/yaml/pyyaml/issues/266">described here</a>, otherwise directive processing
+wont' work
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="references">References</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://pyyaml.org/">PyYaml</a>: A very widely used library to load yaml.</p>
+</li>
+<li>
+<p><a href="https://github.com/mewwts/addict">Addict</a>: a library that uses a different
+approach when dealing with dictionary structures.</p>
+</li>
+<li>
+<p>From StackOverflow: How to <a href="https://stackoverflow.com/questions/8384737/extract-file-name-from-path-no-matter-what-the-os-path-format">Extract file name from path, no matter what the os/path format</a></p>
+</li>
+<li>
+<p>How to use <a href="https://github.com/yaml/pyyaml/issues/141">environment variables in our yaml files</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>
