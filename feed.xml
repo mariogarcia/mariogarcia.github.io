@@ -4,8 +4,257 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2019-10-16T00:01:04Z</updated>
-    <id>tag:null,2019:10</id>
+    <updated>2020-07-29T09:08:40Z</updated>
+    <id>tag:null,2020:07</id>
+    <entry>
+        <title>Groovy Shots - Collections - Spread operator</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2020/07/groovy-shots-lists-maps-spread.html"/>
+        <updated>2020-07-29T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2020/07/groovy-shots-lists-maps-spread.html</id>
+        <category term="groovy"/>
+        <category term="collections"/>
+        <content type="html">
+            &lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;intro&quot;&gt;Intro&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Sometimes it looks more natural handling collections and maps using operators rather than to use
+the correspondent method call. The spread operator in Groovy is one of those.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;groovy_shell&quot;&gt;Groovy Shell&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To write the examples I&amp;#8217;m using the groovy shell (&lt;a href=&quot;https://groovy-lang.org/groovysh.html&quot; class=&quot;bare&quot;&gt;https://groovy-lang.org/groovysh.html&lt;/a&gt;)
+I&amp;#8217;ve minimized the verbosity of the Groovy shell by replacing the &lt;code&gt;groovy:000&amp;gt;&lt;/code&gt; prompt by just &lt;code&gt;&amp;gt;&lt;/code&gt;. Also remember that in the Groovy shell
+I don&amp;#8217;t use the &lt;code&gt;def&lt;/code&gt; keyword to define a variable (here you can see why &lt;a href=&quot;https://groovy-lang.org/groovysh.html#GroovyShell-Variables&quot; class=&quot;bare&quot;&gt;https://groovy-lang.org/groovysh.html#GroovyShell-Variables&lt;/a&gt;)&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To start the Groovy shell go to your terminal and start the Groovy shell:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;start groovy shell&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;[user]$ groovysh -q
+groovy:000&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;lists&quot;&gt;Lists&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Of course the first case is to create an empty list:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;empty list&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;&amp;gt; empty = []
+&amp;gt; assert empty.size() == 0&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Notice you can initialize the new list with any number of elements:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;adding an element&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;&amp;gt; myList = [1]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now I would like to add one more element &lt;strong&gt;to the end&lt;/strong&gt; of the previous list. Here the spread operator is used
+to add all elements from &lt;strong&gt;myList&lt;/strong&gt; inside &lt;strong&gt;newList&lt;/strong&gt; before the new element &lt;strong&gt;2&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;adding new element at the end&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;&amp;gt; myList  = [1]
+&amp;gt; newList = [*myList, 2]
+&amp;gt; assert newList == [1, 2]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Or adding a new element &lt;strong&gt;at the beginning&lt;/strong&gt; of the previous list.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;adding new element at the beginning&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;&amp;gt; myList  = [1]
+&amp;gt; newList = [0, *myList]
+&amp;gt; assert newList == [0, 1]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The previous examples were pretty trivial, and could be also be tackled by other operators available to lists:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;adding elements simpler&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;&amp;gt; myList = [1]
+&amp;gt; myList = [0] + myList // adding at the beginning
+&amp;gt; myList = myList &amp;lt;&amp;lt; 2  // adding at the end
+&amp;gt; assert myList == [0, 1, 2]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;But when adding in the middle of some lists, the spread operator really shines:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;adding in the middle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;&amp;gt; myList  = [4, 5]
+&amp;gt; newList = [1, 2, 3, *myList, 6, 7, 8]
+&amp;gt; assert newList == [1, 2, 3, 4, 5, 6, 7, 8]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then you can also add two different lists:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;adding two lists&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;&amp;gt; topTen = [*[1, 3, 5, 7, 9], *[2, 4, 6, 8, 10]]
+&amp;gt; assert topTen == [1, 3, 5, 7, 9, 2, 4, 6, 8, 10]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Which is the same as adding one list to the other with simply + operators:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;adding two lists&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;&amp;gt; topTen = [1, 3, 5, 7, 9] + [2, 4, 6, 8, 10]
+&amp;gt; assert topTen == [1, 3, 5, 7, 9, 2, 4, 6, 8, 10]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You can also use array syntax to specify which elements of the list you would like to use.
+In the following example I&amp;#8217;m combining two lists using a range as the initial source list.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;combining two lists&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;&amp;gt; range = (0..10)
+&amp;gt; mirror = [*range[1..6], *range[5..1]]
+&amp;gt; assert mirror == [1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 1]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;What about removing elements from a given list. Deleting one element is as simple as using the &lt;code&gt;-&lt;/code&gt; operator:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;remove one element&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;&amp;gt; myList = [1, 2, 3, 4, 5] - 5
+&amp;gt; assert myList = [1, 2, 3, 4]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I can delete more than one element by subtracting one list to another:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;remove more than one element&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;&amp;gt; myList = [1, 2, 3, 4, 5] - [3, 5]
+&amp;gt; assert myList = [1, 2, 4]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;maps&quot;&gt;Maps&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In maps spread operator can also be useful, specially when overriding values from a given map. Lets say
+we have a configuration map, and some of the entries are common to all scenarios whereas some elements
+can be changed.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;override values&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;&amp;gt; common = [y: 200, x: 100, type: &quot;circle&quot;, color: &quot;green&quot;]
+&amp;gt;
+&amp;gt; pointA = [
+&amp;gt;   *: common,
+&amp;gt;   x: 200,
+&amp;gt; ]
+&amp;gt;
+&amp;gt; assert pointA == [y: 200, x: 200, type: &quot;circle&quot;, color: &quot;green&quot;]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Obviously changing the order will lead to always override my values:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;override values&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;&amp;gt; common = [y: 200, x: 100, type: &quot;circle&quot;, color: &quot;green&quot;]
+&amp;gt;
+&amp;gt; pointA = [
+&amp;gt;   x: 200,
+&amp;gt;   *: common,
+&amp;gt; ]
+&amp;gt;
+&amp;gt; assert pointA == [y: 200, x: 100, type: &quot;circle&quot;, color: &quot;green&quot;]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Next, like we did in the lists examples we can do normal operations such as adding up whole maps:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;adding two maps&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;&amp;gt; mapA = [a: 1, b: 2, c: 3]
+&amp;gt; mapB = [d: 4]
+&amp;gt; mapAB = [*: mapA, *: mapB]
+&amp;gt; assert mapAB == [a: 1, b: 2, c: 3, d: 4]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To add only some elements of a map to another map there&amp;#8217;s no operator for the &lt;strong&gt;subMap&lt;/strong&gt; method. For completeness
+I&amp;#8217;m adding here an example using the &lt;strong&gt;subMap&lt;/strong&gt; method:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;subMap&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;&amp;gt; mapA = [a: 1, b: 2, c: 3]
+&amp;gt; mapB = [d: 4]
+&amp;gt; mapAB = [*: mapA.subMap(&quot;a&quot;, &quot;c&quot;), *: mapB]
+&amp;gt; assert mapAB == [a: 1, c: 3, d: 4]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Lastly you can remove entries from a map with the &lt;strong&gt;minus&lt;/strong&gt; operator as we did previously in list:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;removing elements from map&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;&amp;gt; mapA = [a: 1, b: 2, c: 3, d: 4, e: 5]
+&amp;gt; mapB = mapA - [b: 2, c: 3, d: 4]
+&amp;gt; assert mapB == [a: 1, e: 5]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Again is also important to highlight the &lt;strong&gt;subMap&lt;/strong&gt; method here as the example could be simplified:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;subMap&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;&amp;gt; mapA = [a: 1, b: 2, c: 3, d: 4, e: 5]
+&amp;gt; mapB = mapA - mapA.subMap(&quot;b&quot;..&quot;d&quot;)
+&amp;gt; assert mapB == [a: 1, e: 5]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Notice how &lt;strong&gt;subMap&lt;/strong&gt; can take a range of map keys as parameter, building a map with a series of map entries.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
     <entry>
         <title>Configuring resolv.conf in Fedora 30</title>
         <author>

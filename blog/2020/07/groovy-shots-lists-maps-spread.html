@@ -1,0 +1,304 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>Groovy Shots - Collections - Spread operator</h1></header><yieldScaped><div class="sect1">
+<h2 id="intro">Intro</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Sometimes it looks more natural handling collections and maps using operators rather than to use
+the correspondent method call. The spread operator in Groovy is one of those.</p>
+</div>
+<div class="sect2">
+<h3 id="groovy_shell">Groovy Shell</h3>
+<div class="paragraph">
+<p>To write the examples I&#8217;m using the groovy shell (<a href="https://groovy-lang.org/groovysh.html" class="bare">https://groovy-lang.org/groovysh.html</a>)
+I&#8217;ve minimized the verbosity of the Groovy shell by replacing the <code>groovy:000&gt;</code> prompt by just <code>&gt;</code>. Also remember that in the Groovy shell
+I don&#8217;t use the <code>def</code> keyword to define a variable (here you can see why <a href="https://groovy-lang.org/groovysh.html#GroovyShell-Variables" class="bare">https://groovy-lang.org/groovysh.html#GroovyShell-Variables</a>)</p>
+</div>
+<div class="paragraph">
+<p>To start the Groovy shell go to your terminal and start the Groovy shell:</p>
+</div>
+<div class="listingblock">
+<div class="title">start groovy shell</div>
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">[user]$ groovysh -q
+groovy:000&gt;</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="lists">Lists</h3>
+<div class="paragraph">
+<p>Of course the first case is to create an empty list:</p>
+</div>
+<div class="listingblock">
+<div class="title">empty list</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">&gt; empty = []
+&gt; assert empty.size() == 0</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Notice you can initialize the new list with any number of elements:</p>
+</div>
+<div class="listingblock">
+<div class="title">adding an element</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">&gt; myList = [1]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now I would like to add one more element <strong>to the end</strong> of the previous list. Here the spread operator is used
+to add all elements from <strong>myList</strong> inside <strong>newList</strong> before the new element <strong>2</strong>.</p>
+</div>
+<div class="listingblock">
+<div class="title">adding new element at the end</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">&gt; myList  = [1]
+&gt; newList = [*myList, 2]
+&gt; assert newList == [1, 2]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Or adding a new element <strong>at the beginning</strong> of the previous list.</p>
+</div>
+<div class="listingblock">
+<div class="title">adding new element at the beginning</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">&gt; myList  = [1]
+&gt; newList = [0, *myList]
+&gt; assert newList == [0, 1]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The previous examples were pretty trivial, and could be also be tackled by other operators available to lists:</p>
+</div>
+<div class="listingblock">
+<div class="title">adding elements simpler</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">&gt; myList = [1]
+&gt; myList = [0] + myList // adding at the beginning
+&gt; myList = myList &lt;&lt; 2  // adding at the end
+&gt; assert myList == [0, 1, 2]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>But when adding in the middle of some lists, the spread operator really shines:</p>
+</div>
+<div class="listingblock">
+<div class="title">adding in the middle</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">&gt; myList  = [4, 5]
+&gt; newList = [1, 2, 3, *myList, 6, 7, 8]
+&gt; assert newList == [1, 2, 3, 4, 5, 6, 7, 8]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then you can also add two different lists:</p>
+</div>
+<div class="listingblock">
+<div class="title">adding two lists</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">&gt; topTen = [*[1, 3, 5, 7, 9], *[2, 4, 6, 8, 10]]
+&gt; assert topTen == [1, 3, 5, 7, 9, 2, 4, 6, 8, 10]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Which is the same as adding one list to the other with simply + operators:</p>
+</div>
+<div class="listingblock">
+<div class="title">adding two lists</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">&gt; topTen = [1, 3, 5, 7, 9] + [2, 4, 6, 8, 10]
+&gt; assert topTen == [1, 3, 5, 7, 9, 2, 4, 6, 8, 10]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can also use array syntax to specify which elements of the list you would like to use.
+In the following example I&#8217;m combining two lists using a range as the initial source list.</p>
+</div>
+<div class="listingblock">
+<div class="title">combining two lists</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">&gt; range = (0..10)
+&gt; mirror = [*range[1..6], *range[5..1]]
+&gt; assert mirror == [1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 1]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>What about removing elements from a given list. Deleting one element is as simple as using the <code>-</code> operator:</p>
+</div>
+<div class="listingblock">
+<div class="title">remove one element</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">&gt; myList = [1, 2, 3, 4, 5] - 5
+&gt; assert myList = [1, 2, 3, 4]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I can delete more than one element by subtracting one list to another:</p>
+</div>
+<div class="listingblock">
+<div class="title">remove more than one element</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">&gt; myList = [1, 2, 3, 4, 5] - [3, 5]
+&gt; assert myList = [1, 2, 4]</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="maps">Maps</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In maps spread operator can also be useful, specially when overriding values from a given map. Lets say
+we have a configuration map, and some of the entries are common to all scenarios whereas some elements
+can be changed.</p>
+</div>
+<div class="listingblock">
+<div class="title">override values</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">&gt; common = [y: 200, x: 100, type: "circle", color: "green"]
+&gt;
+&gt; pointA = [
+&gt;   *: common,
+&gt;   x: 200,
+&gt; ]
+&gt;
+&gt; assert pointA == [y: 200, x: 200, type: "circle", color: "green"]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Obviously changing the order will lead to always override my values:</p>
+</div>
+<div class="listingblock">
+<div class="title">override values</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">&gt; common = [y: 200, x: 100, type: "circle", color: "green"]
+&gt;
+&gt; pointA = [
+&gt;   x: 200,
+&gt;   *: common,
+&gt; ]
+&gt;
+&gt; assert pointA == [y: 200, x: 100, type: "circle", color: "green"]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Next, like we did in the lists examples we can do normal operations such as adding up whole maps:</p>
+</div>
+<div class="listingblock">
+<div class="title">adding two maps</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">&gt; mapA = [a: 1, b: 2, c: 3]
+&gt; mapB = [d: 4]
+&gt; mapAB = [*: mapA, *: mapB]
+&gt; assert mapAB == [a: 1, b: 2, c: 3, d: 4]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To add only some elements of a map to another map there&#8217;s no operator for the <strong>subMap</strong> method. For completeness
+I&#8217;m adding here an example using the <strong>subMap</strong> method:</p>
+</div>
+<div class="listingblock">
+<div class="title">subMap</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">&gt; mapA = [a: 1, b: 2, c: 3]
+&gt; mapB = [d: 4]
+&gt; mapAB = [*: mapA.subMap("a", "c"), *: mapB]
+&gt; assert mapAB == [a: 1, c: 3, d: 4]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Lastly you can remove entries from a map with the <strong>minus</strong> operator as we did previously in list:</p>
+</div>
+<div class="listingblock">
+<div class="title">removing elements from map</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">&gt; mapA = [a: 1, b: 2, c: 3, d: 4, e: 5]
+&gt; mapB = mapA - [b: 2, c: 3, d: 4]
+&gt; assert mapB == [a: 1, e: 5]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Again is also important to highlight the <strong>subMap</strong> method here as the example could be simplified:</p>
+</div>
+<div class="listingblock">
+<div class="title">subMap</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">&gt; mapA = [a: 1, b: 2, c: 3, d: 4, e: 5]
+&gt; mapB = mapA - mapA.subMap("b".."d")
+&gt; assert mapB == [a: 1, e: 5]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Notice how <strong>subMap</strong> can take a range of map keys as parameter, building a map with a series of map entries.</p>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>

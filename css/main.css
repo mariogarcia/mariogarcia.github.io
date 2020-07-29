@@ -3650,3 +3650,10 @@ div.note a {
 	background-color: #ffba00;
 	color: #333333;
 }
+
+div.listingblock > div.title {
+    color: #7a2518;
+    font-style: italic;
+    font-size: 0.9em;
+    padding-left: 0.2em;
+}
