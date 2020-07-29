@@ -3,6 +3,7 @@
 
 .env
 .gradle/
+.idea/
 .build/
 .vscode
 **/build/
