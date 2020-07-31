@@ -20,16 +20,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="062ed740-ba20-422d-8d18-d2da05128053" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/blog/mario-blog.blog.main.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/blog/mario-blog.blog.main.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/blog/mario-blog.blog.test.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/blog/mario-blog.blog.test.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/blog/build.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/blog/src/jbake/assets/css/main.css" beforeDir="false" afterPath="$PROJECT_DIR$/blog/src/jbake/assets/css/main.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/blog/src/jbake/content/blog/2020/07/groovy-shots-lists-maps-spread.adoc" beforeDir="false" afterPath="$PROJECT_DIR$/blog/src/jbake/content/blog/2020/07/groovy-shots-lists-maps-spread.adoc" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,8 +47,17 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1553810741561" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/blog/src/jbake/assets/img/2020/07/gs-set-theory" />
     <property name="settings.editor.selected.configurable" value="reference.projectsettings.compiler.javacompiler" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/blog/src/jbake/assets/img/2020/07/gs-set-theory" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/blog/src/jbake/assets/img/2020/07/gs-set-theory" />
+      <recent name="$PROJECT_DIR$/blog/src/jbake/content/blog/2020/07/images" />
+    </key>
   </component>
   <component name="SvnConfiguration">
     <configuration />
@@ -91,6 +93,10 @@
       <screen x="0" y="27" width="1920" height="1053" />
     </state>
     <state width="543" height="446" key="SwitcherDM/1920.0.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1595941630002" />
+    <state x="624" y="252" key="run.anything.popup" timestamp="1596144639306">
+      <screen x="0" y="27" width="1920" height="1053" />
+    </state>
+    <state x="624" y="252" key="run.anything.popup/1920.0.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1596144639306" />
     <state x="623" y="259" key="search.everywhere.popup" timestamp="1595941629338">
       <screen x="0" y="27" width="1920" height="1053" />
     </state>

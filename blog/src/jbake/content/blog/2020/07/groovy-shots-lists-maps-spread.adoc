@@ -9,17 +9,11 @@
 :summary: Adding, replacing collection elements using syntactic sugar.
 :summary_image: groovy.png
 
-== Intro
-
 Sometimes it looks more natural handling collections and maps using operators rather than to use
 the correspondent method call. The spread operator in Groovy is one of those.
 
 === Groovy Shell
-To write the examples I'm using the groovy shell (https://groovy-lang.org/groovysh.html)
-I've minimized the verbosity of the Groovy shell by replacing the `groovy:000>` prompt by just `>`. Also remember that in the Groovy shell
-I don't use the `def` keyword to define a variable (here you can see why https://groovy-lang.org/groovysh.html#GroovyShell-Variables)
-
-To start the Groovy shell go to your terminal and start the Groovy shell:
+To write the examples I'm using the https://groovy-lang.org/groovysh.html[Groovy shell]. To start the Groovy shell go to your terminal and start the Groovy shell:
 
 [source, shell]
 .start groovy shell
@@ -27,6 +21,9 @@ To start the Groovy shell go to your terminal and start the Groovy shell:
 [user]$ groovysh -q
 groovy:000>
 ----
+
+I've minimized the verbosity of the Groovy shell in the examples by replacing the `groovy:000>` prompt by just `>`. Also remember that in the Groovy shell
+you may not want to use the `def` keyword to define a variable (https://groovy-lang.org/groovysh.html#GroovyShell-Variables[here] you can see why)
 
 === Lists
 
@@ -214,3 +211,14 @@ Again is also important to highlight the **subMap** method here as the example c
 ----
 
 Notice how **subMap** can take a range of map keys as parameter, building a map with a series of map entries.
+
+=== Versions
+
+- Groovy 2.5.13
+
+=== References
+
+- https://groovy-lang.org/operators.html#_spread_list_elements[Spread list operator]
+- https://groovy-lang.org/operators.html#_spread_map_elements[Spread map operator]
+- https://groovy-lang.org/operators.html[Groovy operators]
+- https://groovy-lang.org/documentation.html[Groovy Documentation]
