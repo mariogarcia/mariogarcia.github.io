@@ -1,0 +1,294 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>Groovy Shots - Collections - Set Theory</h1></header><yieldScaped><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Sometimes I feel like I&#8217;m using certain data structures as if they were all the same.
+But it turns out if you dig a little on the theory of each of them you may realize there&#8217;re
+data structures that fit better than others for a specific type of problems. In this article
+I&#8217;m reviewing some set theory basics with Groovy.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="groovy_shell">Groovy Shell</h3>
+<div class="paragraph">
+<p>To write the examples I&#8217;m using the <a href="https://groovy-lang.org/groovysh.html">Groovy shell</a>. To start the Groovy shell go to your terminal and start the Groovy shell:</p>
+</div>
+<div class="listingblock">
+<div class="title">start groovy shell</div>
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">[user]$ groovysh -q
+groovy:000&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I&#8217;ve minimized the verbosity of the Groovy shell in the examples by replacing the <code>groovy:000&gt;</code> prompt by just <code>&gt;</code>. Also remember that in the Groovy shell
+you may not want to use the <code>def</code> keyword to define a variable (<a href="https://groovy-lang.org/groovysh.html#GroovyShell-Variables">here</a> you can see why)</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="what_is_a_set">What is a set ?</h3>
+<div class="paragraph">
+<p>A set is a well-defined collection of distinct elements. For example, if we define the following set
+in Groovy:</p>
+</div>
+<div class="listingblock">
+<div class="title">distinct elements</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">&gt; A = [1, 1, 2, 2] as Set
+&gt; assert A == [1, 2] as Set</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The set only cares about distinct elements, repeated elements will be discarded.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="on_groovy_sets">On Groovy sets</h3>
+<div class="paragraph">
+<p>A Groovy set could be created with the list-like syntax but using coercion to note that it&#8217;s a Set. By default
+if you coerce a list to <code>Set</code> a <code>java.util.LinkedHashSet</code> will be created.</p>
+</div>
+<div class="listingblock">
+<div class="title">list-like syntax</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">&gt; A = [1, 2, 3, 3] as Set     // ===&gt; LinkedHashSet
+&gt; B = [4, 5, 6] as HashSet    // ===&gt; HashSet
+&gt; C = [1, 1, 1, 1] as TreeSet // ===&gt; TreeSet</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Anyway you could also create a set like you do in Java:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">&gt; A = new HashSet()
+&gt; B = new TreeSet()
+&gt; C = new LinkedHashSet()</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="union_intersection_difference">Union, intersection, difference</h3>
+<div class="paragraph">
+<p>The first set operation that springs to mind is adding up two sets together. Given a set A and a set B the union of A and B is all elements of A and B.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/07/gs-set-theory/union.png" alt="Union" height="250">
+</div>
+</div>
+<div class="paragraph">
+<p>We can use the <code>+</code> operator in Groovy to add one set with another set.</p>
+</div>
+<div class="listingblock">
+<div class="title">union</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">&gt; A = ["john", "peter"] as Set
+&gt; B = ["anne", "robby", "robby"] as Set // notice I've repeated robby deliberately ;)
+&gt; unionAB = A + B
+&gt; assert unionAB == ["john", "peter", "anne", "robby"] as Set</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If we&#8217;d like to know which elements of A are not in B we could calculate the difference between A and B using the <code>-</code> operator:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/07/gs-set-theory/difference.png" alt="Difference" height="250">
+</div>
+</div>
+<div class="listingblock">
+<div class="title">difference</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">&gt; A = ["john", "peter", "corie"] as Set
+&gt; B = ["anne", "robby", "peter"] as Set
+&gt; diffAB = A - B
+&gt; diffBA = B - A
+&gt; assert diffAB == ["john", "corie"] as Set
+&gt; assert diffBA == ["anne", "robby"] as Set</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The difference between two sets is also used to introduce the <strong>relative complement</strong> of a given set. If A - B is everything
+that is in A that is not in B, the relative complement is everything that is not in A that is in B. Or
+in plain english, just the opposite. So if the difference between A and B is noted as <code>A - B</code>
+the relative complement of A related to B is noted <code>B \ A</code>, but effectively is equal to <code>B - A</code>.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/07/gs-set-theory/relative-complement.png" alt="Complement" height="250">
+</div>
+</div>
+<div class="listingblock">
+<div class="title">relative complement</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">&gt; A = ["john", "peter", "corie"] as Set
+&gt; B = ["anne", "robby", "peter"] as Set
+&gt; relCompOfA = B - A // ==&gt; A \ B
+&gt; assert relCompOfA == ["anne", "robby"] as Set</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Why is important to know the relative complement ? It helps you to calculate the <strong>symmetric difference</strong>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="symmetric_difference">Symmetric difference</h3>
+<div class="paragraph">
+<p>At some point you may want to know all elements of A and elements of B without the elements that are common to both sets.
+That&#8217;s called the symmetric difference between A and B. Basically all you have to do is to sum the relative complement of both sets.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/07/gs-set-theory/simmetric-difference.png" alt="Simmetric" height="250">
+</div>
+</div>
+<div class="paragraph">
+<p>We can create a closure containing the formula of the relative complement and then use it to calculate the simmetric difference.</p>
+</div>
+<div class="listingblock">
+<div class="title">symetric difference</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">&gt; A = ["john", "peter", "corie"] as Set
+&gt; B = ["anne", "robby", "peter"] as Set
+&gt; relComplement = { a, b -&gt; b - a }
+&gt; symmetricDiff = { a, b -&gt; relComplement(a, b) + relComplement(b, a) } // ===&gt; (B \ A) U (A \ B)
+&gt; assert symmetricDiff(A, B) == ["anne", "robby", "john", "corie"] as Set</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="intersection">Intersection</h3>
+<div class="paragraph">
+<p>Another very common problem is to know which elements are shared between sets, or in other words what&#8217;s the <strong>intersection</strong> between
+them.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/07/gs-set-theory/intersection.png" alt="Intersection" height="250">
+</div>
+</div>
+<div class="listingblock">
+<div class="title">intersection</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">&gt; A = [1, 2, 3, 4] as Set
+&gt; B = [1, 3, 5, 6] as Set
+&gt; C = [1, 7] as Set
+&gt; assert A.intersect(B) == [1, 3] as Set
+&gt; assert B.intersect(C) == [1] as Set</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The intersection also is an <strong>associative</strong> and <strong>commutative</strong> operation:</p>
+</div>
+<div class="listingblock">
+<div class="title">intersection properties</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">&gt; assert (A.intersect(B)).intersect(C) == A.intersect(B.intersect(C)) // associative
+&gt; assert A.intersect(B).intersect(C)   == C.intersect(B).intersect(A) // commutative</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>But maybe you are only interested in knowing if two different sets have nothing in common. Then
+you may want to know if they are disjoint sets.</p>
+</div>
+<div class="listingblock">
+<div class="title">disjoint</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">&gt; A = [1, 3, 5] as Set
+&gt; B = [2, 4, 6] as Set
+&gt; assert A.disjoint(B) == true // A and B have nothing in common</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="versions">Versions</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Groovy 2.5.13</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="references">References</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://medium.com/basecs/set-theory-the-method-to-database-madness-5ec4b4f05d79">Set Theory: the Method To Database Madness</a></p>
+</li>
+<li>
+<p><a href="https://groovy-lang.org/documentation.html">Groovy Documentation</a></p>
+</li>
+</ul>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>
