@@ -1,0 +1,225 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>DS - Pandas - DataFrame Indexing</h1></header><yieldScaped><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>This is part of a series of articles dedicated to study Data Science using Python. This article
+aims to review some indexing DataFrame theory going through an example.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="the_data">The Data</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>We have a list of students attending different universities. At the beginning we are indexing all students by the university they enrolled in.</p>
+</div>
+<div class="listingblock">
+<div class="title">initial data</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import pandas as pd
+
+peterj = pd.Series({"name": "Peter Johnson", "city": "NYC", "age": 22})
+marcus = pd.Series({"name": "Marcus Ron", "city": "NYC", "age": 23})
+annagu = pd.Series({"name": "Anna Guta", "city": "PAR", "age": 24})
+johnro = pd.Series({"name": "John Roberts", "city": "NYC", "age": 23})
+valeri = pd.Series({"name": "Valerie Son", "city": "PAR", "age": 22})
+
+people = pd.DataFrame([peterj, marcus, annagu, johnro, valeri], index=["UAM", "UAM", "UCM", "UCM", "UAM"])
+people</code></pre>
+</div>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/09/ds_pandas_df_index/overview.png" alt="Overview" height="250">
+</div>
+</div>
+<div class="paragraph">
+<p>That allows us to query the DataFrame easily to answer questions like the names of the students at UAM:</p>
+</div>
+<div class="listingblock">
+<div class="title">getting UAM students DataFrame</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">uam_students_df = people.iloc["UAM", ["name"]]
+uam_students_df</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>But what if we&#8217;d liked to know which UAM students are from NYC:</p>
+</div>
+<div class="listingblock">
+<div class="title">UAM students from NYC</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">uam_students_df = people.loc["UAM"]
+uam_older_than_22 = uam_students_df[uam_students_df["city"] == "NYC"]
+uam_from_nyc</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We got it, but it would be nice to be able to filter by both conditions at once. As far as I&#8217;m aware there&#8217;re at least two ways to do it: <strong>Boolean masking</strong> and <strong>Multilevel Indexing</strong>. Both approaches require to dig a little bit more about DataFrame indexes.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="boolean_masking">Boolean Masking</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To create a boolean mask involving the university and the city, I need to move the index values to a column and then concatenate the boolean mask with the university and the boolean mask regarding the city:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/09/ds_pandas_df_index/index_to_column.png" alt="Overview" height="450">
+</div>
+</div>
+<div class="listingblock">
+<div class="title">use boolean mask to query DataFrame</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import pandas as pd
+
+peterj = pd.Series({"name": "Peter Johnson", "city": "NYC", "age": 22})
+marcus = pd.Series({"name": "Marcus Ron", "city": "NYC", "age": 23})
+annagu = pd.Series({"name": "Anna Guta", "city": "PAR", "age": 24})
+johnro = pd.Series({"name": "John Roberts", "city": "NYC", "age": 23})
+valeri = pd.Series({"name": "Valerie Son", "city": "PAR", "age": 22})
+
+people = pd.DataFrame([peterj, marcus, annagu, johnro, valeri], index=["UAM", "UAM", "UCM", "UCM", "UAM"])
+
+# creating a new column
+people["UNI"] = people.index
+
+# removing current index and leaving the default numeric index
+people = people.reset_index(drop=True)
+
+# concatenating two boolean masks
+uam_from_nyc = people[(people["UNI"] == "UAM") &amp; (people["city"] == "NYC")]
+uam_from_nyc</code></pre>
+</div>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/09/ds_pandas_df_index/boolean_mask_result.png" alt="Overview" height="180">
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="multilevel_indexing">Multilevel Indexing</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This approach can be seen as the opposite as the boolean masking strategy. Here instead of moving the index to a column, a column will become part of the index so that we can use the <strong>loc</strong> function to get the information I want.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/09/ds_pandas_df_index/multiindexing.png" alt="Overview" height="450">
+</div>
+</div>
+<div class="listingblock">
+<div class="title">use multilevel index to query DataFrame</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import pandas as pd
+
+peterj = pd.Series({"name": "Peter Johnson", "city": "NYC", "age": 22})
+marcus = pd.Series({"name": "Marcus Ron", "city": "NYC", "age": 23})
+annagu = pd.Series({"name": "Anna Guta", "city": "PAR", "age": 24})
+johnro = pd.Series({"name": "John Roberts", "city": "NYC", "age": 23})
+valeri = pd.Series({"name": "Valerie Son", "city": "PAR", "age": 22})
+
+people = pd.DataFrame([peterj, marcus, annagu, johnro, valeri], index=["UAM", "UAM", "UCM", "UCM", "UAM"])
+
+# creating a multilevel index
+people_by_uni_and_city = people.set_index([people.index, "city"])
+people_by_uni_and_city.index.names = ["UNI", "CITY"]
+people_by_uni_and_city
+
+# using loc function to get the information just passing index values
+uam_from_nyc = people_by_uni_and_city.loc["UAM", "NYC"]</code></pre>
+</div>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/09/ds_pandas_df_index/multilevel_result.png" alt="Overview" height="180">
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="references">References</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://pandas.pydata.org">Pandas</a></p>
+</li>
+<li>
+<p><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.reset_index.html">DataFrame reset_index function</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>

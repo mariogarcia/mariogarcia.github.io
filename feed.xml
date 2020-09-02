@@ -4,16 +4,187 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2020-09-02T10:21:28Z</updated>
+    <updated>2020-09-02T18:14:10Z</updated>
     <id>tag:null,2020:09</id>
+    <entry>
+        <title>DS - Pandas - DataFrame Indexing</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2020/09/ds_python_pandas_df_index.html"/>
+        <updated>2020-09-03T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2020/09/ds_python_pandas_df_index.html</id>
+        <category term="data science"/>
+        <category term="pandas"/>
+        <category term="dataframe"/>
+        <content type="html">
+            &lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This is part of a series of articles dedicated to study Data Science using Python. This article
+aims to review some indexing DataFrame theory going through an example.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;the_data&quot;&gt;The Data&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We have a list of students attending different universities. At the beginning we are indexing all students by the university they enrolled in.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;initial data&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import pandas as pd
+
+peterj = pd.Series({&quot;name&quot;: &quot;Peter Johnson&quot;, &quot;city&quot;: &quot;NYC&quot;, &quot;age&quot;: 22})
+marcus = pd.Series({&quot;name&quot;: &quot;Marcus Ron&quot;, &quot;city&quot;: &quot;NYC&quot;, &quot;age&quot;: 23})
+annagu = pd.Series({&quot;name&quot;: &quot;Anna Guta&quot;, &quot;city&quot;: &quot;PAR&quot;, &quot;age&quot;: 24})
+johnro = pd.Series({&quot;name&quot;: &quot;John Roberts&quot;, &quot;city&quot;: &quot;NYC&quot;, &quot;age&quot;: 23})
+valeri = pd.Series({&quot;name&quot;: &quot;Valerie Son&quot;, &quot;city&quot;: &quot;PAR&quot;, &quot;age&quot;: 22})
+
+people = pd.DataFrame([peterj, marcus, annagu, johnro, valeri], index=[&quot;UAM&quot;, &quot;UAM&quot;, &quot;UCM&quot;, &quot;UCM&quot;, &quot;UAM&quot;])
+people&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/09/ds_pandas_df_index/overview.png&quot; alt=&quot;Overview&quot; height=&quot;250&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;That allows us to query the DataFrame easily to answer questions like the names of the students at UAM:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;getting UAM students DataFrame&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;uam_students_df = people.iloc[&quot;UAM&quot;, [&quot;name&quot;]]
+uam_students_df&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;But what if we&amp;#8217;d liked to know which UAM students are from NYC:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;UAM students from NYC&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;uam_students_df = people.loc[&quot;UAM&quot;]
+uam_older_than_22 = uam_students_df[uam_students_df[&quot;city&quot;] == &quot;NYC&quot;]
+uam_from_nyc&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We got it, but it would be nice to be able to filter by both conditions at once. As far as I&amp;#8217;m aware there&amp;#8217;re at least two ways to do it: &lt;strong&gt;Boolean masking&lt;/strong&gt; and &lt;strong&gt;Multilevel Indexing&lt;/strong&gt;. Both approaches require to dig a little bit more about DataFrame indexes.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;boolean_masking&quot;&gt;Boolean Masking&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To create a boolean mask involving the university and the city, I need to move the index values to a column and then concatenate the boolean mask with the university and the boolean mask regarding the city:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/09/ds_pandas_df_index/index_to_column.png&quot; alt=&quot;Overview&quot; height=&quot;450&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;use boolean mask to query DataFrame&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import pandas as pd
+
+peterj = pd.Series({&quot;name&quot;: &quot;Peter Johnson&quot;, &quot;city&quot;: &quot;NYC&quot;, &quot;age&quot;: 22})
+marcus = pd.Series({&quot;name&quot;: &quot;Marcus Ron&quot;, &quot;city&quot;: &quot;NYC&quot;, &quot;age&quot;: 23})
+annagu = pd.Series({&quot;name&quot;: &quot;Anna Guta&quot;, &quot;city&quot;: &quot;PAR&quot;, &quot;age&quot;: 24})
+johnro = pd.Series({&quot;name&quot;: &quot;John Roberts&quot;, &quot;city&quot;: &quot;NYC&quot;, &quot;age&quot;: 23})
+valeri = pd.Series({&quot;name&quot;: &quot;Valerie Son&quot;, &quot;city&quot;: &quot;PAR&quot;, &quot;age&quot;: 22})
+
+people = pd.DataFrame([peterj, marcus, annagu, johnro, valeri], index=[&quot;UAM&quot;, &quot;UAM&quot;, &quot;UCM&quot;, &quot;UCM&quot;, &quot;UAM&quot;])
+
+# creating a new column
+people[&quot;UNI&quot;] = people.index
+
+# removing current index and leaving the default numeric index
+people = people.reset_index(drop=True)
+
+# concatenating two boolean masks
+uam_from_nyc = people[(people[&quot;UNI&quot;] == &quot;UAM&quot;) &amp;amp; (people[&quot;city&quot;] == &quot;NYC&quot;)]
+uam_from_nyc&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/09/ds_pandas_df_index/boolean_mask_result.png&quot; alt=&quot;Overview&quot; height=&quot;180&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;multilevel_indexing&quot;&gt;Multilevel Indexing&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This approach can be seen as the opposite as the boolean masking strategy. Here instead of moving the index to a column, a column will become part of the index so that we can use the &lt;strong&gt;loc&lt;/strong&gt; function to get the information I want.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/09/ds_pandas_df_index/multiindexing.png&quot; alt=&quot;Overview&quot; height=&quot;450&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;use multilevel index to query DataFrame&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import pandas as pd
+
+peterj = pd.Series({&quot;name&quot;: &quot;Peter Johnson&quot;, &quot;city&quot;: &quot;NYC&quot;, &quot;age&quot;: 22})
+marcus = pd.Series({&quot;name&quot;: &quot;Marcus Ron&quot;, &quot;city&quot;: &quot;NYC&quot;, &quot;age&quot;: 23})
+annagu = pd.Series({&quot;name&quot;: &quot;Anna Guta&quot;, &quot;city&quot;: &quot;PAR&quot;, &quot;age&quot;: 24})
+johnro = pd.Series({&quot;name&quot;: &quot;John Roberts&quot;, &quot;city&quot;: &quot;NYC&quot;, &quot;age&quot;: 23})
+valeri = pd.Series({&quot;name&quot;: &quot;Valerie Son&quot;, &quot;city&quot;: &quot;PAR&quot;, &quot;age&quot;: 22})
+
+people = pd.DataFrame([peterj, marcus, annagu, johnro, valeri], index=[&quot;UAM&quot;, &quot;UAM&quot;, &quot;UCM&quot;, &quot;UCM&quot;, &quot;UAM&quot;])
+
+# creating a multilevel index
+people_by_uni_and_city = people.set_index([people.index, &quot;city&quot;])
+people_by_uni_and_city.index.names = [&quot;UNI&quot;, &quot;CITY&quot;]
+people_by_uni_and_city
+
+# using loc function to get the information just passing index values
+uam_from_nyc = people_by_uni_and_city.loc[&quot;UAM&quot;, &quot;NYC&quot;]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/09/ds_pandas_df_index/multilevel_result.png&quot; alt=&quot;Overview&quot; height=&quot;180&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://pandas.pydata.org&quot;&gt;Pandas&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.reset_index.html&quot;&gt;DataFrame reset_index function&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
     <entry>
         <title>DS - Pandas - DataFrame</title>
         <author>
             <name>@marioggar</name>
         </author>
-        <link href="http://github.com/mariogarcia/blog/2020/09/ds_python_pandas_dataframe.html"/>
+        <link href="http://github.com/mariogarcia/blog/2020/09/ds_python_pandas_df.html"/>
         <updated>2020-09-02T00:00:00Z</updated>
-        <id>http://github.com/mariogarcia/blog/2020/09/ds_python_pandas_dataframe.html</id>
+        <id>http://github.com/mariogarcia/blog/2020/09/ds_python_pandas_df.html</id>
         <category term="data science"/>
         <category term="pandas"/>
         <category term="dataframe"/>
