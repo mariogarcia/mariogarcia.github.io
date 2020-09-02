@@ -6,7 +6,7 @@
 :jbake-tags: groovy, collections, sets
 :sources: ../../../../../../../sources/2020/07/groovy-shots-set-theory
 :idprefix:
-:summary: Set theory using Groovy sets.
+:summary: Doing some basic set theory using Groovy collections.
 :summary_image: groovy.png
 
 Sometimes I feel like I'm using certain data structures as if they were all the same.

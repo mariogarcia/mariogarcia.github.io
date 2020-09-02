@@ -1,0 +1,147 @@
+= DS - Pandas - Series
+@marioggar
+2020-09-01
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: data science, pandas, series
+:sources: ../../../../../../../sources/2020/09/ds_pandas_series
+:idprefix:
+:summary: Playing with the basics of Pandas' Series abstraction
+:summary_image: data_science.png
+
+This is part of a series of articles dedicated to study Data Science using Python. This article
+tries to explain the basics of using the Series abstraction from the Pandas library.
+
+== What is a Series object ?
+
+Following the Pandas documentation, a **Series** object represents a one-dimensional **dnarray** with axis labels (including time-series). On the other hand a **ndarray**, which is an abstraction from the Numpy library, is an array representing a multidimensional, homogeneous array of fixed-sized items.
+
+Long story short, the way you can think of if is like if it was a data structure having 2 columns, the first one contains the indexes, and the second one the actual data, the values we will be providing as content to the Series object, for instance:
+
+|===
+|Index|Data
+|0|100
+|1|200
+|2|300
+|===
+
+== Creating a Series object
+
+So lets say we want to provide a series of population for three cities:
+
+[source, python]
+.create a new Series object
+----
+import pandas as pd
+
+city_population_2020 = pd.Series([6.7, 21, 8.5])
+city_population_2020
+----
+
+This will show:
+
+|===
+|0|6.7
+|1|21
+|2|8.5
+|===
+
+
+== Series indexes
+
+If you don't explicitly provide indexes for the values by default the indexes will be a series of integer values beginning at 0. It's important to provide the right indexes because those indexes will enable us to access data later on.
+
+You can provide custom indexes in three ways. Firstly when creating the Series object, **using the index parameter**:
+
+[source, python]
+.change at creation
+----
+import pandas as pd
+
+city_population_2020 = pd.Series([6.7, 21, 8.5], index=["MAD", "MEXDF", "NYC"])
+city_population_2020
+----
+
+Now the Series object will look like:
+
+|===
+|MAD|6.7
+|MEXDF|21
+|NYC|8.5
+|===
+
+You can also change the indexes after creating a Series object, **setting the index property** :
+
+[source, python]
+.change after creation
+----
+import pandas as pd
+
+city_population_2020 = pd.Series([6.7, 21, 8.5])
+city_population_2020.index = ["MAD", "MEXDF", "NYC"]
+city_population_2020
+----
+
+Finally, you can create a Series object **from a Python dictionary**, where keys in the dictionary will become the indexes in the Series object:
+
+[source, python]
+----
+import pandas as pd
+
+city_population_2020 = pd.Series({"MAD": 6.7, "MEXDF": 21, "NYC": 8.5})
+city_population_2020
+----
+
+== Accessing data: iloc, loc
+
+As an iterable you can iterate over the Series object like any other array in Python:
+
+[source, python]
+.iterating over a Series
+----
+for value in city_population_2020:
+    print("-> {}".format(value))
+----
+
+[source, shell]
+.output
+----
+-> 6.7
+-> 21
+-> 8.5
+----
+
+But if you'd like to access in a more surgical way, you can access specific set of values by index. There're two functions in the Series objects that can give you a hand with that: **iloc** and **loc** functions. 
+
+NOTE: invocations to **iloc** and **loc** return another Series object.
+
+The **iloc** function gets the data by the order is stored in the Series object. For instance:
+
+[source, python]
+.getting values by index order (iloc)
+----
+import pandas as pd
+
+city_population_2020 = pd.Series([6.7, 21, 8.5], index=["MAD", "MEXDF", "NYC"])
+city_population_2020.iloc[0]
+----
+
+Will get **6.7** as it is the first value stored in the Series object. But what if wanted to get a value stored under a certain index. Then we could use the **loc** function. The **loc** function retrieves a value by the index is stored under. That means it can return None, one value or many values. The following example contains several values stored under the same index:
+
+[source, python]
+.getting values by index name (loc)
+----
+import pandas as pd
+
+people = pd.Series(["Marcos", "Ana", "Jules"], index=["MAD", "MAD", "PAR"])
+
+people.loc["MAD"] # returns Marcos and Ana in another Series object
+----
+
+WARNING: If you try to get values by a non existent index, you will get an error.
+
+== Resources
+
+- https://www.coursera.org/learn/python-data-analysis[Introduction to Data Science in Python course at Coursera]
+- https://pandas.pydata.org/[Pandas site]
+- https://pandas.pydata.org/pandas-docs/stable/user_guide/dsintro.html[Pandas basic data structures explained]

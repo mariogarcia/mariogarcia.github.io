@@ -6,7 +6,7 @@
 :jbake-tags: groovy, collections
 :sources: ../../../../../../../blog/src/jbake/templates/
 :idprefix:
-:summary: Adding, replacing collection elements using syntactic sugar.
+:summary: Using spread operator in Groovy collections.
 :summary_image: groovy.png
 
 Sometimes it looks more natural handling collections and maps using operators rather than to use
