@@ -1,0 +1,349 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>DS - Pandas - DataFrame</h1></header><yieldScaped><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>This is part of a series of articles dedicated to study Data Science using Python. This article
+tries to explain the basics of using the DataFrame abstraction from the Pandas library.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="what_is_a_dataframe">What is a DataFrame ?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You can think of a DataFrame as a 2 dimensional Series object. If you take any row of the next example, you would be getting Series object. The same thing happens if you take a given column values.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/09/ds_pandas_dataframe/overview.png" alt="DataFrame" height="300">
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="creating_a_dataframe">Creating a DataFrame</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You can create a DataFrame out of Series objects where each series represents a <strong>row</strong> of data:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import pandas as pd
+
+peterj = pd.Series({"name": "Peter Johnson", "city": "NYC", "age": 22})
+marcus = pd.Series({"name": "Marcus Ron", "city": "NYC", "age": 23})
+annagu = pd.Series({"name": "Anna Guta", "city": "PAR", "age": 24})
+
+people = pd.DataFrame([peterj, marcus, annagu])
+people</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Or just from a list of dictionaries:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import pandas as pd
+
+peterj = {"name": "Peter Johnson", "city": "NYC", "age": 22}
+marcus = {"name": "Marcus Ron", "city": "NYC", "age": 23}
+annagu = {"name": "Anna Guta", "city": "PAR", "age": 24}
+
+people = pd.DataFrame([peterj, marcus, annagu])
+people</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Either way you would get the following data structure:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/09/ds_pandas_dataframe/created.png" alt="DataFrame" height="200">
+</div>
+</div>
+<div class="paragraph">
+<p>We might want to change the default integer index by providing our own. For instance we are providing the symbol of a given spanish university:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import pandas as pd
+
+peterj = {"name": "Peter Johnson", "city": "NYC", "age": 22}
+marcus = {"name": "Marcus Ron", "city": "NYC", "age": 23}
+annagu = {"name": "Anna Guta", "city": "PAR", "age": 24}
+
+people = pd.DataFrame([peterj, marcus, annagu], index=["UAM", "UAM", "UCM"])
+people</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>That would get us:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/09/ds_pandas_dataframe/created_with_index.png" alt="DataFrame" height="200">
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="accessing_data_iloc_loc">Accessing data: iloc, loc</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The same way we used these functions to access data in a Series object, we can use it in a DataFrame object. For example, if we&#8217;d like to access every person attending a certain university we can use the <strong>loc</strong> function:</p>
+</div>
+<div class="listingblock">
+<div class="title">loc</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import pandas as pd
+
+peterj = {"name": "Peter Johnson", "city": "NYC", "age": 22}
+marcus = {"name": "Marcus Ron", "city": "NYC", "age": 23}
+annagu = {"name": "Anna Guta", "city": "PAR", "age": 24}
+
+people = pd.DataFrame([peterj, marcus, annagu], index=["UAM", "UAM", "UCM"])
+people.loc["UAM"]</code></pre>
+</div>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/09/ds_pandas_dataframe/loc_by_university.png" alt="university" height="160">
+</div>
+</div>
+<div class="paragraph">
+<p>Although in this particular case a new DataFrame is return, however depending on how many rows this call is returning, the type will be a <strong>Series</strong> object if it&#8217;s just one row, or a <strong>DataFrame</strong> if multiple rows are return.</p>
+</div>
+<div class="paragraph">
+<p>You can go one step further and not only filter by index but also select a given set of columns:</p>
+</div>
+<div class="listingblock">
+<div class="title">loc full syntax</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">people.loc["UAM", ["name", "age"]]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Basically you have to remember that <strong>loc</strong> and <strong>iloc</strong> can be called with two parameters, the first one representing the rows we&#8217;d like to select, and the second one representing which columns we would like to show.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/09/ds_pandas_dataframe/loc_function.png" alt="DataFrame" height="250">
+</div>
+</div>
+<div class="paragraph">
+<p>The <strong>iloc</strong> works the same but, instead of using an index value, you should use an integer representing the position of both rows and columns. Following the previous example, to get the same result with <strong>iloc</strong>:</p>
+</div>
+<div class="listingblock">
+<div class="title">iloc full syntax</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">people.iloc[0, [0, 2]]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>What if you only want to get all values of a certain column. The brackets syntax can be used to select only a given column. For instance, getting all cities in the DataFrame:</p>
+</div>
+<div class="listingblock">
+<div class="title">column selection bracket syntax</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">people["city"]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As a rule of thumb, stick to bracket syntax to get <strong>ONLY</strong> column values, and <strong>iloc</strong> and <strong>loc</strong> to do a more advanced row selection.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/09/ds_pandas_dataframe/query_overview.png" alt="query overview" height="300">
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="dropping_columnsrows">Dropping columns/rows</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When cleaning messy data, we might want to get rid of unnecessary data. That could mean get rid of some rows or maybe some columns. To get a new DataFrame without rows indexed by index value "UAM":</p>
+</div>
+<div class="listingblock">
+<div class="title">drop rows by index value</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import pandas as pd
+
+peterj = {"name": "Peter Johnson", "city": "NYC", "age": 22}
+marcus = {"name": "Marcus Ron", "city": "NYC", "age": 23}
+annagu = {"name": "Anna Guta", "city": "PAR", "age": 24}
+
+people = pd.DataFrame([peterj, marcus, annagu], index=["UAM", "UAM", "UCM"])
+new_people = people.drop("UCM")</code></pre>
+</div>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/09/ds_pandas_dataframe/loc_by_university.png" alt="university" height="160">
+</div>
+</div>
+<div class="paragraph">
+<p>This returns a new DataFrame instead of changing the source DataFrame in place. For changing the DataFrame in place set the <strong>inplace</strong> parameter to <strong>True</strong>:</p>
+</div>
+<div class="listingblock">
+<div class="title">drop rows in place</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">people.drop("UCM", inplace=True)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>However if you&#8217;d like to drop certain columns you can <strong>change the axis</strong> you are looking into, where <strong>axis=0</strong> is for deleting rows and <strong>axis=1</strong> for deleting columns:</p>
+</div>
+<div class="listingblock">
+<div class="title">drop columns</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import pandas as pd
+
+peterj = {"name": "Peter Johnson", "city": "NYC", "age": 22}
+marcus = {"name": "Marcus Ron", "city": "NYC", "age": 23}
+annagu = {"name": "Anna Guta", "city": "PAR", "age": 24}
+
+people = pd.DataFrame([peterj, marcus, annagu], index=["UAM", "UAM", "UCM"])
+new_people = people.drop("age", axis=1)</code></pre>
+</div>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/09/ds_pandas_dataframe/drop_columns.png" alt="drop columns" height="200">
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="filtering_a_dataframe_boolean_masks">Filtering a DataFrame: boolean masks</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The same way we query a database using SQL expressions it would be nice to have a where-like expressions to query a given DataFrame. There is such type of expression, the <strong>Boolean Mask</strong>.</p>
+</div>
+<div class="paragraph">
+<p>A <strong>boolean Mask</strong> is an expression representing a filter that can be applied to a given DataFrame. By itself represents a Series object, but when applied to a DataFrame it returns a new filtered DataFrame.</p>
+</div>
+<div class="paragraph">
+<p>In the following example I&#8217;d like to get a DataFrame containing people older than 22 years old. First of all I need to create a <strong>boolean mask</strong> about the <strong>age</strong> column.</p>
+</div>
+<div class="listingblock">
+<div class="title">creating a boolean mask</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import pandas as pd
+
+peterj = {"name": "Peter Johnson", "city": "NYC", "age": 22}
+marcus = {"name": "Marcus Ron", "city": "NYC", "age": 23}
+annagu = {"name": "Anna Guta", "city": "PAR", "age": 24}
+
+people = pd.DataFrame([peterj, marcus, annagu], index=["UAM", "UAM", "UCM"])
+older_than_22 = people["age"] &gt; 22
+older_than_22</code></pre>
+</div>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/09/ds_pandas_dataframe/boolean_mask_creation.png" alt="boolean mask creation" height="500">
+</div>
+</div>
+<div class="paragraph">
+<p>As you can see the <strong>boolean mask</strong> itself represents a list of indexes. Therefore I can apply those indexes to filter out our people DataFrame to get only the interesting rows in a new DataFrame instance.</p>
+</div>
+<div class="listingblock">
+<div class="title">applying a boolean mask to a DataFrame</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">people_older_than_22 = people[older_than_22]
+people_older_than_22</code></pre>
+</div>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/09/ds_pandas_dataframe/boolean_mask_applied.png" alt="boolean mask creation" height="450">
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="resources">Resources</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://www.coursera.org/learn/python-data-analysis">Introduction to Data Science in Python course at Coursera</a></p>
+</li>
+<li>
+<p><a href="https://pandas.pydata.org/">Pandas site</a></p>
+</li>
+<li>
+<p><a href="https://pandas.pydata.org/pandas-docs/stable/user_guide/dsintro.html">Pandas basic data structures explained</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>

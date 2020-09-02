@@ -2815,7 +2815,7 @@ button:disabled,
 	flex-shrink: 1;
 	margin: 0 0 6em 6em;
 	position: relative;
-	width: calc(33.3333333333% - 6em);
+	width: calc(25% - 6em);
 }
 
 .posts article:before {
@@ -3583,10 +3583,10 @@ button:disabled,
 
 .tags {
     display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
+    flex-direction: row;    
     list-style: none;
-    margin: 0;
+	margin: 0;
+	overflow: hidden;
     padding: 0;
 }
 
@@ -3603,7 +3603,14 @@ button:disabled,
 }
 
 article > header > h1,h2,h3,h4,h5 {
-    margin: 0;
+	margin: 0;
+}
+
+article > header > h3 {
+	font-size: 1em;
+	line-height: 1em;
+	height: 1em;
+	overflow: hidden;
 }
 
 article > header > time {
@@ -3683,4 +3690,12 @@ div.sidebarblock>.content>.title {
 
 .imageblock.text-center {
     text-align: center;
+}
+
+table.stretch {
+	width: auto;
+}
+
+table.stretch p {
+	margin: 0;
 }

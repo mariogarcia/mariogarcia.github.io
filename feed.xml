@@ -4,8 +4,560 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2020-07-31T10:29:20Z</updated>
-    <id>tag:null,2020:07</id>
+    <updated>2020-09-02T10:21:28Z</updated>
+    <id>tag:null,2020:09</id>
+    <entry>
+        <title>DS - Pandas - DataFrame</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2020/09/ds_python_pandas_dataframe.html"/>
+        <updated>2020-09-02T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2020/09/ds_python_pandas_dataframe.html</id>
+        <category term="data science"/>
+        <category term="pandas"/>
+        <category term="dataframe"/>
+        <content type="html">
+            &lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This is part of a series of articles dedicated to study Data Science using Python. This article
+tries to explain the basics of using the DataFrame abstraction from the Pandas library.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;what_is_a_dataframe&quot;&gt;What is a DataFrame ?&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You can think of a DataFrame as a 2 dimensional Series object. If you take any row of the next example, you would be getting Series object. The same thing happens if you take a given column values.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/09/ds_pandas_dataframe/overview.png&quot; alt=&quot;DataFrame&quot; height=&quot;300&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;creating_a_dataframe&quot;&gt;Creating a DataFrame&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You can create a DataFrame out of Series objects where each series represents a &lt;strong&gt;row&lt;/strong&gt; of data:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import pandas as pd
+
+peterj = pd.Series({&quot;name&quot;: &quot;Peter Johnson&quot;, &quot;city&quot;: &quot;NYC&quot;, &quot;age&quot;: 22})
+marcus = pd.Series({&quot;name&quot;: &quot;Marcus Ron&quot;, &quot;city&quot;: &quot;NYC&quot;, &quot;age&quot;: 23})
+annagu = pd.Series({&quot;name&quot;: &quot;Anna Guta&quot;, &quot;city&quot;: &quot;PAR&quot;, &quot;age&quot;: 24})
+
+people = pd.DataFrame([peterj, marcus, annagu])
+people&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Or just from a list of dictionaries:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import pandas as pd
+
+peterj = {&quot;name&quot;: &quot;Peter Johnson&quot;, &quot;city&quot;: &quot;NYC&quot;, &quot;age&quot;: 22}
+marcus = {&quot;name&quot;: &quot;Marcus Ron&quot;, &quot;city&quot;: &quot;NYC&quot;, &quot;age&quot;: 23}
+annagu = {&quot;name&quot;: &quot;Anna Guta&quot;, &quot;city&quot;: &quot;PAR&quot;, &quot;age&quot;: 24}
+
+people = pd.DataFrame([peterj, marcus, annagu])
+people&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Either way you would get the following data structure:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/09/ds_pandas_dataframe/created.png&quot; alt=&quot;DataFrame&quot; height=&quot;200&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We might want to change the default integer index by providing our own. For instance we are providing the symbol of a given spanish university:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import pandas as pd
+
+peterj = {&quot;name&quot;: &quot;Peter Johnson&quot;, &quot;city&quot;: &quot;NYC&quot;, &quot;age&quot;: 22}
+marcus = {&quot;name&quot;: &quot;Marcus Ron&quot;, &quot;city&quot;: &quot;NYC&quot;, &quot;age&quot;: 23}
+annagu = {&quot;name&quot;: &quot;Anna Guta&quot;, &quot;city&quot;: &quot;PAR&quot;, &quot;age&quot;: 24}
+
+people = pd.DataFrame([peterj, marcus, annagu], index=[&quot;UAM&quot;, &quot;UAM&quot;, &quot;UCM&quot;])
+people&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;That would get us:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/09/ds_pandas_dataframe/created_with_index.png&quot; alt=&quot;DataFrame&quot; height=&quot;200&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;accessing_data_iloc_loc&quot;&gt;Accessing data: iloc, loc&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The same way we used these functions to access data in a Series object, we can use it in a DataFrame object. For example, if we&amp;#8217;d like to access every person attending a certain university we can use the &lt;strong&gt;loc&lt;/strong&gt; function:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;loc&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import pandas as pd
+
+peterj = {&quot;name&quot;: &quot;Peter Johnson&quot;, &quot;city&quot;: &quot;NYC&quot;, &quot;age&quot;: 22}
+marcus = {&quot;name&quot;: &quot;Marcus Ron&quot;, &quot;city&quot;: &quot;NYC&quot;, &quot;age&quot;: 23}
+annagu = {&quot;name&quot;: &quot;Anna Guta&quot;, &quot;city&quot;: &quot;PAR&quot;, &quot;age&quot;: 24}
+
+people = pd.DataFrame([peterj, marcus, annagu], index=[&quot;UAM&quot;, &quot;UAM&quot;, &quot;UCM&quot;])
+people.loc[&quot;UAM&quot;]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/09/ds_pandas_dataframe/loc_by_university.png&quot; alt=&quot;university&quot; height=&quot;160&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Although in this particular case a new DataFrame is return, however depending on how many rows this call is returning, the type will be a &lt;strong&gt;Series&lt;/strong&gt; object if it&amp;#8217;s just one row, or a &lt;strong&gt;DataFrame&lt;/strong&gt; if multiple rows are return.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You can go one step further and not only filter by index but also select a given set of columns:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;loc full syntax&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;people.loc[&quot;UAM&quot;, [&quot;name&quot;, &quot;age&quot;]]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Basically you have to remember that &lt;strong&gt;loc&lt;/strong&gt; and &lt;strong&gt;iloc&lt;/strong&gt; can be called with two parameters, the first one representing the rows we&amp;#8217;d like to select, and the second one representing which columns we would like to show.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/09/ds_pandas_dataframe/loc_function.png&quot; alt=&quot;DataFrame&quot; height=&quot;250&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The &lt;strong&gt;iloc&lt;/strong&gt; works the same but, instead of using an index value, you should use an integer representing the position of both rows and columns. Following the previous example, to get the same result with &lt;strong&gt;iloc&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;iloc full syntax&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;people.iloc[0, [0, 2]]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;What if you only want to get all values of a certain column. The brackets syntax can be used to select only a given column. For instance, getting all cities in the DataFrame:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;column selection bracket syntax&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;people[&quot;city&quot;]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As a rule of thumb, stick to bracket syntax to get &lt;strong&gt;ONLY&lt;/strong&gt; column values, and &lt;strong&gt;iloc&lt;/strong&gt; and &lt;strong&gt;loc&lt;/strong&gt; to do a more advanced row selection.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/09/ds_pandas_dataframe/query_overview.png&quot; alt=&quot;query overview&quot; height=&quot;300&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;dropping_columnsrows&quot;&gt;Dropping columns/rows&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;When cleaning messy data, we might want to get rid of unnecessary data. That could mean get rid of some rows or maybe some columns. To get a new DataFrame without rows indexed by index value &quot;UAM&quot;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;drop rows by index value&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import pandas as pd
+
+peterj = {&quot;name&quot;: &quot;Peter Johnson&quot;, &quot;city&quot;: &quot;NYC&quot;, &quot;age&quot;: 22}
+marcus = {&quot;name&quot;: &quot;Marcus Ron&quot;, &quot;city&quot;: &quot;NYC&quot;, &quot;age&quot;: 23}
+annagu = {&quot;name&quot;: &quot;Anna Guta&quot;, &quot;city&quot;: &quot;PAR&quot;, &quot;age&quot;: 24}
+
+people = pd.DataFrame([peterj, marcus, annagu], index=[&quot;UAM&quot;, &quot;UAM&quot;, &quot;UCM&quot;])
+new_people = people.drop(&quot;UCM&quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/09/ds_pandas_dataframe/loc_by_university.png&quot; alt=&quot;university&quot; height=&quot;160&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This returns a new DataFrame instead of changing the source DataFrame in place. For changing the DataFrame in place set the &lt;strong&gt;inplace&lt;/strong&gt; parameter to &lt;strong&gt;True&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;drop rows in place&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;people.drop(&quot;UCM&quot;, inplace=True)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;However if you&amp;#8217;d like to drop certain columns you can &lt;strong&gt;change the axis&lt;/strong&gt; you are looking into, where &lt;strong&gt;axis=0&lt;/strong&gt; is for deleting rows and &lt;strong&gt;axis=1&lt;/strong&gt; for deleting columns:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;drop columns&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import pandas as pd
+
+peterj = {&quot;name&quot;: &quot;Peter Johnson&quot;, &quot;city&quot;: &quot;NYC&quot;, &quot;age&quot;: 22}
+marcus = {&quot;name&quot;: &quot;Marcus Ron&quot;, &quot;city&quot;: &quot;NYC&quot;, &quot;age&quot;: 23}
+annagu = {&quot;name&quot;: &quot;Anna Guta&quot;, &quot;city&quot;: &quot;PAR&quot;, &quot;age&quot;: 24}
+
+people = pd.DataFrame([peterj, marcus, annagu], index=[&quot;UAM&quot;, &quot;UAM&quot;, &quot;UCM&quot;])
+new_people = people.drop(&quot;age&quot;, axis=1)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/09/ds_pandas_dataframe/drop_columns.png&quot; alt=&quot;drop columns&quot; height=&quot;200&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;filtering_a_dataframe_boolean_masks&quot;&gt;Filtering a DataFrame: boolean masks&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The same way we query a database using SQL expressions it would be nice to have a where-like expressions to query a given DataFrame. There is such type of expression, the &lt;strong&gt;Boolean Mask&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A &lt;strong&gt;boolean Mask&lt;/strong&gt; is an expression representing a filter that can be applied to a given DataFrame. By itself represents a Series object, but when applied to a DataFrame it returns a new filtered DataFrame.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In the following example I&amp;#8217;d like to get a DataFrame containing people older than 22 years old. First of all I need to create a &lt;strong&gt;boolean mask&lt;/strong&gt; about the &lt;strong&gt;age&lt;/strong&gt; column.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;creating a boolean mask&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import pandas as pd
+
+peterj = {&quot;name&quot;: &quot;Peter Johnson&quot;, &quot;city&quot;: &quot;NYC&quot;, &quot;age&quot;: 22}
+marcus = {&quot;name&quot;: &quot;Marcus Ron&quot;, &quot;city&quot;: &quot;NYC&quot;, &quot;age&quot;: 23}
+annagu = {&quot;name&quot;: &quot;Anna Guta&quot;, &quot;city&quot;: &quot;PAR&quot;, &quot;age&quot;: 24}
+
+people = pd.DataFrame([peterj, marcus, annagu], index=[&quot;UAM&quot;, &quot;UAM&quot;, &quot;UCM&quot;])
+older_than_22 = people[&quot;age&quot;] &amp;gt; 22
+older_than_22&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/09/ds_pandas_dataframe/boolean_mask_creation.png&quot; alt=&quot;boolean mask creation&quot; height=&quot;500&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As you can see the &lt;strong&gt;boolean mask&lt;/strong&gt; itself represents a list of indexes. Therefore I can apply those indexes to filter out our people DataFrame to get only the interesting rows in a new DataFrame instance.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;applying a boolean mask to a DataFrame&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;people_older_than_22 = people[older_than_22]
+people_older_than_22&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/09/ds_pandas_dataframe/boolean_mask_applied.png&quot; alt=&quot;boolean mask creation&quot; height=&quot;450&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;resources&quot;&gt;Resources&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.coursera.org/learn/python-data-analysis&quot;&gt;Introduction to Data Science in Python course at Coursera&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://pandas.pydata.org/&quot;&gt;Pandas site&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://pandas.pydata.org/pandas-docs/stable/user_guide/dsintro.html&quot;&gt;Pandas basic data structures explained&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
+    <entry>
+        <title>DS - Pandas - Series</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2020/09/ds_python_pandas_series.html"/>
+        <updated>2020-09-01T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2020/09/ds_python_pandas_series.html</id>
+        <category term="data science"/>
+        <category term="pandas"/>
+        <category term="series"/>
+        <content type="html">
+            &lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This is part of a series of articles dedicated to study Data Science using Python. This article
+tries to explain the basics of using the Series abstraction from the Pandas library.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;what_is_a_series_object&quot;&gt;What is a Series object ?&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Following the Pandas documentation, a &lt;strong&gt;Series&lt;/strong&gt; object represents a one-dimensional &lt;strong&gt;dnarray&lt;/strong&gt; with axis labels (including time-series). On the other hand a &lt;strong&gt;ndarray&lt;/strong&gt;, which is an abstraction from the Numpy library, is an array representing a multidimensional, homogeneous array of fixed-sized items.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Long story short, the way you can think of if is like if it was a data structure having 2 columns, the first one contains the indexes, and the second one the actual data, the values we will be providing as content to the Series object, for instance:&lt;/p&gt;
+&lt;/div&gt;
+&lt;table class=&quot;tableblock frame-all grid-all stretch&quot;&gt;
+&lt;colgroup&gt;
+&lt;col style=&quot;width: 50%;&quot;&gt;
+&lt;col style=&quot;width: 50%;&quot;&gt;
+&lt;/colgroup&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Index&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Data&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;100&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;1&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;200&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;300&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;creating_a_series_object&quot;&gt;Creating a Series object&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So lets say we want to provide a series of population for three cities:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;create a new Series object&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import pandas as pd
+
+city_population_2020 = pd.Series([6.7, 21, 8.5])
+city_population_2020&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This will show:&lt;/p&gt;
+&lt;/div&gt;
+&lt;table class=&quot;tableblock frame-all grid-all stretch&quot;&gt;
+&lt;colgroup&gt;
+&lt;col style=&quot;width: 50%;&quot;&gt;
+&lt;col style=&quot;width: 50%;&quot;&gt;
+&lt;/colgroup&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;6.7&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;1&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;21&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;8.5&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;series_indexes&quot;&gt;Series indexes&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If you don&amp;#8217;t explicitly provide indexes for the values by default the indexes will be a series of integer values beginning at 0. It&amp;#8217;s important to provide the right indexes because those indexes will enable us to access data later on.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You can provide custom indexes in three ways. Firstly when creating the Series object, &lt;strong&gt;using the index parameter&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;change at creation&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import pandas as pd
+
+city_population_2020 = pd.Series([6.7, 21, 8.5], index=[&quot;MAD&quot;, &quot;MEXDF&quot;, &quot;NYC&quot;])
+city_population_2020&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now the Series object will look like:&lt;/p&gt;
+&lt;/div&gt;
+&lt;table class=&quot;tableblock frame-all grid-all stretch&quot;&gt;
+&lt;colgroup&gt;
+&lt;col style=&quot;width: 50%;&quot;&gt;
+&lt;col style=&quot;width: 50%;&quot;&gt;
+&lt;/colgroup&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;MAD&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;6.7&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;MEXDF&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;21&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;NYC&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;8.5&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You can also change the indexes after creating a Series object, &lt;strong&gt;setting the index property&lt;/strong&gt; :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;change after creation&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import pandas as pd
+
+city_population_2020 = pd.Series([6.7, 21, 8.5])
+city_population_2020.index = [&quot;MAD&quot;, &quot;MEXDF&quot;, &quot;NYC&quot;]
+city_population_2020&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Finally, you can create a Series object &lt;strong&gt;from a Python dictionary&lt;/strong&gt;, where keys in the dictionary will become the indexes in the Series object:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import pandas as pd
+
+city_population_2020 = pd.Series({&quot;MAD&quot;: 6.7, &quot;MEXDF&quot;: 21, &quot;NYC&quot;: 8.5})
+city_population_2020&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;accessing_data_iloc_loc&quot;&gt;Accessing data: iloc, loc&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As an iterable you can iterate over the Series object like any other array in Python:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;iterating over a Series&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;for value in city_population_2020:
+    print(&quot;-&amp;gt; {}&quot;.format(value))&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;output&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;-&amp;gt; 6.7
+-&amp;gt; 21
+-&amp;gt; 8.5&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;But if you&amp;#8217;d like to access in a more surgical way, you can access specific set of values by index. There&amp;#8217;re two functions in the Series objects that can give you a hand with that: &lt;strong&gt;iloc&lt;/strong&gt; and &lt;strong&gt;loc&lt;/strong&gt; functions.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock note&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-note&quot; title=&quot;Note&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+invocations to &lt;strong&gt;iloc&lt;/strong&gt; and &lt;strong&gt;loc&lt;/strong&gt; return another Series object.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The &lt;strong&gt;iloc&lt;/strong&gt; function gets the data by the order is stored in the Series object. For instance:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;getting values by index order (iloc)&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import pandas as pd
+
+city_population_2020 = pd.Series([6.7, 21, 8.5], index=[&quot;MAD&quot;, &quot;MEXDF&quot;, &quot;NYC&quot;])
+city_population_2020.iloc[0]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Will get &lt;strong&gt;6.7&lt;/strong&gt; as it is the first value stored in the Series object. But what if wanted to get a value stored under a certain index. Then we could use the &lt;strong&gt;loc&lt;/strong&gt; function. The &lt;strong&gt;loc&lt;/strong&gt; function retrieves a value by the index is stored under. That means it can return None, one value or many values. The following example contains several values stored under the same index:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;getting values by index name (loc)&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import pandas as pd
+
+people = pd.Series([&quot;Marcos&quot;, &quot;Ana&quot;, &quot;Jules&quot;], index=[&quot;MAD&quot;, &quot;MAD&quot;, &quot;PAR&quot;])
+
+people.loc[&quot;MAD&quot;] # returns Marcos and Ana in another Series object&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock warning&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-warning&quot; title=&quot;Warning&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+If you try to get values by a non existent index, you will get an error.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;resources&quot;&gt;Resources&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.coursera.org/learn/python-data-analysis&quot;&gt;Introduction to Data Science in Python course at Coursera&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://pandas.pydata.org/&quot;&gt;Pandas site&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://pandas.pydata.org/pandas-docs/stable/user_guide/dsintro.html&quot;&gt;Pandas basic data structures explained&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
     <entry>
         <title>Groovy Shots - Collections - Set Theory</title>
         <author>
