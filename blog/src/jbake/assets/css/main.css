@@ -3609,7 +3609,7 @@ article > header > h1,h2,h3,h4,h5 {
 article > header > h3 {
 	font-size: 1em;
 	line-height: 1em;
-	height: 1em;
+	height: 2em;
 	overflow: hidden;
 }
 

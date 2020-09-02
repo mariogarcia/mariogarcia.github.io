@@ -1,0 +1,122 @@
+= DS - Pandas - DataFrame Indexing
+@marioggar
+2020-09-03
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: data science, pandas, dataframe
+:sources: ../../../../../../../sources/2020/09/ds_pandas_series
+:idprefix:
+:summary: Using indexes to help querying the DataFrame better
+:summary_image: data_science.png
+
+This is part of a series of articles dedicated to study Data Science using Python. This article
+aims to review some indexing DataFrame theory going through an example.
+
+== The Data
+
+We have a list of students attending different universities. At the beginning we are indexing all students by the university they enrolled in. 
+
+[source, python]
+.initial data
+----
+import pandas as pd
+
+peterj = pd.Series({"name": "Peter Johnson", "city": "NYC", "age": 22})
+marcus = pd.Series({"name": "Marcus Ron", "city": "NYC", "age": 23})
+annagu = pd.Series({"name": "Anna Guta", "city": "PAR", "age": 24})
+johnro = pd.Series({"name": "John Roberts", "city": "NYC", "age": 23})
+valeri = pd.Series({"name": "Valerie Son", "city": "PAR", "age": 22})
+
+people = pd.DataFrame([peterj, marcus, annagu, johnro, valeri], index=["UAM", "UAM", "UCM", "UCM", "UAM"])
+people
+----
+
+image::2020/09/ds_pandas_df_index/overview.png[alt=Overview, height=250, align="center"]
+
+That allows us to query the DataFrame easily to answer questions like the names of the students at UAM:
+
+[source, python]
+.getting UAM students DataFrame
+----
+uam_students_df = people.iloc["UAM", ["name"]]
+uam_students_df
+----
+
+But what if we'd liked to know which UAM students are from NYC:
+
+[source, python]
+.UAM students from NYC
+----
+uam_students_df = people.loc["UAM"]
+uam_older_than_22 = uam_students_df[uam_students_df["city"] == "NYC"]
+uam_from_nyc
+----
+
+We got it, but it would be nice to be able to filter by both conditions at once. As far as I'm aware there're at least two ways to do it: **Boolean masking** and **Multilevel Indexing**. Both approaches require to dig a little bit more about DataFrame indexes.
+
+== Boolean Masking
+
+To create a boolean mask involving the university and the city, I need to move the index values to a column and then concatenate the boolean mask with the university and the boolean mask regarding the city:
+
+image::2020/09/ds_pandas_df_index/index_to_column.png[alt=Overview, height=450, align="center"]
+
+[source, python]
+.use boolean mask to query DataFrame
+----
+import pandas as pd
+
+peterj = pd.Series({"name": "Peter Johnson", "city": "NYC", "age": 22})
+marcus = pd.Series({"name": "Marcus Ron", "city": "NYC", "age": 23})
+annagu = pd.Series({"name": "Anna Guta", "city": "PAR", "age": 24})
+johnro = pd.Series({"name": "John Roberts", "city": "NYC", "age": 23})
+valeri = pd.Series({"name": "Valerie Son", "city": "PAR", "age": 22})
+
+people = pd.DataFrame([peterj, marcus, annagu, johnro, valeri], index=["UAM", "UAM", "UCM", "UCM", "UAM"])
+
+# creating a new column
+people["UNI"] = people.index
+
+# removing current index and leaving the default numeric index
+people = people.reset_index(drop=True)
+
+# concatenating two boolean masks
+uam_from_nyc = people[(people["UNI"] == "UAM") & (people["city"] == "NYC")]
+uam_from_nyc
+----
+
+image::2020/09/ds_pandas_df_index/boolean_mask_result.png[alt=Overview, height=180, align="center"]
+
+== Multilevel Indexing
+
+This approach can be seen as the opposite as the boolean masking strategy. Here instead of moving the index to a column, a column will become part of the index so that we can use the **loc** function to get the information I want.
+
+image::2020/09/ds_pandas_df_index/multiindexing.png[alt=Overview, height=450, align="center"]
+
+[source, python]
+.use multilevel index to query DataFrame
+----
+import pandas as pd
+
+peterj = pd.Series({"name": "Peter Johnson", "city": "NYC", "age": 22})
+marcus = pd.Series({"name": "Marcus Ron", "city": "NYC", "age": 23})
+annagu = pd.Series({"name": "Anna Guta", "city": "PAR", "age": 24})
+johnro = pd.Series({"name": "John Roberts", "city": "NYC", "age": 23})
+valeri = pd.Series({"name": "Valerie Son", "city": "PAR", "age": 22})
+
+people = pd.DataFrame([peterj, marcus, annagu, johnro, valeri], index=["UAM", "UAM", "UCM", "UCM", "UAM"])
+
+# creating a multilevel index
+people_by_uni_and_city = people.set_index([people.index, "city"])
+people_by_uni_and_city.index.names = ["UNI", "CITY"]
+people_by_uni_and_city
+
+# using loc function to get the information just passing index values
+uam_from_nyc = people_by_uni_and_city.loc["UAM", "NYC"]
+----
+
+image::2020/09/ds_pandas_df_index/multilevel_result.png[alt=Overview, height=180, align="center"]
+
+== References
+
+- https://pandas.pydata.org[Pandas]
+- https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.reset_index.html[DataFrame reset_index function]
