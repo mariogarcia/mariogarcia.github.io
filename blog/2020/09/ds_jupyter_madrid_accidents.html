@@ -1,0 +1,959 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>DS - Research - Bike accidents in Madrid</h1></header><yieldScaped><div id="preamble">
+<div class="sectionbody">
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<strong>DISCLAIMER ALERT</strong>: This article is intended to be an exercise to start practicing with the Jupyter tool and Python related scientific libraries such as Pandas and Numpy. By no means it&#8217;s supposed to be considered as a reference analysis of any kind.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="bike_accident_analysis_in_madrid_city_2018_2020">Bike accident analysis in Madrid city (2018-2020)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Following the Coursera course I’m in I wanted to practice with some real
+data out there. What best to get some insights about the city I live in
+? Nowadays I normally ride my bike several days a week through the city
+so as you would imagine I&#8217;m very concerned about the bike accidents in the city.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/09/ds_jupyter_madrid_accidents/bike_accident_madrid.png" alt="accident">
+</div>
+</div>
+<div class="paragraph">
+<p>The <a href="https://datos.madrid.es/portal/site/egob/menuitem.c05c1f754a33a9fbe4b2e4b284f1a5a0/?vgnextoid=7c2843010d9c3610VgnVCM2000001f4a900aRCRD&amp;vgnextchannel=374512b9ace9f310VgnVCM100000171f5a0aRCRD&amp;vgnextfmt=default">source datasets</a> I’m using during this analysis are taken from the site <a href="https://datos.madrid.es/portal/site/egob/">Madrid council open data site</a>. Specifically I’m using the years 2018, 2019, and 2020
+(until August which is the last available dataset at the time of
+writing). In the resources section you can also find the Jupyter source file.</p>
+</div>
+<div class="paragraph">
+<p>I’ve realized that conducting an analysis using a Jupyter Notebook is
+great not only because is one of the best tools for statistical analysis
+but also because I can export the notebook to asciidoc which I can
+convert easily to asciidoctor and copy/paste it to my blog.</p>
+</div>
+<div class="paragraph">
+<p>Before doing any kind of analysis we need to look the data and see if we
+should clean it up a little bit.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="2018_dataset">2018 Dataset</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Datasets before 2018 have a different formatting that datasets from 2019
+and ahead. Therefore I need to make them match the rest of the datasets
+I’m merging it with.</p>
+</div>
+<div class="paragraph">
+<p>*In[1]:*</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import pandas as pd
+
+def get_first_hour(hour_range_str):
+    import re
+    m = re.search('DE (.*) A .*', hour_range_str)
+    return m.group(1)
+
+accidents_2018 = pd.read_csv("accidents_2018.csv", delimiter=";", skiprows=0, encoding="ISO-8859-1")
+
+accidents_2018["TIPO VEHÍCULO"] = accidents_2018["Tipo Vehiculo"]
+accidents_2018["CALLE"] = accidents_2018["LUGAR ACCIDENTE"]
+accidents_2018["HORA"] = accidents_2018["RANGO HORARIO"].apply(get_first_hour)</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="2019_2020_datasets">2019-2020 Datasets</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Reading 2019 and 2020 CSV files.</p>
+</div>
+<div class="paragraph">
+<p>*In[2]:*</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">accidents_2020 = pd.read_csv("accidents_2020.csv", delimiter=";", skiprows=0, encoding="ISO-8859-1")
+accidents_2019 = pd.read_csv("accidents_2019.csv", delimiter=";", skiprows=0, encoding="ISO-8859-1")</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="merging_datasets_2018_2020">Merging datasets 2018-2020</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Finally merging all datasets into the dataframe I’ll be working with.</p>
+</div>
+<div class="paragraph">
+<p>*In[3]:*</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">accidents=pd.concat([accidents_2018, accidents_2019, accidents_2020])</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="preparing_dataframe_to_start_with_the_analysis">Preparing DataFrame to start with the analysis</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Before starting with the analysis there’re a couple of steps required to
+make the process a little bit easier:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>I’m interested only in <strong>a given set of columns</strong>:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>FECHA (Date)</p>
+</li>
+<li>
+<p>HORA (Hour)</p>
+</li>
+<li>
+<p>CALLE (Street),</p>
+</li>
+<li>
+<p>DISTRITO (District)</p>
+</li>
+<li>
+<p>TIPO VEHÍCULO (Type of Vehicle)</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>*In[4]:*</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">columns_to_keep = ["FECHA", "HORA", "CALLE", "DISTRITO", "TIPO VEHÍCULO"]
+accidents = accidents[columns_to_keep].dropna()</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>I’m only interested in <strong>bike accidents</strong>: <strong>Ci</strong> stands for moped in spanish.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>*In[5]:*</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">by_bike = accidents["TIPO VEHÍCULO"].str.startswith("Moto") | \
+    accidents["TIPO VEHÍCULO"].str.startswith("Ci") | \
+    accidents["TIPO VEHÍCULO"].str.startswith("MO")
+
+accidents = accidents[by_bike]
+accidents.drop("TIPO VEHÍCULO", axis=1, inplace=True)</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>I need to normalize <strong>street names</strong>:</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>*In[6]:*</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">accidents["CALLE"] = accidents["CALLE"].\
+    str.replace("CALLE DE", "").\
+    str.replace("CALLE", "").\
+    str.replace("NUM .*", "").\
+    str.replace("CALL. ", "").\
+    str.replace(" - .*", "").\
+    str.strip()</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>I need to normalize <strong>district names</strong> as well.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>*In[7]:*</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">for x, y in [('Á', 'A'), ('Í', 'I')]:
+    accidents["DISTRITO"] = accidents["DISTRITO"].\
+        str.replace(x, y).\
+        str.strip()</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Convert string dates</strong> to actual timestamp objects</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>*In[8]:*</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">accidents["TIMESTAMP"] = accidents["FECHA"] + " " + accidents["HORA"]
+accidents["TIMESTAMP"] = pd.to_datetime(accidents["TIMESTAMP"], format="%d/%m/%Y %H:%M")</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Sort DataFrame by date</strong> in ascending order</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>*In[9]:*</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">accidents = accidents.sort_values("TIMESTAMP")
+accidents = accidents.reset_index()
+accidents.drop(["FECHA", "HORA", "index"], axis=1, inplace=True)
+accidents.head()</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>*Out[9]:*</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top"></th>
+<th class="tableblock halign-left valign-top">CALLE</th>
+<th class="tableblock halign-left valign-top">DISTRITO</th>
+<th class="tableblock halign-left valign-top">TIMESTAMP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">VIA CARPETANA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CARABANCHEL</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2018-01-01 21:00:00</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">LA INFANTA MERCEDES</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">TETUAN</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2018-01-02 12:00:00</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">LA ARMADA ESPAÑOLA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SALAMANCA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2018-01-02 13:00:00</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">3</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">EUGENIO SALAZAR</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CHAMARTIN</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2018-01-02 14:00:00</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">4</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">PASEO DE LA CASTELLANA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CHAMBERI</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2018-01-02 15:00:00</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect1">
+<h2 id="analysis">Analysis</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="accident_trend">Accident trend</h3>
+<div class="paragraph">
+<p>In this first question I’d like to address the following points:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Answer the question</strong>: Are the number of accidents increasing from
+2018 ?<br></p>
+</li>
+<li>
+<p><strong>Show a line chart</strong> showing the trend</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>*In[10]:*</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">trends = accidents.copy()
+trends["NO"] = 1
+trends["MONTH"] = trends["TIMESTAMP"].dt.strftime("%m")
+trends["YEAR"] = trends["TIMESTAMP"].dt.strftime("%Y")
+trends = trends.set_index(["YEAR", "MONTH"])
+trends = trends.groupby(["YEAR", "MONTH"]).sum()
+trends = trends.reset_index()
+trends["DATE"] = trends["YEAR"] + "/" + trends["MONTH"]
+trends["DATE"] = pd.to_datetime(trends["DATE"], format="%Y/%m")
+
+# getting rid of unnecessary columns
+trends.drop(["YEAR", "MONTH"], axis=1, inplace=True)
+
+# rolling mean
+trends["MEAN"] = trends["NO"].rolling(6).mean()
+trends = trends.set_index("DATE")
+
+trends.plot.line(figsize=(15,5))</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>*Out[10]:*</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/09/ds_jupyter_madrid_accidents/output_20_1.png" alt="DataFrame">
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Visually the first thing that sprang to mind was <strong>the huge abism on
+april 2020</strong> because of the <strong>covid-19 confinement</strong> in Spain.</p>
+</li>
+<li>
+<p>Despite that important fact, is also true that <strong>the general trend from
+2018 was increasing significantly until october 2019</strong>. You can see the
+rolling mean (in yellow) going up until later 2019.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>There are <strong>two patterns</strong> worth mentioning:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>A decrease</strong> of accidents at holidays’ peaks (August/December)</p>
+</li>
+<li>
+<p><strong>An increase</strong> at the end of of holidays (end of August and earlier
+January)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>You can see the increase/decrease percentage in the next dataframe.</p>
+</div>
+<div class="paragraph">
+<p>*In[11]:*</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">percent = accidents.copy()
+
+percent["NO"] = 1
+percent["YEAR"] = percent["TIMESTAMP"].dt.year
+percent = percent.groupby("YEAR").aggregate("sum").head()
+
+percent = percent.reset_index()
+percent = percent.rename(columns={"NO": "TOTAL"}, inplace=False)
+
+for i in range(1, len(percent)):
+    previous = percent.loc[i-1, "TOTAL"]
+    current = percent.loc[i, "TOTAL"]
+    percent.loc[i, "INCREMENT"] = ((current - previous) / previous) * 100
+
+percent</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>*Out[11]:*</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top"></th>
+<th class="tableblock halign-left valign-top">YEAR</th>
+<th class="tableblock halign-left valign-top">TOTAL</th>
+<th class="tableblock halign-left valign-top">INCREMENT</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2018</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">4489</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">NaN</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2019</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">6885</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">53.374916</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2020</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2352</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-65.838780</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="worst_districts_by_number_of_accidents">Worst districts by number of accidents</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The worst ten district by number of accidents during these three years
+were:</p>
+</div>
+<div class="paragraph">
+<p>*In[12]:*</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">wb = accidents.copy()
+wb["NO"] = 1
+wb = wb.\
+    groupby("DISTRITO").\
+    sum().\
+    sort_values("NO", ascending=False)
+
+wb.head(10)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>*Out[12]:*</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">NO</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DISTRITO</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1517</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SALAMANCA</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1276</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CENTRO</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1264</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CHAMBERI</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1250</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CHAMARTIN</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">998</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">TETUAN</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">873</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CIUDAD LINEAL</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">776</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">RETIRO</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">699</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">MONCLOA-ARAVACA</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">648</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ARGANZUELA</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">593</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CARABANCHEL</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect1">
+<h2 id="comparing_the_wost_distrinct_vs_the_best">Comparing the wost distrinct vs the best</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The most dangerous district vs the safest. It turns out the district
+with <strong>the highest rate of accidents</strong> was the district of <strong>SALAMANCA</strong>
+whereas <strong>the lowest was VICALVARO</strong>. It makes sense because VICALVARO is
+outside the city center by far, so traffic density is also very low.</p>
+</div>
+<div class="paragraph">
+<p>*In[13]:*</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">wb = wb.iloc[[0, -1]]
+wb</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>*Out[13]:*</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">NO</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DISTRITO</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1517</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SALAMANCA</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">117</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">VICALVARO</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect1">
+<h2 id="when_is_the_bestworst_hours_to_ride_in_general">When is the best/worst hours to ride in general ?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Apart from the districts it would be nice to know which are the
+best/worst moment to get out there with your bike. Although we will see
+how rush hours are in general a bad moment to go, it seems that <strong>the
+worst hour to ride in general is 14h</strong>, is when most accidents occur. On
+the other hand, <strong>the hour with less number of accidents is 4h</strong>, which
+makes sense because at that hour at night you don’t see a soul on the
+road.</p>
+</div>
+<div class="paragraph">
+<p>*In[14]:*</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">hs = accidents.copy()
+
+hs["HOUR"] = hs["TIMESTAMP"].dt.hour
+hs["DAY"] = hs["TIMESTAMP"].dt.dayofweek
+
+hs = hs.\
+    groupby(["DAY", "HOUR"]).\
+    size().\
+    reset_index(name="COUNT").\
+    set_index("DAY")
+
+all_week = pd.DataFrame(hs.reset_index().groupby("HOUR")["COUNT"].sum())
+values = all_week.sort_values("COUNT")
+
+worst = values.iloc[-1]
+best  = values.iloc[0]
+
+w_hour, w_no, b_hour, b_no = [worst.name, worst["COUNT"], best.name, best["COUNT"]]
+
+message = "Best \t==&gt; {}h  ({} accidents)\nWorst \t==&gt; {}h ({} accidents)".format(b_hour, b_no, w_hour, w_no)
+print(message)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>*Out[14]:*</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">Best 	==&gt; 4h  (60 accidents)
+Worst 	==&gt; 14h (1060 accidents)</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="analysis_of_hours_during_the_week">Analysis of hours during the week</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I’d to see visually how accidents are arrange on a working day. In order
+to achieve that I’m creating a bar chart with the aggregated number of
+accidents from Monday to Friday by hour.</p>
+</div>
+<div class="paragraph">
+<p>*In[15]:*</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">week = hs.loc[0:5]
+week = pd.DataFrame(week.reset_index().groupby("HOUR")["COUNT"].sum())
+
+week.plot.bar(y="COUNT", figsize=(15,5))</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>*Out[15]:*</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/09/ds_jupyter_madrid_accidents/output_30_1.png" alt="chart">
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="analysis_of_hours_during_the_weekend">Analysis of hours during the weekend</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>As a biker, it’s even more important to me to analyse when is the best
+moment to ride my bike during the weekends. So the same way I did the
+analysis for the working days, here I’m doing the same for the weekend.</p>
+</div>
+<div class="paragraph">
+<p>*In[16]:*</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">weekend = hs.loc[5:7]
+weekend = pd.DataFrame(weekend.reset_index().groupby("HOUR")["COUNT"].sum())
+
+weekend.plot.bar(y="COUNT", figsize=(15,5))</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>*Out[16]:*</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/09/ds_jupyter_madrid_accidents/output_32_1.png" alt="chart">
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="comparing_weekweekend_hour_by_hour">Comparing week/weekend hour by hour</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Fortunately the number of accidents decreases a lot during weekends, but
+the shape of the chart seems to be pretty similar. I’m curious to see
+both charts head to head to see both datasets with the same scale.</p>
+</div>
+<div class="paragraph">
+<p>*In[17]:*</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">all_week = weekend.copy()
+all_week["WEEK"] = week["COUNT"]
+
+all_week.\
+    rename(columns={"COUNT": "WEEKEND"}, inplace=False).\
+    plot.bar(figsize=(15,5))</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>*Out[17]:*</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/09/ds_jupyter_madrid_accidents/output_34_1.png" alt="chart">
+</div>
+</div>
+<div class="paragraph">
+<p>As you can see <strong>there’s a huge difference</strong> (even visually) when you
+compare both datasets altogether <strong>with the same scale</strong>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="comparing_weekend_days_hour_by_hour">Comparing weekend days hour by hour</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This time I’m going directly to compare both Saturday and Sunday
+datasets.</p>
+</div>
+<div class="paragraph">
+<p>*In[18]:*</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">saturday = hs.loc[5]
+saturday = pd.DataFrame(saturday.reset_index().groupby("HOUR")["COUNT"].sum()).\
+    rename(columns={"COUNT": "SATURDAY"})
+
+sunday = hs.loc[6]
+sunday = pd.DataFrame(sunday.reset_index().groupby("HOUR")["COUNT"].sum()).\
+    rename(columns={"COUNT": "SUNDAY"})
+
+pd.merge(saturday, sunday, how="inner", on="HOUR").\
+    plot.bar(figsize=(15,5))</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>*Out[18]:*</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/09/ds_jupyter_madrid_accidents/output_37_1.png" alt="chart">
+</div>
+</div>
+<div class="paragraph">
+<p>I can observe that <strong>in general, there’re more accidents during Satuday
+than Sunday</strong>. The exception is the earlier hours on Sunday which I guess
+corresponds people hanging out and at sunset on Sunday when these people
+are coming home and some other people are heading work (e.g: bakers).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="blackspots_streets_with_highest_rate_of_aggregated_accidents">Blackspots: Streets with highest rate of aggregated accidents</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Which are the streets with the highest number of accidents overtime ?</p>
+</div>
+<div class="paragraph">
+<p>*In[19]:*</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">bs = accidents.copy()
+bs.groupby(["CALLE", "DISTRITO"]).\
+    size().\
+    reset_index(name='COUNT').\
+    sort_values("COUNT", ascending=False).\
+    head(10).\
+    reset_index().\
+    drop("index", axis=1)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>*Out[19]:*</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top"></th>
+<th class="tableblock halign-left valign-top">CALLE</th>
+<th class="tableblock halign-left valign-top">DISTRITO</th>
+<th class="tableblock halign-left valign-top">COUNT</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">BRAVO MURILLO</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">TETUAN</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">145</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ALCALA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SALAMANCA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">123</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ALCALA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CIUDAD LINEAL</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">123</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">3</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SERRANO</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SALAMANCA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">80</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">4</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">GRAN VIA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CENTRO</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">72</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">5</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ARTURO SORIA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CIUDAD LINEAL</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">72</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">6</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">PASEO. CASTELLANA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CHAMARTIN</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">60</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">7</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">FRANCISCO SILVELA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SALAMANCA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">58</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">8</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">PASEO. CASTELLANA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">TETUAN</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">57</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">9</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">JOAQUIN COSTA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CHAMARTIN</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">56</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>I can see a clear winner with the <strong>BRAVO MURILLO</strong> street, followed by
+<strong>ALCALA</strong>. Alcala makes sense to me because it’s a really long street
+spanning different districts, so it’s naturally busy all the time. But I
+have to admit that I wouldn’t have said Bravo Murillo, not in a million
+years.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="next_steps">Next steps</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I’d like to create a probability table in order to answer the question:
+What is the probability of having an accident at a given district at a
+given day of the week at a given hour ? That requires some missing
+numbers I have to get before going any further.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="resources">Resources</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="/img/2020/09/ds_jupyter_madrid_accidents/notebook.ipynb">Jupyter Notebook source file</a></p>
+</li>
+<li>
+<p><a href="https://datos.madrid.es/portal/site/egob/menuitem.c05c1f754a33a9fbe4b2e4b284f1a5a0/?vgnextoid=7c2843010d9c3610VgnVCM2000001f4a900aRCRD&amp;vgnextchannel=374512b9ace9f310VgnVCM100000171f5a0aRCRD&amp;vgnextfmt=default">Accidents
+in Madrid city</a></p>
+</li>
+<li>
+<p><a href="http://www.dgt.es/es/seguridad-vial/estadisticas-e-indicadores/parque-vehiculos/tablas-estadisticas/2019/">Vehicles
+in Spain in 2019 by province</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>
