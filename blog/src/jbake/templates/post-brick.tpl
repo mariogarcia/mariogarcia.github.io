@@ -4,11 +4,11 @@ def image = "${config.site_contextPath}img/latests/${post.summary_image ?: 'comp
 article {
     header {
         a(href: link, class: "image") {
-        img(src: image, width: '361') { }
-    }
-    h3 "${post.title}"
-    time {
-        yield "${post?.date?.format('yyyy-MM-dd')}"
+            img(src: image, width: '361', height:'150') { }
+        }
+        h3 "${post.title}"
+        time {
+            yield "${post?.date?.format('yyyy-MM-dd')}"
         }
 
         include template: "tags-brick.tpl"

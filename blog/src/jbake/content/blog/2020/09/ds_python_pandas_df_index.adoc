@@ -3,11 +3,11 @@
 2020-09-03
 :jbake-type: post
 :jbake-status: published
-:jbake-tags: data science, pandas, dataframe
+:jbake-tags: ds, pandas, dataframe
 :sources: ../../../../../../../sources/2020/09/ds_pandas_series
 :idprefix:
-:summary: Using indexes to help querying the DataFrame better
-:summary_image: data_science.png
+:summary: How to use indexes to query your data frames better
+:summary_image: pandas.png
 
 This is part of a series of articles dedicated to study Data Science using Python. This article
 aims to review some indexing DataFrame theory going through an example.

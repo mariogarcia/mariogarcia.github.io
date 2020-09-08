@@ -3689,7 +3689,8 @@ div.sidebarblock>.content>.title {
 }
 
 .imageblock.text-center {
-    text-align: center;
+	text-align: center;
+	margin-bottom: 15px;
 }
 
 table.stretch {

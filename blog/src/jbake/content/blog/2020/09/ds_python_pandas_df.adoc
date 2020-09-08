@@ -3,11 +3,11 @@
 2020-09-02
 :jbake-type: post
 :jbake-status: published
-:jbake-tags: data science, pandas, dataframe
+:jbake-tags: ds, pandas, dataframe
 :sources: ../../../../../../../sources/2020/09/ds_pandas_series
 :idprefix:
 :summary: Reviewing the Basics of Pandas' DataFrame
-:summary_image: data_science.png
+:summary_image: pandas.png
 
 This is part of a series of articles dedicated to study Data Science using Python. This article
 tries to explain the basics of using the DataFrame abstraction from the Pandas library.

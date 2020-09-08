@@ -3,11 +3,11 @@
 2020-09-01
 :jbake-type: post
 :jbake-status: published
-:jbake-tags: data science, pandas, series
+:jbake-tags: ds, pandas, series
 :sources: ../../../../../../../sources/2020/09/ds_pandas_series
 :idprefix:
 :summary: Playing with the basics of Pandas' Series abstraction
-:summary_image: data_science.png
+:summary_image: pandas.png
 
 This is part of a series of articles dedicated to study Data Science using Python. This article
 tries to explain the basics of using the Series abstraction from the Pandas library.
