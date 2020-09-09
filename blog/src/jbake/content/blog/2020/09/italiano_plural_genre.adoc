@@ -1,0 +1,103 @@
+= Italian - Plural
+@marioggar
+2020-09-09
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: languages, italian
+:sources: ../../../../../../../sources/2020/09/ds_pandas_series
+:idprefix:
+:summary: A bit of vocabulary to practice plural
+:summary_image: italia.png
+
+== Basic rules
+
+There're a few rules to know how to construct plural in italian depending on the ending of the singular form. I'm probably missing some rule but in general we've got:
+
+.basic rules
+[.centered]
+|===
+| singular | plural | example
+|    -a     |   -e | amica -> amice (friend f.)
+|    -o     |   -i | zaino -> zaini (bagpack)
+|    -e     |   -i | stazione -> stazioni (station)
+|===
+
+Here you have some examples following these rules:
+
+.examples
+|===
+| singular | plural | meaning
+| ospedale | ospedali | hospital
+| cassa | casse | house/home
+| matita | matite | pencil
+| panino | panini | sandwich
+| penna | penne | pastry
+| pizza | pizze | pizza
+| piazza | piazze | square
+| povero | poveri | poor
+| quaderno | quaderni | notebook
+| sieda | siede | chair
+| spiaggia | spiaggie | beach
+|===
+
+== Foreign words
+
+In general foreign words are the same in both singular and plural:
+
+.foreign words
+|===
+|singular|plural
+|bus|bus
+|scooter|scooter
+|===
+
+== Adding h
+
+Finally there're some exceptions to the basic rules. These exceptions try to keep the sonority that the singular form had.
+
+.h rules
+[.centered]
+|===
+| singular | plural | example
+| -ca | -che | amica -> amiche
+| -ga | -ghe | ruga -> rughe
+|===
+
+When ending with **-go** depends. If it's related to a person the the plural ends with **gi** as in **biologo -> biologi**:
+
+.ending with -go
+[.centered]
+|===
+| singular | plural | example
+| -go | -gui | albergo -> alberghi
+| -go | -gi | biologo -> biologi
+|===
+
+The same goes with **-co**. Depending on whether the letter before **co** is a vowel or a consonant, the plural will be different.
+
+.ending with -co (cont.)
+[.centered]
+|===
+| singular | plural | example
+| -[vowel]co | chi| parco -> parchi
+| -[conso]co | ci | medico -> medici
+|===
+
+== Must-know exceptions
+
+Finally there're some must-know exceptions worth learning:
+
+.important exceptions
+|===
+| singular | plural | meaning
+| uomo | uomini | man
+| dito | dita | finger
+| uovo | uova | egg
+| braccio | braccia | arm
+|===
+
+== Reference
+
+- https://www.edx.org/course/italian-language-and-culture-beginner-2019-2020[Italian course on EDX]
+- https://www.youtube.com/watch?v=IoudHeIDvIM[Italian Plural Nouns and Their Exceptions (Youtube)]
+
