@@ -9,6 +9,8 @@
 :summary: A bit of vocabulary to practice plural
 :summary_image: italia.png
 
+image::2020/09/italiano_plural/mela_mele.png[alt=mela, height=200, align="center"]
+
 == Basic rules
 
 There're a few rules to know how to construct plural in italian depending on the ending of the singular form. I'm probably missing some rule but in general we've got:
@@ -25,6 +27,7 @@ There're a few rules to know how to construct plural in italian depending on the
 Here you have some examples following these rules:
 
 .examples
+[.centered]
 |===
 | singular | plural | meaning
 | ospedale | ospedali | hospital
@@ -42,14 +45,9 @@ Here you have some examples following these rules:
 
 == Foreign words
 
-In general foreign words are the same in both singular and plural:
+In general foreign words are the same in both singular and plural.
 
-.foreign words
-|===
-|singular|plural
-|bus|bus
-|scooter|scooter
-|===
+image::2020/09/italiano_plural/foreign_words.png[alt=mela, height=200, align=center]
 
 == Adding h
 
@@ -88,6 +86,7 @@ The same goes with **-co**. Depending on whether the letter before **co** is a v
 Finally there're some must-know exceptions worth learning:
 
 .important exceptions
+[.centered]
 |===
 | singular | plural | meaning
 | uomo | uomini | man
