@@ -3700,3 +3700,12 @@ table.stretch {
 table.stretch p {
 	margin: 0;
 }
+
+table caption {
+	color: #7a2518;
+	font-size: 0.9em;
+}
+
+table.centered {
+	margin: 1em auto;	
+}
