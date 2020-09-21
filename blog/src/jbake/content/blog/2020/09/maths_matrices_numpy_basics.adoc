@@ -177,7 +177,7 @@ C = np.array([
 np.array_equal(A + (B + C), (A + B) + C)
 ----
 
-=== Additive inverse
+=== Additive identity
 
 Finally if we add the **zero** matrix to **A** it should return the **A** matrix: You can create a **zero** array using Numpy's **zeros** function.
 
@@ -196,6 +196,25 @@ A = np.array([
 O = np.zeros((2,3))
 
 np.array_equal(A + O, A)
+----
+
+=== Additive inverse
+
+Given a matrix **A** there is its inverse **-A** so that **-A+A=O**. Adding up a matrix and its inverse results in a **zero** matrix.
+
+[source, python]
+.additive inverse proof
+----
+import numpy as np
+
+A = np.array([
+    [1, 2, 3],
+    [1, 2, 3]
+])
+
+O = np.zeros((2, 3))
+
+np.array_equal(A + (-A), O)
 ----
 
 == MULTIPLICATION
@@ -324,3 +343,8 @@ I = np.identity(2)
 np.array_equal(A.dot(I), A)
 np.array_equal(I.dot(A), A)
 ----
+
+== Resources
+
+- https://numpy.org/[Numpy]
+- https://www.codeformech.com/matrix-operations-linear-algebra-using-python/[Linear algebra using Python]
