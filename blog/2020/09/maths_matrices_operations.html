@@ -1,0 +1,376 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>Matrices - Basic operations</h1></header><yieldScaped><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Matrices are one of the most used Math abstraction nowadays, specially in the field of machine learning. That&#8217;s why I encounter myself lately reviewing matrices theory. Now with the most basic operations: <strong>sum</strong> and <strong>multiplication</strong>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="sum">SUM</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Before adding up two matrices <strong>they must have the same dimensions</strong>, the same number of lines and columns. Once we&#8217;ve got two valid matrices, we have to add up each correspondent pair of both matrices, <strong>a<sub>1,1</sub> + b<sub>1,1</sub>, a<sub>1,2</sub> + b<sub>1,2</sub> &#8230;&#8203; a<sub>n,m</sub> + b<sub>n,m</sub></strong>.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/09/matrices_basic_operations/matrix_sum_process.png" alt="commutative" height="250">
+</div>
+<div class="title">Figure 1. Sum (row,column) of A with the same (row, column) of B</div>
+</div>
+<div class="paragraph">
+<p>So, lets say we have a matrix <strong>A</strong> and a matrix <strong>B</strong> and lets add them up:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/4c27af57175b6e8c9e1e83b967f5ede3.png" alt="4c27af57175b6e8c9e1e83b967f5ede3.png" height="50">
+</div>
+<div class="title">Figure 2. Adding up two matrices</div>
+</div>
+<div class="paragraph">
+<p>Matrix addition has a number of properties worth knowing, such as: <strong>commutative</strong>, <strong>associative</strong>, the <strong>additive identity</strong> and the <strong>additive inverse</strong>.</p>
+</div>
+<div class="sect2">
+<h3 id="commutative">COMMUTATIVE</h3>
+<div class="paragraph">
+<p>If A and B are matrices of the same order then it doesn&#8217;t matter the order in which you add them up, in other words <strong>A + B = B + A</strong>. Lets prove it, lets make A and B to be two real matrices:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/92dfbc2cb02304b93145c3469c378f12.png" alt="92dfbc2cb02304b93145c3469c378f12.png" height="50">
+</div>
+<div class="title">Figure 3. Two matrices of the same order</div>
+</div>
+<div class="paragraph">
+<p>So lets do <strong>A + B</strong> and then <strong>B + A</strong> to check that both operations have the same result:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/b87ad35c27e48900c7866490787ad4c0.png" alt="b87ad35c27e48900c7866490787ad4c0.png" height="50">
+</div>
+<div class="title">Figure 4. Commutative property proof</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="associative">ASSOCIATIVE</h3>
+<div class="paragraph">
+<p>Matrix addition is associative. This says that, if A, B and C are Three matrices of the same order then you will get the same result whether you add <strong>A to (B + C)</strong> or <strong>(A + B) to C</strong>. Lets prove it by defining three matrices:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2a51117b88e4737630b7b005409604e7.png" alt="2a51117b88e4737630b7b005409604e7.png" height="50">
+</div>
+<div class="title">Figure 5. Three matrices of the same order (2x2)</div>
+</div>
+<div class="paragraph">
+<p>Now lets define <strong>B + C</strong> AND <strong>A + B</strong>:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/d05998e5da9797d13c9909bdcf483c89.png" alt="d05998e5da9797d13c9909bdcf483c89.png" height="50">
+</div>
+<div class="title">Figure 6. Resolving (B + C) and (A + B)</div>
+</div>
+<div class="paragraph">
+<p>Finally:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/bc4fdc58b112103ec89267fed60e6d9e.png" alt="bc4fdc58b112103ec89267fed60e6d9e.png" height="50">
+</div>
+<div class="title">Figure 7. Associative property proof A + (B + C)</div>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/3ba1da5d60495d608982f8fbf8d5f8e4.png" alt="3ba1da5d60495d608982f8fbf8d5f8e4.png" height="50">
+</div>
+<div class="title">Figure 8. Associative property proof (A + B) + C</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="additive_identity">ADDITIVE IDENTITY</h3>
+<div class="paragraph">
+<p>Let A be the matrix then, <strong>A + O = A = O + A</strong> Therefore, <strong>O</strong> a matrix of the same order as the matrix A that when added up to <strong>A</strong> equals to <strong>A</strong> as well. <strong>O</strong> is also named the <strong>null</strong> or <strong>zero</strong> matrix. So lets prove it adding up a matrix <strong>A</strong> with a compatible <strong>zero</strong> matrix. First the two matrices:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/4961332eccb32f8020b94d816e233840.png" alt="4961332eccb32f8020b94d816e233840.png" height="65">
+</div>
+<div class="title">Figure 9. Two matrices of the same order (3x3)</div>
+</div>
+<div class="paragraph">
+<p>Now adding up <strong>A</strong> to <strong>O</strong> must result in <strong>A</strong>:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/71be61798e5508737ee1b5c54b988c61.png" alt="71be61798e5508737ee1b5c54b988c61.png" height="65">
+</div>
+<div class="title">Figure 10. Additive identity proof</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="additive_inverse">ADDITIVE INVERSE</h3>
+<div class="paragraph">
+<p>Let A be the matrix then, <strong>A + (- A) = O = (- A) + A</strong>  where <strong>-A</strong> is the <strong>inverse of A</strong>. The <strong>inverse of a matrix</strong> is the matrix obtained by changing the sign of every matrix element. Having <strong>A</strong> and <strong>-A</strong>:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/4fbcffb55906329dd3249da3f3aefa75.png" alt="4fbcffb55906329dd3249da3f3aefa75.png" height="65">
+</div>
+<div class="title">Figure 11. Matrix A and its inverse -A</div>
+</div>
+<div class="paragraph">
+<p>So basically adding up <strong>-A</strong> to <strong>A</strong> will end up giving <strong>O</strong> (the null matrix):</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/9d05f9c5183afc6cad849907627d84d4.png" alt="9d05f9c5183afc6cad849907627d84d4.png" height="65">
+</div>
+<div class="title">Figure 12. A + (-A)</div>
+</div>
+<div class="paragraph">
+<p>And the opposite works the same:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/8c3aa1abda55989b4d89bec201cd34b9.png" alt="8c3aa1abda55989b4d89bec201cd34b9.png" height="65">
+</div>
+<div class="title">Figure 13. Additive inverse proof</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="multiply">MULTIPLY</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If <strong>A</strong> is a matrix of order <strong>m x n</strong> and B is another matrix with order <strong>o x p</strong> where <strong>m</strong> and <strong>o</strong> are number of rows and <strong>n</strong> and <strong>p</strong> are number of columns, in order to be able to multiply <strong>A x B</strong>, then <strong>n == o</strong> must be true, meaning that the number of columns of <strong>A</strong> must be equals the number of rows in <strong>B</strong>, and the resulting matrix will be of order <strong>m x p</strong>:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/09/matrices_basic_operations/multiply_pre.png" alt="multiplication" width="500">
+</div>
+</div>
+<div class="paragraph">
+<p>How is the procedure of multiplying two matrices ? Well, the element <strong>C<sub>i,j</sub></strong> (where <strong>i</strong> is the row and <strong>j</strong> is the column) will be the result of multiplying the elements of <strong>A<sub>i</sub></strong> by the elements <strong>B<sub>j</sub></strong> and adding up their results. So for example, when multiplying <strong>A x B = C</strong>:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/09/matrices_basic_operations/multiply_process.png" alt="process" width="500">
+</div>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/bb8c647a0c66f2612f6bb147f631ae34.png" alt="bb8c647a0c66f2612f6bb147f631ae34.png" height="180">
+</div>
+<div class="title">Figure 14. Matrix C cells</div>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s an example, there&#8217;re two matrices <strong>A</strong> and <strong>B</strong>:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/1f715b76e89b3d4ece10306a4dca1849.png" alt="1f715b76e89b3d4ece10306a4dca1849.png" height="70">
+</div>
+<div class="title">Figure 15. Two matrices to multiply</div>
+</div>
+<div class="paragraph">
+<p>Then in order to get <strong>c<sub>1,1</sub></strong> we need to multiply elements from <strong>a<sub>1,&#8230;&#8203;</sub></strong> and <strong>b<sub>&#8230;&#8203;,1</sub></strong> and then add them up:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2b7916ac4fd6b1ac6271bf772400748a.png" alt="2b7916ac4fd6b1ac6271bf772400748a.png" height="60">
+</div>
+<div class="title">Figure 16. Resolving c<sub>1,1</sub></div>
+</div>
+<div class="paragraph">
+<p>Now in order to get <strong>c<sub>1,2</sub></strong> we need to multiply elements from <strong>a<sub>1,&#8230;&#8203;</sub></strong> and <strong>b<sub>&#8230;&#8203;,2</sub></strong>:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/42da6e8bbee0c4f3de8531300e6f24fd.png" alt="42da6e8bbee0c4f3de8531300e6f24fd.png" height="60">
+</div>
+<div class="title">Figure 17. Resolving c<sub>1,2</sub></div>
+</div>
+<div class="paragraph">
+<p>And this would go on and on for remaining cells:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/d229eb831653e78bbc39dde22f0caf09.png" alt="d229eb831653e78bbc39dde22f0caf09.png" width="700">
+</div>
+<div class="title">Figure 18. Two matrices to multiply</div>
+</div>
+<div class="paragraph">
+<p>Finally simplifying:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/5a3a9caf2641b93284b40105c62d6038.png" alt="5a3a9caf2641b93284b40105c62d6038.png" height="60">
+</div>
+<div class="title">Figure 19. A * B result</div>
+</div>
+<div class="paragraph">
+<p>The matrix multiplication has a few properties: the <strong>associative</strong> the <strong>distributive</strong> and the <strong>multiplicative identity</strong>. Lets view them all with examples. I&#8217;m using the following matrices:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/11393696767fea805a3d694a125971e0.png" alt="11393696767fea805a3d694a125971e0.png" height="60">
+</div>
+</div>
+<div class="sect2">
+<h3 id="associative_2">Associative</h3>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+This should be called pseudo-associative due to the fact that the order to the elements in a matrix multiplication matters. <strong>AB</strong> and <strong>BA</strong> may not result in the same solution.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The associative property says that <strong>A(BC)=(AB)C</strong>. So lets calculate <strong>A(BC)</strong> first and then <strong>(AB)C</strong> and compare both results:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/b470aa8be45237e4c1b2b352a961222c.png" alt="b470aa8be45237e4c1b2b352a961222c.png" height="60">
+</div>
+<div class="title">Figure 20. A(BC)</div>
+</div>
+<div class="paragraph">
+<p>Then <strong>A(BC)</strong>:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/9c2403f161ed4dd7739846572f75b2b0.png" alt="9c2403f161ed4dd7739846572f75b2b0.png" height="60">
+</div>
+<div class="title">Figure 21. (AB)C</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="distributive">Distributive</h3>
+<div class="paragraph">
+<p>When multiplying three different matrices <strong>A, B and C</strong> the distributive property says that <strong>A(B+C) = AB + AC</strong> and also that <strong>(A+B)C = AC + BC</strong>. So again having the previous <strong>A, B and C</strong> matrices, lets do a couple of calculations:</p>
+</div>
+<div class="sect3">
+<h4 id="abc_ab_ac">A(B+C) = AB + AC</h4>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/052d2910493fa9d578b5daf39dfca2d9.png" alt="052d2910493fa9d578b5daf39dfca2d9.png" height="50">
+</div>
+<div class="title">Figure 22. A(B+C)</div>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/6c5a38b2aed9a001b2b85ef8e3e4a370.png" alt="6c5a38b2aed9a001b2b85ef8e3e4a370.png" height="50">
+</div>
+<div class="title">Figure 23. AB + AC</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="abc_ac_bc">(A+B)C = AC + BC</h4>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/7b2e6d43d39332682192f0a0738c8fc6.png" alt="7b2e6d43d39332682192f0a0738c8fc6.png" height="50">
+</div>
+<div class="title">Figure 24. (A+B)C</div>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/8572889475f81f70c1cf6cf3bb230f27.png" alt="8572889475f81f70c1cf6cf3bb230f27.png" height="50">
+</div>
+<div class="title">Figure 25. AC + BC</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="multiplicative_identity">Multiplicative identity</h3>
+<div class="paragraph">
+<p>The multiplicative identity property says that there&#8217;s an <strong>identity matrix</strong>. When a matrix is multiplied by this <strong>identity matrix</strong> the result is the matrix itself. The mathematical formula would be <strong>AI = A = IA</strong> where <strong>I</strong> is the <strong>identity matrix</strong>.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/12688282ae1a31faf6f26e990231805d.png" alt="12688282ae1a31faf6f26e990231805d.png" height="50">
+</div>
+<div class="title">Figure 26. multiplicative identity proof (AI)</div>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/a34c7c0b6195377908a7c080296062f8.png" alt="a34c7c0b6195377908a7c080296062f8.png" height="50">
+</div>
+<div class="title">Figure 27. multiplicative identity proof (IA)</div>
+</div>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>

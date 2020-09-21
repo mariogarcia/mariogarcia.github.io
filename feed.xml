@@ -4,8 +4,685 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2020-09-09T22:26:50Z</updated>
+    <updated>2020-09-21T11:52:25Z</updated>
     <id>tag:null,2020:09</id>
+    <entry>
+        <title>Matrices - Basic operations</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2020/09/maths_matrices_numpy_basics.html"/>
+        <updated>2020-09-22T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2020/09/maths_matrices_numpy_basics.html</id>
+        <category term="maths"/>
+        <category term="python"/>
+        <category term="matrix"/>
+        <content type="html">
+            &lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;After review basic matrix operations in a &lt;a href=&quot;http://localhost:8080/blog/2020/09/maths_matrices_operations.html&quot;&gt;previous article&lt;/a&gt;, in this article I&amp;#8217;m reviewing these operations and their properties using Python and the &lt;a href=&quot;https://numpy.org/&quot;&gt;Numpy&lt;/a&gt; library.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;matrices_with_numpy&quot;&gt;Matrices with Numpy&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Although there&amp;#8217;s the &lt;strong&gt;matrix&lt;/strong&gt; function to create matrices, &lt;a href=&quot;https://numpy.org/doc/stable/reference/generated/numpy.matrix.html&quot;&gt;according to documentation is deprecated&lt;/a&gt; in favor of &lt;strong&gt;array&lt;/strong&gt;. So lets say we want to create different arrays:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/3d2d2ee2baa7a5273daa6bbd5417e412.png&quot; alt=&quot;3d2d2ee2baa7a5273daa6bbd5417e412.png&quot; height=&quot;80&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 1. array A&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As we&amp;#8217;ve mentioned earlier, we need to import &lt;a href=&quot;https://numpy.org/&quot;&gt;Numpy&lt;/a&gt; and then create an array representing the matrix. A matrix in Numpy will be written as a multidimensional array:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Matrix declaration&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import numpy as np
+
+A = np.array([
+    [1, 2, 3].
+    [1, 2, 3]
+])
+
+B = np.array([
+    [1],
+    [2]
+])
+
+C = np.array([
+    [1, 1],
+    [2, 2],
+    [3, 3]
+])&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;sum&quot;&gt;SUM&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So, How do we sum two different matrices ? As easy as declaring both matrices and then add them up using the &lt;strong&gt;+&lt;/strong&gt; operator:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/d5de5fdb95dd8655eb0290535b65150f.png&quot; alt=&quot;d5de5fdb95dd8655eb0290535b65150f.png&quot; height=&quot;60&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 2. two matrices A and B&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;adding up two matrices&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import numpy as np
+
+A = np.array([
+    [1, 2, 3],
+    [1, 2, 3]
+])
+
+B = np.array([
+    [2, 2, 2],
+    [2, 2, 2]
+])
+
+A + B&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock warning&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-warning&quot; title=&quot;Warning&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+Of course if you try to sum two matrices with different order (different shape in numpy terms) the operation will fail, as it&amp;#8217;s not possible to sum matrices of different order.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;commutative&quot;&gt;Commutative&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;With the same matrices we can check that the &lt;strong&gt;commutative property&lt;/strong&gt; holds. We can can use &lt;strong&gt;array_equal&lt;/strong&gt; to make sure both &lt;strong&gt;A + B&lt;/strong&gt; and &lt;strong&gt;B + A&lt;/strong&gt; are equal.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/53199ee40c6dcf18bfb0ef8acabcda91.png&quot; alt=&quot;53199ee40c6dcf18bfb0ef8acabcda91.png&quot; height=&quot;60&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 3. commutative&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;commutative proof&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import numpy as np
+
+A = np.array([
+    [1, 2, 3],
+    [1, 2, 3]
+])
+
+B = np.array([
+    [2, 2, 2],
+    [2, 2, 2]
+])
+
+np.array_equal(A + B, B + A)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;associative&quot;&gt;Associative&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now checking the &lt;strong&gt;associative property&lt;/strong&gt; with a third matrix &lt;strong&gt;C&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/f5a50397d43fbc7d2b1086a959240609.png&quot; alt=&quot;f5a50397d43fbc7d2b1086a959240609.png&quot; height=&quot;60&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 4. another matrix C&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/fd801dcd6a6a044ec7b1ad9bf9be2fa1.png&quot; alt=&quot;fd801dcd6a6a044ec7b1ad9bf9be2fa1.png&quot; height=&quot;60&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 5. associative&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import numpy as np
+
+A = np.array([
+    [1, 2, 3],
+    [1, 2, 3]
+])
+
+B = np.array([
+    [2, 2, 2],
+    [2, 2, 2]
+])
+
+C = np.array([
+    [2, 2, 2],
+    [2, 2, 2]
+])
+
+np.array_equal(A + (B + C), (A + B) + C)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;additive_inverse&quot;&gt;Additive inverse&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Finally if we add the &lt;strong&gt;zero&lt;/strong&gt; matrix to &lt;strong&gt;A&lt;/strong&gt; it should return the &lt;strong&gt;A&lt;/strong&gt; matrix: You can create a &lt;strong&gt;zero&lt;/strong&gt; array using Numpy&amp;#8217;s &lt;strong&gt;zeros&lt;/strong&gt; function.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock warning&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-warning&quot; title=&quot;Warning&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+THe zero matrix should be of the &lt;strong&gt;same order as A&lt;/strong&gt;. Meaning if A is of order 2x3 then the zero matrix should be of order 2x3 as well.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;adding zero matrix to A&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import numpy as np
+
+A = np.array([
+    [1, 2, 3],
+    [1, 2, 3]
+])
+
+O = np.zeros((2,3))
+
+np.array_equal(A + O, A)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;multiplication&quot;&gt;MULTIPLICATION&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Matrix multiplication is also known as the &lt;strong&gt;dot&lt;/strong&gt; operation, and there&amp;#8217;s the &lt;strong&gt;dot&lt;/strong&gt; function in Numpy for a given matrix. Therefore for multiplying two different matrices we can use this &lt;strong&gt;dot&lt;/strong&gt; function:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/aca54a4709a9031e9213018f31e2e5f3.png&quot; alt=&quot;aca54a4709a9031e9213018f31e2e5f3.png&quot; height=&quot;60&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 6. two matrices A and B&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;multiplying A * B&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import numpy as np
+
+A = np.array([
+    [1, 2],
+    [2, 3]
+])
+
+B = np.array([
+    [1, 2, 3],
+    [3, 4, 1]
+])
+
+expected = np.array([
+    [ 7, 10,  5],
+    [11, 16,  9]
+])
+
+np.array_equal(A.dot(B), expected)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock warning&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-warning&quot; title=&quot;Warning&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+Again both matrices must be compatible in order to multiply them, otherwise an error will be raised.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;associative_2&quot;&gt;Associative&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We&amp;#8217;re checking that &lt;strong&gt;A(BC) = (AB)C&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock warning&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-warning&quot; title=&quot;Warning&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+Remember that the order of the elements in matrix multiplication is important, meaning &lt;strong&gt;ABC != CBA&lt;/strong&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;associative proof&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import numpy as np
+
+A = np.array([
+    [2, 2],
+    [2, 2],
+])
+
+B = np.array([
+    [1, 2],
+    [1, 2],
+])
+C = np.array([
+    [2, 1],
+    [2, 1],
+])
+
+BC = B.dot(C)
+AB = A.dot(B)
+
+np.array_equal(A.dot(BC), AB.dot(C))&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;distributive&quot;&gt;Distributive&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The distributive property has two parts, &lt;strong&gt;A(B+C) = AB + AC&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;A(B + C) = AB + AC&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;A = np.array([[1, 2], [1, 2]])
+B = np.array([[2, 2], [2, 2]])
+C = np.array([[3, 3], [3, 3]])
+
+AB = A.dot(B)
+AC = A.dot(C)
+
+np.array_equal(A.dot(B + C), AB + AC)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And then &lt;strong&gt;(A + B)C = AC + BC&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;(A+B)C = AC + BC&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;A = np.array([[1, 2], [1, 2]])
+B = np.array([[2, 2], [2, 2]])
+C = np.array([[3, 3], [3, 3]])
+
+AC = A.dot(C)
+BC = B.dot(C)
+
+np.array_equal((A+B).dot(C), AC + BC)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;multiplicative_identity&quot;&gt;Multiplicative identity&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Multiplicative identity property says that if any matrix &lt;strong&gt;A&lt;/strong&gt; is multiplied by the &lt;strong&gt;identity matrix&lt;/strong&gt; then the result will be &lt;strong&gt;A&lt;/strong&gt;. You can use numpy&amp;#8217;s function &lt;strong&gt;identity&lt;/strong&gt; to get an &lt;strong&gt;identity matrix&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;multiply by identity&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import numpy as np
+
+A = np.array([
+    [2, 2],
+    [2, 2],
+])
+
+I = np.identity(2)
+
+np.array_equal(A.dot(I), A)
+np.array_equal(I.dot(A), A)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
+    <entry>
+        <title>Matrices - Basic operations</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2020/09/maths_matrices_operations.html"/>
+        <updated>2020-09-21T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2020/09/maths_matrices_operations.html</id>
+        <category term="maths"/>
+        <category term="matrices"/>
+        <content type="html">
+            &lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Matrices are one of the most used Math abstraction nowadays, specially in the field of machine learning. That&amp;#8217;s why I encounter myself lately reviewing matrices theory. Now with the most basic operations: &lt;strong&gt;sum&lt;/strong&gt; and &lt;strong&gt;multiplication&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;sum&quot;&gt;SUM&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Before adding up two matrices &lt;strong&gt;they must have the same dimensions&lt;/strong&gt;, the same number of lines and columns. Once we&amp;#8217;ve got two valid matrices, we have to add up each correspondent pair of both matrices, &lt;strong&gt;a&lt;sub&gt;1,1&lt;/sub&gt; + b&lt;sub&gt;1,1&lt;/sub&gt;, a&lt;sub&gt;1,2&lt;/sub&gt; + b&lt;sub&gt;1,2&lt;/sub&gt; &amp;#8230;&amp;#8203; a&lt;sub&gt;n,m&lt;/sub&gt; + b&lt;sub&gt;n,m&lt;/sub&gt;&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/09/matrices_basic_operations/matrix_sum_process.png&quot; alt=&quot;commutative&quot; height=&quot;250&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 1. Sum (row,column) of A with the same (row, column) of B&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So, lets say we have a matrix &lt;strong&gt;A&lt;/strong&gt; and a matrix &lt;strong&gt;B&lt;/strong&gt; and lets add them up:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/4c27af57175b6e8c9e1e83b967f5ede3.png&quot; alt=&quot;4c27af57175b6e8c9e1e83b967f5ede3.png&quot; height=&quot;50&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 2. Adding up two matrices&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Matrix addition has a number of properties worth knowing, such as: &lt;strong&gt;commutative&lt;/strong&gt;, &lt;strong&gt;associative&lt;/strong&gt;, the &lt;strong&gt;additive identity&lt;/strong&gt; and the &lt;strong&gt;additive inverse&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;commutative&quot;&gt;COMMUTATIVE&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If A and B are matrices of the same order then it doesn&amp;#8217;t matter the order in which you add them up, in other words &lt;strong&gt;A + B = B + A&lt;/strong&gt;. Lets prove it, lets make A and B to be two real matrices:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/92dfbc2cb02304b93145c3469c378f12.png&quot; alt=&quot;92dfbc2cb02304b93145c3469c378f12.png&quot; height=&quot;50&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 3. Two matrices of the same order&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So lets do &lt;strong&gt;A + B&lt;/strong&gt; and then &lt;strong&gt;B + A&lt;/strong&gt; to check that both operations have the same result:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/b87ad35c27e48900c7866490787ad4c0.png&quot; alt=&quot;b87ad35c27e48900c7866490787ad4c0.png&quot; height=&quot;50&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 4. Commutative property proof&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;associative&quot;&gt;ASSOCIATIVE&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Matrix addition is associative. This says that, if A, B and C are Three matrices of the same order then you will get the same result whether you add &lt;strong&gt;A to (B + C)&lt;/strong&gt; or &lt;strong&gt;(A + B) to C&lt;/strong&gt;. Lets prove it by defining three matrices:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2a51117b88e4737630b7b005409604e7.png&quot; alt=&quot;2a51117b88e4737630b7b005409604e7.png&quot; height=&quot;50&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 5. Three matrices of the same order (2x2)&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now lets define &lt;strong&gt;B + C&lt;/strong&gt; AND &lt;strong&gt;A + B&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/d05998e5da9797d13c9909bdcf483c89.png&quot; alt=&quot;d05998e5da9797d13c9909bdcf483c89.png&quot; height=&quot;50&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 6. Resolving (B + C) and (A + B)&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Finally:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/bc4fdc58b112103ec89267fed60e6d9e.png&quot; alt=&quot;bc4fdc58b112103ec89267fed60e6d9e.png&quot; height=&quot;50&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 7. Associative property proof A + (B + C)&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/3ba1da5d60495d608982f8fbf8d5f8e4.png&quot; alt=&quot;3ba1da5d60495d608982f8fbf8d5f8e4.png&quot; height=&quot;50&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 8. Associative property proof (A + B) + C&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;additive_identity&quot;&gt;ADDITIVE IDENTITY&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Let A be the matrix then, &lt;strong&gt;A + O = A = O + A&lt;/strong&gt; Therefore, &lt;strong&gt;O&lt;/strong&gt; a matrix of the same order as the matrix A that when added up to &lt;strong&gt;A&lt;/strong&gt; equals to &lt;strong&gt;A&lt;/strong&gt; as well. &lt;strong&gt;O&lt;/strong&gt; is also named the &lt;strong&gt;null&lt;/strong&gt; or &lt;strong&gt;zero&lt;/strong&gt; matrix. So lets prove it adding up a matrix &lt;strong&gt;A&lt;/strong&gt; with a compatible &lt;strong&gt;zero&lt;/strong&gt; matrix. First the two matrices:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/4961332eccb32f8020b94d816e233840.png&quot; alt=&quot;4961332eccb32f8020b94d816e233840.png&quot; height=&quot;65&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 9. Two matrices of the same order (3x3)&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now adding up &lt;strong&gt;A&lt;/strong&gt; to &lt;strong&gt;O&lt;/strong&gt; must result in &lt;strong&gt;A&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/71be61798e5508737ee1b5c54b988c61.png&quot; alt=&quot;71be61798e5508737ee1b5c54b988c61.png&quot; height=&quot;65&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 10. Additive identity proof&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;additive_inverse&quot;&gt;ADDITIVE INVERSE&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Let A be the matrix then, &lt;strong&gt;A + (- A) = O = (- A) + A&lt;/strong&gt;  where &lt;strong&gt;-A&lt;/strong&gt; is the &lt;strong&gt;inverse of A&lt;/strong&gt;. The &lt;strong&gt;inverse of a matrix&lt;/strong&gt; is the matrix obtained by changing the sign of every matrix element. Having &lt;strong&gt;A&lt;/strong&gt; and &lt;strong&gt;-A&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/4fbcffb55906329dd3249da3f3aefa75.png&quot; alt=&quot;4fbcffb55906329dd3249da3f3aefa75.png&quot; height=&quot;65&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 11. Matrix A and its inverse -A&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So basically adding up &lt;strong&gt;-A&lt;/strong&gt; to &lt;strong&gt;A&lt;/strong&gt; will end up giving &lt;strong&gt;O&lt;/strong&gt; (the null matrix):&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/9d05f9c5183afc6cad849907627d84d4.png&quot; alt=&quot;9d05f9c5183afc6cad849907627d84d4.png&quot; height=&quot;65&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 12. A + (-A)&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And the opposite works the same:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/8c3aa1abda55989b4d89bec201cd34b9.png&quot; alt=&quot;8c3aa1abda55989b4d89bec201cd34b9.png&quot; height=&quot;65&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 13. Additive inverse proof&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;multiply&quot;&gt;MULTIPLY&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If &lt;strong&gt;A&lt;/strong&gt; is a matrix of order &lt;strong&gt;m x n&lt;/strong&gt; and B is another matrix with order &lt;strong&gt;o x p&lt;/strong&gt; where &lt;strong&gt;m&lt;/strong&gt; and &lt;strong&gt;o&lt;/strong&gt; are number of rows and &lt;strong&gt;n&lt;/strong&gt; and &lt;strong&gt;p&lt;/strong&gt; are number of columns, in order to be able to multiply &lt;strong&gt;A x B&lt;/strong&gt;, then &lt;strong&gt;n == o&lt;/strong&gt; must be true, meaning that the number of columns of &lt;strong&gt;A&lt;/strong&gt; must be equals the number of rows in &lt;strong&gt;B&lt;/strong&gt;, and the resulting matrix will be of order &lt;strong&gt;m x p&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/09/matrices_basic_operations/multiply_pre.png&quot; alt=&quot;multiplication&quot; width=&quot;500&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;How is the procedure of multiplying two matrices ? Well, the element &lt;strong&gt;C&lt;sub&gt;i,j&lt;/sub&gt;&lt;/strong&gt; (where &lt;strong&gt;i&lt;/strong&gt; is the row and &lt;strong&gt;j&lt;/strong&gt; is the column) will be the result of multiplying the elements of &lt;strong&gt;A&lt;sub&gt;i&lt;/sub&gt;&lt;/strong&gt; by the elements &lt;strong&gt;B&lt;sub&gt;j&lt;/sub&gt;&lt;/strong&gt; and adding up their results. So for example, when multiplying &lt;strong&gt;A x B = C&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/09/matrices_basic_operations/multiply_process.png&quot; alt=&quot;process&quot; width=&quot;500&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/bb8c647a0c66f2612f6bb147f631ae34.png&quot; alt=&quot;bb8c647a0c66f2612f6bb147f631ae34.png&quot; height=&quot;180&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 14. Matrix C cells&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Here&amp;#8217;s an example, there&amp;#8217;re two matrices &lt;strong&gt;A&lt;/strong&gt; and &lt;strong&gt;B&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/1f715b76e89b3d4ece10306a4dca1849.png&quot; alt=&quot;1f715b76e89b3d4ece10306a4dca1849.png&quot; height=&quot;70&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 15. Two matrices to multiply&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then in order to get &lt;strong&gt;c&lt;sub&gt;1,1&lt;/sub&gt;&lt;/strong&gt; we need to multiply elements from &lt;strong&gt;a&lt;sub&gt;1,&amp;#8230;&amp;#8203;&lt;/sub&gt;&lt;/strong&gt; and &lt;strong&gt;b&lt;sub&gt;&amp;#8230;&amp;#8203;,1&lt;/sub&gt;&lt;/strong&gt; and then add them up:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2b7916ac4fd6b1ac6271bf772400748a.png&quot; alt=&quot;2b7916ac4fd6b1ac6271bf772400748a.png&quot; height=&quot;60&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 16. Resolving c&lt;sub&gt;1,1&lt;/sub&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now in order to get &lt;strong&gt;c&lt;sub&gt;1,2&lt;/sub&gt;&lt;/strong&gt; we need to multiply elements from &lt;strong&gt;a&lt;sub&gt;1,&amp;#8230;&amp;#8203;&lt;/sub&gt;&lt;/strong&gt; and &lt;strong&gt;b&lt;sub&gt;&amp;#8230;&amp;#8203;,2&lt;/sub&gt;&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/42da6e8bbee0c4f3de8531300e6f24fd.png&quot; alt=&quot;42da6e8bbee0c4f3de8531300e6f24fd.png&quot; height=&quot;60&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 17. Resolving c&lt;sub&gt;1,2&lt;/sub&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And this would go on and on for remaining cells:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/d229eb831653e78bbc39dde22f0caf09.png&quot; alt=&quot;d229eb831653e78bbc39dde22f0caf09.png&quot; width=&quot;700&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 18. Two matrices to multiply&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Finally simplifying:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/5a3a9caf2641b93284b40105c62d6038.png&quot; alt=&quot;5a3a9caf2641b93284b40105c62d6038.png&quot; height=&quot;60&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 19. A * B result&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The matrix multiplication has a few properties: the &lt;strong&gt;associative&lt;/strong&gt; the &lt;strong&gt;distributive&lt;/strong&gt; and the &lt;strong&gt;multiplicative identity&lt;/strong&gt;. Lets view them all with examples. I&amp;#8217;m using the following matrices:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/11393696767fea805a3d694a125971e0.png&quot; alt=&quot;11393696767fea805a3d694a125971e0.png&quot; height=&quot;60&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;associative_2&quot;&gt;Associative&lt;/h3&gt;
+&lt;div class=&quot;admonitionblock warning&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-warning&quot; title=&quot;Warning&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+This should be called pseudo-associative due to the fact that the order to the elements in a matrix multiplication matters. &lt;strong&gt;AB&lt;/strong&gt; and &lt;strong&gt;BA&lt;/strong&gt; may not result in the same solution.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The associative property says that &lt;strong&gt;A(BC)=(AB)C&lt;/strong&gt;. So lets calculate &lt;strong&gt;A(BC)&lt;/strong&gt; first and then &lt;strong&gt;(AB)C&lt;/strong&gt; and compare both results:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/b470aa8be45237e4c1b2b352a961222c.png&quot; alt=&quot;b470aa8be45237e4c1b2b352a961222c.png&quot; height=&quot;60&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 20. A(BC)&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then &lt;strong&gt;A(BC)&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/9c2403f161ed4dd7739846572f75b2b0.png&quot; alt=&quot;9c2403f161ed4dd7739846572f75b2b0.png&quot; height=&quot;60&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 21. (AB)C&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;distributive&quot;&gt;Distributive&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;When multiplying three different matrices &lt;strong&gt;A, B and C&lt;/strong&gt; the distributive property says that &lt;strong&gt;A(B+C) = AB + AC&lt;/strong&gt; and also that &lt;strong&gt;(A+B)C = AC + BC&lt;/strong&gt;. So again having the previous &lt;strong&gt;A, B and C&lt;/strong&gt; matrices, lets do a couple of calculations:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;abc_ab_ac&quot;&gt;A(B+C) = AB + AC&lt;/h4&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/052d2910493fa9d578b5daf39dfca2d9.png&quot; alt=&quot;052d2910493fa9d578b5daf39dfca2d9.png&quot; height=&quot;50&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 22. A(B+C)&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/6c5a38b2aed9a001b2b85ef8e3e4a370.png&quot; alt=&quot;6c5a38b2aed9a001b2b85ef8e3e4a370.png&quot; height=&quot;50&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 23. AB + AC&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;abc_ac_bc&quot;&gt;(A+B)C = AC + BC&lt;/h4&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/7b2e6d43d39332682192f0a0738c8fc6.png&quot; alt=&quot;7b2e6d43d39332682192f0a0738c8fc6.png&quot; height=&quot;50&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 24. (A+B)C&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/8572889475f81f70c1cf6cf3bb230f27.png&quot; alt=&quot;8572889475f81f70c1cf6cf3bb230f27.png&quot; height=&quot;50&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 25. AC + BC&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;multiplicative_identity&quot;&gt;Multiplicative identity&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The multiplicative identity property says that there&amp;#8217;s an &lt;strong&gt;identity matrix&lt;/strong&gt;. When a matrix is multiplied by this &lt;strong&gt;identity matrix&lt;/strong&gt; the result is the matrix itself. The mathematical formula would be &lt;strong&gt;AI = A = IA&lt;/strong&gt; where &lt;strong&gt;I&lt;/strong&gt; is the &lt;strong&gt;identity matrix&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/12688282ae1a31faf6f26e990231805d.png&quot; alt=&quot;12688282ae1a31faf6f26e990231805d.png&quot; height=&quot;50&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 26. multiplicative identity proof (AI)&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/a34c7c0b6195377908a7c080296062f8.png&quot; alt=&quot;a34c7c0b6195377908a7c080296062f8.png&quot; height=&quot;50&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 27. multiplicative identity proof (IA)&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
     <entry>
         <title>Italian - Plural</title>
         <author>
@@ -5133,7 +5810,7 @@ functions &amp;#x039F;(g(n)) is all f(n) functions defined by:&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;imageblock&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/9321e17836700f7c25ebd23db9b51dfe.png&quot; alt=&quot;9321e17836700f7c25ebd23db9b51dfe.png&quot; width=&quot;500&quot; height=&quot;50&quot;&gt;
+&lt;img src=&quot;/img/9321e17836700f7c25ebd23db9b51dfe.png&quot; alt=&quot;9321e17836700f7c25ebd23db9b51dfe.png&quot; height=&quot;50&quot;&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
@@ -5143,7 +5820,7 @@ that a given function is in the set of functions of &lt;code&gt;&amp;#x039F;(g(n
 &lt;/div&gt;
 &lt;div class=&quot;imageblock&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/5350bb29b0ba717c96295c82fc4fc543.png&quot; alt=&quot;5350bb29b0ba717c96295c82fc4fc543.png&quot; width=&quot;500&quot; height=&quot;50&quot;&gt;
+&lt;img src=&quot;/img/5350bb29b0ba717c96295c82fc4fc543.png&quot; alt=&quot;5350bb29b0ba717c96295c82fc4fc543.png&quot; height=&quot;50&quot;&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
@@ -5152,7 +5829,7 @@ that a given function is in the set of functions of &lt;code&gt;&amp;#x039F;(g(n
 &lt;/div&gt;
 &lt;div class=&quot;imageblock&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/328a1ed3bc1940174402e61384cfcb63.png&quot; alt=&quot;328a1ed3bc1940174402e61384cfcb63.png&quot; width=&quot;500&quot; height=&quot;50&quot;&gt;
+&lt;img src=&quot;/img/328a1ed3bc1940174402e61384cfcb63.png&quot; alt=&quot;328a1ed3bc1940174402e61384cfcb63.png&quot; height=&quot;50&quot;&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;quoteblock&quot;&gt;
@@ -5536,29 +6213,30 @@ If it&amp;#8217;s other day than Monday, Elsa goes running, but John doesn&amp;#
 &lt;/div&gt;
 &lt;div class=&quot;imageblock&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/15cf1d5e3870ce537725c72f59ba8b51.png&quot; alt=&quot;15cf1d5e3870ce537725c72f59ba8b51.png&quot; width=&quot;500&quot; height=&quot;50&quot;&gt;
+&lt;img src=&quot;/img/15cf1d5e3870ce537725c72f59ba8b51.png&quot; alt=&quot;15cf1d5e3870ce537725c72f59ba8b51.png&quot; height=&quot;50&quot;&gt;
 &lt;/div&gt;
-&lt;div class=&quot;title&quot;&gt;A&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;imageblock&quot;&gt;
-&lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/4746161d80e6233cd4e033b11d76f630.png&quot; alt=&quot;4746161d80e6233cd4e033b11d76f630.png&quot; width=&quot;500&quot; height=&quot;50&quot;&gt;
-&lt;/div&gt;
-&lt;div class=&quot;title&quot;&gt;B&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 1. Solution to A&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;imageblock&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/2869e7f1a17332d42352718625fea878.png&quot; alt=&quot;2869e7f1a17332d42352718625fea878.png&quot; width=&quot;500&quot; height=&quot;50&quot;&gt;
+&lt;img src=&quot;/img/4746161d80e6233cd4e033b11d76f630.png&quot; alt=&quot;4746161d80e6233cd4e033b11d76f630.png&quot; height=&quot;50&quot;&gt;
 &lt;/div&gt;
-&lt;div class=&quot;title&quot;&gt;C&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 2. Solution to B&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2869e7f1a17332d42352718625fea878.png&quot; alt=&quot;2869e7f1a17332d42352718625fea878.png&quot; height=&quot;50&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 3. Solution to C&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;&lt;strong&gt;Table of truth&lt;/strong&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;imageblock&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/c94965721b3f779852da1cb2cbc97854.png&quot; alt=&quot;c94965721b3f779852da1cb2cbc97854.png&quot; width=&quot;450&quot; height=&quot;250&quot;&gt;
+&lt;img src=&quot;/img/c94965721b3f779852da1cb2cbc97854.png&quot; alt=&quot;c94965721b3f779852da1cb2cbc97854.png&quot; height=&quot;150&quot;&gt;
 &lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 4. table of truth&lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;sect3&quot;&gt;
@@ -5605,23 +6283,24 @@ lottery
 &lt;/div&gt;
 &lt;div class=&quot;imageblock&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/644cc113c4e2e43fed228da526309215.png&quot; alt=&quot;644cc113c4e2e43fed228da526309215.png&quot; width=&quot;500&quot; height=&quot;50&quot;&gt;
+&lt;img src=&quot;/img/644cc113c4e2e43fed228da526309215.png&quot; alt=&quot;644cc113c4e2e43fed228da526309215.png&quot; height=&quot;50&quot;&gt;
 &lt;/div&gt;
-&lt;div class=&quot;title&quot;&gt;A&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 5. Solution to A&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;imageblock&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/4a9b2fa4c9f484a58c366527cf3744de.png&quot; alt=&quot;4a9b2fa4c9f484a58c366527cf3744de.png&quot; width=&quot;500&quot; height=&quot;50&quot;&gt;
+&lt;img src=&quot;/img/4a9b2fa4c9f484a58c366527cf3744de.png&quot; alt=&quot;4a9b2fa4c9f484a58c366527cf3744de.png&quot; height=&quot;50&quot;&gt;
 &lt;/div&gt;
-&lt;div class=&quot;title&quot;&gt;B&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 6. Solution to B&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;&lt;strong&gt;Table of truth&lt;/strong&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;imageblock&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/e94b6da93ef97104907195b148d451d4.png&quot; alt=&quot;e94b6da93ef97104907195b148d451d4.png&quot; width=&quot;450&quot; height=&quot;250&quot;&gt;
+&lt;img src=&quot;/img/e94b6da93ef97104907195b148d451d4.png&quot; alt=&quot;e94b6da93ef97104907195b148d451d4.png&quot; width=&quot;450&quot;&gt;
 &lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 7. table of truth&lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -5776,20 +6455,22 @@ has two parts:&lt;/p&gt;
 &lt;p&gt;And both parts are combined using the &lt;code&gt;AND&lt;/code&gt; operator (&lt;code&gt;&amp;#x2227;&lt;/code&gt;). Mathematically can be
 expressed as:&lt;/p&gt;
 &lt;/div&gt;
-&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/4aa32bf3a4aa6239a102af7635373072.png&quot; alt=&quot;4aa32bf3a4aa6239a102af7635373072.png&quot; width=&quot;500&quot; height=&quot;50&quot;&gt;
+&lt;img src=&quot;/img/4aa32bf3a4aa6239a102af7635373072.png&quot; alt=&quot;4aa32bf3a4aa6239a102af7635373072.png&quot; height=&quot;50&quot;&gt;
 &lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 1. and&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;The use of the &lt;code&gt;&amp;#x2227;&lt;/code&gt; means that the proposition is true when both &lt;strong&gt;p&lt;/strong&gt;
 and &lt;strong&gt;q&lt;/strong&gt; are true. Another way to represent the possible values for this
 propositions is using a &lt;strong&gt;truth table&lt;/strong&gt;:&lt;/p&gt;
 &lt;/div&gt;
-&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/22f8f28238ea878dc92c096384f52043.png&quot; alt=&quot;22f8f28238ea878dc92c096384f52043.png&quot; width=&quot;450&quot; height=&quot;450&quot;&gt;
+&lt;img src=&quot;/img/22f8f28238ea878dc92c096384f52043.png&quot; alt=&quot;22f8f28238ea878dc92c096384f52043.png&quot; height=&quot;150&quot;&gt;
 &lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 2. truth table&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;admonitionblock warning&quot;&gt;
 &lt;table&gt;
@@ -5822,19 +6503,21 @@ winner ticket.&lt;/p&gt;
 ticket and &lt;code&gt;q&lt;/code&gt; you having a winner ticket, a proposition will be true
 if any of you have a winner ticket. Mathematically:&lt;/p&gt;
 &lt;/div&gt;
-&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/e24a5601777c447da6dcdab4efb64f53.png&quot; alt=&quot;e24a5601777c447da6dcdab4efb64f53.png&quot; width=&quot;100&quot; height=&quot;120&quot;&gt;
+&lt;img src=&quot;/img/e24a5601777c447da6dcdab4efb64f53.png&quot; alt=&quot;e24a5601777c447da6dcdab4efb64f53.png&quot; height=&quot;50&quot;&gt;
 &lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 3. or&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;But, if you would like to go through all the possibilities then you
 can write down the truth table:&lt;/p&gt;
 &lt;/div&gt;
-&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/21606cc5359143bb8ba10398d7567961.png&quot; alt=&quot;21606cc5359143bb8ba10398d7567961.png&quot; width=&quot;250&quot; height=&quot;250&quot;&gt;
+&lt;img src=&quot;/img/21606cc5359143bb8ba10398d7567961.png&quot; alt=&quot;21606cc5359143bb8ba10398d7567961.png&quot; height=&quot;150&quot;&gt;
 &lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 4. truth table&lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;sect3&quot;&gt;
@@ -5891,10 +6574,11 @@ expression we want to evaluate. In this case we have:&lt;/p&gt;
 between both propositions. &lt;strong&gt;A&lt;/strong&gt; implies that &lt;strong&gt;B&lt;/strong&gt; can happen. This can
 be expressed as:&lt;/p&gt;
 &lt;/div&gt;
-&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/50c8bc1a5046d2c61e4af316a3ce3777.png&quot; alt=&quot;50c8bc1a5046d2c61e4af316a3ce3777.png&quot; width=&quot;150&quot; height=&quot;120&quot;&gt;
+&lt;img src=&quot;/img/50c8bc1a5046d2c61e4af316a3ce3777.png&quot; alt=&quot;50c8bc1a5046d2c61e4af316a3ce3777.png&quot; height=&quot;50&quot;&gt;
 &lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 5. implies&lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;sect2&quot;&gt;
@@ -5931,10 +6615,11 @@ mathematical symbol of boolean negation is &lt;code&gt;&amp;#x00AC;&lt;/code&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;So how the statement looks like with its propositions negated ?&lt;/p&gt;
 &lt;/div&gt;
-&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/7d7d1fdf66bb95d608df4f75c4fb7645.png&quot; alt=&quot;7d7d1fdf66bb95d608df4f75c4fb7645.png&quot; width=&quot;150&quot; height=&quot;120&quot;&gt;
+&lt;img src=&quot;/img/7d7d1fdf66bb95d608df4f75c4fb7645.png&quot; alt=&quot;7d7d1fdf66bb95d608df4f75c4fb7645.png&quot; height=&quot;50&quot;&gt;
 &lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 6. negation&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Which leads me to the next concept, the &lt;strong&gt;contrapositive&lt;/strong&gt; of the
@@ -5956,10 +6641,11 @@ way:&lt;/p&gt;
 &lt;p&gt;This would imply that I didn&amp;#8217;t join the project, because the next
 project is not using Java.&lt;/p&gt;
 &lt;/div&gt;
-&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/7d7d1fdf66bb95d608df4f75c4fb7645.png&quot; alt=&quot;7d7d1fdf66bb95d608df4f75c4fb7645.png&quot; width=&quot;150&quot; height=&quot;120&quot;&gt;
+&lt;img src=&quot;/img/7d7d1fdf66bb95d608df4f75c4fb7645.png&quot; alt=&quot;7d7d1fdf66bb95d608df4f75c4fb7645.png&quot; height=&quot;50&quot;&gt;
 &lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 7. contrapositive&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;This is the &lt;strong&gt;contrapositive&lt;/strong&gt; version of our initial statement. In
@@ -5968,10 +6654,11 @@ equivalents, meaning that that both try to express the same thing but
 from different perspectives, positive and negative. In mathematical
 syntax:&lt;/p&gt;
 &lt;/div&gt;
-&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/798c57e9c0d61965f651e302b5fb2cb1.png&quot; alt=&quot;798c57e9c0d61965f651e302b5fb2cb1.png&quot; width=&quot;300&quot; height=&quot;120&quot;&gt;
+&lt;img src=&quot;/img/798c57e9c0d61965f651e302b5fb2cb1.png&quot; alt=&quot;798c57e9c0d61965f651e302b5fb2cb1.png&quot; height=&quot;50&quot;&gt;
 &lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 8. implies vs contrapositive&lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;sect2&quot;&gt;
@@ -5992,10 +6679,11 @@ wanted to be very explicit about the fact that I&amp;#8217;m willing to do the
 next project &lt;strong&gt;only if&lt;/strong&gt; Java is on the table, then I have to express
 the statement using the biconditional operator.&lt;/p&gt;
 &lt;/div&gt;
-&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/5b82cec87b8710817fbc5922dbc9331b.png&quot; alt=&quot;5b82cec87b8710817fbc5922dbc9331b.png&quot; width=&quot;150&quot; height=&quot;120&quot;&gt;
+&lt;img src=&quot;/img/5b82cec87b8710817fbc5922dbc9331b.png&quot; alt=&quot;5b82cec87b8710817fbc5922dbc9331b.png&quot; height=&quot;50&quot;&gt;
 &lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 9. biconditional&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;This expression now reflects that:&lt;/p&gt;

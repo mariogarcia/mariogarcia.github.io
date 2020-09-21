@@ -3688,6 +3688,10 @@ div.sidebarblock>.content>.title {
     text-align: center;
 }
 
+.imageblock > .title {
+	color: #ca4444;
+}
+
 .imageblock.text-center {
 	text-align: center;
 	margin-bottom: 15px;
