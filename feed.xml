@@ -4,7 +4,7 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2020-09-21T11:52:25Z</updated>
+    <updated>2020-09-21T17:03:57Z</updated>
     <id>tag:null,2020:09</id>
     <entry>
         <title>Matrices - Basic operations</title>
@@ -177,7 +177,7 @@ np.array_equal(A + (B + C), (A + B) + C)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;sect2&quot;&gt;
-&lt;h3 id=&quot;additive_inverse&quot;&gt;Additive inverse&lt;/h3&gt;
+&lt;h3 id=&quot;additive_identity&quot;&gt;Additive identity&lt;/h3&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Finally if we add the &lt;strong&gt;zero&lt;/strong&gt; matrix to &lt;strong&gt;A&lt;/strong&gt; it should return the &lt;strong&gt;A&lt;/strong&gt; matrix: You can create a &lt;strong&gt;zero&lt;/strong&gt; array using Numpy&amp;#8217;s &lt;strong&gt;zeros&lt;/strong&gt; function.&lt;/p&gt;
 &lt;/div&gt;
@@ -206,6 +206,27 @@ A = np.array([
 O = np.zeros((2,3))
 
 np.array_equal(A + O, A)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;additive_inverse&quot;&gt;Additive inverse&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Given a matrix &lt;strong&gt;A&lt;/strong&gt; there is its inverse &lt;strong&gt;-A&lt;/strong&gt; so that &lt;strong&gt;-A+A=O&lt;/strong&gt;. Adding up a matrix and its inverse results in a &lt;strong&gt;zero&lt;/strong&gt; matrix.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;additive inverse proof&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import numpy as np
+
+A = np.array([
+    [1, 2, 3],
+    [1, 2, 3]
+])
+
+O = np.zeros((2, 3))
+
+np.array_equal(A + (-A), O)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -357,6 +378,21 @@ np.array_equal(A.dot(I), A)
 np.array_equal(I.dot(A), A)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;resources&quot;&gt;Resources&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://numpy.org/&quot;&gt;Numpy&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.codeformech.com/matrix-operations-linear-algebra-using-python/&quot;&gt;Linear algebra using Python&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -535,7 +571,7 @@ np.array_equal(I.dot(A), A)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div class=&quot;imageblock text-center&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/bb8c647a0c66f2612f6bb147f631ae34.png&quot; alt=&quot;bb8c647a0c66f2612f6bb147f631ae34.png&quot; height=&quot;180&quot;&gt;
+&lt;img src=&quot;/img/e29b866254e91513ccd25ce45adbdeaa.png&quot; alt=&quot;e29b866254e91513ccd25ce45adbdeaa.png&quot; height=&quot;180&quot;&gt;
 &lt;/div&gt;
 &lt;div class=&quot;title&quot;&gt;Figure 14. Matrix C cells&lt;/div&gt;
 &lt;/div&gt;
