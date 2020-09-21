@@ -9,9 +9,9 @@ buildscript {
 
   dependencies {
       // Jbake + Asciidoctor
-      classpath 'org.asciidoctor:asciidoctorj:1.5.1'
+      classpath 'org.asciidoctor:asciidoctorj:1.6.0'
       classpath 'org.asciidoctor:asciidoctorj-diagram:1.5.0'
-      classpath 'com.github.grooviter:asciidoctor-mathx-extension:0.1.3'
+      classpath 'com.github.grooviter:asciidoctor-mathx-extension:0.1.5'
       classpath 'org.ajoberstar:gradle-git:1.7.2'
   }
 }
@@ -24,8 +24,8 @@ apply plugin: 'groovy'
 apply plugin: 'org.ajoberstar.github-pages'
 
 jbake {
-    version = "2.6.4"
-    asciidoctorjVersion = "1.5.8.1"
+    version = "2.6.5"
+    asciidoctorjVersion = "1.6.0"
     configuration['render.tag'] = 'true'
     configuration['social.twitter'] = 'https://twitter.com/marioggar'
     configuration['social.github'] = 'https://github.com/mariogarcia'
@@ -36,6 +36,7 @@ jbake {
         "sourceDir=src/jbake",
         "outputDir=build/jbake",
         "imagesdir=/img",
+        "gradle-projectdir=${projectDir}",
         "imagesoutdir=${projectDir}/build/jbake/img",
         "icons=font"
     ]

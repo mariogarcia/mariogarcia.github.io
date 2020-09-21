@@ -1,0 +1,580 @@
+= Matrices - Basic operations
+@marioggar
+2020-09-21
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: maths, matrices
+:sources: ../../../../../../../sources/2020/09/ds_pandas_series
+:idprefix:
+:summary: Reviewing basic matrix operations
+:summary_image: maths.png
+
+Matrices are one of the most used Math abstraction nowadays, specially in the field of machine learning. That's why I encounter myself lately reviewing matrices theory. Now with the most basic operations: **sum** and **multiplication**.
+
+== SUM
+
+Before adding up two matrices **they must have the same dimensions**, the same number of lines and columns. Once we've got two valid matrices, we have to add up each correspondent pair of both matrices, **a~1,1~ + b~1,1~, a~1,2~ + b~1,2~ ... a~n,m~ + b~n,m~**.
+
+[]
+.Sum (row,column) of A with the same (row, column) of B
+image::2020/09/matrices_basic_operations/matrix_sum_process.png[alt=commutative, height=250, align="center"]
+
+So, lets say we have a matrix **A** and a matrix **B** and lets add them up:
+
+[mathx, height=50, align=center]
+.Adding up two matrices
+----
+A = 
+\begin{pmatrix}
+1 & 2 \\
+3 & 5 \\
+\end{pmatrix},
+B = 
+\begin{pmatrix}
+1 & 2 \\
+3 & 5 \\
+\end{pmatrix}
+\therefore
+A + B = 
+\begin{pmatrix}
+1 + 1 & 2 + 2 \\
+3 + 3 & 5 + 5 \\
+\end{pmatrix}
+----
+
+Matrix addition has a number of properties worth knowing, such as: **commutative**, **associative**, the **additive identity** and the **additive inverse**.
+
+=== COMMUTATIVE
+
+If A and B are matrices of the same order then it doesn't matter the order in which you add them up, in other words **A + B = B + A**. Lets prove it, lets make A and B to be two real matrices:
+
+[mathx, height=50, align=center]
+.Two matrices of the same order
+----
+A = 
+\begin{pmatrix}
+1 & 2 \\
+3 & 4 \\
+\end{pmatrix},
+B = 
+\begin{pmatrix}
+5 & 6 \\
+7 & 8 \\
+\end{pmatrix}
+----
+
+So lets do **A + B** and then **B + A** to check that both operations have the same result:
+
+[mathx, height=50, align=center]
+.Commutative property proof
+----
+A + B = 
+\begin{pmatrix}
+1 + 5 & 2 + 6 \\
+3 + 7 & 4 + 8 \\
+\end{pmatrix} =
+\begin{pmatrix}
+6 & 8 \\
+10 & 12 \\
+\end{pmatrix},
+B + A = 
+\begin{pmatrix}
+5 + 1 & 6 + 2 \\
+7 + 3 & 8 + 4 \\
+\end{pmatrix} =
+\begin{pmatrix}
+6 & 8 \\
+10 & 12 \\
+\end{pmatrix}
+----
+
+=== ASSOCIATIVE
+
+Matrix addition is associative. This says that, if A, B and C are Three matrices of the same order then you will get the same result whether you add **A to (B + C)** or **(A + B) to C**. Lets prove it by defining three matrices:
+
+[mathx, height=50, align=center]
+.Three matrices of the same order (2x2)
+----
+A = 
+\begin{pmatrix}
+1 & 2 \\
+3 & 4 \\
+\end{pmatrix},
+B = 
+\begin{pmatrix}
+5 & 6 \\
+7 & 8 \\
+\end{pmatrix},
+C = 
+\begin{pmatrix}
+9 & 10 \\
+11 & 12 \\
+\end{pmatrix}
+----
+
+Now lets define **B + C** AND **A + B**:
+
+[mathx, height=50, align=center]
+.Resolving (B + C) and (A + B)
+----
+B + C = 
+\begin{pmatrix}
+14 & 16 \\
+18 & 20 \\
+\end{pmatrix},
+A + B = 
+\begin{pmatrix}
+6 & 8 \\
+10 & 12 \\
+\end{pmatrix}
+----
+
+Finally:
+
+[mathx, height=50, align=center]
+.Associative property proof A + (B + C)
+----
+A + (B + C) = 
+\begin{pmatrix}
+1 & 2 \\
+3 & 4 \\
+\end{pmatrix} +
+\begin{pmatrix}
+14 & 16 \\
+18 & 20 \\
+\end{pmatrix} =
+\begin{pmatrix}
+15 & 18 \\
+21 & 24 \\
+\end{pmatrix}
+----
+
+[mathx, height=50, align=center]
+.Associative property proof (A + B) + C
+----
+(A + B) + C = 
+\begin{pmatrix}
+6 & 8 \\
+10 & 12 \\
+\end{pmatrix} +
+\begin{pmatrix}
+9 & 10 \\
+11 & 12 \\
+\end{pmatrix}
+=
+\begin{pmatrix}
+15 & 18 \\
+21 & 24 \\
+\end{pmatrix}
+----
+
+=== ADDITIVE IDENTITY
+
+Let A be the matrix then, **A + O = A = O + A** Therefore, **O** a matrix of the same order as the matrix A that when added up to **A** equals to **A** as well. **O** is also named the **null** or **zero** matrix. So lets prove it adding up a matrix **A** with a compatible **zero** matrix. First the two matrices:
+
+[mathx, height=65, align=center]
+.Two matrices of the same order (3x3)
+----
+A = 
+\begin{pmatrix}
+1 & 2 & 3\\
+1 & 2 & 3 \\
+1 & 2 & 3 \\
+\end{pmatrix},
+O = 
+\begin{pmatrix}
+0 & 0 & 0 \\
+0 & 0 & 0 \\
+0 & 0 & 0 \\
+\end{pmatrix}
+----
+
+Now adding up **A** to **O** must result in **A**:
+
+[mathx, height=65, align=center]
+.Additive identity proof
+----
+A + O = 
+\begin{pmatrix}
+1 + 0 & 2 + 0 & 3 + 0 \\
+1 + 0 & 2 + 0 & 3 + 0 \\
+1 + 0 & 2 + 0 & 3 + 0 \\
+\end{pmatrix} = 
+\begin{pmatrix}
+1 & 2 & 3\\
+1 & 2 & 3 \\
+1 & 2 & 3 \\
+\end{pmatrix} = A
+----
+
+=== ADDITIVE INVERSE
+
+Let A be the matrix then, **A + (- A) = O = (- A) + A**  where **-A** is the **inverse of A**. The **inverse of a matrix** is the matrix obtained by changing the sign of every matrix element. Having **A** and **-A**:
+
+[mathx, height=65, align=center]
+.Matrix A and its inverse -A
+----
+A= 
+\begin{pmatrix}
+1 & 2 & 3\\
+1 & 2 & 3 \\
+1 & 2 & 3 \\
+\end{pmatrix},
+-A = 
+\begin{pmatrix}
+- 1 & - 2 & - 3\\
+- 1 & - 2 &  - 3 \\
+- 1 &  - 2 & - 3 \\
+\end{pmatrix}
+----
+
+So basically adding up **-A** to **A** will end up giving **O** (the null matrix):
+
+[mathx, height=65, align="center"]
+.A + (-A)
+----
+A + (-A) = 
+\begin{pmatrix}
+1 - 1 & 2 - 2 & 3 - 3 \\
+1 - 1 & 2 - 2 & 3 - 3\\
+1 - 1 & 2 - 2 & 3 - 3 \\
+\end{pmatrix} = 
+\begin{pmatrix}
+0 & 0 & 0 \\
+0 & 0 & 0 \\
+0 & 0 & 0  \\
+\end{pmatrix} = O
+----
+
+And the opposite works the same:
+
+[mathx, height=65, align="center"]
+.Additive inverse proof
+----
+-A + A = 
+\begin{pmatrix}
+-1 + 1 & - 2 + 2 & - 3 + 3 \\
+-1 + 1 & - 2 + 2 & - 3 + 3 \\
+-1 + 1 & - 2 + 2 & - 3 + 3 \\
+\end{pmatrix} = 
+\begin{pmatrix}
+0 & 0 & 0 \\
+0 & 0 & 0 \\
+0 & 0 & 0  \\
+\end{pmatrix} = O
+----
+
+== MULTIPLY
+
+If **A** is a matrix of order **m x n** and B is another matrix with order *o x p* where **m** and **o** are number of rows and **n** and **p** are number of columns, in order to be able to multiply **A x B**, then **n == o** must be true, meaning that the number of columns of **A** must be equals the number of rows in **B**, and the resulting matrix will be of order **m x p**:
+
+image::2020/09/matrices_basic_operations/multiply_pre.png[alt=multiplication, width=500, align="center"]
+
+How is the procedure of multiplying two matrices ? Well, the element **C~i,j~** (where **i** is the row and **j** is the column) will be the result of multiplying the elements of **A~i~** by the elements **B~j~** and adding up their results. So for example, when multiplying **A x B = C**:
+
+image::2020/09/matrices_basic_operations/multiply_process.png[alt=process, width=500, align="center"]
+
+[mathx, height=180, align=center]
+.Matrix C cells
+----
+c_{1,1}= a_{1,1}*b_{1,1} + a_{1,2}+b_{2,1} \\
+c_{1,2}= a_{1,1}*b_{1,2} + a_{1,2}+b_{2,2} \\
+c_{1,3}= a_{1,1}*b_{1,3} + a_{1,2}+b_{2,3} \\
+c_{2,1}= a_{2,1}*b_{1,1} + a_{2,2}+b_{2,1} \\
+c_{2,2}= a_{2,1}*b_{1,2} + a_{2,2}+b_{2,2} \\
+c_{2,3}= a_{2,1}*b_{1,3} + a_{2,2}+b_{2,3} \\
+----
+
+Here's an example, there're two matrices **A** and **B**:
+
+[mathx, height=70, align="center"]
+.Two matrices to multiply
+----
+A = 
+\begin{pmatrix}
+1 & 2 \\
+2 & 3 \\
+\end{pmatrix} ,
+B = \begin{pmatrix}
+1 & 2 & 3 \\
+3 & 4 & 1 \\
+\end{pmatrix}
+----
+
+Then in order to get **c~1,1~** we need to multiply elements from **a~1,...~** and **b~...,1~** and then add them up:
+
+[mathx, height=60, align="center"]
+.Resolving c~1,1~
+----
+\begin{pmatrix}
+1 & 2 \\
+2 & 3 \\
+\end{pmatrix} *
+\begin{pmatrix}
+1 & 2 & 3 \\
+3 & 4 & 1 \\
+\end{pmatrix} =
+\begin{pmatrix} 
+1*1 + 2*3 & c_{1,2} & c_{1,3} \\
+c_{2,1} & c_{2,2} & c_{2,3} \\
+\end{pmatrix}
+----
+
+Now in order to get **c~1,2~** we need to multiply elements from **a~1,...~** and **b~...,2~**:
+
+[mathx, height=60, align="center"]
+.Resolving c~1,2~
+----
+\begin{pmatrix}
+1 & 2 \\
+2 & 3 \\
+\end{pmatrix} *
+\begin{pmatrix}
+1 & 2 & 3 \\
+3 & 4 & 1 \\
+\end{pmatrix} =
+\begin{pmatrix} 
+c_{1,1} & 1*2 + 2*4 & c_{1,3} \\
+c_{2,1} & c_{2,2} & c_{2,3} \\
+\end{pmatrix}
+----
+
+And this would go on and on for remaining cells:
+
+[mathx, width=700, align="center"]
+.Two matrices to multiply
+----
+\begin{pmatrix}
+1 & 2 \\
+2 & 3 \\
+\end{pmatrix} *
+\begin{pmatrix}
+1 & 2 & 3 \\
+3 & 4 & 1 \\
+\end{pmatrix} =
+\begin{pmatrix} 
+1*1 + 2*3 & 1*2 + 2*4 & 1*3 + 2*1 \\
+2*1 + 3*3 & 2*2 + 3*4 & 2*3 + 3*1 \\
+\end{pmatrix}
+----
+
+Finally simplifying:
+
+[mathx, height=60, align="center"]
+.A * B result
+----
+A * B =
+\begin{pmatrix} 
+7 & 10 & 5 \\
+11 & 16 & 9 \\
+\end{pmatrix}
+----
+
+The matrix multiplication has a few properties: the **associative** the **distributive** and the **multiplicative identity**. Lets view them all with examples. I'm using the following matrices:
+
+[mathx, height=60, align=center]
+----
+A = 
+\begin{pmatrix} 
+2 & 2 \\
+2 & 2 \\
+\end{pmatrix},
+B = 
+\begin{pmatrix} 
+1 & 2 \\
+1 & 2 \\
+\end{pmatrix},
+C =
+\begin{pmatrix} 
+2 & 1 \\
+2 & 1 \\
+\end{pmatrix}
+----
+
+=== Associative
+
+WARNING: This should be called pseudo-associative due to the fact that the order to the elements in a matrix multiplication matters. **AB** and **BA** may not result in the same solution.
+
+The associative property says that **A(BC)=(AB)C**. So lets calculate **A(BC)** first and then **(AB)C** and compare both results:
+
+[mathx, height=60, align=center]
+.A(BC)
+----
+BC = 
+\begin{pmatrix} 
+6 & 3 \\
+6 & 3 \\
+\end{pmatrix},
+A(BC) = 
+\begin{pmatrix} 
+2 & 2 \\
+2 & 2 \\
+\end{pmatrix} * 
+\begin{pmatrix} 
+6 & 3 \\
+6 & 3 \\
+\end{pmatrix} = 
+\begin{pmatrix} 
+24 & 12 \\
+24 & 12 \\
+\end{pmatrix}
+----
+
+Then **A(BC)**:
+
+[mathx, height=60, align=center]
+.(AB)C
+----
+AB = 
+\begin{pmatrix} 
+4 & 8 \\
+4 & 8 \\
+\end{pmatrix},
+(AB)C = 
+\begin{pmatrix} 
+4 & 8 \\
+4 & 8 \\
+\end{pmatrix} *
+\begin{pmatrix} 
+2 & 1 \\
+2 & 1 \\
+\end{pmatrix} = 
+\begin{pmatrix} 
+24 & 12 \\
+24 & 12 \\
+\end{pmatrix}
+----
+
+=== Distributive
+
+When multiplying three different matrices **A, B and C** the distributive property says that **A(B+C) = AB + AC** and also that **(A+B)C = AC + BC**. So again having the previous **A, B and C** matrices, lets do a couple of calculations:
+
+==== A(B+C) = AB + AC
+
+[mathx, height=50, align=center]
+.A(B+C)
+----
+B+C = 
+\begin{pmatrix} 
+3 & 3 \\
+3 & 3 \\
+\end{pmatrix},
+A(B+C) =
+\begin{pmatrix} 
+2*3 + 2*3 & 2*3 + 2*3 \\
+2*3 + 2*3 & 2*3 + 2*3 \\
+\end{pmatrix} = 
+\begin{pmatrix} 
+12 & 12 \\
+12 & 12 \\
+\end{pmatrix}
+----
+
+[mathx, height=50, align=center]
+.AB + AC
+----
+AB = 
+\begin{pmatrix} 
+4 & 8 \\
+4 & 8 \\
+\end{pmatrix},
+AC = 
+\begin{pmatrix} 
+8 & 4 \\
+8 & 4 \\
+\end{pmatrix},
+AB + AC = 
+\begin{pmatrix} 
+12 & 12 \\
+12 & 12 \\
+\end{pmatrix},
+----
+
+==== (A+B)C = AC + BC
+
+[mathx, height=50, align=center]
+.(A+B)C
+----
+A+B = 
+\begin{pmatrix} 
+3 & 4 \\
+3 & 4 \\
+\end{pmatrix},
+(A+B)C = 
+\begin{pmatrix} 
+3*2 + 4*2 & 3*1 + 4*1 \\
+3*2 + 4*2 & 3*1 + 4*1 \\
+\end{pmatrix} =
+\begin{pmatrix} 
+14 & 7 \\
+14 & 7 \\
+\end{pmatrix}
+----
+
+[mathx, height=50, align=center]
+.AC + BC
+----
+AC =
+\begin{pmatrix} 
+8 & 4 \\
+8 & 4 \\
+\end{pmatrix},
+BC = 
+\begin{pmatrix} 
+6 & 3 \\
+6 & 3 \\
+\end{pmatrix},
+AC + BC = 
+\begin{pmatrix} 
+14 & 7 \\
+14 & 7 \\
+\end{pmatrix},
+----
+
+=== Multiplicative identity
+
+The multiplicative identity property says that there's an **identity matrix**. When a matrix is multiplied by this **identity matrix** the result is the matrix itself. The mathematical formula would be **AI = A = IA** where **I** is the **identity matrix**.
+
+[mathx, height=50, align=center]
+.multiplicative identity proof (AI)
+----
+AI = 
+\begin{pmatrix} 
+2 & 2 \\
+2 & 2 \\
+\end{pmatrix} *
+\begin{pmatrix} 
+1 & 1 \\
+1 & 1 \\
+\end{pmatrix} =
+\begin{pmatrix} 
+2*1 + 2*1 & 2*1 + 2*1 \\
+2*1 + 2*1 & 2*1 + 2*1 \\
+\end{pmatrix} = 
+\begin{pmatrix} 
+2 & 2 \\
+2 & 2 \\
+\end{pmatrix} = A
+----
+
+[mathx, height=50, align=center]
+.multiplicative identity proof (IA)
+----
+IA = 
+\begin{pmatrix} 
+1 & 1 \\
+1 & 1 \\
+\end{pmatrix} *
+\begin{pmatrix} 
+2 & 2 \\
+2 & 2 \\
+\end{pmatrix} =
+\begin{pmatrix} 
+1*2 + 1*2 & 1*2 + 1*2 \\
+1*2 + 1*2 & 1*2 + 1*2 \\
+\end{pmatrix} = 
+\begin{pmatrix} 
+2 & 2 \\
+2 & 2 \\
+\end{pmatrix} = A
+----

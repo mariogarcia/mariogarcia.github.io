@@ -1,0 +1,326 @@
+= Matrices - Basic operations
+@marioggar
+2020-09-22
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: maths, python, matrix
+:sources: ../../../../../../../sources/2020/09/ds_pandas_series
+:idprefix:
+:summary: Reviewing basic matrix operations
+:summary_image: python.png
+
+After review basic matrix operations in a http://localhost:8080/blog/2020/09/maths_matrices_operations.html[previous article], in this article I'm reviewing these operations and their properties using Python and the https://numpy.org/[Numpy] library.
+
+== Matrices with Numpy
+
+Although there's the **matrix** function to create matrices, https://numpy.org/doc/stable/reference/generated/numpy.matrix.html[according to documentation is deprecated] in favor of **array**. So lets say we want to create different arrays:
+
+[mathx, height=80, align=center]
+.array A
+----
+A = 
+\begin{pmatrix}
+1 & 2 & 3 \\
+1 & 2 & 3 \\
+\end{pmatrix},
+B = 
+\begin{pmatrix}
+1  \\
+2  \\
+\end{pmatrix},
+C = 
+\begin{pmatrix}
+1 & 1  \\
+2 & 2 \\
+3 & 3 \\
+\end{pmatrix}
+----
+
+As we've mentioned earlier, we need to import https://numpy.org/[Numpy] and then create an array representing the matrix. A matrix in Numpy will be written as a multidimensional array:
+
+[source, python]
+.Matrix declaration
+----
+import numpy as np
+
+A = np.array([
+    [1, 2, 3].
+    [1, 2, 3]
+])
+
+B = np.array([
+    [1],
+    [2]
+])
+
+C = np.array([
+    [1, 1],
+    [2, 2],
+    [3, 3]
+])
+----
+
+== SUM
+
+So, How do we sum two different matrices ? As easy as declaring both matrices and then add them up using the **+** operator:
+
+[mathx, height=60, align=center]
+.two matrices A and B
+----
+A = 
+\begin{pmatrix}
+1 & 2 & 3 \\
+1 & 2 & 3 \\
+\end{pmatrix},
+B = 
+\begin{pmatrix}
+2 & 2 & 2 \\
+2 & 2 & 2 \\
+\end{pmatrix}
+----
+
+[source, python]
+.adding up two matrices
+----
+import numpy as np
+
+A = np.array([
+    [1, 2, 3],
+    [1, 2, 3]
+])
+
+B = np.array([
+    [2, 2, 2],
+    [2, 2, 2]
+])
+
+A + B
+----
+
+WARNING: Of course if you try to sum two matrices with different order (different shape in numpy terms) the operation will fail, as it's not possible to sum matrices of different order.
+
+=== Commutative
+
+With the same matrices we can check that the **commutative property** holds. We can can use **array_equal** to make sure both **A + B** and **B + A** are equal.
+
+[mathx, height=60, align=center]
+.commutative
+----
+A + B = B + A = 
+\begin{pmatrix}
+3 & 4 & 5 \\
+3 & 4 & 5 \\
+\end{pmatrix}
+----
+
+[source, python]
+.commutative proof
+----
+import numpy as np
+
+A = np.array([
+    [1, 2, 3],
+    [1, 2, 3]
+])
+
+B = np.array([
+    [2, 2, 2],
+    [2, 2, 2]
+])
+
+np.array_equal(A + B, B + A)
+----
+
+=== Associative
+
+Now checking the **associative property** with a third matrix **C**:
+
+[mathx, height=60, align=center]
+.another matrix C
+----
+C = 
+\begin{pmatrix}
+2 & 2 & 2 \\
+2 & 2 & 2 \\
+\end{pmatrix}
+----
+
+[mathx, height=60, align=center]
+.associative
+----
+A + (B + C) = (A + B) + C = 
+\begin{pmatrix}
+5 & 6 & 7 \\
+5 & 6 & 7 \\
+\end{pmatrix}
+----
+
+[source, python]
+----
+import numpy as np
+
+A = np.array([
+    [1, 2, 3],
+    [1, 2, 3]
+])
+
+B = np.array([
+    [2, 2, 2],
+    [2, 2, 2]
+])
+
+C = np.array([
+    [2, 2, 2],
+    [2, 2, 2]
+])
+
+np.array_equal(A + (B + C), (A + B) + C)
+----
+
+=== Additive inverse
+
+Finally if we add the **zero** matrix to **A** it should return the **A** matrix: You can create a **zero** array using Numpy's **zeros** function.
+
+WARNING: THe zero matrix should be of the **same order as A**. Meaning if A is of order 2x3 then the zero matrix should be of order 2x3 as well.
+
+[source, python]
+.adding zero matrix to A
+----
+import numpy as np
+
+A = np.array([
+    [1, 2, 3],
+    [1, 2, 3]
+])
+
+O = np.zeros((2,3))
+
+np.array_equal(A + O, A)
+----
+
+== MULTIPLICATION
+
+Matrix multiplication is also known as the **dot** operation, and there's the **dot** function in Numpy for a given matrix. Therefore for multiplying two different matrices we can use this **dot** function:
+
+[mathx, height=60, align=center]
+.two matrices A and B
+----
+A = 
+\begin{pmatrix}
+1 & 2 \\
+2 & 3 \\
+\end{pmatrix},
+B = 
+\begin{pmatrix}
+1 & 2 & 3 \\
+3 & 4 & 1 \\
+\end{pmatrix}
+----
+
+[source, python]
+.multiplying A * B
+----
+import numpy as np
+
+A = np.array([
+    [1, 2],
+    [2, 3]
+])
+
+B = np.array([
+    [1, 2, 3],
+    [3, 4, 1]
+])
+
+expected = np.array([
+    [ 7, 10,  5],
+    [11, 16,  9]
+])
+
+np.array_equal(A.dot(B), expected)
+----
+
+WARNING: Again both matrices must be compatible in order to multiply them, otherwise an error will be raised.
+
+=== Associative
+
+We're checking that **A(BC) = (AB)C**. 
+
+WARNING: Remember that the order of the elements in matrix multiplication is important, meaning **ABC != CBA**:
+
+[source, python]
+.associative proof
+----
+import numpy as np
+
+A = np.array([
+    [2, 2],
+    [2, 2],
+])
+
+B = np.array([
+    [1, 2],
+    [1, 2],
+])
+C = np.array([
+    [2, 1],
+    [2, 1],
+])
+
+BC = B.dot(C)
+AB = A.dot(B)
+
+np.array_equal(A.dot(BC), AB.dot(C))
+----
+
+=== Distributive
+
+The distributive property has two parts, **A(B+C) = AB + AC**:
+
+[source, python]
+.A(B + C) = AB + AC
+----
+A = np.array([[1, 2], [1, 2]])
+B = np.array([[2, 2], [2, 2]])
+C = np.array([[3, 3], [3, 3]])
+
+AB = A.dot(B)
+AC = A.dot(C)
+
+np.array_equal(A.dot(B + C), AB + AC)
+----
+
+And then **(A + B)C = AC + BC**
+
+[source, python]
+.(A+B)C = AC + BC
+----
+A = np.array([[1, 2], [1, 2]])
+B = np.array([[2, 2], [2, 2]])
+C = np.array([[3, 3], [3, 3]])
+
+AC = A.dot(C)
+BC = B.dot(C)
+
+np.array_equal((A+B).dot(C), AC + BC)
+----
+
+=== Multiplicative identity
+
+Multiplicative identity property says that if any matrix **A** is multiplied by the **identity matrix** then the result will be **A**. You can use numpy's function **identity** to get an **identity matrix**:
+
+[source, python]
+.multiply by identity
+----
+import numpy as np
+
+A = np.array([
+    [2, 2],
+    [2, 2],
+])
+
+I = np.identity(2)
+
+np.array_equal(A.dot(I), A)
+np.array_equal(I.dot(A), A)
+----

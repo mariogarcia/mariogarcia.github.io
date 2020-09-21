@@ -37,26 +37,27 @@ Formalize the following sentences:
 *Solutions*:
 
 [mathx, height=50]
-.A
+.Solution to A
 ----
 p \implies q \land r
 ----
 
 [mathx, height=50]
-.B
+.Solution to B
 ----
 p \implies q
 ----
 
 [mathx, height=50]
-.C
+.Solution to C
 ----
 \neg p \implies r \land \neg q
 ----
 
 *Table of truth*
 
-[mathx, width=450]
+[mathx, height=150]
+.table of truth
 ----
 \begin{tabular}{cc|c|c}
 q & r & p \implies q \land r & \neg p \implies \neg q \land r \\
@@ -89,13 +90,13 @@ lottery"
 *Solutions*:
 
 [mathx, height=50]
-.A
+.Solution to A
 ----
 p \implies q \lor r
 ----
 
 [mathx, height=50]
-.B
+.Solution to B
 ----
 \neg p \implies \neg q \land \neg r
 ----
@@ -103,6 +104,7 @@ p \implies q \lor r
 *Table of truth*
 
 [mathx, width=450]
+.table of truth
 ----
 \begin{tabular}{cc|c|c}
 q & r &  p \implies q \lor r &  \neg p \implies \neg q \land \neg r \\
