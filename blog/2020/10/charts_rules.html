@@ -1,0 +1,596 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>DS - Data visualization 101</h1></header><yieldScaped><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>When trying to explain some data insights to somebody other than us, it requires, more often than not, some visual representation. The are several types of charts and an even greater number of customizations. It&#8217;s important to know which types fit best with the data at hand. Although it seems a pretty straighforward task, there&#8217;re plenty of examples of chart misuse, sometimes people had their heart in the right place, but unfortunately, sometimes misleading is done to confuse the viewer on purpose. At least I think it&#8217;s important to know if we&#8217;re in one group or the other.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="some_basic_rules">Some basic rules</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I think the <a href="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003833">Ten simple rules for better figures</a> by Rougier, Droettboom and Bourne is a good starting point. I&#8217;m reviewing each of these rules by making my own <strong>good vs bad</strong> examples. Although the visualization library I&#8217;m using is <a href="https://matplotlib.org/">matplotlib</a> these rules should hold when using any other visualization tool.</p>
+</div>
+<div class="sect2">
+<h3 id="know_your_audience">Know your audience</h3>
+<div class="paragraph">
+<p>The idea behind this rule is that depending on the people we&#8217;re targeting we should add more or less information to our charts. It has to do with the context the audience has before seeing the data visualization.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+The more the audience is used to the data you&#8217;re showing, the less information is necessary to add to the visualization.
+</blockquote>
+</div>
+<div class="paragraph">
+<p>Ok, imagine your boss entering the room with the chart on the left and yelling  <em>Have you seen these numbers ? I&#8217;m really worried</em>. You may think the man didn&#8217;t get his pills on time this morning right ? What are those numbers, what do they mean ? Your boss is showing something to an audience that doesn&#8217;t know the context, <strong>he didn&#8217;t realize that the audience he&#8217;s talking to needs more information, more context</strong>. If he only had added more information to the chart, maybe you could have had a chance. What about the chart on the right, with more information ?</p>
+</div>
+<table class="tableblock frame-none grid-none stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><span class="image"><img src="/img/2020/10/chart_rules/know_your_audience_1.png" alt="no_context" width="90%"></span></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><span class="image"><img src="/img/2020/10/chart_rules/know_your_audience_2.png" alt="with_context" width="90%"></span></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>Ok now I can understand his concern, I know he lives in PUENTE DE VALLECAS, and he must be worried due to the number of POSSESSION OF PROHIBITED WEAPONS cases in his district. It&#8217;s clear that if my boss were a police officer and I was working in the weapons related department I better know what the first chart was about!</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="identify_your_message">Identify your message</h3>
+<div class="paragraph">
+<p>The figure must match the idea of the message. So only when the the message you try to express is clearly identified you can think of the best figure expressing that message.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+If the figure matches the idea of the message, it will reinforce it.
+</blockquote>
+</div>
+<div class="paragraph">
+<p>There&#8217;re examples about how to represent <a href="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003833#pcbi-1003833-g002">really complex things in a visualization</a>, but <strong>in the end is just a matter of using the chart type that best represents the idea you wanted to communicate</strong>. For example, Imagine I&#8217;d like to represent the increment of the felonies in Madrid city during the last six months. I wouln&#8217;t be doing any favor to the message using for example a pie chart. On the other hand using a line chart could help seeing if the numbers are rising or falling. In the chart on the right I&#8217;m using a barchart with a tendency line.</p>
+</div>
+<table class="tableblock frame-none grid-none stretch">
+<colgroup>
+<col style="width: 40%;">
+<col style="width: 60%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><span class="image"><img src="/img/2020/10/chart_rules/identify_your_message_1.png" alt="wrong_message" width="90%" title="a"></span></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><span class="image"><img src="/img/2020/10/chart_rules/identify_your_message_2.png" alt="right_message" width="90%" title="b"></span></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>There is a <a href="https://blog.hubspot.com/marketing/types-of-graphs-for-data-visualization">great article</a> by <a href="https://twitter.com/jamioetting">Jami Oetting</a> that verses on how to choose the right chart depdending on the data you want to show.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="adapt_the_figure_to_the_support_medium">Adapt the figure to the support medium</h3>
+<div class="paragraph">
+<p>In this case the medium is a blog post that is going to be read by someone in a laptop or a home computer, but tomorrow it could be a big screen in a conference room in front dozens of people. Depending on the medium the amount of information in my figures should be different. If someone is reading a blog post, I can add more details because the reader can stop and review the details at his/her pace whereas in a presentation the slides are going to be shown in a limited period of time. It&#8217;s not only about the amount of information, it also about to <strong>prioritize which information is most valuable depending on the medium and the time</strong>.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+People don&#8217;t always have the time to look to all the details.
+</blockquote>
+</div>
+<div class="paragraph">
+<p>Imagine we were in a room showing the evolution of numbers of drug posession in Madrid from March to August in 2020, using a slide like the one on the left, even people in the first rows could have a hard time figuring out which line is the one we&#8217;re talking about. Instead the <strong>chart on the right side highlights just the part I want the people to focus</strong> reducing the noise.</p>
+</div>
+<table class="tableblock frame-none grid-none stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><span class="image"><img src="/img/2020/10/chart_rules/adapt_to_medium_1.png" alt="hard" width="90%"></span></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><span class="image"><img src="/img/2020/10/chart_rules/adapt_to_medium_2.png" alt="easy" width="90%"></span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="captions_are_not_optional">Captions are not optional</h3>
+<div class="paragraph">
+<p>The caption helps to understand the figure. Imagine a simple pie chart with three areas but with no percentages, no titles telling what the areas represent, that is important information missing right ?</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+Add the required information to understand what is the intent of the figure without any further explanation.
+</blockquote>
+</div>
+<div class="paragraph">
+<p>Another example, the chart on the left has little information, it can&#8217;t help the reader to understand what the figure is about, or what the percentages mean. However the chart on the right has <strong>the minimum information to express what the chart is about</strong>, and what the different areas represent.</p>
+</div>
+<table class="tableblock frame-none grid-none stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><span class="image"><img src="/img/2020/10/chart_rules/captions_1.png" alt="hard" width="90%"></span></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><span class="image"><img src="/img/2020/10/chart_rules/captions_2.png" alt="easy" width="90%"></span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="do_not_trust_the_defaults">Do not trust the defaults</h3>
+<div class="paragraph">
+<p>By default most visualization libraries normally use a subset that can be used in a wider range of cases. Because of that, <strong>the default can lack many of important information</strong> we&#8217;ve been talking about earlier. If that happens we need to learn how to customize the library in order to add whatever additions/changes necessary to create the right message. That could include, adding <strong>captions, changing colors, completing axis information, legends&#8230;&#8203; etc</strong>.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+By default, the defaults shouldn&#8217;t be the default! xD
+</blockquote>
+</div>
+<div class="paragraph">
+<p>The following example shows how the default <strong>horizontal bar plot</strong> (left) looks like. It&#8217;s not so bad, it has the x-axis but everytime you want to know how many premises a given type has, you have to guess it, and even for the top category the x-axis is a little bit to far. Now on the right, is the same data visualized using a <strong>customized horizontal bar plot</strong>. Numbers and labels for every type makes a <strong>better use of the space</strong>. Also <strong>colors have been changed</strong> to maximize the contrast and make it easier to read. A little bit more about the color in the next section.</p>
+</div>
+<table class="tableblock frame-none grid-none stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><span class="image"><img src="/img/2020/10/chart_rules/defaults_1.png" alt="hard" width="90%"></span></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><span class="image"><img src="/img/2020/10/chart_rules/defaults_2.png" alt="easy" width="90%"></span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="use_color_effectively">Use color effectively</h3>
+<div class="paragraph">
+<p>Using colors wisely could help to enhance your charts, and improve the understanding of the information shown. But it also could lead to a complete disaster misleading your audience from the real message if used wrong. A wrong use of the color could also become a phisical barrier, e.g. if you chose a colormap with low contrast, people with color blindness won&#8217;t be able to see the difference between colors.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+Colors should mean something, otherwise keep it simple
+</blockquote>
+</div>
+<div class="paragraph">
+<p>Following the previous chart, I&#8217;m adding colors to it with no special reason, maybe I though it could be more appealing. Look at the chart on the left. Yeah it may look nicer, but <strong>the colors don&#8217;t add any meaningful value</strong>, and a reader could do a <strong>wrong interpretation</strong> based of the colors: maybe red means danger, green means safer&#8230;&#8203;etc. If the colors don&#8217;t mean anything, it&#8217;s better to keep it simple like the chart on the right and avoid misinterpretations.</p>
+</div>
+<table class="tableblock frame-none grid-none stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><span class="image"><img src="/img/2020/10/chart_rules/colors_1.png" alt="hard" width="90%"></span></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><span class="image"><img src="/img/2020/10/chart_rules/colors_2.png" alt="easy" width="90%"></span></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>Another practical use of colors in bar charts is to <strong>associate categories</strong> (could be companies, political parties&#8230;&#8203;) to colors, or <strong>setting threshold limits</strong>. Here you have two examples of these ideas.</p>
+</div>
+<table class="tableblock frame-none grid-none stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><span class="image"><img src="/img/2020/10/chart_rules/colors_3.png" alt="hard" width="90%"></span></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><span class="image"><img src="/img/2020/10/chart_rules/colors_4.png" alt="easy" width="90%"></span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="do_not_mislead_the_reader">Do not mislead the reader</h3>
+<div class="paragraph">
+<p>Alberto Cairo in his work <a href="https://journalismcourses.org/wp-content/uploads/2020/07/Misleading-Visuals.pdf">Graphic Lies, misleading visuals</a> writes about what are the principal techniques used to mislead the reader, or in his words how <strong>Becoming a good liar</strong>. In his paper Cairo points out three important ideas used to mislead the reader:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Hiding relevant data to highlight what benefit us</strong></p>
+</li>
+<li>
+<p><strong>Displaying too much data to obscure reality</strong></p>
+</li>
+<li>
+<p><strong>Using graphic forms in inappropiate ways (distorting the data)</strong></p>
+</li>
+</ul>
+</div>
+<div class="sect3">
+<h4 id="hiding_relevant_data_to_highlight_what_benefit_us">Hiding relevant data to highlight what benefit us</h4>
+<div class="paragraph">
+<p>We&#8217;ve seen a lot of companies going through difficult times but still showing great figures taken from cherry-picked statistics. These two charts represent the same data, but the chart on the left <strong>has cherry-picked the best values leaving bad months out of sight</strong>.</p>
+</div>
+<table class="tableblock frame-none grid-none stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><span class="image"><img src="/img/2020/10/chart_rules/mislead_1.png" alt="misleading" width="90%"></span></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><span class="image"><img src="/img/2020/10/chart_rules/mislead_2.png" alt="real" width="90%"></span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="displaying_too_much_data_to_obscure_reality">Displaying too much data to obscure reality</h4>
+<div class="paragraph">
+<p>If there&#8217;s some really bad numbers that someone wanted to hide from the reader, a good technique could be to show the data we&#8217;re not interested in showing along with a lot of other indicators. In reality bad numbers will be hidden or minimized under all the rest of noisy data.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+Make the bad numbers to become the needle in the haystack
+</blockquote>
+</div>
+<div class="paragraph">
+<p>I came up with the following example, I wanted to check how real state market was doing in Madrid towns depending on number of people and the GDP of the people living in the area, and I tried to visualize everything altogether. <strong>I realized there&#8217;re too many cities</strong> inside the area of Madrid apart from Madrid city as you can see in the chart on the left. Therefore the only way of analyzing the data was <strong>taking smaller subsets</strong> of the data. You can see one of the smaller subsets in chart on the right.</p>
+</div>
+<table class="tableblock frame-none grid-none stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><span class="image"><img src="/img/2020/10/chart_rules/too_much_data_1.png" alt="too_much_data" width="90%"></span></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><span class="image"><img src="/img/2020/10/chart_rules/too_much_data_2.png" alt="less_data_better" width="90%"></span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="using_graphic_forms_in_inappropiate_ways_distorting_the_data">Using graphic forms in inappropiate ways (distorting the data)</h4>
+<div class="paragraph">
+<p>In this category you can find cases where authors are using chart types that were not meant to those cases or cases where the authors are playing with chart configuration in order to bend the reality in their favor.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+Look for figure smells, Does it lack information to check whether data is properly shown, or distorted ?
+</blockquote>
+</div>
+<div class="paragraph">
+<p>For the next example I made up a few supercar brands competing to each other in sales. Apparently the brand that has sold more cars has created the chart on the left to highlight its superiority over the competition. But if you look at the reality (chart on the right) the competition is not so far away as the want us to believe.</p>
+</div>
+<div class="paragraph">
+<p>What did they do in order to deceive us ? Well something really simple, <strong>they truncated the y-axis to increase the impression that the difference is greater than it really is, and then they hide the y-axis to prevent us from discovering the deception</strong>. The only thing that smells wrong is that the common sense is telling us that according to the numbers the difference looks exagerated. The problem is that if you&#8217;re a Kinison fan, your critical thinking will be probably on vacation.</p>
+</div>
+<table class="tableblock frame-none grid-none stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><span class="image"><img src="/img/2020/10/chart_rules/distorting_1.png" alt="a" width="90%"></span></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><span class="image"><img src="/img/2020/10/chart_rules/distorting_2.png" alt="b" width="90%"></span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="avoid_chartjunk">Avoid "chartjunk"</h3>
+<div class="paragraph">
+<p>Chartjunk most of the time <strong>refers to everything we could add to chart without adding anything useful or meaningful to it</strong>. We&#8217;ve already seen a good example of this:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/10/chart_rules/too_much_data_1.png" alt="too_much_data" height="300">
+</div>
+<div class="title">Figure 1. Too much data, colors with no apparently meaning</div>
+</div>
+<div class="paragraph">
+<p>So yes, <strong>in general chartjunk should be avoided</strong>, but sometimes, <strong>chartjunk in the form of infographics has been proved to be useful to memorize the message and the chart itself in the long term</strong> as Bateman, Mandryk, Gutwin stated in their paper <a href="http://www.stat.columbia.edu/~gelman/communication/Bateman2010.pdf">Useful Junk? The Effects of Visual Embellishment on
+Comprehension and Memorability of Charts</a>. Judge by yourself, which of the following charts will you remember tomorrow ?</p>
+</div>
+<table class="tableblock frame-none grid-none stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><span class="image"><img src="/img/2020/10/chart_rules/too_much_data_2.png" alt="simpledata" width="90%"></span></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><span class="image"><img src="/img/2020/10/chart_rules/chartjunk_1.png" alt="chartjunk" width="90%"></span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="message_trumps_beauty">Message trumps beauty</h3>
+<div class="paragraph">
+<p>Sometimes it&#8217;s difficult to figure out which chart will fit best our message, and is in these situations when we are tempted to improvise and create new types of visualizations. We can even create a beautiful masterpiece, but before trying to be the next Michael Angelo <strong>it&#8217;s always better to look whether somebody has already dealt with this problem before</strong>, or if maybe something that&#8217;s already there could help us with the message we&#8217;re trying to send.</p>
+</div>
+<div class="paragraph">
+<p>The main reason is that there&#8217;re tons of scientific documents written by really smart people out there, showing hundreds of ways of visualizing data and it&#8217;s very likely that some of these works will fit somehow in our problem if not perfectly. <strong>Avoid reinventing the wheel</strong>, and remember that <strong>people is more likely to have some exposure to pre-existent scientific visualizations</strong> helping them to avoid the effort of understanding a new way of visualizing data plus the message behind the chart.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="getting_the_right_tool">Getting the right tool</h3>
+<div class="paragraph">
+<p>Depending on your area of expertise, the medium you&#8217;re going to use and the technology you are confortable with, there&#8217;re plenty of tools and libraries out there to visualize the data in the way that best expresses the message you&#8217;re trying to communicate.</p>
+</div>
+<div class="paragraph">
+<p>However I would like to differenciate between the concept of libraries and tools. In the present article I&#8217;m using <a href="https://matplotlib.org/">Matplotlib</a> which is a Python library for data visualization but it&#8217;s been used inside a <a href="https://jupyter.org/">Jupyter</a> notebook. <a href="https://jupyter.org/">Jupyter</a> is a tool, but in the sense of a full featured environment where I can integrate the data I&#8217;m using with some analitic tools with some visualization libraries to show the result of my findings. Another example of such type of tool could be <a href="https://www.cs.waikato.ac.nz/ml/weka/">Weka</a> which is another tool for loading, analyzing and visualizing data, or <a href="http://beakerx.com/">BeakerX</a> which is the Java version of Jupyter. Of course this section will be incomplete without mentioning the <a href="https://www.r-project.org/">R project</a>, which could be considered as well a full featured data-oriented environment.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="resources">Resources</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Finally some links to useful resources regarding data visualization.</p>
+</div>
+<div class="sect2">
+<h3 id="article_sources">Article Sources</h3>
+<div class="paragraph">
+<p>Here you can find <a href="/files/2020/10/charts_101/data_visualization.tar.gz">a tar file</a> with all the sources of the examples I did for this article. You should find both the Jupyter notebooks and the data.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="cheatsheets">Cheatsheets</h3>
+<div class="paragraph">
+<p><strong>If you&#8217;d like to have like a cheatsheet</strong> to quickly know which chart fits best the data you&#8217;re trying to communicate, please don&#8217;t forget to take a look to these:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://blog.hubspot.com/marketing/types-of-graphs-for-data-visualization">Types of graphs for data visualization</a></p>
+</li>
+<li>
+<p><a href="https://www.data-to-viz.com/">From Data to Viz leads you to the most appropriate graph for your data. It links to the code to build it and lists common caveats you should avoid</a></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="theory">Theory</h3>
+<div class="paragraph">
+<p>Some <strong>papers and posts</strong> worth reading:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003833">Ten simple rules for better figures</a></p>
+</li>
+<li>
+<p><a href="https://journalismcourses.org/wp-content/uploads/2020/07/Misleading-Visuals.pdf">Graphic Lies, misleading visuals (Alberto Cairo)</a></p>
+</li>
+<li>
+<p><a href="http://www.stat.columbia.edu/~gelman/communication/Bateman2010.pdf">Useful Junk? The Effects of Visual Embellishment on
+Comprehension and Memorability of Charts</a></p>
+</li>
+<li>
+<p><a href="https://www.youtube.com/user/albertocairo1706/videos">Alberto Cairo videos in YouTube</a></p>
+</li>
+<li>
+<p><a href="https://www.edwardtufte.com/tufte/books_vdqi">THE VISUAL DISPLAY OF QUANTITATIVE INFORMATION</a> A classic book by Edward Tufte</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="examples_of_bad_visualizations">Examples of bad visualizations</h3>
+<div class="paragraph">
+<p>If you&#8217;d like <strong>to have a laugh</strong> watching horrendous or suspicious charts, take a look at these:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://viz.wtf/">WTF Visualizations</a></p>
+</li>
+<li>
+<p><a href="https://www.reddit.com/r/dataisugly/">Data Is Ugly (Reddit)</a></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="data">Data</h3>
+<div class="paragraph">
+<p>Data I&#8217;ve used to create the charts in this article:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://datos.madrid.es/portal/site/egob/menuitem.c05c1f754a33a9fbe4b2e4b284f1a5a0/?vgnextoid=bffff1d2a9fdb410VgnVCM2000000c205a0aRCRD&amp;vgnextchannel=374512b9ace9f310VgnVCM100000171f5a0aRCRD&amp;vgnextfmt=default">Madrid Local Police Monthly Statistics</a></p>
+</li>
+<li>
+<p><a href="https://www.idealista.com/sala-de-prensa/informes-precio-vivienda/venta/madrid-comunidad/madrid-provincia/">Real State prices in Madrid 2020</a></p>
+</li>
+<li>
+<p><a href="https://www.agenciatributaria.es/AEAT/Contenidos_Comunes/La_Agencia_Tributaria/Estadisticas/Publicaciones/sites/irpfmunicipios/2018/jrubik7fe28e5d4daeab97eaf47efe29f0716914ab405e.html">Madrid GDP 2018</a></p>
+</li>
+<li>
+<p><a href="http://datos.comunidad.madrid/catalogo/dataset/municipio_comunidad_madrid/resource/ee750429-1e05-411a-b026-a57ea452a34a">Madrid Towns demographics</a></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="visualization_libraries">Visualization libraries</h3>
+<div class="paragraph">
+<p>Libraries you can use with your favorite programming language.</p>
+</div>
+<div class="sect3">
+<h4 id="python">Python</h4>
+<div class="paragraph">
+<p>I&#8217;m sure there&#8217;re many more in the Python world but Matplotlib is widely used mainly because its integration in Pandas.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://matplotlib.org/">Matplotlib (Python)</a></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="js">JS</h4>
+<div class="paragraph">
+<p>In JS there&#8217;re trillions (well maybe not so many) of libraries, but I&#8217;ve worked with Echarts a couple of times in the past two years and it has my respect.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://echarts.apache.org/en/index.html">Apache ECharts (Javascript)</a></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="java">Java</h4>
+<div class="paragraph">
+<p>I have to say, I haven&#8217;t tested any of the following libraries, but I&#8217;m looking forward to do it in the future. I just did a couple of searches and I copied the ones that looked up to date.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://github.com/jtablesaw/tablesaw">Tablesaw</a>: Java dataframe and visualization library</p>
+</li>
+<li>
+<p><a href="https://github.com/eseifert/gral">Gral</a>: Free Java library for displaying plots</p>
+</li>
+<li>
+<p><a href="https://github.com/jzy3d/jzy3d-api">jzy3d</a>: A Java API for 3d charts</p>
+</li>
+<li>
+<p><a href="https://github.com/knowm/XChart">XChart</a>: is a light-weight Java library for plotting data</p>
+</li>
+<li>
+<p><a href="https://github.com/jfree/jfreechart">JFreeChart</a>: A 2D chart library for Java applications</p>
+</li>
+<li>
+<p><a href="https://jgrapht.org/">JGrapht</a>: a Java library of graph theory data structures and algorithms</p>
+</li>
+<li>
+<p><a href="https://graphstream-project.org/">GraphStream</a>: A Dynamic Graph Library</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="integrated_environments_for_data_analysis_and_visualization">Integrated Environments for data analysis and visualization</h3>
+<div class="paragraph">
+<p>A library alone can&#8217;t solve all the problems trying to get some meaningful insights from data, and integrated environment normally does.</p>
+</div>
+<div class="sect3">
+<h4 id="python_2">Python</h4>
+<div class="paragraph">
+<p>The king of the Jungle at the moment:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://jupyter.org/">Jupyter</a>: Project Jupyter exists to develop open-source software, open-standards, and services for interactive computing across dozens of programming languages</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="java_2">Java</h4>
+<div class="paragraph">
+<p>From the following list, I&#8217;ve tested BeakerX which is, keeping long story short, a Jupyter environment with the possibility of using a JVM language in your notebooks. I also know Weka which is also an integrated environment for data analysis however nowadays is more focused towards machine learning.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="http://beakerx.com/">BeakerX</a>: BeakerX is a collection of kernels and extensions to the Jupyter interactive computing environment. It provides JVM support&#8230;&#8203;</p>
+</li>
+<li>
+<p><a href="https://www.cs.waikato.ac.nz/ml/weka/">Weka</a>: It is widely used for teaching, research, and industrial applications, contains a plethora of built-in tools for standard machine learning tasks</p>
+</li>
+<li>
+<p><a href="https://github.com/PatMartin/dex">Dex</a>: The Data Explorer&#8201;&#8212;&#8201;A data visualization tool written in Java/Groovy/JavaFX capable of powerful ETL and publishing web visualizations</p>
+</li>
+<li>
+<p><a href="https://datamelt.org/">DataMelt</a>: is a free software for numeric computation, mathematics, statistics, symbolic calculations, data analysis and data visualization</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>
