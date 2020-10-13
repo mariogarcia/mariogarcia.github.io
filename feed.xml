@@ -4,8 +4,566 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2020-10-09T00:39:59Z</updated>
+    <updated>2020-10-13T07:13:41Z</updated>
     <id>tag:null,2020:10</id>
+    <entry>
+        <title>DS - Matplotlib - Basic charts</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2020/10/chart_types.html"/>
+        <updated>2020-10-13T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2020/10/chart_types.html</id>
+        <category term="ds"/>
+        <category term="charts"/>
+        <category term="python"/>
+        <content type="html">
+            &lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Still looking into data representation, this time I&amp;#8217;m digging a little bit more on &lt;a href=&quot;https://matplotlib.org/&quot;&gt;Matplotlib&lt;/a&gt; and how to improve my charting kunfu. Still in the basics reviewing some basic charting types.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;getting_some_data&quot;&gt;Getting some data&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A week ago my dear workmate &lt;a href=&quot;https://twitter.com/alotor&quot;&gt;@alotor&lt;/a&gt; reminded me of the book &lt;a href=&quot;https://pragprog.com/titles/atcrime/your-code-as-a-crime-scene/&quot;&gt;Your code as a crime scene&lt;/a&gt; by Adam Tornhill, which I strongly recommend to anyone. In this book the author uses git and some other system tools to get information from software projects and then do some data analysis on them. In this article I&amp;#8217;m using the source code from the backend of &lt;a href=&quot;https://www.taiga.io&quot;&gt;Taiga&lt;/a&gt;, an open source project by &lt;a href=&quot;https://www.kaleidos.net&quot;&gt;Kaleidos&lt;/a&gt;. Taiga is, following the project&amp;#8217;s site definition: &lt;em&gt;the management tool for multi-functional agile teams&lt;/em&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;clone Taiga&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;&amp;gt; git clone https://github.com/taigaio/taiga-back.git&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;scatter_plot&quot;&gt;Scatter plot&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Most of the time is used &lt;strong&gt;to show the relationship between two different variables&lt;/strong&gt; using cartesian coordinates.  For example, lets see which days and hours the people works the most on Taiga. There will be two variables: one axis will be the &lt;strong&gt;days&lt;/strong&gt; and the other will be &lt;strong&gt;hours&lt;/strong&gt;. First I&amp;#8217;m extracting the information required from git:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;creating csv&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;git log --pretty=format:&quot;%h;%ae;%aI&quot; &amp;gt; /tmp/commits_with_datetime.csv&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;After loading the file into Jupyter you can then read the csv file:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Loading csv file&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import pandas as pd
+
+by_datetime = pd.read_csv(&apos;commits_with_datetime.csv&apos;, sep=&apos;;&apos;, names=[&apos;hash&apos;, &apos;email&apos;, &apos;datetime&apos;])
+by_datetime.head()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now lets create two columns in the dataframe for &lt;strong&gt;day of the week&lt;/strong&gt; and &lt;strong&gt;hour of the day&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;splitting datetime from commit hours&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from datetime import datetime as dt
+
+by_datetime[&apos;datetime&apos;] = pd.to_datetime(by_datetime[&apos;datetime&apos;], utc=True)
+by_datetime[&apos;weekday&apos;] = by_datetime[&apos;datetime&apos;].dt.weekday
+by_datetime[&apos;hour&apos;] = by_datetime[&apos;datetime&apos;].dt.hour
+
+august_to_september = (
+    (by_datetime[&apos;datetime&apos;] &amp;gt; dt.fromisoformat(&apos;2020-08-12T00:00:00+02:00&apos;)) &amp;amp;
+    (by_datetime[&apos;datetime&apos;] &amp;lt; dt.fromisoformat(&apos;2020-09-01T00:00:00+02:00&apos;)))
+
+last_month = (by_datetime
+    .copy()
+    .loc[august_to_september]
+    .loc[:, [&apos;datetime&apos;, &apos;hour&apos;]]
+    .sort_values(&apos;datetime&apos;))
+
+last_month.head()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now we can create a scatter plot showing the &lt;strong&gt;commits distribution in August 2020&lt;/strong&gt;. Apart from only showing the points I&amp;#8217;m also &lt;strong&gt;highligthing which commits were done during working hours&lt;/strong&gt; from those done during people&amp;#8217;s own time.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Creating the scatter plot&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import matplotlib.pyplot as plt
+import numpy as np
+from datetime import timedelta, datetime as dt
+
+# SCATTER DATA
+xs = last_month[&apos;datetime&apos;]
+ys = last_month[&apos;hour&apos;]
+
+plt.figure(figsize=(15, 5))
+
+# SCATTER PLOT
+plt.scatter(xs, ys)
+
+# TITLE AND LEGEND
+plt.title(&apos;COMMITS DISTRIBUTED BY HOURS OF THE DAY (AUGUST 2020)&apos;)
+plt.legend([&apos;commits&apos;])
+plt.ylabel(&apos;HOURS (GMT +02:00)&apos;)
+plt.grid(axis=&apos;x&apos;)
+
+# DASHED LINES SHOWING WHERE THE WORKING HOURS START AND END
+since = xs.min()
+until = xs.max()
+
+plt.hlines(y=8, xmin=since, xmax=until, linestyle=&apos;--&apos;, alpha=0.2, color=&apos;black&apos;)
+plt.hlines(y=15, xmin=since, xmax=until, linestyle=&apos;--&apos;, alpha=0.2, color=&apos;black&apos;)
+
+# WORKING OURS RANGE
+plt.gca().fill_between(
+    xs,
+    15,
+    8,
+    alpha=0.5,
+    color=&apos;#9ac9dc&apos;)
+
+# WORKING HOURS CAPTION
+plt.text(until - timedelta(days=0.5), 11, s=&apos;WORKING HOURS&apos;, size=18, ha=&quot;right&quot;, c=&apos;gray&apos;)
+
+# MAKE THE BLUE AREA TO COVER THE WHOLE X AXIS
+plt.margins(x=0)
+
+# MAKING Y AXIS TO START AT ZERO
+plt.yticks(np.arange(0, 28, step=4))
+
+plt.show()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Here&amp;#8217;s the result:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/10/chart_types/commits_distributed_by_hours.png&quot; alt=&quot;scatter_plot&quot; width=&quot;90%&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 1. Scatter plot showing how commits are distributed by daily hours&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A &lt;strong&gt;possible insight&lt;/strong&gt; between days and hours would be that &lt;strong&gt;many of the commits in August were done at the beginning of the month, during working hours&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;quoteblock&quot;&gt;
+&lt;blockquote&gt;
+to show the relationship between two different variables
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;takeaways&quot;&gt;Takeaways&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Include more variables, such as different sizes, to incorporate more data.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Start y-axis at 0 to represent data accurately.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;If you use trend lines, only use a maximum of two to make your plot easy to understand.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;resources&quot;&gt;Resources&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Scatter Plot on &lt;a href=&quot;https://en.wikipedia.org/wiki/Scatter_plot&quot;&gt;Wikipedia&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Scatter Plot: &lt;a href=&quot;https://blog.hubspot.com/marketing/types-of-graphs-for-data-visualization&quot;&gt;How to Choose the Right Chart or Graph for Your Data&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;line_chart&quot;&gt;Line chart&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Normally a line chart is used &lt;strong&gt;to show a trend in data over time&lt;/strong&gt;. Using the commit list we got earlier, in the next example I&amp;#8217;d like to get &lt;strong&gt;the number of commits per month&lt;/strong&gt; to see if there&amp;#8217;s a trend over this year.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Commits done by month&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from datetime import datetime as dt
+
+year_2020 = by_datetime.copy()
+
+year_2020[&apos;datetime&apos;] = pd.to_datetime(year_2020[&apos;datetime&apos;], utc=True)
+year_2020[&apos;month&apos;] = year_2020[&apos;datetime&apos;].dt.month
+
+within_2020 = (
+    (year_2020[&apos;datetime&apos;] &amp;gt; dt.fromisoformat(&apos;2020-01-01T00:00:00+02:00&apos;)) &amp;amp;
+    (year_2020[&apos;datetime&apos;] &amp;lt; dt.fromisoformat(&apos;2020-12-01T00:00:00+02:00&apos;)))
+
+year_2020_by_month = (year_2020
+    .loc[within_2020, [&apos;month&apos;, &apos;weekday&apos;]]
+    .groupby(&apos;month&apos;)
+    .count()
+    .reset_index()
+    .rename(columns={&apos;weekday&apos;: &apos;count&apos;}))
+
+year_2020_by_month&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now that we&amp;#8217;ve got the number of commits by month, we can create a line plot showing the data.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Line plot creation&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import matplotlib.pyplot as plt
+import numpy as np
+
+# PLOT DATA
+xs = year_2020_by_month[&apos;month&apos;]
+ys = year_2020_by_month[&apos;count&apos;]
+
+# PLOT
+plt.figure(figsize=(15, 5))
+
+plt.plot(xs, ys)
+plt.legend([&apos;NUMBER OF COMMITS&apos;])
+plt.ylabel(&apos;NUMBER OF COMMITS&apos;)
+plt.xlabel(&apos;MONTHS&apos;)
+plt.title(&apos;NUMBER OF COMMITS BY MONTH (JAN-OCT 2020)&apos;)
+plt.margins(x=0, y=0)
+
+# SOME LINES HIGHLIGHTING MONTHS WITH HIGHER NUMBER OF COMMITS
+for possible_release in [2, 5, 8]:
+    plt.vlines(x=possible_release, ymin=0, ymax=50, linestyle=&apos;--&apos;, alpha=0.3)
+
+# MAKING Y AXIS TO START AT ZERO
+plt.yticks(np.arange(0, 55, step=5))
+
+plt.show()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Executing the code finally we get the following result:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/10/chart_types/no_commits_by_month.png&quot; alt=&quot;line_plot&quot; width=&quot;90%&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 2. Line plot probably showing Taiga release trend during 2020&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It&amp;#8217;s pretty clear that &lt;strong&gt;every 4 months there&amp;#8217;s an increase of the number of commits&lt;/strong&gt;. However taking a look to Taiga&amp;#8217;s backend &lt;a href=&quot;https://github.com/taigaio/taiga-back/blob/master/CHANGELOG.md&quot;&gt;CHANGELOG.md&lt;/a&gt; this fact doesn&amp;#8217;t correspond to any major release, therefore it should be caused by other reasons.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;quoteblock&quot;&gt;
+&lt;blockquote&gt;
+to show a trend in data over time
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;takeaways_2&quot;&gt;Takeaways&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Use solid lines only.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Don&amp;#8217;t plot more than four lines to avoid visual distractions.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Use the right height so the lines take up roughly 2/3 of the y-axis&apos; height.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;resources_2&quot;&gt;Resources&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Line charts on &lt;a href=&quot;https://en.wikipedia.org/wiki/Line_chart&quot;&gt;Wikipedia&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Line charts on &lt;a href=&quot;https://blog.hubspot.com/marketing/types-of-graphs-for-data-visualization&quot;&gt;How to Choose the Right Chart or Graph for Your Data&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;bar_chart&quot;&gt;Bar chart&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A bar chart &lt;strong&gt;normally represents categorical data in the form of bars or columns&lt;/strong&gt;. The bars could be vertical or horizontal. They are normally used to compare different categories.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The reason of using a bar char in this situation is because I&amp;#8217;d like &lt;strong&gt;to represent the lines of code of every programming language other than Python used&lt;/strong&gt; in Taiga&amp;#8217;s backend project. To get that type of information from source code I&amp;#8217;m using &lt;a href=&quot;https://github.com/AlDanial/cloc&quot;&gt;Cloc&lt;/a&gt;. Cloc counts lines of code and gives some insight about which language is implied in each source code file. I&amp;#8217;m executing cloc and redirecting its output to a csv file.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Getting source code metrics&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;&amp;gt; cd taiga-back
+&amp;gt; cloc ./ --by-file --csv --quiet &amp;gt; /tmp/taiga_cloc_output.csv&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now after uploading the csv file to Jupyter we can then use it:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Reading csv file&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import pandas as pd
+
+df = pd.read_csv(&apos;taiga_cloc_output.csv&apos;, usecols=range(0, 5))
+df.head()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If we liked to get the different languages used in the project:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Different languages used in code&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;df[&apos;language&apos;].unique()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Getting a ranking of the languages used by number of files sorted in descending order, most used first.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;ranking of languages&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;by_language = (df
+    .copy()
+    .loc[:, [&apos;language&apos;, &apos;code&apos;]]
+    .groupby(&apos;language&apos;)
+    .count()
+    .reset_index()
+    .rename(columns={&apos;code&apos;: &apos;count&apos;})
+    .sort_values(&apos;count&apos;, ascending=False))
+
+by_language&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So it&amp;#8217;s clear Python is the most used language by far. But putting Python aside how important are the rest of the languages. I&amp;#8217;m using a bar chart to show it.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Plot creation&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import matplotlib.pyplot as plt
+import numpy as np
+
+bar_data = by_language.copy()
+bar_data = bar_data.loc[bar_data[&apos;language&apos;] != &apos;Python&apos;]
+
+xs = bar_data[&apos;language&apos;]
+ys = bar_data[&apos;count&apos;]
+
+plt.figure(figsize=(15, 5))
+
+bar = plt.bar(xs, ys, color=&apos;gray&apos;)
+
+# ADD CHART TITLE
+plt.title(&apos;NUMBER OF NON PYTHON FILES BY TYPE&apos;)
+
+# ADD NUMBER OF FILES ON TOP OF CHARTS
+for rect in bar:
+    x = rect.get_x() + (rect.get_width() / 2)
+    y = rect.get_height()
+
+    plt.text(x, y + 1, y, weight=&quot;bold&quot;, ha=&apos;center&apos;, va=&apos;center&apos;)
+
+# HIGHLIGH MOST PROMINENT LANGUAGE
+bar[0].set_color(&apos;orange&apos;)
+
+# ADD MORE Y TICKS TO GIVE ON TOP NUMBERS SOME ROOM
+plt.yticks(np.arange(0, 35, step=5))
+plt.show()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/10/chart_types/languages_by_number_of_files.png&quot; alt=&quot;bar_chart&quot; width=&quot;90%&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 3. Bar chart showing Non Python files by number of files&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;quoteblock&quot;&gt;
+&lt;blockquote&gt;
+To compare different categories
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I did another bar char comparing top two committers in a given year to show a more complex use of bar charts. Alghough I&amp;#8217;m not showing the code here, you can download the Jupyter notebook attached to this article in the resources area at the end of the article. Here&amp;#8217;s the comparison between the two top committers 2015:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/10/chart_types/bar_chart_top_two_committers.png&quot; alt=&quot;double_bar_chart&quot; width=&quot;90%&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 4. Top 2 committers 2015&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Notice how &lt;strong&gt;colors are identifying each person&lt;/strong&gt; along the year, and having the &lt;strong&gt;bars side by side helping the reader to compare&lt;/strong&gt; between both committers.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;takeaways_3&quot;&gt;Takeaways&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Use consistent colors throughout the chart, selecting accent colors to highlight meaningful data points or changes over time.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Use horizontal labels to improve readability.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Start the y-axis at 0 to appropriately reflect the values in your graph.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;resources_3&quot;&gt;Resources&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Bar charts on &lt;a href=&quot;https://en.wikipedia.org/wiki/Bar_chart&quot;&gt;Wikipedia&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Bar charts on &lt;a href=&quot;https://blog.hubspot.com/marketing/types-of-graphs-for-data-visualization&quot;&gt;How to Choose the Right Chart or Graph for Your Data&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;pie_chart&quot;&gt;Pie chart&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A pie chart is a &lt;strong&gt;circular graphic divided into slices representing different parts of a whole&lt;/strong&gt;. The arch length of each slice represents the percentage of that slice from the entire chart.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;With same data as we used in the bar chart example, I&amp;#8217;d like to represent the percentage of the Python files vs the rest of the languages. First of all lets read the data again:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;read data&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import pandas as pd
+
+df = pd.read_csv(&apos;taiga_cloc_output.csv&apos;, usecols=range(0, 5))
+df.head()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then, because there&amp;#8217;re really small categories I&amp;#8217;d like to create two groups, Python and the rest of the languages to highlight how big is Python regarding the rest of the languages used in Taiga&amp;#8217;s backend.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;filtering data&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;df[&apos;is_python&apos;] = df[&apos;language&apos;].apply(lambda s: &apos;Python&apos; if s == &apos;Python&apos; else &apos;Non Python&apos;)
+
+by_language = (df
+    .loc[:, [&apos;is_python&apos;, &apos;code&apos;]]
+    .groupby(&apos;is_python&apos;)
+    .count()
+    .reset_index()
+    .rename(columns={&apos;code&apos;: &apos;count&apos;})
+    .sort_values(&apos;count&apos;, ascending=False))
+
+by_language&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Once the data is set, I can build the pie chart:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;plot creation&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;plt.figure(figsize=(5, 5))
+
+sizes  = by_language[&apos;count&apos;]
+labels = by_language[&apos;is_python&apos;]
+
+plt.title(&apos;Percentage of Python vs Non Python languages&apos;)
+plt.pie(
+    sizes,
+    explode=(0, 0.1),
+    labels=labels,
+    textprops={&apos;size&apos;: 12},
+    autopct=&apos;%1.1f%%&apos;,
+    colors=[&apos;#68859c&apos;, &apos;#ffe76f&apos;])
+
+plt.show()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/10/chart_types/python_vs_non_python_pie.png&quot; alt=&quot;pie_chart&quot; height=&quot;300&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 5. Pie chart showing Python presence vs other languages presence&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As we already knew &lt;strong&gt;Python is the predominant programming language in this project with the 95% vs the 5% of the rest&lt;/strong&gt;. In order to see the percentage of the rest of the languages used, I cropped that part of pie and now it can be seen better.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;quoteblock&quot;&gt;
+&lt;blockquote&gt;
+representing different parts of a whole
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;takeaways_4&quot;&gt;Takeaways&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Don&amp;#8217;t illustrate too many categories to ensure differentiation between slices.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Ensure that the slice values add up to 100%.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Order slices according to their size.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;resources_4&quot;&gt;Resources&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Pie chart on &lt;a href=&quot;https://en.wikipedia.org/wiki/Pie_chart&quot;&gt;Wikipedia&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Pie chart on &lt;a href=&quot;https://blog.hubspot.com/marketing/types-of-graphs-for-data-visualization&quot;&gt;How to Choose the Right Chart or Graph for Your Data&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;other_resources&quot;&gt;Other Resources&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;/files/2020/10/charts_types/basic_charts.ipynb&quot;&gt;Jupyter Notebook with article examples&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
     <entry>
         <title>DS - Data visualization 101</title>
         <author>
