@@ -4,8 +4,854 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2020-10-13T07:13:41Z</updated>
+    <updated>2020-10-18T16:24:24Z</updated>
     <id>tag:null,2020:10</id>
+    <entry>
+        <title>DS - Basic stocks charts</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2020/10/charts_stocks.html"/>
+        <updated>2020-10-18T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2020/10/charts_stocks.html</id>
+        <category term="ds"/>
+        <category term="matplotlib"/>
+        <category term="charts"/>
+        <content type="html">
+            &lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A good way of practicing matplotlib is trying to mimic examples out there. Trading is one of those areas where charts are broadly used. I&amp;#8217;ve checked several articles (I&amp;#8217;ll leave the reference in the resources area) to see which ones are the most popular and then try to reproduce them using matplotlib and maybe learning something about stock analysis in the process.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;All the examples in this article have been created using a Jupyter notebook. You can find the source code of the notebook &lt;a href=&quot;/files/2020/10/chart_stocks/ua_analysis.ipynb&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;a_little_bit_about_indicators&quot;&gt;A little bit about indicators&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;After spending an hour trying to get a simple listing of what are the most common financial indicators, I kind of came up with the following summary. There&amp;#8217;re two main types of financial indicators, &lt;strong&gt;lagging&lt;/strong&gt; indicators and &lt;strong&gt;leading indicators&lt;/strong&gt;. &lt;strong&gt;Lagging indicators&lt;/strong&gt; are normally used by traders to know when to enter or exit a given value, whereas a &lt;strong&gt;leading indicator&lt;/strong&gt; would normally used to guess where the prices of a given stock are going to go.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I&amp;#8217;ve also found another classification based on the required information the trader needs at a given time of the process, here&amp;#8217;s a summarized table:&lt;/p&gt;
+&lt;/div&gt;
+&lt;table class=&quot;tableblock frame-all grid-all stretch compressed&quot;&gt;
+&lt;colgroup&gt;
+&lt;col style=&quot;width: 20%;&quot;&gt;
+&lt;col style=&quot;width: 20%;&quot;&gt;
+&lt;col style=&quot;width: 20%;&quot;&gt;
+&lt;col style=&quot;width: 40%;&quot;&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th class=&quot;tableblock halign-center valign-top&quot;&gt;TOPIC&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-center valign-top&quot;&gt;TYPE&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-center valign-top&quot;&gt;CHART&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;EVALUATES&amp;#8230;&amp;#8203;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Trend&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;LAGGING&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;&lt;a href=&quot;#trend_50_and_200_day_ema&quot;&gt;50 and 200-day EMA&lt;/a&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;how the market is moving (up, down, stays still)&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Mean&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;LAGGING&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;&lt;a href=&quot;#mean_bollinger_bands&quot;&gt;Bollinger Bands&lt;/a&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;how far the price is going before changing direction&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Relative strength&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;LEADING&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;&lt;a href=&quot;#relative_strength_stochastic_oscillator_so&quot;&gt;Stochastics&lt;/a&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;oscilations in buying and selling pressure&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Momentum&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;LEADING&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;&lt;a href=&quot;#momentum_macd&quot;&gt;MACD&lt;/a&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;the speed of price change over time&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Volume&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;LEADING / LAGGING&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;&lt;a href=&quot;#volume_on_balance_volume_obv&quot;&gt;On-Balance-Volume (OBV)&lt;/a&gt;&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;whether traders are cautious or greedy&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;resources&quot;&gt;Resources&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.investopedia.com/articles/active-trading/011815/top-technical-indicators-rookie-traders.asp&quot;&gt;Top Technical Indicators for Rookie Traders&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.dailyfx.com/education/technical-analysis-tools/leading-vs-lagging-indicators.html&quot;&gt;Leading vs Lagging indicators&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.investopedia.com/terms/l/leadingindicator.asp&quot;&gt;Leading indicator&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;getting_the_data&quot;&gt;Getting the data&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/ranaroussi/yfinance&quot;&gt;Yfinance&lt;/a&gt; is a Python library which uses the Yahoo Finance API to access stock related information. There&amp;#8217;re thousands of stock values out there, in this ocasion I&amp;#8217;m getting Under Armour last year values.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Getting last year data&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import yfinance
+
+(yfinance
+    .Ticker(&quot;UA&quot;)                # interested in UA
+    .history(period=&quot;1y&quot;)        # downloads last year
+    .to_csv(&apos;/tmp/ua_1y.csv&apos;))   # saves de DataFrame as a csv file&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then I&amp;#8217;m creating a Jupyter notebook where I&amp;#8217;m importing the csv to analyze the data and create the chart with the indicators.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;loading csv with stock prices&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import pandas as pd
+
+ua = pd.read_csv(&apos;ua_1y.csv&apos;)
+ua.head()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;First I&amp;#8217;m creating a line chart with all the loaded prices:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;stock prices with matplotlib&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+
+xs = pd.to_datetime(ua[&apos;Date&apos;])
+ys = ua[&apos;Close&apos;]
+
+def base_plot():
+    plt.plot(xs, ys)
+    plt.title(&apos;UNDER ARMOUR STOCK PRICES (OCT-2019 - OCT-2020)&apos;)
+    plt.ylabel(&apos;PRICE (US Dollars)&apos;)
+    plt.yticks(np.arange(np.floor(ys.min()) - 2, np.ceil(ys.max()) + 4, step=2))
+
+    xaxis = plt.gca().xaxis
+    xaxis.set_major_locator(mdates.MonthLocator())
+    xaxis.set_major_formatter(mdates.DateFormatter(&apos;%b&apos;))
+
+    plt.margins(x=0)
+
+base_plot()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/10/chart_stocks/prices.png&quot; alt=&quot;prices_only&quot; width=&quot;90%&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 1. Line chart showing only stock prices (YDT)&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;resources_2&quot;&gt;Resources&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/ranaroussi/yfinance&quot;&gt;YFinance&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;trend_50_and_200_day_ema&quot;&gt;Trend: 50 and 200-day EMA&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;#a_little_bit_about_indicators&quot;&gt;Back to indicators index&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Following the table I mentioned in the beginning, I&amp;#8217;m starting to draw both the 50 and 200-day EMA to see how the market is behaving about this stock value. EMA stands for &lt;strong&gt;exponential moving average&lt;/strong&gt; and it&amp;#8217;s supposed to be more responsive than the simple moving averages. Depending on whether we&amp;#8217;re looking for medium of long term we would be using the 50 or the 200 days EMA.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;How to calculate the EMA using Pandas ? Well, there&amp;#8217;s the &lt;strong&gt;ewm&lt;/strong&gt; function to precisely calculate functions in an exponential window. So&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;calculating 50 and 200-day EMA&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;ua[&apos;EMA 50&apos;]  = ua[&apos;Close&apos;].ewm(span=50).mean()
+ua[&apos;EMA 200&apos;] = ua[&apos;Close&apos;].ewm(span=200).mean()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then is simply about plotting both dates as x values and EMAs as y values:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;drawing EMA-50 &amp;amp; EMA-200&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;plt.figure(figsize=(15, 5))
+
+# PRICE LINES
+base_plot()
+
+# EMA LINES
+plt.plot(xs, ua[&apos;EMA 50&apos;], color=&apos;green&apos;)
+plt.plot(xs, ua[&apos;EMA 200&apos;], color=&apos;red&apos;)
+
+# INSERSECTIONS
+idx = np.argwhere(np.diff(np.sign(ua[&apos;EMA 50&apos;] - ua[&apos;EMA 200&apos;]))).flatten()
+plt.scatter(xs[idx], ua[&apos;EMA 50&apos;].iloc[idx], s=200, color=&apos;w&apos;, edgecolor=&apos;black&apos;, linewidths=1)
+
+# LEGEND
+plt.legend([&apos;Price&apos;, &apos;EMA 50&apos;, &apos;EMA 200&apos;, &apos;EMAs intersections&apos;], frameon=False)
+
+plt.show()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/10/chart_stocks/ema.png&quot; alt=&quot;ema&quot; width=&quot;90%&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 2. EMA-50 and EMA-200 (YDT)&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There&amp;#8217;s a few of strategies based on the relationship between the EMA and the price lines, and also between fast and slow EMAs. First it seems that when the price is above the EMA line, the price is likely to go up whereas when it&amp;#8217;s below, it&amp;#8217;s likely to fall. Because of that EMAs have been also been used visually as support and resistance bands.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;But there&amp;#8217;s also a relationship worth mentioning, the &lt;a href=&quot;https://corporatefinanceinstitute.com/resources/knowledge/trading-investing/how-to-read-stock-charts/&quot;&gt;relationship between the 50 and 200 EMAs&lt;/a&gt;. This theory says that when the EMA-50 crosses from below to above the EMA-200 is an indicator that the prices are going to rise. However when the EMA-50 crosses from above to below the EMA-200 it&amp;#8217;s an indicator that the prices are going to decrease. &lt;strong&gt;I&amp;#8217;ve highlighted these intersections in the chart&lt;/strong&gt; with the following code:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;EMAs intersections&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;idx = np.argwhere(np.diff(np.sign(ua[&apos;EMA 50&apos;] - ua[&apos;EMA 200&apos;]))).flatten()
+plt.scatter(
+    xs[idx],
+    ua[&apos;EMA 50&apos;].iloc[idx],
+    s=200,
+    color=&apos;w&apos;,
+    edgecolor=&apos;black&apos;,
+    linewidths=1)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;resources_3&quot;&gt;Resources&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://corporatefinanceinstitute.com/resources/knowledge/trading-investing/exponential-moving-average-ema/&quot;&gt;Exponential moving averages&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://corporatefinanceinstitute.com/resources/knowledge/trading-investing/how-to-read-stock-charts/&quot;&gt;How to read stock charts&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://stackoverflow.com/questions/28766692/intersection-of-two-graphs-in-python-find-the-x-value&quot;&gt;Calculate intersection of two graphs with Python&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;mean_bollinger_bands&quot;&gt;Mean: Bollinger Bands &amp;#169;&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;#a_little_bit_about_indicators&quot;&gt;Back to indicators index&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;One of the most famous indicators in financial analysis is the Bollinger Bands &amp;#169;. Create by &lt;a href=&quot;https://en.wikipedia.org/wiki/Bollinger_Bands&quot;&gt;John Bollinger&lt;/a&gt;  in the 1980s to help traders to know when prices are likely to change direction there&amp;#8217;re some indicators. It&amp;#8217;s composed by three bands, the moving average (middle band), upper and lower Bollinger bands.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;typical price&lt;/strong&gt;: is the average of adding up open, close, and highest price&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;ma&lt;/strong&gt; is a simple moving average of the &lt;strong&gt;typical price&lt;/strong&gt; (typically for 20 days)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;n&lt;/strong&gt; is the number of standard deviations (typically 2)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;std&lt;/strong&gt; is standard deviation over a period of time&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/8292af34bd5f286d293d3534cc16d910.png&quot; alt=&quot;8292af34bd5f286d293d3534cc16d910.png&quot; height=&quot;30&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 3. moving average&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;typical price, moving average and standard deviation&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;ua[&apos;Typical Price&apos;] = (ua[&apos;Open&apos;] + ua[&apos;Close&apos;] + ua[&apos;High&apos;]) / 3
+
+ua[&apos;MA 20&apos;]    = ua[&apos;Typical Price&apos;].rolling(window=20).mean()
+ua[&apos;STD 20&apos;]   = ua[&apos;Typical Price&apos;].rolling(window=20).std()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/d9d8b7c979e54c7164e3a66dd0d2d1f3.png&quot; alt=&quot;d9d8b7c979e54c7164e3a66dd0d2d1f3.png&quot; height=&quot;30&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 4. upper bands&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;upper bands calculation&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;ua[&apos;UpperBol&apos;] = ua[&apos;MA 20&apos;] + (2 * ua[&apos;STD 20&apos;])&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/d4bc7f387b4e9108da8873a95b1b1fcd.png&quot; alt=&quot;d4bc7f387b4e9108da8873a95b1b1fcd.png&quot; height=&quot;30&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 5. lower band&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;lower band calculation&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;ua[&apos;LowerBol&apos;] = ua[&apos;MA 20&apos;] - (2 * ua[&apos;STD 20&apos;])&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now we can draw the three bands along with the price band:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Drawing Bollinger bands &amp;#169;&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;plt.figure(figsize=(15, 5))
+
+base_plot() # PRICE PLOT
+
+plt.plot(xs, ua[&apos;MA 20&apos;], color=&apos;orange&apos;)     # MIDDLE BAND
+plt.plot(xs, ua[&apos;UpperBol&apos;], color=&apos;orange&apos;)  # UPPER BAND
+plt.plot(xs, ua[&apos;LowerBol&apos;], color=&apos;orange&apos;)  # LOWER BAND
+
+plt.legend([&apos;Price&apos;, &apos;Bollinger Bands&apos;])
+
+plt.fill_between(xs, ua[&apos;UpperBol&apos;], ua[&apos;LowerBol&apos;], color=&apos;yellow&apos;, alpha=0.2)
+plt.show()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/10/chart_stocks/bollinger.png&quot; alt=&quot;bollinger&quot; width=&quot;90%&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 6. Bollinger upper and lower bands&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Here the idea is that when the price is continuously touching the upper band, that&amp;#8217;s a signal that the price is overbought, whereas when the price is continuosly touching the lower band that means that the price is oversold:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Price &lt;strong&gt;overbought&lt;/strong&gt;: price touching continuosly the upper band&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Price &lt;strong&gt;oversold&lt;/strong&gt;: price touching continuosly the lower band&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There&amp;#8217;re more information on how to use this indicator in the resources section.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;resources_4&quot;&gt;Resources&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Bollinger_Bands&quot;&gt;Bollinger bands &amp;#169; (Wikipedia)&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.investopedia.com/articles/technical/102201.asp&quot;&gt;The basics of the Bollinger bands &amp;#169;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;relative_strength_stochastic_oscillator_so&quot;&gt;Relative strength: Stochastic Oscillator (SO)&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;#a_little_bit_about_indicators&quot;&gt;Back to indicators index&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;When measuring the relative strenght of the price we&amp;#8217;d like to know &lt;strong&gt;if there&amp;#8217;s going to be a significant oscillation&lt;/strong&gt; in the buying or selling pressure. The &lt;strong&gt;stochastic oscillator&lt;/strong&gt; attempts to predict price turning points by comparing the closing price of a stock value to its price range. The formula is:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/903fb9f2c123ccf23354382fb6ed05e3.png&quot; alt=&quot;903fb9f2c123ccf23354382fb6ed05e3.png&quot; height=&quot;60&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 7. Stochastic Oscillator (SO)&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;SO&lt;/strong&gt;: Stochastic oscillator&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;CP&lt;/strong&gt;: Closing price&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;LP14&lt;/strong&gt;: Lowest price of the previous 14 trading days&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;HP14&lt;/strong&gt;: Highest price of the previous 14 trading days&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In Pandas the only mistery is to calculate the lowest and highest price of the previous 14 trading days and then fill the formula in another DataFrame column.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Calculate lowest/highest price in a 14-day window&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;ua[&apos;L14&apos;] = ua[&apos;Low&apos;].rolling(14).min()
+ua[&apos;H14&apos;] = ua[&apos;High&apos;].rolling(14).max()
+
+ua[&apos;SO&apos;] = ((ua[&apos;Close&apos;] - ua[&apos;L14&apos;]) / (ua[&apos;H14&apos;] - ua[&apos;L14&apos;])) * 100&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The SO is not meant to be shown over the price plot. You normally see it side by side as a different chart at the bottom of the stock prices chart.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Drawing both prices and SO charts&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;# DRAWING SO
+from matplotlib.gridspec import GridSpec
+import matplotlib.patches as mpatches
+
+# GRID TO LOCATE PRICE AND SO CHARTS
+fig = plt.figure(figsize=(15, 5))
+gsp = GridSpec(2, 1, height_ratios=[4, 3], hspace=0)
+
+ax1 = fig.add_subplot(gsp[0])
+ax2 = fig.add_subplot(gsp[1], sharex=ax1)
+
+# PRICE CHART
+ax1.plot(xs, ys, label=&apos;Price&apos;, color=&quot;blue&quot;)
+ax1.set_title(&apos;UNDER ARMOUR STOCK PRICES (OCT-2019 - OCT-2020)&apos;)
+ax1.set_ylabel(&apos;PRICE (US Dollars)&apos;)
+ax1.set_yticks(np.arange(np.floor(ys.min()) - 2, np.ceil(ys.max()) + 4, step=2))
+ax1.set_xticks([])
+ax1.grid(axis=&apos;x&apos;, linestyle=&apos;--&apos;)
+
+# SO CHART
+xaxis = ax2.xaxis
+xaxis.set_major_locator(mdates.MonthLocator())
+xaxis.set_major_formatter(mdates.DateFormatter(&apos;%b&apos;))
+
+ax2.plot(xs, ua[&apos;SO&apos;], color=&apos;red&apos;, linestyle=&apos;-&apos;)
+ax2.grid(axis=&apos;x&apos;, linestyle=&apos;--&apos;)
+
+# HIDDING LAST Y TICKS IN SO CHART
+ax2.set_yticks(np.arange(0, 200, step=50))
+ax2.set_ylim(0, 150)
+plt.setp(ax2.get_yticklabels()[-1], visible=False)
+
+# COMBINED LEGEND
+prices_patch = mpatches.Patch(color=&apos;blue&apos;, label=&apos;Prices&apos;)
+stocha_patch = mpatches.Patch(color=&apos;red&apos;, label=&apos;Stochastic&apos;)
+ax1.legend(handles=[prices_patch, stocha_patch])
+plt.show()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As a rule of thumb, most of the sources say that values over 80% are considered overbought whereas values below 20% are considered oversold.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/10/chart_stocks/stochastic.png&quot; alt=&quot;stochastic&quot; width=&quot;90%&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 8. Stochastic Oscillator (YDT)&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;resources_5&quot;&gt;Resources&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.investopedia.com/terms/s/stochasticoscillator.asp&quot;&gt;Stocastic Oscillator&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;momentum_macd&quot;&gt;Momentum: MACD&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;#a_little_bit_about_indicators&quot;&gt;Back to indicators index&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The MACD is another &lt;strong&gt;trending indicator&lt;/strong&gt;. It&amp;#8217;s the difference between a 12 period EMA minus a 26 period EMA. It&amp;#8217;s normally shown together with the MACD SIGNAL and a MACD histogram.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/6ea356b6da058c337c76ae975135a6d4.png&quot; alt=&quot;6ea356b6da058c337c76ae975135a6d4.png&quot; width=&quot;300&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 9. MACD&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;MACD calculationn&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;ua[&apos;EMA 26&apos;]      = ua[&apos;Close&apos;].ewm(span=26).mean()
+ua[&apos;EMA 12&apos;]      = ua[&apos;Close&apos;].ewm(span=12).mean()
+
+ua[&apos;MACD&apos;]        = ua[&apos;EMA 12&apos;] - ua[&apos;EMA 26&apos;]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/e179328a8e6c82fc33673f1165be1429.png&quot; alt=&quot;e179328a8e6c82fc33673f1165be1429.png&quot; width=&quot;300&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 10. MACD signal&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;MACD signal calculation&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;ua[&apos;MACD SIGNAL&apos;] = ua[&apos;MACD&apos;].ewm(span=9).mean()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/db7dfbba912ae3d2518e351eee59fd42.png&quot; alt=&quot;db7dfbba912ae3d2518e351eee59fd42.png&quot; width=&quot;300&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 11. MACD histogram&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;MACD histogram calculation&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;ua[&apos;MACD HIST&apos;] = ua[&apos;MACD&apos;] - ua[&apos;MACD SIGNAL&apos;]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Drawing MACD&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import matplotlib.ticker as ticker
+
+from matplotlib.gridspec import GridSpec
+import matplotlib.patches as mpatches
+
+# GRID TO LOCATE PRICE AND SO CHARTS
+sto = plt.figure(figsize=(15, 5))
+gsp = GridSpec(2, 1, height_ratios=[4, 3], hspace=0)
+
+st1 = sto.add_subplot(gsp[0])
+st2 = sto.add_subplot(gsp[1], sharex=st1)
+
+# USING A NORMALIZED X AXIS TICKS
+thex = np.arange(len(ua))
+
+# DRAWING PRICE CHART
+st1.plot(thex, ys, label=&apos;Price&apos;, color=&quot;blue&quot;)
+st1.set_title(&apos;UNDER ARMOUR STOCK PRICES (OCT-2019 - OCT-2020)&apos;)
+st1.set_ylabel(&apos;PRICE (US Dollars)&apos;)
+st1.set_yticks(np.arange(np.floor(ys.min()) - 2, np.ceil(ys.max()) + 4, step=2))
+st1.grid(axis=&apos;x&apos;, linestyle=&apos;--&apos;)
+
+# DRAWING MACD CHART
+st2.plot(thex, ua[&apos;MACD&apos;], color=&apos;blue&apos;)
+st2.plot(thex, ua[&apos;MACD&apos;], color=&apos;blue&apos;)
+st2.plot(thex, ua[&apos;MACD SIGNAL&apos;], color=&apos;red&apos;)
+
+pos_his1 = ua.loc[ua[&apos;MACD HIST&apos;] &amp;gt; 0.2]
+pos_his2 = ua.loc[(ua[&apos;MACD HIST&apos;] &amp;gt;= 0.0) &amp;amp; (ua[&apos;MACD HIST&apos;] &amp;lt;= 0.2)]
+
+neg_his1 = ua.loc[(ua[&apos;MACD HIST&apos;] &amp;lt; 0) &amp;amp; (ua[&apos;MACD HIST&apos;] &amp;gt;= -0.1)]
+neg_his2 = ua.loc[ua[&apos;MACD HIST&apos;] &amp;lt; -0.1]
+
+st2.bar(pos_his1.index, pos_his1[&apos;MACD HIST&apos;], width=0.6, color=&apos;#77af70&apos;)
+st2.bar(pos_his2.index, pos_his2[&apos;MACD HIST&apos;], width=0.6, color=&apos;#ace6cb&apos;)
+st2.bar(neg_his1.index.values, neg_his1[&apos;MACD HIST&apos;], width=0.6, color=&apos;#dababa&apos;)
+st2.bar(neg_his2.index.values, neg_his2[&apos;MACD HIST&apos;], width=0.6, color=&apos;#b92f2f&apos;)
+
+st2.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, pos: ua.iloc[pos, 0]))
+
+st2.grid(axis=&apos;x&apos;, linestyle=&apos;--&apos;)
+plt.show()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/10/chart_stocks/macd.png&quot; alt=&quot;macd&quot; width=&quot;90%&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 12. MACD YTD&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;One way of using the MACD is noticing that when the &lt;strong&gt;MACD crosses above the signal it&amp;#8217;s telling the traders is a good moment to buy&lt;/strong&gt; whereas &lt;strong&gt;when the MACD crosses below the signal it&amp;#8217;s a good moment to sell&lt;/strong&gt;. Of course this also depends on the trading strategy of everyone.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;resources_6&quot;&gt;Resources&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://school.stockcharts.com/doku.php?id=technical_indicators:moving_average_convergence_divergence_macd&quot;&gt;Calculate moving averages&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;volume_on_balance_volume_obv&quot;&gt;Volume: On-Balance-Volume (OBV)&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;#a_little_bit_about_indicators&quot;&gt;Back to indicators index&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Finally here&amp;#8217;s the last indicator to create. The On-Balance-Volume is another trending indicator. It&amp;#8217;s normally used to know if there&amp;#8217;re many traders jumping in or jumping out of a given value. The formula of the OBV:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/dd9c36e978dabaf826a5f46b5525aaaa.png&quot; alt=&quot;dd9c36e978dabaf826a5f46b5525aaaa.png&quot; height=&quot;90&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 13. OBV&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A possible translation of the formula to Pandas would be something like this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;calculating OBV signal&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;ua[&apos;OBV&apos;] = np.where(
+    ua[&apos;Close&apos;] &amp;gt; ua[&apos;Close&apos;].shift(1), ua[&apos;Volume&apos;],
+    np.where(ua[&apos;Close&apos;] &amp;lt; ua[&apos;Close&apos;].shift(1), -ua[&apos;Volume&apos;], 0)
+).cumsum()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then plotting this with matplolib:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;OBV chart&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import matplotlib.ticker as ticker
+
+from matplotlib.gridspec import GridSpec
+import matplotlib.patches as mpatches
+from matplotlib.ticker import FuncFormatter
+
+# GRID TO LOCATE BOTH CHARTS
+sto = plt.figure(figsize=(15, 5))
+gsp = GridSpec(2, 1, height_ratios=[4, 3], hspace=0)
+
+st1 = sto.add_subplot(gsp[0])
+st2 = sto.add_subplot(gsp[1], sharex=st1)
+
+# SHARED X VALUES
+thex = np.arange(len(ua))
+
+# PRICE CHART
+st1.plot(thex, ys, label=&apos;Price&apos;, color=&quot;blue&quot;)
+st1.set_title(&apos;UNDER ARMOUR STOCK PRICES vs OBV - YTD (OCT-2019 - OCT-2020)&apos;)
+st1.set_ylabel(&apos;PRICE (US Dollars)&apos;)
+st1.set_yticks(np.arange(np.floor(ys.min()) - 2, np.ceil(ys.max()) + 4, step=2))
+st1.grid(axis=&apos;x&apos;, linestyle=&apos;--&apos;)
+
+# OBV CHART
+st2.plot(thex, ua[&apos;OBV&apos;], color=&apos;black&apos;)
+
+# FUNCTION TO FORMAT MILLIONS
+def millions(x, pos):
+    &apos;The two args are the value and tick position&apos;
+    return &apos;$%1.1fM&apos; % (x * 1e-6)
+
+formatter = FuncFormatter(millions)
+st2.yaxis.set_major_formatter(formatter)
+st2.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, pos: ua.iloc[pos, 0]))
+st2.grid(axis=&apos;x&apos;, linestyle=&apos;--&apos;)
+st2.set_ylabel(&apos;OBV (M Dollars)&apos;)
+st2.set_ylim([ua[&apos;OBV&apos;].min() - 1000, ua[&apos;OBV&apos;].max() + 1000])
+plt.show()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/10/chart_stocks/obv.png&quot; alt=&quot;obv&quot; width=&quot;90%&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 14. OBV YTD&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;resources_7&quot;&gt;Resources&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.investopedia.com/articles/active-trading/011815/top-technical-indicators-rookie-traders.asp#volume-on-balance-volume-obv&quot;&gt;OBV for rookie traders&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.investopedia.com/terms/o/onbalancevolume.asp&quot;&gt;OBV calculation&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.metatrader5.com/es/terminal/help/indicators/volume_indicators/obv&quot;&gt;Volume indicators&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.ismaeldelacruz.es/analizando-el-indicador-obv-de-volumen/&quot;&gt;Analyzing OBV (Spanish)&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://stackoverflow.com/questions/52671594/calculating-stockss-on-balance-volume-obv-in-python&quot;&gt;StackOverflow: Calculating OBV in Python&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://matplotlib.org/3.1.0/gallery/ticks_and_spines/custom_ticker1.html&quot;&gt;Custom&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;mplfinance&quot;&gt;mplfinance&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;mplfinance is a matplotlib module specially suited for showing financial data. I didn&amp;#8217;t have the time to play with it fully but it seemed to me a very useful tool if you need to plot financial data very often. To use it in the Jupyter notebook:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;import mplfinance in the notebook&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import sys
+!{sys.executable} -m pip install mplfinance&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For example to see how easy is to create financia data, here&amp;#8217;s the required code to show prices (with candlestick mode) and volume chart of the first 50 days. I&amp;#8217;ve also included a couple of trending lines.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;mplfinance example&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import mplfinance as mpl
+
+# it requires the index to be a time series
+ua[&apos;Date&apos;] = pd.to_datetime(ua[&apos;Date&apos;])
+
+mpl.figure()
+
+# adjusting overall styles
+style = mpl.make_mpf_style(
+    y_on_right=False,
+    base_mpf_style=&apos;yahoo&apos;,
+    gridaxis=&apos;vertical&apos;,
+    edgecolor=&apos;#666666&apos;,
+    gridstyle=&apos;:&apos;)
+
+
+data = ua.set_index(&apos;Date&apos;).iloc[0:50]
+# almost everything happens within the plot() function
+mpl.plot(
+    data, # first 30 days
+    type=&apos;candle&apos;,
+    volume=True,
+    title=&apos;UA PRICE AND VOLUME CHARTS (OCT-DEC 2019)&apos;,
+    style=style,
+    figratio=(11,8),
+    figscale=0.85,
+    figsize=(15, 6),
+    mav=(),
+    tlines=[
+        dict(tlines=[(&apos;2019-11-06&apos;, &apos;2019-11-13&apos;)], colors=&apos;r&apos;),
+        dict(tlines=[(&apos;2019-12-03&apos;, &apos;2019-12-08&apos;), (&apos;2019-12-12&apos;, &apos;2019-12-18&apos;)], colors=&apos;g&apos;)
+    ])
+
+mpl.show()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/10/chart_stocks/mplfinance.png&quot; alt=&quot;mplfinance&quot; width=&quot;90%&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 15. mplfinance example&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As you can see the required number of lines is really low compared to previous examples. I think it&amp;#8217;s worth spending a little bit more time with it in the future.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;resources_8&quot;&gt;Resources&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://medium.com/@shivangisareen/for-anyone-using-jupyter-notebook-installing-packages-18a9468d0c1c&quot;&gt;Installing packages in a Python Jupyter notebook&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/matplotlib/mplfinance&quot;&gt;mplfinance in Github&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;other_resources&quot;&gt;Other Resources&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;article_source_code&quot;&gt;Article source code&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Jupyter notebook: &lt;a href=&quot;/files/2020/10/chart_stocks/ua_analysis.ipynb&quot;&gt;ua_analysis.ipynb&lt;/a&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;financial&quot;&gt;Financial&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://finance.yahoo.com/&quot;&gt;Yahoo Finance&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;pandas&quot;&gt;Pandas&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://towardsdatascience.com/trading-toolbox-02-wma-ema-62c22205e2a9&quot;&gt;Weighted vs Exponential moving averages&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://towardsdatascience.com/trading-technical-analysis-with-pandas-43e737a17861&quot;&gt;Trading technical analysis with Pandas&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;matplotlib&quot;&gt;Matplotlib&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/matplotlib/mplfinance&quot;&gt;Matplot Financial Module&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://stackoverflow.com/questions/22511550/gridspec-with-shared-axes-in-python&quot;&gt;Shared Axes with GridSpec&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.gridspec.GridSpec.html#matplotlib.gridspec.GridSpec&quot;&gt;GridSpec API&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
     <entry>
         <title>DS - Matplotlib - Basic charts</title>
         <author>
