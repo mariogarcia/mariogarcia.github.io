@@ -1,0 +1,619 @@
+= DS - Basic stocks charts
+@marioggar
+2020-10-18
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: ds, matplotlib, charts
+:sources: ../../../../../../../sources/2020/10/charts_stocks
+:idprefix:
+:summary: Creating some basic stock charts
+:summary_image: stocks-python.png
+
+A good way of practicing matplotlib is trying to mimic examples out there. Trading is one of those areas where charts are broadly used. I've checked several articles (I'll leave the reference in the resources area) to see which ones are the most popular and then try to reproduce them using matplotlib and maybe learning something about stock analysis in the process.
+
+All the examples in this article have been created using a Jupyter notebook. You can find the source code of the notebook link:/files/2020/10/chart_stocks/ua_analysis.ipynb[here].
+
+== A little bit about indicators
+
+After spending an hour trying to get a simple listing of what are the most common financial indicators, I kind of came up with the following summary. There're two main types of financial indicators, **lagging** indicators and **leading indicators**. **Lagging indicators** are normally used by traders to know when to enter or exit a given value, whereas a **leading indicator** would normally used to guess where the prices of a given stock are going to go.
+
+I've also found another classification based on the required information the trader needs at a given time of the process, here's a summarized table:
+
+[.compressed, cols="^2,^2,^2,<4", options="header"]
+|===
+| TOPIC
+| TYPE
+| CHART
+| EVALUATES...
+
+| Trend 
+| LAGGING
+| <<trend_50_and_200_day_ema,50 and 200-day EMA>>
+| how the market is moving (up, down, stays still)
+
+| Mean 
+| LAGGING 
+| <<mean_bollinger_bands,Bollinger Bands>>
+| how far the price is going before changing direction
+
+| Relative strength 
+| LEADING 
+| <<relative_strength_stochastic_oscillator_so,Stochastics>>
+| oscilations in buying and selling pressure
+
+| Momentum 
+| LEADING 
+| <<momentum_macd,MACD>>
+| the speed of price change over time
+
+| Volume 
+| LEADING / LAGGING
+| <<volume_on_balance_volume_obv,On-Balance-Volume (OBV)>>
+| whether traders are cautious or greedy
+|===
+
+=== Resources
+
+- https://www.investopedia.com/articles/active-trading/011815/top-technical-indicators-rookie-traders.asp[Top Technical Indicators for Rookie Traders]
+- https://www.dailyfx.com/education/technical-analysis-tools/leading-vs-lagging-indicators.html[Leading vs Lagging indicators]
+- https://www.investopedia.com/terms/l/leadingindicator.asp[Leading indicator]
+
+== Getting the data
+
+https://github.com/ranaroussi/yfinance[Yfinance] is a Python library which uses the Yahoo Finance API to access stock related information. There're thousands of stock values out there, in this ocasion I'm getting Under Armour last year values.
+
+[source, python]
+.Getting last year data
+----
+import yfinance
+
+(yfinance
+    .Ticker("UA")                # interested in UA
+    .history(period="1y")        # downloads last year
+    .to_csv('/tmp/ua_1y.csv'))   # saves de DataFrame as a csv file
+----
+
+Then I'm creating a Jupyter notebook where I'm importing the csv to analyze the data and create the chart with the indicators.
+
+[source, python]
+.loading csv with stock prices
+----
+import pandas as pd
+
+ua = pd.read_csv('ua_1y.csv')
+ua.head()
+----
+
+First I'm creating a line chart with all the loaded prices:
+
+[source, python]
+.stock prices with matplotlib
+----
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+
+xs = pd.to_datetime(ua['Date'])
+ys = ua['Close']
+
+def base_plot():
+    plt.plot(xs, ys)
+    plt.title('UNDER ARMOUR STOCK PRICES (OCT-2019 - OCT-2020)')
+    plt.ylabel('PRICE (US Dollars)')
+    plt.yticks(np.arange(np.floor(ys.min()) - 2, np.ceil(ys.max()) + 4, step=2))
+
+    xaxis = plt.gca().xaxis
+    xaxis.set_major_locator(mdates.MonthLocator())
+    xaxis.set_major_formatter(mdates.DateFormatter('%b'))
+
+    plt.margins(x=0)
+
+base_plot()
+----
+
+[width="90%", align="center"]
+.Line chart showing only stock prices (YDT)
+image::2020/10/chart_stocks/prices.png[alt=prices_only]
+
+=== Resources
+
+- https://github.com/ranaroussi/yfinance[YFinance]
+
+== Trend: 50 and 200-day EMA
+<<a_little_bit_about_indicators, Back to indicators index>>
+
+Following the table I mentioned in the beginning, I'm starting to draw both the 50 and 200-day EMA to see how the market is behaving about this stock value. EMA stands for **exponential moving average** and it's supposed to be more responsive than the simple moving averages. Depending on whether we're looking for medium of long term we would be using the 50 or the 200 days EMA.
+
+How to calculate the EMA using Pandas ? Well, there's the **ewm** function to precisely calculate functions in an exponential window. So
+
+[source, python]
+.calculating 50 and 200-day EMA
+----
+ua['EMA 50']  = ua['Close'].ewm(span=50).mean()
+ua['EMA 200'] = ua['Close'].ewm(span=200).mean()
+----
+
+Then is simply about plotting both dates as x values and EMAs as y values:
+
+[source, python]
+.drawing EMA-50 & EMA-200
+----
+plt.figure(figsize=(15, 5))
+
+# PRICE LINES
+base_plot()
+
+# EMA LINES
+plt.plot(xs, ua['EMA 50'], color='green')
+plt.plot(xs, ua['EMA 200'], color='red')
+
+# INSERSECTIONS
+idx = np.argwhere(np.diff(np.sign(ua['EMA 50'] - ua['EMA 200']))).flatten()
+plt.scatter(xs[idx], ua['EMA 50'].iloc[idx], s=200, color='w', edgecolor='black', linewidths=1)
+
+# LEGEND
+plt.legend(['Price', 'EMA 50', 'EMA 200', 'EMAs intersections'], frameon=False)
+
+plt.show()
+----
+
+[width="90%", align="center"]
+.EMA-50 and EMA-200 (YDT)
+image::2020/10/chart_stocks/ema.png[alt=ema]
+
+There's a few of strategies based on the relationship between the EMA and the price lines, and also between fast and slow EMAs. First it seems that when the price is above the EMA line, the price is likely to go up whereas when it's below, it's likely to fall. Because of that EMAs have been also been used visually as support and resistance bands. 
+
+But there's also a relationship worth mentioning, the https://corporatefinanceinstitute.com/resources/knowledge/trading-investing/how-to-read-stock-charts/[relationship between the 50 and 200 EMAs]. This theory says that when the EMA-50 crosses from below to above the EMA-200 is an indicator that the prices are going to rise. However when the EMA-50 crosses from above to below the EMA-200 it's an indicator that the prices are going to decrease. **I've highlighted these intersections in the chart** with the following code:
+
+[source, python]
+.EMAs intersections
+----
+idx = np.argwhere(np.diff(np.sign(ua['EMA 50'] - ua['EMA 200']))).flatten()
+plt.scatter(
+    xs[idx], 
+    ua['EMA 50'].iloc[idx], 
+    s=200, 
+    color='w', 
+    edgecolor='black', 
+    linewidths=1)
+----
+
+=== Resources
+
+- https://corporatefinanceinstitute.com/resources/knowledge/trading-investing/exponential-moving-average-ema/[Exponential moving averages]
+- https://corporatefinanceinstitute.com/resources/knowledge/trading-investing/how-to-read-stock-charts/[How to read stock charts]
+- https://stackoverflow.com/questions/28766692/intersection-of-two-graphs-in-python-find-the-x-value[Calculate intersection of two graphs with Python]
+
+== Mean: Bollinger Bands &#169;
+<<a_little_bit_about_indicators, Back to indicators index>>
+
+One of the most famous indicators in financial analysis is the Bollinger Bands &#169;. Create by https://en.wikipedia.org/wiki/Bollinger_Bands[John Bollinger]  in the 1980s to help traders to know when prices are likely to change direction there're some indicators. It's composed by three bands, the moving average (middle band), upper and lower Bollinger bands.
+
+- **typical price**: is the average of adding up open, close, and highest price
+- *ma* is a simple moving average of the **typical price** (typically for 20 days)
+- *n* is the number of standard deviations (typically 2)
+- *std* is standard deviation over a period of time
+
+[mathx, height=30, align="center"]
+.moving average
+----
+BOL_{middle} = ma
+----
+
+[source, python]
+.typical price, moving average and standard deviation
+----
+ua['Typical Price'] = (ua['Open'] + ua['Close'] + ua['High']) / 3
+
+ua['MA 20']    = ua['Typical Price'].rolling(window=20).mean()
+ua['STD 20']   = ua['Typical Price'].rolling(window=20).std()
+----
+
+[mathx, height=30, align="center"]
+.upper bands
+----
+BOL_{upper}  = ma + (n * std)\\
+----
+
+[source, python]
+.upper bands calculation
+----
+ua['UpperBol'] = ua['MA 20'] + (2 * ua['STD 20'])
+----
+
+[mathx, height=30, align="center"]
+.lower band
+----
+BOL_{lower}  = ma - (n * std)
+----
+
+[source, python]
+.lower band calculation
+----
+ua['LowerBol'] = ua['MA 20'] - (2 * ua['STD 20'])
+----
+
+Now we can draw the three bands along with the price band:
+
+[source, python]
+.Drawing Bollinger bands &#169;
+----
+plt.figure(figsize=(15, 5))
+
+base_plot() # PRICE PLOT
+
+plt.plot(xs, ua['MA 20'], color='orange')     # MIDDLE BAND
+plt.plot(xs, ua['UpperBol'], color='orange')  # UPPER BAND
+plt.plot(xs, ua['LowerBol'], color='orange')  # LOWER BAND
+
+plt.legend(['Price', 'Bollinger Bands'])
+
+plt.fill_between(xs, ua['UpperBol'], ua['LowerBol'], color='yellow', alpha=0.2)
+plt.show()
+----
+
+[width="90%", align="center"]
+.Bollinger upper and lower bands
+image::2020/10/chart_stocks/bollinger.png[alt=bollinger]
+
+Here the idea is that when the price is continuously touching the upper band, that's a signal that the price is overbought, whereas when the price is continuosly touching the lower band that means that the price is oversold:
+
+- Price **overbought**: price touching continuosly the upper band
+- Price **oversold**: price touching continuosly the lower band
+
+There're more information on how to use this indicator in the resources section.
+
+=== Resources
+
+- https://en.wikipedia.org/wiki/Bollinger_Bands[Bollinger bands &#169; (Wikipedia)]
+- https://www.investopedia.com/articles/technical/102201.asp[The basics of the Bollinger bands &#169;]
+
+== Relative strength: Stochastic Oscillator (SO)
+<<a_little_bit_about_indicators, Back to indicators index>>
+
+When measuring the relative strenght of the price we'd like to know **if there's going to be a significant oscillation** in the buying or selling pressure. The **stochastic oscillator** attempts to predict price turning points by comparing the closing price of a stock value to its price range. The formula is:
+
+[mathx, height=60, align="center"]
+.Stochastic Oscillator (SO) 
+----
+SO = 100 \left \frac{CP - LP_{14}}{HP_{14} - LP_{14}} \right
+----
+
+- **SO**: Stochastic oscillator
+- **CP**: Closing price
+- **LP14**: Lowest price of the previous 14 trading days
+- **HP14**: Highest price of the previous 14 trading days
+
+In Pandas the only mistery is to calculate the lowest and highest price of the previous 14 trading days and then fill the formula in another DataFrame column.
+
+[source, python]
+.Calculate lowest/highest price in a 14-day window
+----
+ua['L14'] = ua['Low'].rolling(14).min()
+ua['H14'] = ua['High'].rolling(14).max()
+
+ua['SO'] = ((ua['Close'] - ua['L14']) / (ua['H14'] - ua['L14'])) * 100
+----
+
+The SO is not meant to be shown over the price plot. You normally see it side by side as a different chart at the bottom of the stock prices chart.
+
+[source, python]
+.Drawing both prices and SO charts
+----
+# DRAWING SO
+from matplotlib.gridspec import GridSpec
+import matplotlib.patches as mpatches
+
+# GRID TO LOCATE PRICE AND SO CHARTS
+fig = plt.figure(figsize=(15, 5))
+gsp = GridSpec(2, 1, height_ratios=[4, 3], hspace=0)
+
+ax1 = fig.add_subplot(gsp[0])
+ax2 = fig.add_subplot(gsp[1], sharex=ax1)
+
+# PRICE CHART
+ax1.plot(xs, ys, label='Price', color="blue")
+ax1.set_title('UNDER ARMOUR STOCK PRICES (OCT-2019 - OCT-2020)')
+ax1.set_ylabel('PRICE (US Dollars)')
+ax1.set_yticks(np.arange(np.floor(ys.min()) - 2, np.ceil(ys.max()) + 4, step=2))
+ax1.set_xticks([])
+ax1.grid(axis='x', linestyle='--')
+
+# SO CHART
+xaxis = ax2.xaxis
+xaxis.set_major_locator(mdates.MonthLocator())
+xaxis.set_major_formatter(mdates.DateFormatter('%b'))
+
+ax2.plot(xs, ua['SO'], color='red', linestyle='-')
+ax2.grid(axis='x', linestyle='--')
+
+# HIDDING LAST Y TICKS IN SO CHART
+ax2.set_yticks(np.arange(0, 200, step=50))
+ax2.set_ylim(0, 150)
+plt.setp(ax2.get_yticklabels()[-1], visible=False)
+
+# COMBINED LEGEND
+prices_patch = mpatches.Patch(color='blue', label='Prices')
+stocha_patch = mpatches.Patch(color='red', label='Stochastic')
+ax1.legend(handles=[prices_patch, stocha_patch])
+plt.show()
+----
+
+As a rule of thumb, most of the sources say that values over 80% are considered overbought whereas values below 20% are considered oversold.
+
+[width="90%", align="center"]
+.Stochastic Oscillator (YDT)
+image::2020/10/chart_stocks/stochastic.png[alt=stochastic]
+
+=== Resources
+
+- https://www.investopedia.com/terms/s/stochasticoscillator.asp[Stocastic Oscillator]
+
+== Momentum: MACD
+<<a_little_bit_about_indicators, Back to indicators index>>
+
+The MACD is another **trending indicator**. It's the difference between a 12 period EMA minus a 26 period EMA. It's normally shown together with the MACD SIGNAL and a MACD histogram.
+
+[mathx, width=300, align="center"]
+.MACD
+----
+MACD = EMA_{12} - EMA_{26} \\
+----
+
+[source, python]
+.MACD calculationn
+----
+ua['EMA 26']      = ua['Close'].ewm(span=26).mean()
+ua['EMA 12']      = ua['Close'].ewm(span=12).mean()
+
+ua['MACD']        = ua['EMA 12'] - ua['EMA 26']
+----
+
+[mathx, width=300, align="center"]
+.MACD signal
+----
+MACD_{SIGNAL} = EMA(MACD)_{9} 
+----
+
+[source, python]
+.MACD signal calculation
+----
+ua['MACD SIGNAL'] = ua['MACD'].ewm(span=9).mean()
+----
+
+[mathx, width=300, align="center"]
+.MACD histogram
+----
+MACD_{HIST} = MACD - MACD_{SIGNAL}
+----
+
+[source, python]
+.MACD histogram calculation
+----
+ua['MACD HIST'] = ua['MACD'] - ua['MACD SIGNAL']
+----
+
+[source, python]
+.Drawing MACD
+----
+import matplotlib.ticker as ticker
+
+from matplotlib.gridspec import GridSpec
+import matplotlib.patches as mpatches
+
+# GRID TO LOCATE PRICE AND SO CHARTS
+sto = plt.figure(figsize=(15, 5))
+gsp = GridSpec(2, 1, height_ratios=[4, 3], hspace=0)
+
+st1 = sto.add_subplot(gsp[0])
+st2 = sto.add_subplot(gsp[1], sharex=st1)
+
+# USING A NORMALIZED X AXIS TICKS
+thex = np.arange(len(ua))
+
+# DRAWING PRICE CHART
+st1.plot(thex, ys, label='Price', color="blue")
+st1.set_title('UNDER ARMOUR STOCK PRICES (OCT-2019 - OCT-2020)')
+st1.set_ylabel('PRICE (US Dollars)')
+st1.set_yticks(np.arange(np.floor(ys.min()) - 2, np.ceil(ys.max()) + 4, step=2))
+st1.grid(axis='x', linestyle='--')
+
+# DRAWING MACD CHART
+st2.plot(thex, ua['MACD'], color='blue')
+st2.plot(thex, ua['MACD'], color='blue')
+st2.plot(thex, ua['MACD SIGNAL'], color='red')
+
+pos_his1 = ua.loc[ua['MACD HIST'] > 0.2]
+pos_his2 = ua.loc[(ua['MACD HIST'] >= 0.0) & (ua['MACD HIST'] <= 0.2)]
+
+neg_his1 = ua.loc[(ua['MACD HIST'] < 0) & (ua['MACD HIST'] >= -0.1)]
+neg_his2 = ua.loc[ua['MACD HIST'] < -0.1]
+
+st2.bar(pos_his1.index, pos_his1['MACD HIST'], width=0.6, color='#77af70')
+st2.bar(pos_his2.index, pos_his2['MACD HIST'], width=0.6, color='#ace6cb')
+st2.bar(neg_his1.index.values, neg_his1['MACD HIST'], width=0.6, color='#dababa')
+st2.bar(neg_his2.index.values, neg_his2['MACD HIST'], width=0.6, color='#b92f2f')
+
+st2.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, pos: ua.iloc[pos, 0]))
+
+st2.grid(axis='x', linestyle='--')
+plt.show()
+----
+
+[width="90%", align="center"]
+.MACD YTD
+image::2020/10/chart_stocks/macd.png[alt=macd]
+
+One way of using the MACD is noticing that when the **MACD crosses above the signal it's telling the traders is a good moment to buy** whereas **when the MACD crosses below the signal it's a good moment to sell**. Of course this also depends on the trading strategy of everyone.
+
+=== Resources
+
+- https://school.stockcharts.com/doku.php?id=technical_indicators:moving_average_convergence_divergence_macd[Calculate moving averages]
+
+== Volume: On-Balance-Volume (OBV)
+<<a_little_bit_about_indicators, Back to indicators index>>
+
+Finally here's the last indicator to create. The On-Balance-Volume is another trending indicator. It's normally used to know if there're many traders jumping in or jumping out of a given value. The formula of the OBV:
+
+[mathx, height=90, align="center"]
+.OBV
+----
+\begin{align}
+    OBV  &= OBV_{prev} + volume & , \text{if } close > close_{prev}  \\ 
+    &= OBV_{prev}               & , \text{if } close = close_{prev}  \\ 
+    &= -OBV_{prev}              & , \text{if } close < close_{prev} 
+\end{align}
+----
+
+A possible translation of the formula to Pandas would be something like this:
+
+[source, python]
+.calculating OBV signal
+----
+ua['OBV'] = np.where(
+    ua['Close'] > ua['Close'].shift(1), ua['Volume'], 
+    np.where(ua['Close'] < ua['Close'].shift(1), -ua['Volume'], 0)
+).cumsum()
+----
+
+Then plotting this with matplolib:
+
+[source, python]
+.OBV chart
+----
+import matplotlib.ticker as ticker
+
+from matplotlib.gridspec import GridSpec
+import matplotlib.patches as mpatches
+from matplotlib.ticker import FuncFormatter
+
+# GRID TO LOCATE BOTH CHARTS
+sto = plt.figure(figsize=(15, 5))
+gsp = GridSpec(2, 1, height_ratios=[4, 3], hspace=0)
+
+st1 = sto.add_subplot(gsp[0])
+st2 = sto.add_subplot(gsp[1], sharex=st1)
+
+# SHARED X VALUES
+thex = np.arange(len(ua))
+
+# PRICE CHART
+st1.plot(thex, ys, label='Price', color="blue")
+st1.set_title('UNDER ARMOUR STOCK PRICES vs OBV - YTD (OCT-2019 - OCT-2020)')
+st1.set_ylabel('PRICE (US Dollars)')
+st1.set_yticks(np.arange(np.floor(ys.min()) - 2, np.ceil(ys.max()) + 4, step=2))
+st1.grid(axis='x', linestyle='--')
+
+# OBV CHART
+st2.plot(thex, ua['OBV'], color='black')
+
+# FUNCTION TO FORMAT MILLIONS
+def millions(x, pos):
+    'The two args are the value and tick position'
+    return '$%1.1fM' % (x * 1e-6)
+
+formatter = FuncFormatter(millions)
+st2.yaxis.set_major_formatter(formatter)
+st2.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, pos: ua.iloc[pos, 0]))
+st2.grid(axis='x', linestyle='--')
+st2.set_ylabel('OBV (M Dollars)')
+st2.set_ylim([ua['OBV'].min() - 1000, ua['OBV'].max() + 1000])
+plt.show()
+----
+
+[width="90%", align="center"]
+.OBV YTD
+image::2020/10/chart_stocks/obv.png[alt=obv]
+
+=== Resources
+
+- https://www.investopedia.com/articles/active-trading/011815/top-technical-indicators-rookie-traders.asp#volume-on-balance-volume-obv[OBV for rookie traders]
+- https://www.investopedia.com/terms/o/onbalancevolume.asp[OBV calculation]
+- https://www.metatrader5.com/es/terminal/help/indicators/volume_indicators/obv[Volume indicators]
+- https://www.ismaeldelacruz.es/analizando-el-indicador-obv-de-volumen/[Analyzing OBV (Spanish)]
+- https://stackoverflow.com/questions/52671594/calculating-stockss-on-balance-volume-obv-in-python[StackOverflow: Calculating OBV in Python]
+- https://matplotlib.org/3.1.0/gallery/ticks_and_spines/custom_ticker1.html[Custom]
+
+== mplfinance 
+
+mplfinance is a matplotlib module specially suited for showing financial data. I didn't have the time to play with it fully but it seemed to me a very useful tool if you need to plot financial data very often. To use it in the Jupyter notebook:
+
+[source, python]
+.import mplfinance in the notebook
+----
+import sys
+!{sys.executable} -m pip install mplfinance
+----
+
+For example to see how easy is to create financia data, here's the required code to show prices (with candlestick mode) and volume chart of the first 50 days. I've also included a couple of trending lines.
+
+[source, python]
+.mplfinance example
+----
+import mplfinance as mpl
+
+# it requires the index to be a time series
+ua['Date'] = pd.to_datetime(ua['Date'])
+
+mpl.figure()
+
+# adjusting overall styles
+style = mpl.make_mpf_style(
+    y_on_right=False,
+    base_mpf_style='yahoo',
+    gridaxis='vertical',
+    edgecolor='#666666',
+    gridstyle=':')
+
+
+data = ua.set_index('Date').iloc[0:50]
+# almost everything happens within the plot() function
+mpl.plot(
+    data, # first 30 days
+    type='candle', 
+    volume=True, 
+    title='UA PRICE AND VOLUME CHARTS (OCT-DEC 2019)',
+    style=style,
+    figratio=(11,8),
+    figscale=0.85,
+    figsize=(15, 6),
+    mav=(),
+    tlines=[
+        dict(tlines=[('2019-11-06', '2019-11-13')], colors='r'),
+        dict(tlines=[('2019-12-03', '2019-12-08'), ('2019-12-12', '2019-12-18')], colors='g')
+    ])
+
+mpl.show()
+----
+
+[width="90%", align="center"]
+.mplfinance example
+image::2020/10/chart_stocks/mplfinance.png[alt=mplfinance]
+
+As you can see the required number of lines is really low compared to previous examples. I think it's worth spending a little bit more time with it in the future.
+
+=== Resources
+
+- https://medium.com/@shivangisareen/for-anyone-using-jupyter-notebook-installing-packages-18a9468d0c1c[Installing packages in a Python Jupyter notebook]
+- https://github.com/matplotlib/mplfinance[mplfinance in Github]
+
+== Other Resources
+
+=== Article source code
+
+- Jupyter notebook: link:/files/2020/10/chart_stocks/ua_analysis.ipynb[ua_analysis.ipynb].
+
+=== Financial
+
+- https://finance.yahoo.com/[Yahoo Finance]
+
+=== Pandas
+
+- https://towardsdatascience.com/trading-toolbox-02-wma-ema-62c22205e2a9[Weighted vs Exponential moving averages]
+- https://towardsdatascience.com/trading-technical-analysis-with-pandas-43e737a17861[Trading technical analysis with Pandas]
+
+=== Matplotlib
+
+- https://github.com/matplotlib/mplfinance[Matplot Financial Module]
+- https://stackoverflow.com/questions/22511550/gridspec-with-shared-axes-in-python[Shared Axes with GridSpec]
+- https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.gridspec.GridSpec.html#matplotlib.gridspec.GridSpec[GridSpec API]
