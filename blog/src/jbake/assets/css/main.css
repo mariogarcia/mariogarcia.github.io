@@ -3739,3 +3739,15 @@ tbody tr th,tbody tr th p,tfoot tr th,tfoot tr th p{color:rgba(0,0,0,.8);font-we
 table.compressed td {
 	padding: 0 .75em;
 }
+
+table.compressed th {
+	padding: 0 .75em;
+}
+
+.metadata > em {
+	margin-right: .5em;
+}
+
+.metadata > b {
+	margin-right: .5em;
+}
