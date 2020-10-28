@@ -1,0 +1,513 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><div class="metadata"><em class="fa fa-calendar-o"></em><b>2020-10-27</b></div><h1>DS - Machine Learning key concepts</h1></header><yieldScaped><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>As my next step in Data Science world, this week I&#8217;m starting a Machine Learning Course. Although it seems like an intimidating path ahead, lets take it step by step and lets review some basic concepts on Machine Learning.</p>
+</div>
+<hr>
+</div>
+</div>
+<div class="sect1">
+<h2 id="what_is_machine_learning">What is Machine Learning ?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Machine learning (ML) is an area of artificial Intelligence (AI) <strong>focused on building software capable of improving over time through experience</strong>. Searching a little bit about the topic will show you that ML is not new in town. Although it&#8217;s an area of research already present in the 50&#8217;s, however it remained mainly in the academia, the military and some large corporations. It&#8217;s only nowadays when it&#8217;s has become a trending technology where everybody wants to jump in. Some of the reasons behind this change are:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>ML benefits from vast amounts of data</strong>. In the early days data was scarced and hard to collect, now is easier to access or to create large datasets.</p>
+</li>
+<li>
+<p><strong>ML benefits from series of modern coded algorithms</strong>. Today there&#8217;re plenty of new algorithms already coded and freely available.</p>
+</li>
+<li>
+<p><strong>ML benefits from powerful computers</strong>. A smart phone today has more power than a super computer in the 70&#8217;s.</p>
+</li>
+</ul>
+</div>
+<div class="quoteblock">
+<blockquote>
+Is an area of AI focused on building software capable of improving over time through experience
+</blockquote>
+</div>
+<div class="sect2">
+<h3 id="resources">Resources</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://en.wikipedia.org/wiki/Machine_learning">Wikipedia</a></p>
+</li>
+<li>
+<p><a href="https://medium.com/towards-artificial-intelligence/what-is-machine-learning-ml-b58162f97ec7">What is ML ? (Medium)</a></p>
+</li>
+<li>
+<p><a href="https://www.ibm.com/cloud/learn/machine-learning">Machine Learning (IBM article)</a></p>
+</li>
+<li>
+<p><a href="https://www.quora.com/Are-there-any-similar-services-to-Amazon-Mechanical-Turk">Alternatives to Mechanical Turk</a></p>
+</li>
+<li>
+<p><a href="https://builtin.com/artificial-intelligence/machine-learning-healthcare">Machine learning in Healthcare</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="why_you_should_not_learn_ml">Why you should (not) learn ML ?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>While preparing this entry, I came across some very interesting videos (see resources) talking about how people are learning ML maybe because the wrong reasons. The truth is that ML has an enormous hype and that could force some people into think that there&#8217;s a need to learn it, even if they don&#8217;t know why. Some of these (wrong?) ideas on ML:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>ML is the next big thing</strong>: Well, it&#8217;s a new exciting area of knowledge of course, but there&#8217;re many others, like distributed computing for example. People who gets excited for every new thing tend to lose interest as soon as there&#8217;s something newer.</p>
+</li>
+<li>
+<p><strong>ML is going to improve my career path</strong>: Well, having a course on ML is not gonna get you more dollars in your bank account by itself, the experience on working with ML will. You have to make sure you&#8217;ll like the change, maybe there&#8217;re many other ways of improving your current situation without involving ML.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>And even once you&#8217;ve decided the why, there&#8217;s still <strong>the problem of having a plan</strong>. Having a plan <strong>involves how, and what</strong>. How are you going to do it ? Are you going to do online courses ? Do an intership in an ML project ? And, in case you&#8217;re doing an online course, What type of course will fullfil your goals ?</p>
+</div>
+<div class="paragraph">
+<p>Not having a plan could lead you to a paralisis analysis situation and the <a href="https://en.wikipedia.org/wiki/Buridan%27s_ass">Buridan&#8217;s ass</a> problem (aka donkey problem). There are many people getting stuck in the following question: Am I learning ML <strong>to build a product</strong> or just <strong>for research</strong> ? Well lesson learned is that to avoid paralisis analysis you must choose one or the other quickly, don&#8217;t waste your time.</p>
+</div>
+<div class="paragraph">
+<p>Having said that, I thought it would be great to answer these questions to myself:</p>
+</div>
+<div class="paragraph">
+<p><strong>Why are you learning ML ?</strong></p>
+</div>
+<div class="paragraph">
+<p>I&#8217;m learning ML because most of the software projects I was working on lately required ML for a good reason (computer vision applied to security, healthcare diagnosis), and I felt I was missing a very important part of the project. I think ML is really key in many software development projects and I also think that my work as software engineer can be improved by having some practical knowledge on ML. Even if I don&#8217;t code myself the ML solution, I will be better on understanding how to integrate those solutions in the projects I&#8217;m involved with.</p>
+</div>
+<div class="paragraph">
+<p><strong>How are you going to do it ?</strong></p>
+</div>
+<div class="paragraph">
+<p>To me, taking online courses is the most convenient way of learning ML. Moreover now is almost mandatory because of the pandemic. Another part of the plan is to write as much as I can about what I&#8217;m learning. That, I think, will reinforce my learning process.</p>
+</div>
+<div class="paragraph">
+<p><strong>What exactly are you going to begin with ?</strong></p>
+</div>
+<div class="paragraph">
+<p>General online course giving me a general overview of the most used techniques. The course has to be practical, real coding examples.</p>
+</div>
+<div class="sect2">
+<h3 id="resources_2">Resources</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://www.youtube.com/watch?v=cyLWtMSry58">Don&#8217;t learn machine learning (Youtube)</a></p>
+</li>
+<li>
+<p><a href="https://towardsdatascience.com/dont-learn-machine-learning-8af3cf946214">Don&#8217;t learn machine learning article</a></p>
+</li>
+<li>
+<p><a href="https://www.youtube.com/watch?v=reY50t2hbuM&amp;t=289s">Why You Should NOT Learn Machine Learning! (Youtube)</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="how_ml_works">How ML works ?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Although there&#8217;re different methods to build ML software, they all share a common iterative process with three phases:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>In the first part, called <strong>representation</strong>, we should find a representative dataset and a suitable algorithm for the problem at hand. Then we use both, dataset and algorithm, to train a software model to make predictions.</p>
+</li>
+<li>
+<p>Afterwards the model performance is evaluated with new datasets. Training and evaluation are part of the <strong>evaluation</strong> phase.</p>
+</li>
+<li>
+<p>Finally if we&#8217;re not satisfied with the results we can always iterate over the process to optimize the results. This final part as you may guess is called <strong>optimization</strong>.</p>
+</li>
+</ul>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/diag-ee54226f3e64668152bfd7efafad0f7b.png" alt="ML processes are iterative" width="1070" height="308">
+</div>
+<div class="title">ML processes are iterative</div>
+</div>
+<div class="sect2">
+<h3 id="representation">Representation</h3>
+<div class="paragraph">
+<p>For instance, if we&#8217;d like to create a software capable of giving fair loans avoiding risky clients we&#8217;ll need as many historical records as we can get. The more the data, the better. But there&#8217;re also some other considerations to take into account. Maybe the data contains some sensitive information we should skip before feeding the system, whether because of privacy reasons or because it could lead to unwanted biased results. Remember that the lack of some information could also end having unfair or biased results. Bottom line <strong>during dataset preparation you need to make sure the data is unbiased and relevant</strong>.</p>
+</div>
+<div class="paragraph">
+<p><strong>The type of algorithm to use depends on the type of the data, the amount of data, and the type of the problem to be solved</strong>. In practice most of the algorithm selection usually depends on the type of strategy selected: supervised, unsupervised, semi-supervised, or reinforced. There&#8217;re algorithms that fit best in one strategy than others.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+The training dataset and the algorithm to train the model
+</blockquote>
+</div>
+</div>
+<div class="sect2">
+<h3 id="evaluation">Evaluation</h3>
+<div class="paragraph">
+<p>Once we&#8217;ve decided which algorithm to use we need to evaluate how it works . We need to <strong>create a model and train it with a training dataset</strong>. Later on the trained model will be used to make predictions on new data. Finally once the training has finished we can now <strong>use the model with the testing dataset to see if the predictions over the trained dataset are correct</strong>.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+Model creation and testing the model with the testing dataset
+</blockquote>
+</div>
+</div>
+<div class="sect2">
+<h3 id="optimization">Optimization</h3>
+<div class="paragraph">
+<p>If we&#8217;re happy with the model predictions we&#8217;ve finished for now, if not, we should iterate to see how we can improve the results:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Maybe we realize the data was not accurate, maybe it was biased somehow</p>
+</li>
+<li>
+<p>Maybe we can use a more suitable algorithm</p>
+</li>
+<li>
+<p>Maybe the algorithm is correct but we can customize its parameters a little bit</p>
+</li>
+</ul>
+</div>
+<div class="quoteblock">
+<blockquote>
+Did I get the expected performance ?
+</blockquote>
+</div>
+</div>
+<div class="sect2">
+<h3 id="resources_3">Resources</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://www.coursera.org/learn/python-machine-learning">Applied Machine Learning in Python (Coursera)</a></p>
+</li>
+<li>
+<p><a href="https://www.ibm.com/cloud/learn/machine-learning">Machine Learning (IBM article)</a></p>
+</li>
+<li>
+<p><a href="https://www.analyticsvidhya.com/blog/2017/09/common-machine-learning-algorithms/">Common Machine Learning Algorithms</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="machine_learning_methods">Machine Learning methods</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>According to Wikipedia there&#8217;re <a href="https://en.wikipedia.org/wiki/Outline_of_machine_learning#Machine_learning_methods">a few ML methods</a>, but now that I&#8217;ve just started looking into ML I&#8217;m focusing on <strong>supervised, and unsupervised</strong> methods.</p>
+</div>
+<div class="sect2">
+<h3 id="supervised">Supervised</h3>
+<div class="paragraph">
+<p>In the supervised method, there&#8217;s a labeled dataset, meaning that for every set of features there&#8217;s what is called <strong>a target value</strong>, this target value could be discrete (e.g. a label) or continuous (e.g a date). Depending on the type of the target values problems will fit into <strong>classification (discrete)</strong> or <strong>regression (continuous)</strong> problems.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+Supervised method requires labeled data
+</blockquote>
+</div>
+<div class="sect3">
+<h4 id="classification">Classification</h4>
+<div class="paragraph">
+<p>Here the goal is to predict the target value (categorical class labels) of new instances based on training data. For example, check the following dataset:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch compressed">
+<caption class="title">Table 1. classification training dataset</caption>
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-center valign-top">WHEELS</th>
+<th class="tableblock halign-center valign-top">MODEL</th>
+<th class="tableblock halign-center valign-top">BRAND</th>
+<th class="tableblock halign-center valign-top">COLOR</th>
+<th class="tableblock halign-center valign-top">LABEL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock">2</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">CBR 600</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">HONDA</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">RED</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">BIKE</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock">4</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">F450</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">FERRARI</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">RED</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">CAR</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock">2</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">SV650</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">SUZUKI</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">BLUE</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">BIKE</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock">4</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">SPACE</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">RENAULT</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">YELLOW</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">CAR</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>By looking at the features, <strong>WHEELS</strong> could be useful when trying to predict if something is a car or a bike. Once we&#8217;ve chosen the most representative features, we build the model. Then the model is evaluated with a <strong>testing dataset</strong> to see how well the algorithm predicts target values. When the target value is discrete like in this example, you are facing a <strong>classification problem</strong>. For example, if I use the following as an input to the model built with the previous table:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch compressed">
+<caption class="title">Table 2. classification testing dataset</caption>
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-center valign-top">WHEELS</th>
+<th class="tableblock halign-center valign-top">MODEL</th>
+<th class="tableblock halign-center valign-top">BRAND</th>
+<th class="tableblock halign-center valign-top">COLOR</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock">2</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">FZR 600</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">YAMAHA</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">WHITE</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>I would expect the algorithm to return the target value <strong>BIKE</strong>.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+Classification is about discrete values
+</blockquote>
+</div>
+</div>
+<div class="sect3">
+<h4 id="regression">Regression</h4>
+<div class="paragraph">
+<p>A <strong>regression problem</strong> is when the target value is continuous such as "height" or "temperature". For instance, this is a sample of a training dataset of housing prices in a given neigbourghood:</p>
+</div>
+<table class="tableblock frame-all grid-all centered" style="width: 20%;">
+<caption class="title">Table 3. regression training dataset</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-center valign-top">ROOMS</th>
+<th class="tableblock halign-center valign-top">PRICE</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock">2</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">200000</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock">2</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">205000</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock">3</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">250000</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock">4</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">300000</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>Now that we have a training dataset, we need to look for a regression algorithm to build the model. Testing the model should return a prediction on housing prices using the number of rooms as the input. Graphically, the result for any new input would be a point along the regression line (orange):</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/10/ml_key_concepts/regression.png" alt="regression" width="60%">
+</div>
+<div class="title">Figure 1. Regression</div>
+</div>
+<div class="quoteblock">
+<blockquote>
+Regression is about continuous values
+</blockquote>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="unsupervised">Unsupervised</h3>
+<div class="paragraph">
+<p>Unsupervised methods <strong>try to get some insight or knowledge in data when labels are not available</strong>. There&#8217;s also a main distinction between those problems where the unsupervised method will try to find groups in the data (clustering) and those where the algorithm will try to look for unusual patterns (also called outliers).</p>
+</div>
+<table class="tableblock frame-none grid-none stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><span class="image"><img src="/img/2020/10/ml_key_concepts/clustering.png" alt="clustering" width="90%"></span></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><span class="image"><img src="/img/2020/10/ml_key_concepts/outliers.png" alt="outlier" width="90%"></span></p></td>
+</tr>
+</tbody>
+</table>
+<div class="quoteblock">
+<blockquote>
+In a non labeled dataset unsupervised algorithms look for groups and patterns
+</blockquote>
+</div>
+<div class="paragraph">
+<p>There&#8217;s also a <a href="https://en.wikipedia.org/wiki/Semi-supervised_learning">semi-supervised</a> method. It&#8217;s normally very useful when not having enough labelled data. This approach combines a small amount of labeled data with a large amount of unlabeled data during training.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="resources_4">Resources</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://www.coursera.org/learn/python-machine-learning">Applied Machine Learning in Python (Coursera)</a></p>
+</li>
+<li>
+<p><a href="https://www.ibm.com/cloud/learn/machine-learning">Machine Learning (IBM article)</a></p>
+</li>
+<li>
+<p><a href="https://en.wikipedia.org/wiki/Outline_of_machine_learning#Machine_learning_methods">Machine learning methods (Wikipedia)</a></p>
+</li>
+<li>
+<p><a href="https://en.wikipedia.org/wiki/Semi-supervised_learning">Semi-supervised learning (Wikipedia)</a></p>
+</li>
+<li>
+<p><a href="https://www.quora.com/What-is-the-difference-between-supervised-and-unsupervised-learning-algorithms">Difference between supervised and unsupervised algorithms (Quora)</a></p>
+</li>
+<li>
+<p><a href="https://machinelearningmastery.com/a-tour-of-machine-learning-algorithms/">A Tour of Machine Learning Algorithms</a></p>
+</li>
+<li>
+<p><a href="https://towardsdatascience.com/types-of-machine-learning-algorithms-you-should-know-953a08248861">Types of Machine Learning Algorithms you should know</a></p>
+</li>
+<li>
+<p><a href="https://towardsdatascience.com/supervised-learning-basics-of-classification-and-main-algorithms-c16b06806cd3">Supervised Learning</a></p>
+</li>
+<li>
+<p><a href="https://www.geeksforgeeks.org/regression-classification-supervised-machine-learning/">Supervised Learning: regression and classification examples</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="other_resources">Other Resources</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://github.com/dlsucomet/MLResources">ML courses</a>: A github repository with ML resources (books and courses links)</p>
+</li>
+<li>
+<p><a href="https://github.com/facebookresearch/detectron2">Detectron2</a>: FAIR&#8217;s next-generation platform for object detection and segmentation</p>
+</li>
+</ul>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>
