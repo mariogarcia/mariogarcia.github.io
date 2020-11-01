@@ -1,0 +1,339 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><div class="metadata"><em class="fa fa-calendar-o"></em><b>2020-11-01</b></div><h1>Classifying food</h1></header><yieldScaped><div id="preamble">
+<div class="sectionbody">
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/10/ml_slc_getting_started/header.png" alt="header" width="100%">
+</div>
+</div>
+<div class="paragraph">
+<p>Next station in my machine learning journey is the Supervised Learning method. In this article I&#8217;m using <strong>Supervised Learning Classification</strong> to <strong>classify food</strong> into three categories: green, orange or red <strong>depending on whether they&#8217;re healthy or not</strong>. In order to get used to the methodology I&#8217;m sticking to the <a href="https://mariogarcia.github.io/blog/2020/10/ml_key_concepts.html#how_ml_works">representation-evaluation-optimization</a> process.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/diag-76efed66a451856f2944041b54f7e48a.png" alt="representation &#8594; evaluation &#8594; optimization" width="760" height="210">
+</div>
+<div class="title">representation &#8594; evaluation &#8594; optimization</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="representation_phase">Representation Phase</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In the representation phase <strong>we should find a representative dataset and a suitable algorithm for the problem</strong> at hand. Then we use both, dataset and algorithm, to train a software model to make predictions.</p>
+</div>
+<div class="sect2">
+<h3 id="dataset_preparation">Dataset preparation</h3>
+<div class="paragraph">
+<p>A representative dataset, in this case, would be a large dataset of food, labeled as good/bad/not-so-good food. I created a <a href="/files/2020/10/ml_slc_getting_started/food.csv">csv file</a> with more than three thousand food entries, collected from <a href="https://badali.umh.es/home">this site (Spanish)</a>.</p>
+</div>
+<div class="listingblock">
+<div class="title">loading data</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import pandas as pd
+
+food = pd.read_csv('food.csv', sep=';').fillna(0)
+food.head()</code></pre>
+</div>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/10/ml_slc_getting_started/food_dataset.png" alt="header" width="80%">
+</div>
+<div class="title">Figure 1. food dataset</div>
+</div>
+<div class="paragraph">
+<p>Each entry has a series of possible features and it&#8217;s labeled with a color value (TRAFFICLIGH VALUE) which depends on whether it is a healthy food, not so healthy food or junk food. Next I should choose every column that can be eligible as a feature, for example the name of the food is not a good feature if you&#8217;d like to generalize the results.</p>
+</div>
+<div class="listingblock">
+<div class="title">choosing possible features</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">COLUMNS_OF_INTEREST = [
+    "TRAFFICLIGHT VALUE",
+    "CARBS",
+    "SUGAR",
+    "ENERGY",
+    "PROTEINS",
+    "SATURATED FAT",
+    "FAT",
+    "SODIUM",
+    "FIBER",
+    "SALT",
+]
+
+df = (food
+    .copy()
+    .loc[:, COLUMNS_OF_INTEREST]
+    .dropna())
+
+df.head()</code></pre>
+</div>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/10/ml_slc_getting_started/food_features_all.png" alt="dataset" width="80%">
+</div>
+<div class="title">Figure 2. possible features</div>
+</div>
+<div class="paragraph">
+<p><strong>However the goal is to choose the minimum set of features that maximizes the classification</strong>. Too many could classify well but it would become too hard to use, too few would not classify well enough. I need to find the balance between the two. Once I&#8217;ve found the balance I can use both, features and labels to create a training and test datasets. For that I use the <a href="https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html">train_test_split function</a> from scikit-learn library.</p>
+</div>
+<div class="listingblock">
+<div class="title">minimum set of features and creating training and test datasets</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from sklearn.model_selection import train_test_split
+
+feats = df[['CARBS', 'SUGAR', 'PROTEINS', 'FAT', 'SALT', 'FIBER']]
+label = df['TRAFFICLIGHT VALUE']
+
+X_train, X_test, y_train, y_test = train_test_split(feats, label, random_state=0)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Drawing a <strong>scatter matrix</strong> sometimes could help you to spot features that are particularly good on classifying samples. I did the matrix, but I recognize that although some of the feature-pairs are clearly better than others (e.g. proteins/carbs) many of them are inconclusive to me (e.g. salt/fat). I invite you to open the plot in a new window, full size, and take a look for yourself:</p>
+</div>
+<div class="listingblock">
+<div class="title">matrix plot</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import numpy as np
+
+from matplotlib import pyplot as plt
+from pandas.plotting import scatter_matrix
+
+plt.figure()
+scatter_matrix(X_train, c=y_train,hist_kwds={'bins': 15}, figsize=(15, 15))
+plt.show()</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Notice how I&#8217;m using the <strong>training dataset features</strong> (X_train) and the <strong>training dataset labels</strong> (y_train) to build the scatter matrix.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/10/ml_slc_getting_started/matrix_plot.png" alt="header" width="25%">
+</div>
+<div class="title">Figure 3. matrix plot</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="algorithm_selection_configuration">Algorithm selection &amp; configuration</h3>
+<div class="paragraph">
+<p>In order to choose the algorithm, I needed to identify first the type of problem I was facing. Why I though this would fit as a <strong>Supervised Learning Classification Problem</strong> ?</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>First, I&#8217;ve got a <strong>labeled dataset</strong>, so it looked like I could use the labeled data to train a <strong>supervised learning model</strong>.</p>
+</li>
+<li>
+<p>Second, I was looking for different types of <strong>discrete target values</strong> (values for green, orange, red), therefore it seemed to be a <strong>classification problem</strong>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Once I confirmed it was a classification problem I chose the only classification algorithm I know so far, the <a href="https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm">k-nearest neighbors</a> algorithm.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="resources">Resources</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="/files/2020/10/ml_slc_getting_started/food.csv">Food dataset (csv)</a></p>
+</li>
+<li>
+<p><a href="https://badali.umh.es/home">Badali: Food &amp; Nutrition educational site (spanish)</a></p>
+</li>
+<li>
+<p><a href="/files/2020/10/ml_slc_getting_started/food.ipynb">Jupyter notebook source</a></p>
+</li>
+<li>
+<p><a href="https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm">k-nearest neighbors (Wikipedia)</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="evaluation_phase">Evaluation Phase</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Then we use both, dataset and algorithm, to train a software model to make predictions. Afterwards the model performance is evaluated with testing datasets. Training and testing are part of the evaluation phase.</p>
+</div>
+<div class="sect2">
+<h3 id="ml_model_creation_training">ML model creation &amp; training</h3>
+<div class="paragraph">
+<p>The k-nearest neighbors algorithm is implemented in <a href="https://scikit-learn.org/">scikit-learn</a> via the <a href="https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html">KNeighborsClassifier</a> class. The algorithm tries to establish to which type the element belongs by checking the closest neighborg elements around. You can customize the <strong>K parameter</strong> which sets how many neighbors does the algorithm have to check before emmiting its veredict.</p>
+</div>
+<div class="paragraph">
+<p>Here I&#8217;m initializing the algorithm with <strong>k=5</strong>. Then I&#8217;m <strong>training the model using the fit function</strong> and finally I&#8217;m checking how well the model is going to perform by passing the <strong>testing dataset</strong> (X_test, y_test) to the <strong>score function</strong>. After some tunes here and there I was able to get a 90% of accuracy by using 6 features.</p>
+</div>
+<div class="listingblock">
+<div class="title">model training and getting accuracy score with the testing dataset</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from sklearn.neighbors import KNeighborsClassifier
+
+knn = KNeighborsClassifier(n_neighbors=5)
+
+knn.fit(X_train, y_train)
+knn.score(X_test, y_test) # returns 0.9 ==&gt; 90%</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="ml_model_testing">ML model testing</h3>
+<div class="paragraph">
+<p>To get a prediction I need to provide the following measurements to the model:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>CARBS</p>
+</li>
+<li>
+<p>SUGAR</p>
+</li>
+<li>
+<p>PROTEINS</p>
+</li>
+<li>
+<p>FAT</p>
+</li>
+<li>
+<p>SALT</p>
+</li>
+<li>
+<p>FIBER</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>I&#8217;m passing as many samples as I want to the <strong>KNeighborsClassifier&#8217;s predict function</strong> and for every sample I&#8217;m getting a prediction. Every sample is passed as an array with the required feature values. In this case I&#8217;m using another online supermarket dataset to test the model with other datasets than the training and testing datasets.</p>
+</div>
+<div class="listingblock">
+<div class="title">model prediction</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python"># Every sample has to provide values for
+# food_entry = [CARBS, SUGAR, PROTEINS, FAT, SALT, FIBER]
+
+tuna_olive_oil = [0, 0, 20, 33, 0.88, 0]    # expected 3
+beer_one_liter = [3.4, 0.1, 0.3, 0, 0, 0]   # expected 2
+coke           = [10.6, 10.6, 0, 0, 0, 0]   # expected 3
+croissants     = [46, 4.5, 8.7, 26, 1.3, 0] # expected 3
+
+predictions    = knn.predict([
+    tuna_olive_oil,
+    beer_one_liter,
+    coke,
+    croissants
+])
+
+predictions == [3, 2, 3, 3]</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="resources_2">Resources</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://scikit-learn.org">Scikit</a></p>
+</li>
+<li>
+<p><a href="https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html">Scikit KNeighborsClassifier</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="optimization">Optimization</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Because I still don&#8217;t have a background on optimization procedures, the optimization I did was completely hand-crafted. But I can comment on two tools that I think helped trying to optimize the whole process:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>scatter matrix</strong>. It helped me to see some features that I though for sure they were not going to work well.</p>
+</li>
+<li>
+<p><strong>model score</strong>: I used it as a brute force mechanism. I chose the optimal set of features by running the <strong>model score</strong> until I got what I though it was a compromised between a high score and a reasonable number of features.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>I&#8217;m sure that, in the future, with more experience, I&#8217;ll be able to do a more serious and professional optimization plan.</p>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>

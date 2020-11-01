@@ -4,8 +4,293 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2020-10-28T10:49:38Z</updated>
-    <id>tag:null,2020:10</id>
+    <updated>2020-11-01T20:07:23Z</updated>
+    <id>tag:null,2020:11</id>
+    <entry>
+        <title>Classifying food</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2020/10/ml_slc_getting_started.html"/>
+        <updated>2020-11-01T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2020/10/ml_slc_getting_started.html</id>
+        <category term="ds"/>
+        <category term="ml"/>
+        <category term="python"/>
+        <content type="html">
+            &lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/10/ml_slc_getting_started/header.png&quot; alt=&quot;header&quot; width=&quot;100%&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Next station in my machine learning journey is the Supervised Learning method. In this article I&amp;#8217;m using &lt;strong&gt;Supervised Learning Classification&lt;/strong&gt; to &lt;strong&gt;classify food&lt;/strong&gt; into three categories: green, orange or red &lt;strong&gt;depending on whether they&amp;#8217;re healthy or not&lt;/strong&gt;. In order to get used to the methodology I&amp;#8217;m sticking to the &lt;a href=&quot;https://mariogarcia.github.io/blog/2020/10/ml_key_concepts.html#how_ml_works&quot;&gt;representation-evaluation-optimization&lt;/a&gt; process.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/diag-76efed66a451856f2944041b54f7e48a.png&quot; alt=&quot;representation &amp;#8594; evaluation &amp;#8594; optimization&quot; width=&quot;760&quot; height=&quot;210&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;representation &amp;#8594; evaluation &amp;#8594; optimization&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;representation_phase&quot;&gt;Representation Phase&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In the representation phase &lt;strong&gt;we should find a representative dataset and a suitable algorithm for the problem&lt;/strong&gt; at hand. Then we use both, dataset and algorithm, to train a software model to make predictions.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;dataset_preparation&quot;&gt;Dataset preparation&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A representative dataset, in this case, would be a large dataset of food, labeled as good/bad/not-so-good food. I created a &lt;a href=&quot;/files/2020/10/ml_slc_getting_started/food.csv&quot;&gt;csv file&lt;/a&gt; with more than three thousand food entries, collected from &lt;a href=&quot;https://badali.umh.es/home&quot;&gt;this site (Spanish)&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;loading data&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import pandas as pd
+
+food = pd.read_csv(&apos;food.csv&apos;, sep=&apos;;&apos;).fillna(0)
+food.head()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/10/ml_slc_getting_started/food_dataset.png&quot; alt=&quot;header&quot; width=&quot;80%&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 1. food dataset&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Each entry has a series of possible features and it&amp;#8217;s labeled with a color value (TRAFFICLIGH VALUE) which depends on whether it is a healthy food, not so healthy food or junk food. Next I should choose every column that can be eligible as a feature, for example the name of the food is not a good feature if you&amp;#8217;d like to generalize the results.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;choosing possible features&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;COLUMNS_OF_INTEREST = [
+    &quot;TRAFFICLIGHT VALUE&quot;,
+    &quot;CARBS&quot;,
+    &quot;SUGAR&quot;,
+    &quot;ENERGY&quot;,
+    &quot;PROTEINS&quot;,
+    &quot;SATURATED FAT&quot;,
+    &quot;FAT&quot;,
+    &quot;SODIUM&quot;,
+    &quot;FIBER&quot;,
+    &quot;SALT&quot;,
+]
+
+df = (food
+    .copy()
+    .loc[:, COLUMNS_OF_INTEREST]
+    .dropna())
+
+df.head()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/10/ml_slc_getting_started/food_features_all.png&quot; alt=&quot;dataset&quot; width=&quot;80%&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 2. possible features&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;However the goal is to choose the minimum set of features that maximizes the classification&lt;/strong&gt;. Too many could classify well but it would become too hard to use, too few would not classify well enough. I need to find the balance between the two. Once I&amp;#8217;ve found the balance I can use both, features and labels to create a training and test datasets. For that I use the &lt;a href=&quot;https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html&quot;&gt;train_test_split function&lt;/a&gt; from scikit-learn library.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;minimum set of features and creating training and test datasets&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.model_selection import train_test_split
+
+feats = df[[&apos;CARBS&apos;, &apos;SUGAR&apos;, &apos;PROTEINS&apos;, &apos;FAT&apos;, &apos;SALT&apos;, &apos;FIBER&apos;]]
+label = df[&apos;TRAFFICLIGHT VALUE&apos;]
+
+X_train, X_test, y_train, y_test = train_test_split(feats, label, random_state=0)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Drawing a &lt;strong&gt;scatter matrix&lt;/strong&gt; sometimes could help you to spot features that are particularly good on classifying samples. I did the matrix, but I recognize that although some of the feature-pairs are clearly better than others (e.g. proteins/carbs) many of them are inconclusive to me (e.g. salt/fat). I invite you to open the plot in a new window, full size, and take a look for yourself:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;matrix plot&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import numpy as np
+
+from matplotlib import pyplot as plt
+from pandas.plotting import scatter_matrix
+
+plt.figure()
+scatter_matrix(X_train, c=y_train,hist_kwds={&apos;bins&apos;: 15}, figsize=(15, 15))
+plt.show()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Notice how I&amp;#8217;m using the &lt;strong&gt;training dataset features&lt;/strong&gt; (X_train) and the &lt;strong&gt;training dataset labels&lt;/strong&gt; (y_train) to build the scatter matrix.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/10/ml_slc_getting_started/matrix_plot.png&quot; alt=&quot;header&quot; width=&quot;25%&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 3. matrix plot&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;algorithm_selection_configuration&quot;&gt;Algorithm selection &amp;amp; configuration&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In order to choose the algorithm, I needed to identify first the type of problem I was facing. Why I though this would fit as a &lt;strong&gt;Supervised Learning Classification Problem&lt;/strong&gt; ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;First, I&amp;#8217;ve got a &lt;strong&gt;labeled dataset&lt;/strong&gt;, so it looked like I could use the labeled data to train a &lt;strong&gt;supervised learning model&lt;/strong&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Second, I was looking for different types of &lt;strong&gt;discrete target values&lt;/strong&gt; (values for green, orange, red), therefore it seemed to be a &lt;strong&gt;classification problem&lt;/strong&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Once I confirmed it was a classification problem I chose the only classification algorithm I know so far, the &lt;a href=&quot;https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm&quot;&gt;k-nearest neighbors&lt;/a&gt; algorithm.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;resources&quot;&gt;Resources&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;/files/2020/10/ml_slc_getting_started/food.csv&quot;&gt;Food dataset (csv)&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://badali.umh.es/home&quot;&gt;Badali: Food &amp;amp; Nutrition educational site (spanish)&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;/files/2020/10/ml_slc_getting_started/food.ipynb&quot;&gt;Jupyter notebook source&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm&quot;&gt;k-nearest neighbors (Wikipedia)&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;evaluation_phase&quot;&gt;Evaluation Phase&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then we use both, dataset and algorithm, to train a software model to make predictions. Afterwards the model performance is evaluated with testing datasets. Training and testing are part of the evaluation phase.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;ml_model_creation_training&quot;&gt;ML model creation &amp;amp; training&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The k-nearest neighbors algorithm is implemented in &lt;a href=&quot;https://scikit-learn.org/&quot;&gt;scikit-learn&lt;/a&gt; via the &lt;a href=&quot;https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html&quot;&gt;KNeighborsClassifier&lt;/a&gt; class. The algorithm tries to establish to which type the element belongs by checking the closest neighborg elements around. You can customize the &lt;strong&gt;K parameter&lt;/strong&gt; which sets how many neighbors does the algorithm have to check before emmiting its veredict.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Here I&amp;#8217;m initializing the algorithm with &lt;strong&gt;k=5&lt;/strong&gt;. Then I&amp;#8217;m &lt;strong&gt;training the model using the fit function&lt;/strong&gt; and finally I&amp;#8217;m checking how well the model is going to perform by passing the &lt;strong&gt;testing dataset&lt;/strong&gt; (X_test, y_test) to the &lt;strong&gt;score function&lt;/strong&gt;. After some tunes here and there I was able to get a 90% of accuracy by using 6 features.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;model training and getting accuracy score with the testing dataset&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.neighbors import KNeighborsClassifier
+
+knn = KNeighborsClassifier(n_neighbors=5)
+
+knn.fit(X_train, y_train)
+knn.score(X_test, y_test) # returns 0.9 ==&amp;gt; 90%&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;ml_model_testing&quot;&gt;ML model testing&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To get a prediction I need to provide the following measurements to the model:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;CARBS&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;SUGAR&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;PROTEINS&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;FAT&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;SALT&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;FIBER&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I&amp;#8217;m passing as many samples as I want to the &lt;strong&gt;KNeighborsClassifier&amp;#8217;s predict function&lt;/strong&gt; and for every sample I&amp;#8217;m getting a prediction. Every sample is passed as an array with the required feature values. In this case I&amp;#8217;m using another online supermarket dataset to test the model with other datasets than the training and testing datasets.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;model prediction&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;# Every sample has to provide values for
+# food_entry = [CARBS, SUGAR, PROTEINS, FAT, SALT, FIBER]
+
+tuna_olive_oil = [0, 0, 20, 33, 0.88, 0]    # expected 3
+beer_one_liter = [3.4, 0.1, 0.3, 0, 0, 0]   # expected 2
+coke           = [10.6, 10.6, 0, 0, 0, 0]   # expected 3
+croissants     = [46, 4.5, 8.7, 26, 1.3, 0] # expected 3
+
+predictions    = knn.predict([
+    tuna_olive_oil,
+    beer_one_liter,
+    coke,
+    croissants
+])
+
+predictions == [3, 2, 3, 3]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;resources_2&quot;&gt;Resources&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://scikit-learn.org&quot;&gt;Scikit&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html&quot;&gt;Scikit KNeighborsClassifier&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;optimization&quot;&gt;Optimization&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Because I still don&amp;#8217;t have a background on optimization procedures, the optimization I did was completely hand-crafted. But I can comment on two tools that I think helped trying to optimize the whole process:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;scatter matrix&lt;/strong&gt;. It helped me to see some features that I though for sure they were not going to work well.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;model score&lt;/strong&gt;: I used it as a brute force mechanism. I chose the optimal set of features by running the &lt;strong&gt;model score&lt;/strong&gt; until I got what I though it was a compromised between a high score and a reasonable number of features.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I&amp;#8217;m sure that, in the future, with more experience, I&amp;#8217;ll be able to do a more serious and professional optimization plan.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
     <entry>
         <title>DS - Machine Learning key concepts</title>
         <author>
@@ -143,10 +428,10 @@ Is an area of AI focused on building software capable of improving over time thr
 &lt;div class=&quot;ulist&quot;&gt;
 &lt;ul&gt;
 &lt;li&gt;
-&lt;p&gt;In the first part, called &lt;strong&gt;representation&lt;/strong&gt;, we should find a representative dataset and a suitable algorithm for the problem at hand. Then we use both, dataset and algorithm, to train a software model to make predictions.&lt;/p&gt;
+&lt;p&gt;In the first part, called &lt;strong&gt;representation&lt;/strong&gt;, we should find a representative dataset and a suitable algorithm for the problem at hand.&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;Afterwards the model performance is evaluated with new datasets. Training and evaluation are part of the &lt;strong&gt;evaluation&lt;/strong&gt; phase.&lt;/p&gt;
+&lt;p&gt;Then we use both, dataset and algorithm, to train a software model to make predictions. Afterwards the model performance is evaluated with new datasets. Training and evaluation are part of the &lt;strong&gt;evaluation&lt;/strong&gt; phase.&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;Finally if we&amp;#8217;re not satisfied with the results we can always iterate over the process to optimize the results. This final part as you may guess is called &lt;strong&gt;optimization&lt;/strong&gt;.&lt;/p&gt;
@@ -250,11 +535,12 @@ Supervised method requires labeled data
 &lt;table class=&quot;tableblock frame-all grid-all stretch compressed&quot;&gt;
 &lt;caption class=&quot;title&quot;&gt;Table 1. classification training dataset&lt;/caption&gt;
 &lt;colgroup&gt;
-&lt;col style=&quot;width: 20%;&quot;&gt;
-&lt;col style=&quot;width: 20%;&quot;&gt;
-&lt;col style=&quot;width: 20%;&quot;&gt;
-&lt;col style=&quot;width: 20%;&quot;&gt;
-&lt;col style=&quot;width: 20%;&quot;&gt;
+&lt;col style=&quot;width: 16.6666%;&quot;&gt;
+&lt;col style=&quot;width: 16.6666%;&quot;&gt;
+&lt;col style=&quot;width: 16.6666%;&quot;&gt;
+&lt;col style=&quot;width: 16.6666%;&quot;&gt;
+&lt;col style=&quot;width: 16.6666%;&quot;&gt;
+&lt;col style=&quot;width: 16.667%;&quot;&gt;
 &lt;/colgroup&gt;
 &lt;thead&gt;
 &lt;tr&gt;
@@ -262,7 +548,8 @@ Supervised method requires labeled data
 &lt;th class=&quot;tableblock halign-center valign-top&quot;&gt;MODEL&lt;/th&gt;
 &lt;th class=&quot;tableblock halign-center valign-top&quot;&gt;BRAND&lt;/th&gt;
 &lt;th class=&quot;tableblock halign-center valign-top&quot;&gt;COLOR&lt;/th&gt;
-&lt;th class=&quot;tableblock halign-center valign-top&quot;&gt;LABEL&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-center valign-top&quot;&gt;TYPE_NAME&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-center valign-top&quot;&gt;TYPE&lt;/th&gt;
 &lt;/tr&gt;
 &lt;/thead&gt;
 &lt;tbody&gt;
@@ -272,6 +559,7 @@ Supervised method requires labeled data
 &lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;HONDA&lt;/p&gt;&lt;/td&gt;
 &lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;RED&lt;/p&gt;&lt;/td&gt;
 &lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;BIKE&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;1&lt;/p&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;4&lt;/p&gt;&lt;/td&gt;
@@ -279,6 +567,7 @@ Supervised method requires labeled data
 &lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;FERRARI&lt;/p&gt;&lt;/td&gt;
 &lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;RED&lt;/p&gt;&lt;/td&gt;
 &lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;CAR&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0&lt;/p&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2&lt;/p&gt;&lt;/td&gt;
@@ -286,6 +575,7 @@ Supervised method requires labeled data
 &lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;SUZUKI&lt;/p&gt;&lt;/td&gt;
 &lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;BLUE&lt;/p&gt;&lt;/td&gt;
 &lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;BIKE&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;1&lt;/p&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;4&lt;/p&gt;&lt;/td&gt;
@@ -293,6 +583,7 @@ Supervised method requires labeled data
 &lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;RENAULT&lt;/p&gt;&lt;/td&gt;
 &lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;YELLOW&lt;/p&gt;&lt;/td&gt;
 &lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;CAR&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0&lt;/p&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
@@ -325,7 +616,7 @@ Supervised method requires labeled data
 &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I would expect the algorithm to return the target value &lt;strong&gt;BIKE&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;I would expect the algorithm to return the target value &lt;strong&gt;1&lt;/strong&gt; which is the value of the type &lt;strong&gt;BIKE&lt;/strong&gt;.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;quoteblock&quot;&gt;
 &lt;blockquote&gt;

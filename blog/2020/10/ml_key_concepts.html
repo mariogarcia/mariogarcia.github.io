@@ -157,10 +157,10 @@ Is an area of AI focused on building software capable of improving over time thr
 <div class="ulist">
 <ul>
 <li>
-<p>In the first part, called <strong>representation</strong>, we should find a representative dataset and a suitable algorithm for the problem at hand. Then we use both, dataset and algorithm, to train a software model to make predictions.</p>
+<p>In the first part, called <strong>representation</strong>, we should find a representative dataset and a suitable algorithm for the problem at hand.</p>
 </li>
 <li>
-<p>Afterwards the model performance is evaluated with new datasets. Training and evaluation are part of the <strong>evaluation</strong> phase.</p>
+<p>Then we use both, dataset and algorithm, to train a software model to make predictions. Afterwards the model performance is evaluated with new datasets. Training and evaluation are part of the <strong>evaluation</strong> phase.</p>
 </li>
 <li>
 <p>Finally if we&#8217;re not satisfied with the results we can always iterate over the process to optimize the results. This final part as you may guess is called <strong>optimization</strong>.</p>
@@ -264,11 +264,12 @@ Supervised method requires labeled data
 <table class="tableblock frame-all grid-all stretch compressed">
 <caption class="title">Table 1. classification training dataset</caption>
 <colgroup>
-<col style="width: 20%;">
-<col style="width: 20%;">
-<col style="width: 20%;">
-<col style="width: 20%;">
-<col style="width: 20%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.667%;">
 </colgroup>
 <thead>
 <tr>
@@ -276,7 +277,8 @@ Supervised method requires labeled data
 <th class="tableblock halign-center valign-top">MODEL</th>
 <th class="tableblock halign-center valign-top">BRAND</th>
 <th class="tableblock halign-center valign-top">COLOR</th>
-<th class="tableblock halign-center valign-top">LABEL</th>
+<th class="tableblock halign-center valign-top">TYPE_NAME</th>
+<th class="tableblock halign-center valign-top">TYPE</th>
 </tr>
 </thead>
 <tbody>
@@ -286,6 +288,7 @@ Supervised method requires labeled data
 <td class="tableblock halign-center valign-top"><p class="tableblock">HONDA</p></td>
 <td class="tableblock halign-center valign-top"><p class="tableblock">RED</p></td>
 <td class="tableblock halign-center valign-top"><p class="tableblock">BIKE</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">1</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-center valign-top"><p class="tableblock">4</p></td>
@@ -293,6 +296,7 @@ Supervised method requires labeled data
 <td class="tableblock halign-center valign-top"><p class="tableblock">FERRARI</p></td>
 <td class="tableblock halign-center valign-top"><p class="tableblock">RED</p></td>
 <td class="tableblock halign-center valign-top"><p class="tableblock">CAR</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">0</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-center valign-top"><p class="tableblock">2</p></td>
@@ -300,6 +304,7 @@ Supervised method requires labeled data
 <td class="tableblock halign-center valign-top"><p class="tableblock">SUZUKI</p></td>
 <td class="tableblock halign-center valign-top"><p class="tableblock">BLUE</p></td>
 <td class="tableblock halign-center valign-top"><p class="tableblock">BIKE</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">1</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-center valign-top"><p class="tableblock">4</p></td>
@@ -307,6 +312,7 @@ Supervised method requires labeled data
 <td class="tableblock halign-center valign-top"><p class="tableblock">RENAULT</p></td>
 <td class="tableblock halign-center valign-top"><p class="tableblock">YELLOW</p></td>
 <td class="tableblock halign-center valign-top"><p class="tableblock">CAR</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">0</p></td>
 </tr>
 </tbody>
 </table>
@@ -339,7 +345,7 @@ Supervised method requires labeled data
 </tbody>
 </table>
 <div class="paragraph">
-<p>I would expect the algorithm to return the target value <strong>BIKE</strong>.</p>
+<p>I would expect the algorithm to return the target value <strong>1</strong> which is the value of the type <strong>BIKE</strong>.</p>
 </div>
 <div class="quoteblock">
 <blockquote>
