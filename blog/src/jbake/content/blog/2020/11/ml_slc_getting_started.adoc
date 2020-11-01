@@ -4,12 +4,12 @@
 :jbake-type: post
 :jbake-status: published
 :jbake-tags: ds, ml, python
-:sources: ../../../../../../../sources/2020/10/ml_key_concepts
+:sources: ../../../../../../../sources/2020/11/ml_key_concepts
 :idprefix:
 :summary: A Supervised Learning Classification Problem
 :summary_image: healthy.png
 
-image::2020/10/ml_slc_getting_started/header.png[alt=header, align="center", width="100%"]
+image::2020/11/ml_slc_getting_started/header.png[alt=header, align="center", width="100%"]
 
 Next station in my machine learning journey is the Supervised Learning method. In this article I'm using **Supervised Learning Classification** to **classify food** into three categories: green, orange or red **depending on whether they're healthy or not**. In order to get used to the methodology I'm sticking to the https://mariogarcia.github.io/blog/2020/10/ml_key_concepts.html#how_ml_works[representation-evaluation-optimization] process.
 
@@ -36,7 +36,7 @@ In the representation phase **we should find a representative dataset and a suit
 
 === Dataset preparation
 
-A representative dataset, in this case, would be a large dataset of food, labeled as good/bad/not-so-good food. I created a link:/files/2020/10/ml_slc_getting_started/food.csv[csv file] with more than three thousand food entries, collected from https://badali.umh.es/home[this site (Spanish)].
+A representative dataset, in this case, would be a large dataset of food, labeled as good/bad/not-so-good food. I created a link:/files/2020/11/ml_slc_getting_started/food.csv[csv file] with more than three thousand food entries, collected from https://badali.umh.es/home[this site (Spanish)].
 
 [source, python]
 .loading data
@@ -49,7 +49,7 @@ food.head()
 
 []
 .food dataset
-image::2020/10/ml_slc_getting_started/food_dataset.png[alt=header, align="center", width="80%"]
+image::2020/11/ml_slc_getting_started/food_dataset.png[alt=header, align="center", width="80%"]
 
 Each entry has a series of possible features and it's labeled with a color value (TRAFFICLIGH VALUE) which depends on whether it is a healthy food, not so healthy food or junk food. Next I should choose every column that can be eligible as a feature, for example the name of the food is not a good feature if you'd like to generalize the results. 
 
@@ -79,7 +79,7 @@ df.head()
 
 []
 .possible features
-image::2020/10/ml_slc_getting_started/food_features_all.png[alt=dataset, align="center", width="80%"]
+image::2020/11/ml_slc_getting_started/food_features_all.png[alt=dataset, align="center", width="80%"]
 
 **However the goal is to choose the minimum set of features that maximizes the classification**. Too many could classify well but it would become too hard to use, too few would not classify well enough. I need to find the balance between the two. Once I've found the balance I can use both, features and labels to create a training and test datasets. For that I use the https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html[train_test_split function] from scikit-learn library.
 
@@ -113,7 +113,7 @@ Notice how I'm using the **training dataset features** (X_train) and the **train
 
 [, align="center", width="25%"]
 .matrix plot
-image::2020/10/ml_slc_getting_started/matrix_plot.png[alt=header]
+image::2020/11/ml_slc_getting_started/matrix_plot.png[alt=header]
 
 === Algorithm selection & configuration
 
@@ -126,9 +126,8 @@ Once I confirmed it was a classification problem I chose the only classification
 
 === Resources
 
-- link:/files/2020/10/ml_slc_getting_started/food.csv[Food dataset (csv)]
-- https://badali.umh.es/home[Badali: Food & Nutrition educational site (spanish)]
-- link:/files/2020/10/ml_slc_getting_started/food.ipynb[Jupyter notebook source]
+- link:/files/2020/11/ml_slc_getting_started/food.csv[Food dataset (csv)]. Data was collected from https://badali.umh.es/home[Badali: Food & Nutrition educational site (spanish)]
+- link:/files/2020/11/ml_slc_getting_started/food.ipynb[Jupyter notebook source]
 - https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm[k-nearest neighbors (Wikipedia)]
 
 == Evaluation Phase
