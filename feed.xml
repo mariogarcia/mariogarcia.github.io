@@ -4,16 +4,16 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2020-11-01T20:07:23Z</updated>
+    <updated>2020-11-01T23:49:34Z</updated>
     <id>tag:null,2020:11</id>
     <entry>
         <title>Classifying food</title>
         <author>
             <name>@marioggar</name>
         </author>
-        <link href="http://github.com/mariogarcia/blog/2020/10/ml_slc_getting_started.html"/>
+        <link href="http://github.com/mariogarcia/blog/2020/11/ml_slc_getting_started.html"/>
         <updated>2020-11-01T00:00:00Z</updated>
-        <id>http://github.com/mariogarcia/blog/2020/10/ml_slc_getting_started.html</id>
+        <id>http://github.com/mariogarcia/blog/2020/11/ml_slc_getting_started.html</id>
         <category term="ds"/>
         <category term="ml"/>
         <category term="python"/>
@@ -22,7 +22,7 @@
 &lt;div class=&quot;sectionbody&quot;&gt;
 &lt;div class=&quot;imageblock text-center&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/2020/10/ml_slc_getting_started/header.png&quot; alt=&quot;header&quot; width=&quot;100%&quot;&gt;
+&lt;img src=&quot;/img/2020/11/ml_slc_getting_started/header.png&quot; alt=&quot;header&quot; width=&quot;100%&quot;&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
@@ -45,7 +45,7 @@
 &lt;div class=&quot;sect2&quot;&gt;
 &lt;h3 id=&quot;dataset_preparation&quot;&gt;Dataset preparation&lt;/h3&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;A representative dataset, in this case, would be a large dataset of food, labeled as good/bad/not-so-good food. I created a &lt;a href=&quot;/files/2020/10/ml_slc_getting_started/food.csv&quot;&gt;csv file&lt;/a&gt; with more than three thousand food entries, collected from &lt;a href=&quot;https://badali.umh.es/home&quot;&gt;this site (Spanish)&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;A representative dataset, in this case, would be a large dataset of food, labeled as good/bad/not-so-good food. I created a &lt;a href=&quot;/files/2020/11/ml_slc_getting_started/food.csv&quot;&gt;csv file&lt;/a&gt; with more than three thousand food entries, collected from &lt;a href=&quot;https://badali.umh.es/home&quot;&gt;this site (Spanish)&lt;/a&gt;.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;listingblock&quot;&gt;
 &lt;div class=&quot;title&quot;&gt;loading data&lt;/div&gt;
@@ -58,7 +58,7 @@ food.head()&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div class=&quot;imageblock text-center&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/2020/10/ml_slc_getting_started/food_dataset.png&quot; alt=&quot;header&quot; width=&quot;80%&quot;&gt;
+&lt;img src=&quot;/img/2020/11/ml_slc_getting_started/food_dataset.png&quot; alt=&quot;header&quot; width=&quot;80%&quot;&gt;
 &lt;/div&gt;
 &lt;div class=&quot;title&quot;&gt;Figure 1. food dataset&lt;/div&gt;
 &lt;/div&gt;
@@ -91,7 +91,7 @@ df.head()&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div class=&quot;imageblock text-center&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/2020/10/ml_slc_getting_started/food_features_all.png&quot; alt=&quot;dataset&quot; width=&quot;80%&quot;&gt;
+&lt;img src=&quot;/img/2020/11/ml_slc_getting_started/food_features_all.png&quot; alt=&quot;dataset&quot; width=&quot;80%&quot;&gt;
 &lt;/div&gt;
 &lt;div class=&quot;title&quot;&gt;Figure 2. possible features&lt;/div&gt;
 &lt;/div&gt;
@@ -130,7 +130,7 @@ plt.show()&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div class=&quot;imageblock text-center&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/2020/10/ml_slc_getting_started/matrix_plot.png&quot; alt=&quot;header&quot; width=&quot;25%&quot;&gt;
+&lt;img src=&quot;/img/2020/11/ml_slc_getting_started/matrix_plot.png&quot; alt=&quot;header&quot; width=&quot;25%&quot;&gt;
 &lt;/div&gt;
 &lt;div class=&quot;title&quot;&gt;Figure 3. matrix plot&lt;/div&gt;
 &lt;/div&gt;
@@ -159,13 +159,10 @@ plt.show()&lt;/code&gt;&lt;/pre&gt;
 &lt;div class=&quot;ulist&quot;&gt;
 &lt;ul&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;a href=&quot;/files/2020/10/ml_slc_getting_started/food.csv&quot;&gt;Food dataset (csv)&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;/files/2020/11/ml_slc_getting_started/food.csv&quot;&gt;Food dataset (csv)&lt;/a&gt;. Data was collected from &lt;a href=&quot;https://badali.umh.es/home&quot;&gt;Badali: Food &amp;amp; Nutrition educational site (spanish)&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;a href=&quot;https://badali.umh.es/home&quot;&gt;Badali: Food &amp;amp; Nutrition educational site (spanish)&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href=&quot;/files/2020/10/ml_slc_getting_started/food.ipynb&quot;&gt;Jupyter notebook source&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;/files/2020/11/ml_slc_getting_started/food.ipynb&quot;&gt;Jupyter notebook source&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm&quot;&gt;k-nearest neighbors (Wikipedia)&lt;/a&gt;&lt;/p&gt;
