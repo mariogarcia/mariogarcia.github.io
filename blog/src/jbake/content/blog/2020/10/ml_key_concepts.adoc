@@ -68,8 +68,8 @@ General online course giving me a general overview of the most used techniques. 
 
 Although there're different methods to build ML software, they all share a common iterative process with three phases: 
 
-- In the first part, called **representation**, we should find a representative dataset and a suitable algorithm for the problem at hand. Then we use both, dataset and algorithm, to train a software model to make predictions. 
-- Afterwards the model performance is evaluated with new datasets. Training and evaluation are part of the **evaluation** phase.
+- In the first part, called **representation**, we should find a representative dataset and a suitable algorithm for the problem at hand. 
+- Then we use both, dataset and algorithm, to train a software model to make predictions. Afterwards the model performance is evaluated with new datasets. Training and evaluation are part of the **evaluation** phase.
 - Finally if we're not satisfied with the results we can always iterate over the process to optimize the results. This final part as you may guess is called **optimization**.
 
 [ditaa, align="center"]
@@ -144,38 +144,43 @@ Supervised method requires labeled data
 
 Here the goal is to predict the target value (categorical class labels) of new instances based on training data. For example, check the following dataset:
 
-[.compressed, cols="^,^,^,^,^", options="header"]
+[.compressed, cols="^,^,^,^,^,^", options="header"]
 .classification training dataset
 |===
 | WHEELS
 | MODEL
 | BRAND
 | COLOR
-| LABEL
+| TYPE_NAME
+| TYPE
 
 | 2
 | CBR 600
 | HONDA
 | RED
 | BIKE
+| 1
 
 | 4
 | F450
 | FERRARI
 | RED
 | CAR
+| 0
 
 | 2
 | SV650
 | SUZUKI
 | BLUE
 | BIKE
+| 1
 
 | 4
 | SPACE
 | RENAULT
 | YELLOW
 | CAR
+| 0
 |===
 
 By looking at the features, **WHEELS** could be useful when trying to predict if something is a car or a bike. Once we've chosen the most representative features, we build the model. Then the model is evaluated with a **testing dataset** to see how well the algorithm predicts target values. When the target value is discrete like in this example, you are facing a **classification problem**. For example, if I use the following as an input to the model built with the previous table:
@@ -194,7 +199,7 @@ By looking at the features, **WHEELS** could be useful when trying to predict if
 | WHITE
 |===
 
-I would expect the algorithm to return the target value **BIKE**. 
+I would expect the algorithm to return the target value **1** which is the value of the type **BIKE**. 
 
 [quote]
 Classification is about discrete values
