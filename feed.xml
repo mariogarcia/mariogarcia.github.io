@@ -4,8 +4,730 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2020-11-01T23:49:34Z</updated>
+    <updated>2020-11-13T01:01:29Z</updated>
     <id>tag:null,2020:11</id>
+    <entry>
+        <title>Linear Regression notes</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2020/11/ml_slr_overview.html"/>
+        <updated>2020-11-13T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2020/11/ml_slr_overview.html</id>
+        <category term="ds"/>
+        <category term="ml"/>
+        <category term="python"/>
+        <content type="html">
+            &lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Classification is a great method to predict discrete values from a given dataset, but sometimes you need to &lt;strong&gt;predict a continuous value&lt;/strong&gt;, e.g: height, weight, prices&amp;#8230;&amp;#8203; And that&amp;#8217;s when linear regression techniques come handy.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;what_is_linear_regression&quot;&gt;What is linear regression ?&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The definition that I read in the &lt;a href=&quot;https://en.wikipedia.org/wiki/Linear_regression&quot;&gt;Wikipedia&lt;/a&gt; didn&amp;#8217;t help me at all. Instead when I related it with a line, it started to make sense to me. If we&amp;#8217;ve got a linear function, that is, a function describing a line, where &lt;strong&gt;&amp;#373; is the slope&lt;/strong&gt; of the line and &lt;strong&gt;b is called the intercept&lt;/strong&gt; which is a constant value:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/29a4f9fc149861c3868f87f96962265e.png&quot; alt=&quot;29a4f9fc149861c3868f87f96962265e.png&quot; width=&quot;275&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 1. linear function&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For every &lt;strong&gt;x&lt;/strong&gt; value a new point will be drawn and eventually altogether will form a line. So, if you think about it visually, given a set of input values, a simple linear regression algorithm will try to come up with a line trying to pass as close as possible to the majority of the input dataset points. So if you try to predict an output value from the input values, the machine learning process will pick up a value from that line.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/11/ml_slr_overview/linear_regression.png&quot; alt=&quot;linear_regression&quot; width=&quot;40%&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 2. Simple linear regression&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There&amp;#8217;re differences between the types of linear regression techniques depending on the presence of &lt;strong&gt;regularization&lt;/strong&gt; (Ridge and Lasso), or the lack of it (Simple Linear Regression). There&amp;#8217;s also important the use of &lt;strong&gt;polynomial transformation&lt;/strong&gt; and &lt;strong&gt;normalization&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;simple_linear_regression&quot;&gt;Simple Linear Regression&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The most popular linear regression uses the &lt;a href=&quot;https://en.wikipedia.org/wiki/Least_squares&quot;&gt;least squares&lt;/a&gt; technique. It tries to find a &lt;strong&gt;slope&lt;/strong&gt; (w) and &lt;strong&gt;constant value&lt;/strong&gt; (b) that &lt;strong&gt;minimizes the mean squared error of the model&lt;/strong&gt;. It doesn&amp;#8217;t have parameters to control model complexity, everything it needs is estimated from training data.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock note&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-note&quot; title=&quot;Note&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+Although it could be easier, I didn&amp;#8217;t want to made up a dataset to practice, because one of the things I&amp;#8217;m finding most difficult while learning machine learning is to extrapolate simple examples to real world problems. I also tried to use several public datasets out there that I thought they could match well with a regression solution, but in the end and after having a dismal failure trying to make it work I had to gave up and use a specific dataset prepared for regression. The actual dataset used for this entry is a &lt;a href=&quot;http://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset&quot;&gt;Bike sharing dataset&lt;/a&gt; from the &lt;a href=&quot;http://archive.ics.uci.edu/ml/datasets.php&quot;&gt;UCI Dataset repository for machine learning&lt;/a&gt;.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I&amp;#8217;m loading the &lt;a href=&quot;http://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset&quot;&gt;Bike sharing daily dataset&lt;/a&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;reading daily rental data&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import pandas as pd
+from datetime import datetime, date
+
+bikes = pd.read_csv(&quot;day.csv&quot;, parse_dates=[&apos;dteday&apos;])
+bikes.head()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;First, I&amp;#8217;d like to see how features could be related to each other using the seaborn&amp;#8217;s correlation heatmap:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;creating correlation table&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# use all columns except the date column
+bikes = bikes.loc[:, bikes.columns != &apos;dteday&apos;]
+corr  = np.corrcoef(bikes.T)
+
+plt.figure(figsize=(10, 10))
+sns.heatmap(
+    corr,
+    cbar=False,
+    annot=True,
+    yticklabels=bikes.columns,
+    xticklabels=bikes.columns)
+plt.show()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/11/ml_slr_overview/correlation_table.png&quot; alt=&quot;header&quot; width=&quot;35%&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 3. correlation table&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There are a lot of features, but I&amp;#8217;m focusing on just choosing one, &lt;strong&gt;temp&lt;/strong&gt; which is the normalized temperature in Celsius the day of the rental. I&amp;#8217;d like to see how it looks like visually the relationship between registered number of rentals (registered variable) and the temperature feature I&amp;#8217;ve chosen:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;pair plot&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import seaborn as sns
+
+sns.pairplot(bikes[[&apos;temp&apos;, &apos;registered&apos;]])&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/11/ml_slr_overview/pairplot.png&quot; alt=&quot;header&quot; width=&quot;35%&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 4. pair plot&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;What I&amp;#8217;m looking for at this point in the scatter plot, is tendencies. In this case it seems that points tend to go in diagonal from the bottom left to the upper right part of the graph. So far, the more tendency I see the better it seems to work. Now lets create a linear regression using the &lt;strong&gt;LinearRegression&lt;/strong&gt; class from scikit-learn:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;creating a simple linear regression&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+
+feats = [&apos;temp&apos;]
+label = &apos;registered&apos;
+
+X = bikes[feats]
+y = bikes[label]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+
+linear_reg  = LinearRegression().fit(X_train, y_train)
+score_train = linear_reg.score(X_train, y_train)
+score_test  = linear_reg.score(X_test, y_test)
+
+print(&quot;train: {}, test: {}&quot;.format(score_train, score_test))&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;scores&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;train: 0.2894397189330029, test: 0.29427542275712537&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If we draw the regression line we&amp;#8217;ve got:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;regression line&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import matplotlib.pyplot as plt
+
+y_predict = linear_reg.predict(X_test)
+
+plt.figure(figsize=(8, 8))
+plt.title(&quot;Linear Regression (Least Squares - No Polynomial)&quot;)
+plt.xlabel(&apos;temp&apos;)
+plt.ylabel(&apos;registered&apos;)
+plt.scatter(X[&apos;temp&apos;], y, edgecolor=&apos;black&apos;, color=&apos;w&apos;)
+plt.plot(X_test, y_predict, color=&apos;orange&apos;)
+plt.show()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/11/ml_slr_overview/linear_regression.png&quot; alt=&quot;header&quot; width=&quot;50%&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 5. regression line&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As you can see a straight line won&amp;#8217;t be able to do good predictions. A way of helping the linear transformation to adapt better to the shape of the model is to use a polynomial transformation.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;polynomial_transformation&quot;&gt;Polynomial Transformation&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;When the problem doesn&amp;#8217;t fit easily a straight line or there are many features, it could become complicated to find a good relationship between them, specially with a simple line. The &lt;strong&gt;polynomial transformation&lt;/strong&gt; helps finding those relationships. Applying a polynomial transformation to our problem can help the linear regression to adapt better to the shape of the data. This is the same linear regression example, but this time applying the &lt;strong&gt;PolynomialFeatures&lt;/strong&gt; class prior to the linear regression fit.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;applying polynomial transformation&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import PolynomialFeatures
+
+feats = [&apos;temp&apos;]
+label = &apos;registered&apos;
+
+X = bikes[feats]
+y = bikes[label]
+
+degrees = 3
+X_poly  = PolynomialFeatures(degree=degrees).fit_transform(X)
+
+X_train, X_test, y_train, y_test = train_test_split(X_poly, y, random_state=0)
+
+linear_reg  = LinearRegression().fit(X_train, y_train)
+score_train = linear_reg.score(X_train, y_train)
+score_test  = linear_reg.score(X_test, y_test)
+
+print(&quot;train: {}, test: {}&quot;.format(score_train, score_test))&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;scores&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;train: 0.3427117865309586, test: 0.371685603196769&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Because the polynomial transformation is creating more features, they cover a wider spectrum of the data, therefore more likely to do better predictions, at least in the training dataset. If we draw now the result:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import matplotlib.pyplot as plt
+
+y_predict = linear_reg.predict(X_test)
+
+plt.figure(figsize=(8, 6))
+plt.title(&quot;Linear Regression (Least Squares - Polynomial)&quot;)
+plt.xlabel(&apos;temp&apos;)
+plt.ylabel(&apos;registered&apos;)
+plt.scatter(X[&apos;temp&apos;], y, edgecolor=&apos;black&apos;, color=&apos;w&apos;)
+
+colors = {1: &apos;orange&apos;, 2: &apos;green&apos;, 3: &apos;red&apos;}
+
+# drawing each new feature derived from the initial temp feature
+for i in range(1, degrees + 1):
+    plt.plot(X_test[:,i], y_predict, color=colors[i], alpha=0.6)
+
+plt.show()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/11/ml_slr_overview/linear_regression_polynomial.png&quot; alt=&quot;polynomial&quot; width=&quot;50%&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 6. polynomial regression&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Which covers much more than the previous example. However there are a couple of things to keep in mind when applying the polynomial transformation:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Polynomial transformation with a &lt;strong&gt;high degree value could overfit the model&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;It&amp;#8217;s better to &lt;strong&gt;combine it with a regularized regression method&lt;/strong&gt; like Ridge.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;resources&quot;&gt;Resources&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://archive.ics.uci.edu/ml/datasets.php&quot;&gt;UCI public datasets&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset&quot;&gt;Bike sharing dataset&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Least_squares&quot;&gt;least squares&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;regularization_and_normalization&quot;&gt;Regularization and Normalization&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;regularization&quot;&gt;Regularization&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Regularization is a technique used &lt;strong&gt;to reduce the model complexity&lt;/strong&gt; and thus it &lt;strong&gt;helps dealing with overfitting&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;It reduces the model size by shrinking the number of parameters the model has to learn&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;It adds weight to the values so that it tries to favor smaller values&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Regularization penalizes certain values by &lt;strong&gt;using a loss function with a cost&lt;/strong&gt;. This cost could be of type:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;L1&lt;/strong&gt;: The cost is proportional to the &lt;strong&gt;absolute value&lt;/strong&gt; of the weight coefficients (Lasso)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;L2&lt;/strong&gt;: The cost is proportional to the &lt;strong&gt;square of the value&lt;/strong&gt; of the weight coefficients (Ridge)&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;normalization&quot;&gt;Normalization&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Data normalization is the process of rescaling one or more features to a common scale. It&amp;#8217;s normally used when features used to create the model have different scales. There are a few advantages of using normalization is such scenario:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;It could improve the numerical stability of your model&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;It could speed up the training process&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Normalization is specially important when applying certain regression techniques, as regression is sensitive to model feature adjustements.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;resources_2&quot;&gt;Resources&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://towardsdatascience.com/supervised-learning-basics-of-linear-regression-1cbab48d0eba&quot;&gt;Basics of linear regression&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://towardsdatascience.com/regularization-in-machine-learning-76441ddcf99a&quot;&gt;Regularization in machine learning&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://medium.com/@vigneshmadanan/linear-regression-basics-and-regularization-methods-b40359b0aea5&quot;&gt;Linear regression basics and regularization methods&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Normalization_(statistics)&quot;&gt;Normalization in Wikipedia&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://medium.com/@urvashilluniya/why-data-normalization-is-necessary-for-machine-learning-models-681b65a05029&quot;&gt;Why data normalization is necessary for machine learning&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://towardsdatascience.com/understand-data-normalization-in-machine-learning-8ff3062101f0&quot;&gt;Understand Data Normalization in machine learning&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;ridge&quot;&gt;Ridge&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Follows the leat-squares criterion but it uses regularization as a penalty for large variations in &lt;strong&gt;w&lt;/strong&gt; parameters.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Regularization prevents overfitting by restricting the model, it normally reduces its complexity&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Regularization is controlled by the &lt;strong&gt;alpha&lt;/strong&gt; parameter&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The high the value of alpha the simpler the model, that is, the model is less likely to overfit&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now I&amp;#8217;m using &lt;strong&gt;Ridge&lt;/strong&gt; class with the same dataset:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;using Ridge regression&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.linear_model import Ridge
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+
+ridge = Ridge(alpha=20).fit(X_train, y_train)
+
+score_train = ridge.score(X_train, y_train)
+score_test = ridge.score(X_test, y_test)
+
+print(&quot;train: {}, test: {}&quot;.format(score_train, score_test))&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Giving me the following scores:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;train: 0.21131995467057785, test: 0.19818161857049388&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Although it seems worst than the polynomial example, the takeaway idea here is that the Ridge regression along with a high value of alpha is going to reduce the complexity of the model and make the generalization more estable.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ridge regression score can be improved by applying normalization to the source dataset. Is important for some ML methods that all features are on the same scale. In this case we&amp;#8217;re apply a &lt;strong&gt;MinMax&lt;/strong&gt; normalization.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Ridge with scaled set&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.linear_model import Ridge
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+
+scaler         = MinMaxScaler()
+X_train_scaled = scaler.fit_transform(X_train) # fit with the X_train
+X_test_scaled  = scaler.transform(X_test)      # apply THE SAME scaler
+
+ridge = Ridge(alpha=20).fit(X_train_scaled, y_train)
+
+score_train = ridge.score(X_train_scaled, y_train)
+score_test  = ridge.score(X_test_scaled, y_test)
+
+print(&quot;train: {}, test: {}&quot;.format(score_train, score_test))&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;scores&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;train: 0.24767875041471266, test: 0.23615269197631883&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We can use the scaled &lt;strong&gt;X&lt;/strong&gt; to train the Ridge regression. However there&amp;#8217;re some basic tips to be aware of:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Fit the scaler with the training set&lt;/strong&gt; and then apply &lt;strong&gt;the same scaler&lt;/strong&gt; to transform the training and test feature sets&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Don&amp;#8217;t use the test dataset to fit the scaler&lt;/strong&gt;. That could lead to data leakage.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;lasso&quot;&gt;Lasso&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;It uses a L1 type regularization penalty, meaning &lt;strong&gt;it minimizes the sum of the absolute values of the coefficients&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;It works as a kind of &lt;strong&gt;feature selection&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;It also has an &lt;strong&gt;alpha&lt;/strong&gt; parameter to control regularization&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;using lasso regression&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.linear_model import Ridge, Lasso
+
+lasso = Lasso(alpha=20).fit(X_train, y_train)
+
+score_train = lasso.score(X_train, y_train)
+score_test = lasso.score(X_test, y_test)
+
+print(&quot;train: {}, test: {}&quot;.format(score_train, score_test))&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;scores&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;train: 0.2842911095363777, test: 0.2813866438355652&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And finally using &lt;strong&gt;MinMaxScaler&lt;/strong&gt; to try to improve regression scoring:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;lasso with scaled features&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.preprocessing import MinMaxScaler
+from sklearn.linear_model import Ridge, Lasso
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+
+scaler         = MinMaxScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled  = scaler.transform(X_test)
+
+lasso = Lasso(alpha=20).fit(X_train_scaled, y_train)
+
+score_train = lasso.score(X_train_scaled, y_train)
+score_test  = lasso.score(X_test_scaled, y_test)
+
+print(&quot;train: {}, test: {}&quot;.format(score_train, score_test))&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;scores&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;train: 0.2865231606947747, test: 0.285332265748411&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;results_summary&quot;&gt;Results Summary&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Finally I&amp;#8217;ve written a summary table.&lt;/p&gt;
+&lt;/div&gt;
+&lt;table class=&quot;tableblock frame-all grid-all stretch compressed&quot;&gt;
+&lt;caption class=&quot;title&quot;&gt;Table 1. Results summary&lt;/caption&gt;
+&lt;colgroup&gt;
+&lt;col style=&quot;width: 14.2857%;&quot;&gt;
+&lt;col style=&quot;width: 14.2857%;&quot;&gt;
+&lt;col style=&quot;width: 14.2857%;&quot;&gt;
+&lt;col style=&quot;width: 14.2857%;&quot;&gt;
+&lt;col style=&quot;width: 14.2857%;&quot;&gt;
+&lt;col style=&quot;width: 14.2857%;&quot;&gt;
+&lt;col style=&quot;width: 14.2858%;&quot;&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th class=&quot;tableblock halign-center valign-top&quot;&gt;TYPE&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-center valign-top&quot;&gt;SCIKIT CLASS&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-center valign-top&quot;&gt;POLYNOMIAL&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-center valign-top&quot;&gt;NORMALIZATION&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-center valign-top&quot;&gt;REGULARIZATION&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;TRAIN SCORE&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;TEST SCORE&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Linear&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;LinearRegression&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;No&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;No&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;No&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0.2894397189330029&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0.29427542275712537&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Linear&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;LinearRegression&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Yes&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;No&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;No&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0.3427117865309586&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0.371685603196769&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Ridge&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Ridge&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Yes&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;No&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Yes&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0.21131995467057785&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0.19818161857049388&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Ridge&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Ridge&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;No&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Yes&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Yes&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0.24767875041471266&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0.23615269197631883&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Lasso&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Lasso&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;No&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;No&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Yes&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0.2842911095363777&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0.2813866438355652&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Lasso&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Lasso&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;No&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Yes&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Yes&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0.2865231606947747&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0.285332265748411&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;lasso_as_feature_selection_method&quot;&gt;Lasso as feature selection method&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So far I&amp;#8217;ve been working with just one feature &lt;strong&gt;temp&lt;/strong&gt; to predict a possible outcome. I chose this feature by using the correlation table as a guide. When looking for just one variable to work with, it could be enough, but when looking for many possible features it could be cumbersome. &lt;strong&gt;The Lasso regression seems a better method for telling me which features do perform and which don&amp;#8217;t&lt;/strong&gt;. How ? Well according to how the L1 regulation method works, keeping it short, those &lt;strong&gt;features that are not so important, Lasso makes its coefficient equal to 0&lt;/strong&gt;, therefore, those features having a coefficient greater than 0 are worth using them to train the model (the higher the better). Lets use this knowledge to know which features could be useful to train the model.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;using all possible features to see which one fits best in case we only want to use one&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.preprocessing import MinMaxScaler
+from sklearn.linear_model import Ridge, Lasso
+from sklearn.model_selection import train_test_split
+
+all_features = list(bikes.columns.values)
+
+# removing all not feature suitable columns (dteday was already removed)
+all_features.remove(&apos;registered&apos;)
+all_features.remove(&apos;casual&apos;)
+all_features.remove(&apos;cnt&apos;)
+
+# then doing the regression with all the remaining features
+X            = bikes[all_features]
+y            = bikes[&apos;registered&apos;]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+
+lasso       = Lasso(alpha=20).fit(X_train, y_train)
+
+# showing features with their coefficients
+feats_coeff = dict(zip(all_features, lasso.coef_))
+feats_coeff&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Which shows the following map:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;features along with their coefficients&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;{&apos;instant&apos;: 4.6922455121283315,
+ &apos;season&apos;: 403.43794430245987,
+ &apos;yr&apos;: 0.0,
+ &apos;mnth&apos;: -147.25674152072335,
+ &apos;holiday&apos;: -0.0,
+ &apos;weekday&apos;: 40.46762455840893,
+ &apos;workingday&apos;: 830.067983219723,
+ &apos;weathersit&apos;: -506.75253043165566,
+ &apos;temp&apos;: 2732.6155708939527,
+ &apos;atemp&apos;: 0.0,
+ &apos;hum&apos;: -0.0,
+ &apos;windspeed&apos;: -0.0}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now as the theory stated, we can discard those features with 0 value, and maybe those which are negatively correlated. For this example, where I&amp;#8217;m only interested in one feature to validate whether I chose the most significant feature or not. In this case I&amp;#8217;m getting the feature with the highest possitive coefficient:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.preprocessing import MinMaxScaler
+from sklearn.linear_model import Ridge, Lasso
+from sklearn.model_selection import train_test_split
+
+# getting only the NON ZERO features
+best_features = {k:v for (k, v) in sorted(feats_coeff.items(), key=lambda x: -x[1]) if v &amp;gt; 0}
+
+# getting the higher ranked
+best_feature = list(best_features.keys())[0]
+best_feature&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;&apos;temp&apos;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Nice!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;ridge_vs_lasso&quot;&gt;Ridge vs Lasso&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In this case we&amp;#8217;ve used both algorithms with the same dataset, but there&amp;#8217;re situations where one or the other fit best:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Ridge: Many &lt;strong&gt;small/medium&lt;/strong&gt; sized effects&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Lasso: Few &lt;strong&gt;medium/large&lt;/strong&gt; sized effects&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;resources_3&quot;&gt;Resources&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;/files/2020/11/ml_slr_overview/bike_rental_regression.ipynb&quot;&gt;Jupyter Notebook source&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://towardsdatascience.com/ridge-and-lasso-regression-a-complete-guide-with-python-scikit-learn-e20e34bcbf0b&quot;&gt;Ridge and Lasso Regression&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
     <entry>
         <title>Classifying food</title>
         <author>
