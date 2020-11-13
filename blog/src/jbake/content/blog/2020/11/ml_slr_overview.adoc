@@ -229,6 +229,8 @@ Regularization penalizes certain values by **using a loss function with a cost**
 - **L1**: The cost is proportional to the **absolute value** of the weight coefficients (Lasso)
 - **L2**: The cost is proportional to the **square of the value** of the weight coefficients (Ridge)
 
+WARNING: Regularization really shines when there is a high dimensionality, meaning there're multiple features. So in these examples it won't make a huge impact with the scores.
+
 === Normalization
 
 Data normalization is the process of rescaling one or more features to a common scale. It's normally **used when features used to create the model have different scales**. There are a few advantages of using normalization is such scenario:
