@@ -335,7 +335,7 @@ plt.show()</code></pre>
 <div class="sect2">
 <h3 id="normalization">Normalization</h3>
 <div class="paragraph">
-<p>Data normalization is the process of rescaling one or more features to a common scale. It&#8217;s normally used when features used to create the model have different scales. There are a few advantages of using normalization is such scenario:</p>
+<p>Data normalization is the process of rescaling one or more features to a common scale. It&#8217;s normally <strong>used when features used to create the model have different scales</strong>. There are a few advantages of using normalization is such scenario:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -349,6 +349,18 @@ plt.show()</code></pre>
 </div>
 <div class="paragraph">
 <p>Normalization is specially important when applying certain regression techniques, as regression is sensitive to model feature adjustements.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Because in this article I&#8217;m only using <strong>ONE</strong> feature, normalization is not going to make much difference but, when using multiple features, and each of them in different scales, then we should use normalization.
+</td>
+</tr>
+</table>
 </div>
 </div>
 <div class="sect2">

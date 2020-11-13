@@ -4,7 +4,7 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2020-11-13T01:01:29Z</updated>
+    <updated>2020-11-13T08:52:55Z</updated>
     <id>tag:null,2020:11</id>
     <entry>
         <title>Linear Regression notes</title>
@@ -322,7 +322,7 @@ plt.show()&lt;/code&gt;&lt;/pre&gt;
 &lt;div class=&quot;sect2&quot;&gt;
 &lt;h3 id=&quot;normalization&quot;&gt;Normalization&lt;/h3&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Data normalization is the process of rescaling one or more features to a common scale. It&amp;#8217;s normally used when features used to create the model have different scales. There are a few advantages of using normalization is such scenario:&lt;/p&gt;
+&lt;p&gt;Data normalization is the process of rescaling one or more features to a common scale. It&amp;#8217;s normally &lt;strong&gt;used when features used to create the model have different scales&lt;/strong&gt;. There are a few advantages of using normalization is such scenario:&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;ulist&quot;&gt;
 &lt;ul&gt;
@@ -336,6 +336,18 @@ plt.show()&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Normalization is specially important when applying certain regression techniques, as regression is sensitive to model feature adjustements.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock warning&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-warning&quot; title=&quot;Warning&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+Because in this article I&amp;#8217;m only using &lt;strong&gt;ONE&lt;/strong&gt; feature, normalization is not going to make much difference but, when using multiple features, and each of them in different scales, then we should use normalization.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;sect2&quot;&gt;
