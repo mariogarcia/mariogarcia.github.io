@@ -231,12 +231,14 @@ Regularization penalizes certain values by **using a loss function with a cost**
 
 === Normalization
 
-Data normalization is the process of rescaling one or more features to a common scale. It's normally used when features used to create the model have different scales. There are a few advantages of using normalization is such scenario:
+Data normalization is the process of rescaling one or more features to a common scale. It's normally **used when features used to create the model have different scales**. There are a few advantages of using normalization is such scenario:
 
 - It could improve the numerical stability of your model
 - It could speed up the training process
 
 Normalization is specially important when applying certain regression techniques, as regression is sensitive to model feature adjustements.
+
+WARNING: Because in this article I'm only using **ONE** feature, normalization is not going to make much difference but, when using multiple features, and each of them in different scales, then we should use normalization.
 
 === Resources
 
