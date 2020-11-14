@@ -4,8 +4,238 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2020-11-13T08:55:26Z</updated>
+    <updated>2020-11-14T01:04:23Z</updated>
     <id>tag:null,2020:11</id>
+    <entry>
+        <title>Logistic Regression: firewall rules</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2020/11/ml_slc_logistic_regression.html"/>
+        <updated>2020-11-14T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2020/11/ml_slc_logistic_regression.html</id>
+        <category term="ds"/>
+        <category term="ml"/>
+        <category term="python"/>
+        <content type="html">
+            &lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Although &lt;strong&gt;Logistic regression&lt;/strong&gt; is a regression technique, due to the logistic function applied to it, it can constraint target values from a linear regression into discrete values and therefore act as a classification technique. Why not using KNN classification ? Well as a regression technique &lt;strong&gt;it benefits from regularization&lt;/strong&gt;, so for a huge number of features it could reduce dimensionality.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There are &lt;strong&gt;three types of logistic regression&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;binary&lt;/strong&gt;: only two possible target values&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;multinomial&lt;/strong&gt;: several possible target values without ordering&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;ordinal&lt;/strong&gt;: several possible target values with a specific ordering&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;classifying_firewall_rules&quot;&gt;Classifying firewall rules&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I&amp;#8217;m practicing Binary Logistic Regression with UCI&amp;#8217;s &lt;a href=&quot;http://archive.ics.uci.edu/ml/datasets/Internet+Firewall+Data&quot;&gt;Internet Firewall Data&lt;/a&gt; which is a data set collected from the internet traffic records on a university&amp;#8217;s firewall. &lt;a href=&quot;http://archive.ics.uci.edu/ml/datasets.php&quot;&gt;UCI datasets&lt;/a&gt; are sorted depending on whether they&amp;#8217;re good candidates for regression, classification or for both. In this ocassion I&amp;#8217;d like to classify a set of firewall rules into two target values &lt;strong&gt;allowed&lt;/strong&gt; or &lt;strong&gt;not allowed&lt;/strong&gt;. Lets load the data and see how it looks:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;loading and simplifying data&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import pandas as pd
+
+firewall = pd.read_csv(&apos;firewall.csv&apos;)
+
+# simplifying dataframe column names
+firewall.columns = [
+    &apos;source&apos;,
+    &apos;destination&apos;,
+    &apos;nat_source&apos;,
+    &apos;nat_destination&apos;,
+    &apos;action&apos;,
+    &apos;b_total&apos;,
+    &apos;b_sent&apos;,
+    &apos;b_received&apos;,
+    &apos;packets&apos;,
+    &apos;time&apos;,
+    &apos;p_sent&apos;,
+    &apos;p_received&apos;
+]
+
+firewall.head()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/11/ml_slc_logistic_regression/dataset_source.png&quot; alt=&quot;source&quot; width=&quot;90%&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Because I&amp;#8217;d like to do a binary classification, I need to narrow down the multi-valued column &lt;strong&gt;action&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;action has several possible values&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;firewall[&apos;action&apos;].unique()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;array([&apos;allow&apos;, &apos;drop&apos;, &apos;deny&apos;, &apos;reset-both&apos;], dtype=object)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;That&amp;#8217;s why I&amp;#8217;m creating the &lt;strong&gt;allowed&lt;/strong&gt; column with only two possible values &lt;strong&gt;1 for allow&lt;/strong&gt; and &lt;strong&gt;0 for the rest&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;create label column&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;# simplifying actions to allowed or not allowed
+firewall[&apos;allowed&apos;] = firewall[&apos;action&apos;].apply(lambda tag: 1 if tag == &apos;allow&apos; else 0)
+firewall            = firewall.drop(&apos;action&apos;, axis=1)
+firewall.head()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/11/ml_slc_logistic_regression/dataset_with_allowed.png&quot; alt=&quot;allowed&quot; width=&quot;90%&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As usual, first I&amp;#8217;d like to see the correlation matrix to see which features are the best to use in the logistic regression training:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;correlation matrix&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import seaborn as sns
+import numpy as np
+import matplotlib.pyplot as plt
+
+corr_matrix = np.corrcoef(firewall.T)
+
+plt.figure(figsize=(10, 10))
+sns.heatmap(
+    corr_matrix,
+    cbar=False,
+    annot=True,
+    square=True,
+    xticklabels=firewall.columns,
+    yticklabels=firewall.columns)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/11/ml_slc_logistic_regression/correlation_matrix.png&quot; alt=&quot;matrix&quot; width=&quot;40%&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It seems that &lt;strong&gt;nat_source&lt;/strong&gt;, &lt;strong&gt;nat_destination&lt;/strong&gt; and &lt;strong&gt;time&lt;/strong&gt; have the highest rates. With that in mind, I can now create &lt;strong&gt;X&lt;/strong&gt; and &lt;strong&gt;y&lt;/strong&gt; variables and the &lt;strong&gt;training and test sets&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;features and training/test sets&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.model_selection import train_test_split
+
+label    = &apos;allowed&apos;
+features = [&apos;nat_source&apos;, &apos;nat_destination&apos;, &apos;time&apos;]
+
+X = firewall[features]
+y = firewall[label]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=50)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Because &lt;strong&gt;there are several features working in different scales&lt;/strong&gt; (e.g. time, ports) it would be better to apply some &lt;strong&gt;normalization&lt;/strong&gt; to the feature set, in other words, I need to transform them to a common scale. For that I&amp;#8217;m using the &lt;strong&gt;MinMaxScaler&lt;/strong&gt; transformation.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;scaling features&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.preprocessing import MinMaxScaler
+
+# needed to reduce complexity
+# https://stackoverflow.com/questions/62658215/convergencewarning-lbfgs-failed-to-converge-status-1-stop-total-no-of-iter
+scaler         = MinMaxScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled  = scaler.transform(X_test)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now I can fit the &lt;strong&gt;LogisticRegression&lt;/strong&gt; class with the training scaled dataset, check the score for training and test set, and see how well the model performs.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;applying regression&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.linear_model import LogisticRegression
+
+logistic = LogisticRegression().fit(X_train_scaled, y_train)
+logistic.score(X_train_scaled, y_train), logistic.score(X_test_scaled, y_test)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Which returns the following scores:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;scores&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;(0.9711489552178071, 0.9730818531404505)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Finally I&amp;#8217;m picking the first two samples with different &lt;strong&gt;allowed&lt;/strong&gt; value to see if the prediction works:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;checking sample&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;validation_test_set = (firewall
+    .drop_duplicates(subset=&apos;allowed&apos;, keep=&quot;first&quot;)
+    .copy()
+    .reset_index(drop=True))
+
+validation_test_x = validation_test_set.loc[:, features]
+validation_test_y = validation_test_set.loc[:, label]
+
+validation_test_x_scaled = scaler.transform(validation_test_x)
+
+logistic.predict(validation_test_x_scaled) == [1, 0]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Unfortunately this is not a good proof, these two samples were already part of the training or test datasets. As a reminder for my future self I should be keeping some part of the source dataset away from the training/test datasets to do a more serious validation at the end of the process.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;resources&quot;&gt;Resources&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;/files/2020/11/ml_slc_logistic_regression/logistic_regression_firewall.ipynb&quot;&gt;Jupyter notebook of the article&amp;#8217;s source&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Logistic_regression&quot;&gt;Logistic Regression (Wikipedia)&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://towardsdatascience.com/logistic-regression-detailed-overview-46c4da4303bc&quot;&gt;Logistic Regression: Detailed Overview (article)&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://archive.ics.uci.edu/ml/datasets/Internet+Firewall+Data&quot;&gt;UCI&amp;#8217;s Internet Firewall Data dataset&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
     <entry>
         <title>Linear Regression notes</title>
         <author>
