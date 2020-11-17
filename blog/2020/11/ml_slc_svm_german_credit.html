@@ -47,7 +47,7 @@
 <h2 id="a_little_bit_of_theory">A little bit of theory</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Another type of supervised learning model is SVM or <strong>Support Vector Machines</strong> or <strong>SVM</strong>. SVM can be used for both regression and classification purposes. SVM tries to find a decision boundary that best separates different target classes. For linear spaces with two different target classes, we need to find the line (decision boundary for 1-dimensional space) that best classifies both classes. And which is the best line, the one that maximizes the margin from both classes to the decision boundary or hyperplane.</p>
+<p>Another type of supervised learning model is SVM or <strong>Support Vector Machines</strong> or <strong>SVM</strong>. SVM can be used for both regression and classification purposes. SVM tries to find a decision boundary that best separates different target classes. For linear spaces with two different target classes, we need to find the line (decision boundary for 1-dimensional space) that best classifies both classes. And which is the best line ? The one that maximizes the margin from both classes to the decision boundary or hyperplane.</p>
 </div>
 <div class="paragraph">
 <p>SVM rewards classifiers by the <strong>maximum margin classifier</strong> between two different target classes. <strong>The higher the distance between two classes the higher is the classifier ranked</strong>. This margin can be customized by the classifier&#8217;s regularization parameter (normally named <strong>C</strong>).</p>
@@ -264,7 +264,7 @@ sns.heatmap(
 <div class="sect2">
 <h3 id="creating_xy">Creating X,y</h3>
 <div class="paragraph">
-<p>From the correlation matrix, I&#8217;ve chose those features tighly related with the label, and those that are tighly related to the former features. With this information I can create the <strong>X</strong> (features) and <strong>y</strong> label sets.</p>
+<p>From the correlation matrix, I&#8217;ve chosen those features tighly related with the label, and those that are tighly related to the aforementioned features. With this information I can now create the <strong>X</strong> (features) and <strong>y</strong> label sets.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -289,7 +289,7 @@ y = credit['label']</code></pre>
 <div class="sect2">
 <h3 id="cross_validation">Cross validation</h3>
 <div class="paragraph">
-<p>While reading about SVM, it came across the concept of cross validation.  In this particular case is helping me to choose <strong>the best value for gamma</strong>.</p>
+<p>While reading about SVM, it came across the concept of <a href="https://en.wikipedia.org/wiki/Cross-validation_(statistics)">cross validation</a>.  In this particular case is helping me to choose <strong>the best value for gamma</strong>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -329,7 +329,7 @@ gamma_dataframe.head()</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The cross validation results returns the gamma values and the mean scores for training and test datasets.</p>
+<p>The cross validation results returns the gamma values and the mean scores for training and test datasets. I should look for the results with higher test_mean and lower train_mean. Meaning that <strong>I&#8217;m looking for a value of gamma that maximizes the generalization and minimizes the complexity of the model</strong>.</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -392,7 +392,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=10)</code
 <div class="sect2">
 <h3 id="fit_the_model_and_evaluate_scores">Fit the model and evaluate scores</h3>
 <div class="paragraph">
-<p>Then I&#8217;m fitting the model and getting the score for the training and test datasets using the best gamma value I was able to get. If you use <strong>'auto'</strong> as the value for gamma, scikit learn will use <strong>uses 1 / n_features</strong> instead.</p>
+<p>Then I&#8217;m fitting the model and getting the score for the training and test datasets using the best gamma value I was able to get. If you use <strong>'auto'</strong> as the value for gamma, scikit learn will use <strong>1 / n_features</strong> instead.</p>
 </div>
 <div class="listingblock">
 <div class="title">Fit the model and evaluate scores</div>
@@ -416,7 +416,7 @@ score_train, score_test</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Although the training dataset is not bad, the test dataset is still far from giving me a fair result. But it&#8217;s clear that the gamma value helped to avoid overfitting the model.</p>
+<p>Although the training dataset is not bad, the test dataset is still far from giving me a fair result. But it&#8217;s clear that <strong>the gamma value helped to avoid overfitting</strong> the model.</p>
 </div>
 </div>
 <div class="sect2">
@@ -497,6 +497,9 @@ score_train, score_test</code></pre>
 <ul>
 <li>
 <p><a href="/files/2020/11/ml_svm_german_credit/german-credit.ipynb">Jupyter Notebook source code</a></p>
+</li>
+<li>
+<p><a href="https://scikit-learn.org/stable/modules/cross_validation.html">Cross validation with Scikit Learn</a></p>
 </li>
 <li>
 <p><a href="https://towardsdatascience.com/cross-validation-in-machine-learning-72924a69872f?gi=8733cf0be132">Cross Validation in Machine Learning</a></p>

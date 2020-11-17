@@ -4,7 +4,7 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2020-11-17T15:21:52Z</updated>
+    <updated>2020-11-17T15:48:39Z</updated>
     <id>tag:null,2020:11</id>
     <entry>
         <title>Credit approval using SVM</title>
@@ -34,7 +34,7 @@
 &lt;h2 id=&quot;a_little_bit_of_theory&quot;&gt;A little bit of theory&lt;/h2&gt;
 &lt;div class=&quot;sectionbody&quot;&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Another type of supervised learning model is SVM or &lt;strong&gt;Support Vector Machines&lt;/strong&gt; or &lt;strong&gt;SVM&lt;/strong&gt;. SVM can be used for both regression and classification purposes. SVM tries to find a decision boundary that best separates different target classes. For linear spaces with two different target classes, we need to find the line (decision boundary for 1-dimensional space) that best classifies both classes. And which is the best line, the one that maximizes the margin from both classes to the decision boundary or hyperplane.&lt;/p&gt;
+&lt;p&gt;Another type of supervised learning model is SVM or &lt;strong&gt;Support Vector Machines&lt;/strong&gt; or &lt;strong&gt;SVM&lt;/strong&gt;. SVM can be used for both regression and classification purposes. SVM tries to find a decision boundary that best separates different target classes. For linear spaces with two different target classes, we need to find the line (decision boundary for 1-dimensional space) that best classifies both classes. And which is the best line ? The one that maximizes the margin from both classes to the decision boundary or hyperplane.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;SVM rewards classifiers by the &lt;strong&gt;maximum margin classifier&lt;/strong&gt; between two different target classes. &lt;strong&gt;The higher the distance between two classes the higher is the classifier ranked&lt;/strong&gt;. This margin can be customized by the classifier&amp;#8217;s regularization parameter (normally named &lt;strong&gt;C&lt;/strong&gt;).&lt;/p&gt;
@@ -251,7 +251,7 @@ sns.heatmap(
 &lt;div class=&quot;sect2&quot;&gt;
 &lt;h3 id=&quot;creating_xy&quot;&gt;Creating X,y&lt;/h3&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;From the correlation matrix, I&amp;#8217;ve chose those features tighly related with the label, and those that are tighly related to the former features. With this information I can create the &lt;strong&gt;X&lt;/strong&gt; (features) and &lt;strong&gt;y&lt;/strong&gt; label sets.&lt;/p&gt;
+&lt;p&gt;From the correlation matrix, I&amp;#8217;ve chosen those features tighly related with the label, and those that are tighly related to the aforementioned features. With this information I can now create the &lt;strong&gt;X&lt;/strong&gt; (features) and &lt;strong&gt;y&lt;/strong&gt; label sets.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;listingblock&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
@@ -276,7 +276,7 @@ y = credit[&apos;label&apos;]&lt;/code&gt;&lt;/pre&gt;
 &lt;div class=&quot;sect2&quot;&gt;
 &lt;h3 id=&quot;cross_validation&quot;&gt;Cross validation&lt;/h3&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;While reading about SVM, it came across the concept of cross validation.  In this particular case is helping me to choose &lt;strong&gt;the best value for gamma&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;While reading about SVM, it came across the concept of &lt;a href=&quot;https://en.wikipedia.org/wiki/Cross-validation_(statistics)&quot;&gt;cross validation&lt;/a&gt;.  In this particular case is helping me to choose &lt;strong&gt;the best value for gamma&lt;/strong&gt;.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;listingblock&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
@@ -316,7 +316,7 @@ gamma_dataframe.head()&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;The cross validation results returns the gamma values and the mean scores for training and test datasets.&lt;/p&gt;
+&lt;p&gt;The cross validation results returns the gamma values and the mean scores for training and test datasets. I should look for the results with higher test_mean and lower train_mean. Meaning that &lt;strong&gt;I&amp;#8217;m looking for a value of gamma that maximizes the generalization and minimizes the complexity of the model&lt;/strong&gt;.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;imageblock&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
@@ -379,7 +379,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=10)&lt;/c
 &lt;div class=&quot;sect2&quot;&gt;
 &lt;h3 id=&quot;fit_the_model_and_evaluate_scores&quot;&gt;Fit the model and evaluate scores&lt;/h3&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Then I&amp;#8217;m fitting the model and getting the score for the training and test datasets using the best gamma value I was able to get. If you use &lt;strong&gt;&apos;auto&apos;&lt;/strong&gt; as the value for gamma, scikit learn will use &lt;strong&gt;uses 1 / n_features&lt;/strong&gt; instead.&lt;/p&gt;
+&lt;p&gt;Then I&amp;#8217;m fitting the model and getting the score for the training and test datasets using the best gamma value I was able to get. If you use &lt;strong&gt;&apos;auto&apos;&lt;/strong&gt; as the value for gamma, scikit learn will use &lt;strong&gt;1 / n_features&lt;/strong&gt; instead.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;listingblock&quot;&gt;
 &lt;div class=&quot;title&quot;&gt;Fit the model and evaluate scores&lt;/div&gt;
@@ -403,7 +403,7 @@ score_train, score_test&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Although the training dataset is not bad, the test dataset is still far from giving me a fair result. But it&amp;#8217;s clear that the gamma value helped to avoid overfitting the model.&lt;/p&gt;
+&lt;p&gt;Although the training dataset is not bad, the test dataset is still far from giving me a fair result. But it&amp;#8217;s clear that &lt;strong&gt;the gamma value helped to avoid overfitting&lt;/strong&gt; the model.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;sect2&quot;&gt;
@@ -484,6 +484,9 @@ score_train, score_test&lt;/code&gt;&lt;/pre&gt;
 &lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;a href=&quot;/files/2020/11/ml_svm_german_credit/german-credit.ipynb&quot;&gt;Jupyter Notebook source code&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://scikit-learn.org/stable/modules/cross_validation.html&quot;&gt;Cross validation with Scikit Learn&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;a href=&quot;https://towardsdatascience.com/cross-validation-in-machine-learning-72924a69872f?gi=8733cf0be132&quot;&gt;Cross Validation in Machine Learning&lt;/a&gt;&lt;/p&gt;
