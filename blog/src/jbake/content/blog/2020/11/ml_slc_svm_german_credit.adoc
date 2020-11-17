@@ -16,7 +16,7 @@ Here I'm just working with a particular case of SVM, if you'd like to known more
 
 == A little bit of theory
 
-Another type of supervised learning model is SVM or **Support Vector Machines** or **SVM**. SVM can be used for both regression and classification purposes. SVM tries to find a decision boundary that best separates different target classes. For linear spaces with two different target classes, we need to find the line (decision boundary for 1-dimensional space) that best classifies both classes. And which is the best line, the one that maximizes the margin from both classes to the decision boundary or hyperplane.
+Another type of supervised learning model is SVM or **Support Vector Machines** or **SVM**. SVM can be used for both regression and classification purposes. SVM tries to find a decision boundary that best separates different target classes. For linear spaces with two different target classes, we need to find the line (decision boundary for 1-dimensional space) that best classifies both classes. And which is the best line ? The one that maximizes the margin from both classes to the decision boundary or hyperplane.
 
 SVM rewards classifiers by the **maximum margin classifier** between two different target classes. **The higher the distance between two classes the higher is the classifier ranked**. This margin can be customized by the classifier's regularization parameter (normally named **C**). 
 
@@ -198,7 +198,7 @@ image::2020/11/ml_svm_german_credit/svm_correlation_matrix.png[]
 
 === Creating X,y
 
-From the correlation matrix, I've chose those features tighly related with the label, and those that are tighly related to the former features. With this information I can create the **X** (features) and **y** label sets.
+From the correlation matrix, I've chosen those features tighly related with the label, and those that are tighly related to the aforementioned features. With this information I can now create the **X** (features) and **y** label sets.
 
 [source, python]
 ----
@@ -221,7 +221,7 @@ y = credit['label']
 
 === Cross validation
 
-While reading about SVM, it came across the concept of cross validation.  In this particular case is helping me to choose **the best value for gamma**.
+While reading about SVM, it came across the concept of https://en.wikipedia.org/wiki/Cross-validation_(statistics)[cross validation].  In this particular case is helping me to choose **the best value for gamma**. 
 
 [source, python]
 ----
@@ -260,7 +260,7 @@ gamma_dataframe = cross_validation_gamma(X, y, 0.001, 0.1)
 gamma_dataframe.head()
 ----
 
-The cross validation results returns the gamma values and the mean scores for training and test datasets.
+The cross validation results returns the gamma values and the mean scores for training and test datasets. I should look for the results with higher test_mean and lower train_mean. Meaning that **I'm looking for a value of gamma that maximizes the generalization and minimizes the complexity of the model**. 
 
 [alt=gamma, width="20%"]
 .Gamma values
@@ -314,7 +314,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=10)
 
 === Fit the model and evaluate scores
 
-Then I'm fitting the model and getting the score for the training and test datasets using the best gamma value I was able to get. If you use **'auto'** as the value for gamma, scikit learn will use **uses 1 / n_features** instead.
+Then I'm fitting the model and getting the score for the training and test datasets using the best gamma value I was able to get. If you use **'auto'** as the value for gamma, scikit learn will use **1 / n_features** instead.
 
 [source, python]
 .Fit the model and evaluate scores
@@ -337,7 +337,7 @@ score_train, score_test
 (0.8066666666666666, 0.68)
 ----
 
-Although the training dataset is not bad, the test dataset is still far from giving me a fair result. But it's clear that the gamma value helped to avoid overfitting the model.
+Although the training dataset is not bad, the test dataset is still far from giving me a fair result. But it's clear that **the gamma value helped to avoid overfitting** the model.
 
 === Iterating
 
@@ -394,6 +394,7 @@ Some final thoughs:
 == Resources
 
 - link:/files/2020/11/ml_svm_german_credit/german-credit.ipynb[Jupyter Notebook source code]
+- https://scikit-learn.org/stable/modules/cross_validation.html[Cross validation with Scikit Learn]
 - https://towardsdatascience.com/cross-validation-in-machine-learning-72924a69872f?gi=8733cf0be132[Cross Validation in Machine Learning]
 - https://monkeylearn.com/blog/introduction-to-support-vector-machines-svm/[Introduction to SVM]
 - https://www.youtube.com/watch?v=efR1C6CvhmE[Support Vector Machines, clearly exlained!! (Youtube)]
