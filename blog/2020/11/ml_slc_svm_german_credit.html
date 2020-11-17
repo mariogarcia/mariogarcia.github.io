@@ -1,0 +1,551 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><div class="metadata"><em class="fa fa-calendar-o"></em><b>2020-11-15</b></div><h1>Credit approval using SVM</h1></header><yieldScaped><div id="preamble">
+<div class="sectionbody">
+<div class="sidebarblock">
+<div class="content">
+<div class="title">SVM clearly explained!</div>
+<div class="paragraph">
+<p>Here I&#8217;m just working with a particular case of SVM, if you&#8217;d like to known more, I really recommend you this <a href="https://www.youtube.com/watch?v=efR1C6CvhmE">wonderful video</a> explaining how SVM works in a nutshell for linear and non linear spaces. There&#8217;re also a few other references in the resources section.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="a_little_bit_of_theory">A little bit of theory</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Another type of supervised learning model is SVM or <strong>Support Vector Machines</strong> or <strong>SVM</strong>. SVM can be used for both regression and classification purposes. SVM tries to find a decision boundary that best separates different target classes. For linear spaces with two different target classes, we need to find the line (decision boundary for 1-dimensional space) that best classifies both classes. And which is the best line, the one that maximizes the margin from both classes to the decision boundary or hyperplane.</p>
+</div>
+<div class="paragraph">
+<p>SVM rewards classifiers by the <strong>maximum margin classifier</strong> between two different target classes. <strong>The higher the distance between two classes the higher is the classifier ranked</strong>. This margin can be customized by the classifier&#8217;s regularization parameter (normally named <strong>C</strong>).</p>
+</div>
+<div class="paragraph">
+<p>How do we know which is the best margin ? Using <a href="https://towardsdatascience.com/cross-validation-in-machine-learning-72924a69872f?gi=8733cf0be132">cross-validation</a> to validate how well the different margins perform and pick up the one that performs the best. Some rules of thumb to keep in mind:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch compressed">
+<caption class="title">Table 1. Regularization parameter &#169; consequences</caption>
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-center valign-top">AS C &#8230;&#8203;</th>
+<th class="tableblock halign-center valign-top">REGULARIZATION</th>
+<th class="tableblock halign-center valign-top">OVERFITTING</th>
+<th class="tableblock halign-center valign-top">MARGIN</th>
+<th class="tableblock halign-center valign-top">SENSITIVE TO IND. VALUES</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock">INCREASES</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">DECREASES</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">EASIER</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">SMALLER</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">YES</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock">DECREASES</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">INCREASES</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">HARDER</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">BIGGER</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">NO</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>There&#8217;s also the <strong>gamma</strong> parameter when the SVM kernel used is <a href="https://scikit-learn.org/stable/auto_examples/svm/plot_rbf_parameters.html">Radial Basis Function (RBF)</a> (which is the default in scikit learn SVC). The gamma parameter defines how far the influence of a single training example reaches, with low values meaning ‘far’ and high values meaning ‘close’. The behavior of the model is very sensitive to the gamma parameter. <strong>If gamma is too large, the radius of the area of influence of the support vectors only includes the support vector itself and no amount of regularization with C will be able to prevent overfitting</strong>.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch compressed">
+<caption class="title">Table 2. Gamma parameter consequences</caption>
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-center valign-top">AS Gamma &#8230;&#8203;</th>
+<th class="tableblock halign-center valign-top">REGULARIZATION</th>
+<th class="tableblock halign-center valign-top">OVERFITTING</th>
+<th class="tableblock halign-center valign-top">MARGIN</th>
+<th class="tableblock halign-center valign-top">SENSITIVE TO IND. VALUES</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock">INCREASES</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">DECREASES</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">EASIER</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">SMALLER</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">CLOSE</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock">DECREASES</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">INCREASES</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">HARDER</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">BIGGER</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">FAR</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect1">
+<h2 id="credit_risks">Credit risks</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I&#8217;m using <a href="http://archive.ics.uci.edu/ml/datasets/Statlog+%28German+Credit+Data%29">a dataset</a> that classifies people described by a set of attributes as good or bad credit risks. There dataset has two versions, I&#8217;m using the dataset with all attributes converted to numeric values (german.data-numeric file).</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/diag-d33b4b7e5f331db6af3c5f0aeb387b79.png" alt="process steps" width="90%" height="196">
+</div>
+<div class="title">process steps</div>
+</div>
+<div class="sect2">
+<h3 id="loading_and_preparing_data">Loading and preparing data</h3>
+<div class="paragraph">
+<p>First of all I&#8217;m loading the credit data and see how it looks:</p>
+</div>
+<div class="listingblock">
+<div class="title">loading data</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import pandas as pd
+
+cols = [
+    'status',
+    'duration',
+    'history',
+    'purpose',
+    'amount',
+    'savings',
+    'employment_since',
+    'installment_rate',
+    'personal_status',
+    'debtors',
+    'residence_since',
+    'property',
+    'age',
+    'installment_others',
+    'housing',
+    'existing_credits',
+    'job',
+    'people_being_liable',
+    'telephone',
+    'foreign_worker',
+    'label'
+]
+
+credit = pd.read_csv('german.data', engine='python', sep='\s+', names=cols)
+credit.head()</code></pre>
+</div>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/11/ml_svm_german_credit/svm_loading_data.png" alt="data" width="90%">
+</div>
+<div class="title">Figure 1. raw data</div>
+</div>
+<div class="paragraph">
+<p>The problem is that I need to get rid of categorical data and convert everything into numerical data. I&#8217;m creating a function that takes all unique values of a given series and maps every categorical value to a given number.</p>
+</div>
+<div class="listingblock">
+<div class="title">converting categorical data to numeric</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import numpy as np
+
+def to_numerical(series):
+    uniques = np.sort(series.unique())
+    nvalues = range(1, len(uniques) + 1)
+    xmap    = dict(zip(uniques, nvalues))
+
+    return series.map(xmap).astype(int)
+
+
+cols_not_to_convert = [
+    'duration',
+    'installment_rate',
+    'age',
+    'amount',
+    'existing_credits',
+    'people_being_liable',
+    'label'
+]
+cols_to_convert = [e for e in cols if e not in cols_not_to_convert]
+
+for col in cols_to_convert:
+    credit[col] = to_numerical(credit[col])
+
+credit.head()</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now all columns show numerical data ready to be used.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/11/ml_svm_german_credit/svm_to_numerical.png" alt="to_numerical" width="90%">
+</div>
+<div class="title">Figure 2. numerical data</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="soft_features_choice">Soft features choice</h3>
+<div class="paragraph">
+<p>As I&#8217;m usually doing nowadays, the first thing I do is to create a correlation matrix so I can see which features could clearly work with the label chosen and which don&#8217;t</p>
+</div>
+<div class="listingblock">
+<div class="title">correlation matrix</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import seaborn as sns
+import matplotlib.pyplot as plt
+import numpy as np
+
+corr_matrix = np.corrcoef(credit.T)
+
+plt.figure(figsize=(15, 15))
+sns.heatmap(
+    corr_matrix,
+    cbar=False,
+    annot=True,
+    square=True,
+    xticklabels=cols,
+    yticklabels=cols
+)</code></pre>
+</div>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/11/ml_svm_german_credit/svm_correlation_matrix.png" alt="correlation" width="40%">
+</div>
+<div class="title">Figure 3. correlation matrix</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="creating_xy">Creating X,y</h3>
+<div class="paragraph">
+<p>From the correlation matrix, I&#8217;ve chose those features tighly related with the label, and those that are tighly related to the former features. With this information I can create the <strong>X</strong> (features) and <strong>y</strong> label sets.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">feature_cols = [
+    'duration',
+    'amount',
+    'job',
+    'age',
+    'history',
+    'employment_since',
+    'telephone',
+    'existing_credits',
+    'savings',
+    'property'
+]
+
+X = credit[feature_cols]
+y = credit['label']</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="cross_validation">Cross validation</h3>
+<div class="paragraph">
+<p>While reading about SVM, it came across the concept of cross validation.  In this particular case is helping me to choose <strong>the best value for gamma</strong>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import pandas as pd
+from sklearn.svm import SVC
+from sklearn.model_selection import validation_curve
+
+def extract_best_numbers(params, train_pcts, test_pcts):
+    trains = pd.DataFrame(dict(zip(params, train_pcts))).T
+    tests  = pd.DataFrame(dict(zip(params, test_pcts))).T
+
+    trains['train_mean'] = trains.mean(axis=1)
+    tests['test_mean']  = tests.mean(axis=1)
+
+    return (trains[['train_mean']]
+        .copy()
+        .merge(
+            tests[['test_mean']].copy(),
+            left_index=True,
+            right_index=True
+        ))
+
+def cross_validation_gamma(X, y, gamma_min, gamma_max):
+    param_range = np.linspace(gamma_min, gamma_max, num=20)
+    train_scores, test_scores = validation_curve(
+        SVC(),
+        X,
+        y,
+        param_name="gamma",
+        param_range=param_range,
+        cv=5)
+
+    return extract_best_numbers(param_range, train_scores.tolist(), test_scores.tolist())
+
+gamma_dataframe = cross_validation_gamma(X, y, 0.001, 0.1)
+gamma_dataframe.head()</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The cross validation results returns the gamma values and the mean scores for training and test datasets.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/img/2020/11/ml_svm_german_credit/svm_cross_validation_gamma_values.png" alt="gamma" width="20%">
+</div>
+<div class="title">Figure 4. Gamma values</div>
+</div>
+<div class="paragraph">
+<p>I wanted to show visually how training and test datasets were behaving depending on the gamma values provided.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import matplotlib.pyplot as plt
+
+def show_svc_param_performance(dataframe, param_name):
+    x = dataframe.index
+
+    plt.figure(figsize=(10, 6))
+    plt.title("SVC {}".format(param_name.upper()))
+    plt.xlabel('{} VALUE'.format(param_name.upper()))
+    plt.ylabel('MODEL SCORE')
+    plt.grid(axis='both')
+    plt.yticks(np.arange(0.00, 1.10, step=0.10))
+    plt.xticks(np.arange(0.00, 1.10, step=0.10))
+
+    # drawing test and training performance lines
+    plt.plot(x, dataframe['train_mean'], label='TRAINING SCORE', color='red')
+    plt.plot(x, dataframe['test_mean'], label='TEST SCORE', color='green')
+
+    # drawing limiy where train score is still ok
+    limit_x = dataframe[dataframe['train_mean'] &gt;= 0.80].index[0]
+    plt.vlines(limit_x, ymin=0, ymax=1, linestyle='--', color='red', alpha=0.4)
+    plt.annotate("Recommended Gamma: {}".format(limit_x), xy=(limit_x + 0.005, 0.5))
+    plt.legend(loc="lower right")
+    plt.show()
+
+show_svc_param_performance(gamma_dataframe, "gamma")</code></pre>
+</div>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/11/ml_svm_german_credit/svm_cross_validation_gamma_chart.png" alt="gamma_chart" width="50%">
+</div>
+<div class="title">Figure 5. Gamma evolution chart</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="splitting_dataset">Splitting Dataset</h3>
+<div class="paragraph">
+<p>Ok so now that I know the best value of gamma, I can start preparing the training and test datasets that are going to feed the model.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=10)</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="fit_the_model_and_evaluate_scores">Fit the model and evaluate scores</h3>
+<div class="paragraph">
+<p>Then I&#8217;m fitting the model and getting the score for the training and test datasets using the best gamma value I was able to get. If you use <strong>'auto'</strong> as the value for gamma, scikit learn will use <strong>uses 1 / n_features</strong> instead.</p>
+</div>
+<div class="listingblock">
+<div class="title">Fit the model and evaluate scores</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from sklearn.svm import SVC
+
+gamma_value = 0.001
+
+svc = SVC(gamma=gamma_value).fit(X_train, y_train)
+
+score_train = svc.score(X_train, y_train)
+score_test  = svc.score(X_test, y_test)
+
+score_train, score_test</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">scores</div>
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">(0.8066666666666666, 0.68)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Although the training dataset is not bad, the test dataset is still far from giving me a fair result. But it&#8217;s clear that the gamma value helped to avoid overfitting the model.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="iterating">Iterating</h3>
+<div class="paragraph">
+<p>In order to help the model I used the <strong>sklearn.preprocessing.MinMaxScaler</strong> transformation to make all features to share a common scale. It improved a bit the performance of the test scoring and reduced the model complexity.</p>
+</div>
+<div class="listingblock">
+<div class="title">transforming the features</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from sklearn.preprocessing import MinMaxScaler
+
+scaler = MinMaxScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled  = scaler.transform(X_test)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I ran the <strong>cross_validation_curve</strong> from <strong>1 to 5</strong> to see which value of gamma would be the best:</p>
+</div>
+<div class="listingblock">
+<div class="title">getting gamma values</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">scaled_cross_validation = cross_validation_gamma(X_train_scaled, y_train, 1, 5)
+scaled_cross_validation.head()</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And finally I executed the model again with the new gamma value:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from sklearn.preprocessing import MinMaxScaler
+
+svc = SVC(gamma=1).fit(X_train_scaled, y_train)
+
+score_train = svc.score(X_train_scaled, y_train)
+score_test  = svc.score(X_test_scaled, y_test)
+
+score_train, score_test</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Giving me a slightly better result</p>
+</div>
+<div class="listingblock">
+<div class="title">score</div>
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">(0.7666666666666667, 0.724)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Some final thoughs:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>I&#8217;m not convinced on <strong>how to extract best gamma values</strong> from the cross validation procedure.</p>
+</li>
+<li>
+<p>Is there a combinatorial way <strong>to get the best (c, gamma) pair</strong> that I still don&#8217;t know about ?</p>
+</li>
+<li>
+<p><strong>Maybe SVM was not the best technique</strong> for this classification problem</p>
+</li>
+<li>
+<p>It seems that <strong>normalization helps to get better results in SVM</strong> problems</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="resources">Resources</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="/files/2020/11/ml_svm_german_credit/german-credit.ipynb">Jupyter Notebook source code</a></p>
+</li>
+<li>
+<p><a href="https://towardsdatascience.com/cross-validation-in-machine-learning-72924a69872f?gi=8733cf0be132">Cross Validation in Machine Learning</a></p>
+</li>
+<li>
+<p><a href="https://monkeylearn.com/blog/introduction-to-support-vector-machines-svm/">Introduction to SVM</a></p>
+</li>
+<li>
+<p><a href="https://www.youtube.com/watch?v=efR1C6CvhmE">Support Vector Machines, clearly exlained!! (Youtube)</a></p>
+</li>
+<li>
+<p><a href="http://archive.ics.uci.edu/ml/datasets/Statlog+%28German+Credit+Data%29">German Credit DataSet (UCI&#8217;s ML dataset repository)</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>

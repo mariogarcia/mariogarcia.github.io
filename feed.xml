@@ -4,8 +4,505 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2020-11-14T01:04:23Z</updated>
+    <updated>2020-11-17T15:21:52Z</updated>
     <id>tag:null,2020:11</id>
+    <entry>
+        <title>Credit approval using SVM</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2020/11/ml_slc_svm_german_credit.html"/>
+        <updated>2020-11-15T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2020/11/ml_slc_svm_german_credit.html</id>
+        <category term="ds"/>
+        <category term="ml"/>
+        <category term="python"/>
+        <content type="html">
+            &lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;sidebarblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;SVM clearly explained!&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Here I&amp;#8217;m just working with a particular case of SVM, if you&amp;#8217;d like to known more, I really recommend you this &lt;a href=&quot;https://www.youtube.com/watch?v=efR1C6CvhmE&quot;&gt;wonderful video&lt;/a&gt; explaining how SVM works in a nutshell for linear and non linear spaces. There&amp;#8217;re also a few other references in the resources section.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;a_little_bit_of_theory&quot;&gt;A little bit of theory&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Another type of supervised learning model is SVM or &lt;strong&gt;Support Vector Machines&lt;/strong&gt; or &lt;strong&gt;SVM&lt;/strong&gt;. SVM can be used for both regression and classification purposes. SVM tries to find a decision boundary that best separates different target classes. For linear spaces with two different target classes, we need to find the line (decision boundary for 1-dimensional space) that best classifies both classes. And which is the best line, the one that maximizes the margin from both classes to the decision boundary or hyperplane.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;SVM rewards classifiers by the &lt;strong&gt;maximum margin classifier&lt;/strong&gt; between two different target classes. &lt;strong&gt;The higher the distance between two classes the higher is the classifier ranked&lt;/strong&gt;. This margin can be customized by the classifier&amp;#8217;s regularization parameter (normally named &lt;strong&gt;C&lt;/strong&gt;).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;How do we know which is the best margin ? Using &lt;a href=&quot;https://towardsdatascience.com/cross-validation-in-machine-learning-72924a69872f?gi=8733cf0be132&quot;&gt;cross-validation&lt;/a&gt; to validate how well the different margins perform and pick up the one that performs the best. Some rules of thumb to keep in mind:&lt;/p&gt;
+&lt;/div&gt;
+&lt;table class=&quot;tableblock frame-all grid-all stretch compressed&quot;&gt;
+&lt;caption class=&quot;title&quot;&gt;Table 1. Regularization parameter &amp;#169; consequences&lt;/caption&gt;
+&lt;colgroup&gt;
+&lt;col style=&quot;width: 20%;&quot;&gt;
+&lt;col style=&quot;width: 20%;&quot;&gt;
+&lt;col style=&quot;width: 20%;&quot;&gt;
+&lt;col style=&quot;width: 20%;&quot;&gt;
+&lt;col style=&quot;width: 20%;&quot;&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th class=&quot;tableblock halign-center valign-top&quot;&gt;AS C &amp;#8230;&amp;#8203;&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-center valign-top&quot;&gt;REGULARIZATION&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-center valign-top&quot;&gt;OVERFITTING&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-center valign-top&quot;&gt;MARGIN&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-center valign-top&quot;&gt;SENSITIVE TO IND. VALUES&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;INCREASES&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;DECREASES&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;EASIER&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;SMALLER&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;YES&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;DECREASES&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;INCREASES&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;HARDER&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;BIGGER&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;NO&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There&amp;#8217;s also the &lt;strong&gt;gamma&lt;/strong&gt; parameter when the SVM kernel used is &lt;a href=&quot;https://scikit-learn.org/stable/auto_examples/svm/plot_rbf_parameters.html&quot;&gt;Radial Basis Function (RBF)&lt;/a&gt; (which is the default in scikit learn SVC). The gamma parameter defines how far the influence of a single training example reaches, with low values meaning ‘far’ and high values meaning ‘close’. The behavior of the model is very sensitive to the gamma parameter. &lt;strong&gt;If gamma is too large, the radius of the area of influence of the support vectors only includes the support vector itself and no amount of regularization with C will be able to prevent overfitting&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;table class=&quot;tableblock frame-all grid-all stretch compressed&quot;&gt;
+&lt;caption class=&quot;title&quot;&gt;Table 2. Gamma parameter consequences&lt;/caption&gt;
+&lt;colgroup&gt;
+&lt;col style=&quot;width: 20%;&quot;&gt;
+&lt;col style=&quot;width: 20%;&quot;&gt;
+&lt;col style=&quot;width: 20%;&quot;&gt;
+&lt;col style=&quot;width: 20%;&quot;&gt;
+&lt;col style=&quot;width: 20%;&quot;&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th class=&quot;tableblock halign-center valign-top&quot;&gt;AS Gamma &amp;#8230;&amp;#8203;&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-center valign-top&quot;&gt;REGULARIZATION&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-center valign-top&quot;&gt;OVERFITTING&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-center valign-top&quot;&gt;MARGIN&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-center valign-top&quot;&gt;SENSITIVE TO IND. VALUES&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;INCREASES&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;DECREASES&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;EASIER&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;SMALLER&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;CLOSE&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;DECREASES&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;INCREASES&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;HARDER&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;BIGGER&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;FAR&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;credit_risks&quot;&gt;Credit risks&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I&amp;#8217;m using &lt;a href=&quot;http://archive.ics.uci.edu/ml/datasets/Statlog+%28German+Credit+Data%29&quot;&gt;a dataset&lt;/a&gt; that classifies people described by a set of attributes as good or bad credit risks. There dataset has two versions, I&amp;#8217;m using the dataset with all attributes converted to numeric values (german.data-numeric file).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/diag-d33b4b7e5f331db6af3c5f0aeb387b79.png&quot; alt=&quot;process steps&quot; width=&quot;90%&quot; height=&quot;196&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;process steps&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;loading_and_preparing_data&quot;&gt;Loading and preparing data&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;First of all I&amp;#8217;m loading the credit data and see how it looks:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;loading data&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import pandas as pd
+
+cols = [
+    &apos;status&apos;,
+    &apos;duration&apos;,
+    &apos;history&apos;,
+    &apos;purpose&apos;,
+    &apos;amount&apos;,
+    &apos;savings&apos;,
+    &apos;employment_since&apos;,
+    &apos;installment_rate&apos;,
+    &apos;personal_status&apos;,
+    &apos;debtors&apos;,
+    &apos;residence_since&apos;,
+    &apos;property&apos;,
+    &apos;age&apos;,
+    &apos;installment_others&apos;,
+    &apos;housing&apos;,
+    &apos;existing_credits&apos;,
+    &apos;job&apos;,
+    &apos;people_being_liable&apos;,
+    &apos;telephone&apos;,
+    &apos;foreign_worker&apos;,
+    &apos;label&apos;
+]
+
+credit = pd.read_csv(&apos;german.data&apos;, engine=&apos;python&apos;, sep=&apos;\s+&apos;, names=cols)
+credit.head()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/11/ml_svm_german_credit/svm_loading_data.png&quot; alt=&quot;data&quot; width=&quot;90%&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 1. raw data&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The problem is that I need to get rid of categorical data and convert everything into numerical data. I&amp;#8217;m creating a function that takes all unique values of a given series and maps every categorical value to a given number.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;converting categorical data to numeric&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import numpy as np
+
+def to_numerical(series):
+    uniques = np.sort(series.unique())
+    nvalues = range(1, len(uniques) + 1)
+    xmap    = dict(zip(uniques, nvalues))
+
+    return series.map(xmap).astype(int)
+
+
+cols_not_to_convert = [
+    &apos;duration&apos;,
+    &apos;installment_rate&apos;,
+    &apos;age&apos;,
+    &apos;amount&apos;,
+    &apos;existing_credits&apos;,
+    &apos;people_being_liable&apos;,
+    &apos;label&apos;
+]
+cols_to_convert = [e for e in cols if e not in cols_not_to_convert]
+
+for col in cols_to_convert:
+    credit[col] = to_numerical(credit[col])
+
+credit.head()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now all columns show numerical data ready to be used.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/11/ml_svm_german_credit/svm_to_numerical.png&quot; alt=&quot;to_numerical&quot; width=&quot;90%&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 2. numerical data&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;soft_features_choice&quot;&gt;Soft features choice&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As I&amp;#8217;m usually doing nowadays, the first thing I do is to create a correlation matrix so I can see which features could clearly work with the label chosen and which don&amp;#8217;t&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;correlation matrix&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import seaborn as sns
+import matplotlib.pyplot as plt
+import numpy as np
+
+corr_matrix = np.corrcoef(credit.T)
+
+plt.figure(figsize=(15, 15))
+sns.heatmap(
+    corr_matrix,
+    cbar=False,
+    annot=True,
+    square=True,
+    xticklabels=cols,
+    yticklabels=cols
+)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/11/ml_svm_german_credit/svm_correlation_matrix.png&quot; alt=&quot;correlation&quot; width=&quot;40%&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 3. correlation matrix&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;creating_xy&quot;&gt;Creating X,y&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;From the correlation matrix, I&amp;#8217;ve chose those features tighly related with the label, and those that are tighly related to the former features. With this information I can create the &lt;strong&gt;X&lt;/strong&gt; (features) and &lt;strong&gt;y&lt;/strong&gt; label sets.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;feature_cols = [
+    &apos;duration&apos;,
+    &apos;amount&apos;,
+    &apos;job&apos;,
+    &apos;age&apos;,
+    &apos;history&apos;,
+    &apos;employment_since&apos;,
+    &apos;telephone&apos;,
+    &apos;existing_credits&apos;,
+    &apos;savings&apos;,
+    &apos;property&apos;
+]
+
+X = credit[feature_cols]
+y = credit[&apos;label&apos;]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;cross_validation&quot;&gt;Cross validation&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;While reading about SVM, it came across the concept of cross validation.  In this particular case is helping me to choose &lt;strong&gt;the best value for gamma&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import pandas as pd
+from sklearn.svm import SVC
+from sklearn.model_selection import validation_curve
+
+def extract_best_numbers(params, train_pcts, test_pcts):
+    trains = pd.DataFrame(dict(zip(params, train_pcts))).T
+    tests  = pd.DataFrame(dict(zip(params, test_pcts))).T
+
+    trains[&apos;train_mean&apos;] = trains.mean(axis=1)
+    tests[&apos;test_mean&apos;]  = tests.mean(axis=1)
+
+    return (trains[[&apos;train_mean&apos;]]
+        .copy()
+        .merge(
+            tests[[&apos;test_mean&apos;]].copy(),
+            left_index=True,
+            right_index=True
+        ))
+
+def cross_validation_gamma(X, y, gamma_min, gamma_max):
+    param_range = np.linspace(gamma_min, gamma_max, num=20)
+    train_scores, test_scores = validation_curve(
+        SVC(),
+        X,
+        y,
+        param_name=&quot;gamma&quot;,
+        param_range=param_range,
+        cv=5)
+
+    return extract_best_numbers(param_range, train_scores.tolist(), test_scores.tolist())
+
+gamma_dataframe = cross_validation_gamma(X, y, 0.001, 0.1)
+gamma_dataframe.head()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The cross validation results returns the gamma values and the mean scores for training and test datasets.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/11/ml_svm_german_credit/svm_cross_validation_gamma_values.png&quot; alt=&quot;gamma&quot; width=&quot;20%&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 4. Gamma values&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I wanted to show visually how training and test datasets were behaving depending on the gamma values provided.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import matplotlib.pyplot as plt
+
+def show_svc_param_performance(dataframe, param_name):
+    x = dataframe.index
+
+    plt.figure(figsize=(10, 6))
+    plt.title(&quot;SVC {}&quot;.format(param_name.upper()))
+    plt.xlabel(&apos;{} VALUE&apos;.format(param_name.upper()))
+    plt.ylabel(&apos;MODEL SCORE&apos;)
+    plt.grid(axis=&apos;both&apos;)
+    plt.yticks(np.arange(0.00, 1.10, step=0.10))
+    plt.xticks(np.arange(0.00, 1.10, step=0.10))
+
+    # drawing test and training performance lines
+    plt.plot(x, dataframe[&apos;train_mean&apos;], label=&apos;TRAINING SCORE&apos;, color=&apos;red&apos;)
+    plt.plot(x, dataframe[&apos;test_mean&apos;], label=&apos;TEST SCORE&apos;, color=&apos;green&apos;)
+
+    # drawing limiy where train score is still ok
+    limit_x = dataframe[dataframe[&apos;train_mean&apos;] &amp;gt;= 0.80].index[0]
+    plt.vlines(limit_x, ymin=0, ymax=1, linestyle=&apos;--&apos;, color=&apos;red&apos;, alpha=0.4)
+    plt.annotate(&quot;Recommended Gamma: {}&quot;.format(limit_x), xy=(limit_x + 0.005, 0.5))
+    plt.legend(loc=&quot;lower right&quot;)
+    plt.show()
+
+show_svc_param_performance(gamma_dataframe, &quot;gamma&quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/11/ml_svm_german_credit/svm_cross_validation_gamma_chart.png&quot; alt=&quot;gamma_chart&quot; width=&quot;50%&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 5. Gamma evolution chart&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;splitting_dataset&quot;&gt;Splitting Dataset&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ok so now that I know the best value of gamma, I can start preparing the training and test datasets that are going to feed the model.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=10)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;fit_the_model_and_evaluate_scores&quot;&gt;Fit the model and evaluate scores&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then I&amp;#8217;m fitting the model and getting the score for the training and test datasets using the best gamma value I was able to get. If you use &lt;strong&gt;&apos;auto&apos;&lt;/strong&gt; as the value for gamma, scikit learn will use &lt;strong&gt;uses 1 / n_features&lt;/strong&gt; instead.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Fit the model and evaluate scores&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.svm import SVC
+
+gamma_value = 0.001
+
+svc = SVC(gamma=gamma_value).fit(X_train, y_train)
+
+score_train = svc.score(X_train, y_train)
+score_test  = svc.score(X_test, y_test)
+
+score_train, score_test&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;scores&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;(0.8066666666666666, 0.68)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Although the training dataset is not bad, the test dataset is still far from giving me a fair result. But it&amp;#8217;s clear that the gamma value helped to avoid overfitting the model.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;iterating&quot;&gt;Iterating&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In order to help the model I used the &lt;strong&gt;sklearn.preprocessing.MinMaxScaler&lt;/strong&gt; transformation to make all features to share a common scale. It improved a bit the performance of the test scoring and reduced the model complexity.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;transforming the features&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.preprocessing import MinMaxScaler
+
+scaler = MinMaxScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled  = scaler.transform(X_test)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I ran the &lt;strong&gt;cross_validation_curve&lt;/strong&gt; from &lt;strong&gt;1 to 5&lt;/strong&gt; to see which value of gamma would be the best:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;getting gamma values&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;scaled_cross_validation = cross_validation_gamma(X_train_scaled, y_train, 1, 5)
+scaled_cross_validation.head()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And finally I executed the model again with the new gamma value:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.preprocessing import MinMaxScaler
+
+svc = SVC(gamma=1).fit(X_train_scaled, y_train)
+
+score_train = svc.score(X_train_scaled, y_train)
+score_test  = svc.score(X_test_scaled, y_test)
+
+score_train, score_test&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Giving me a slightly better result&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;score&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;(0.7666666666666667, 0.724)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Some final thoughs:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;I&amp;#8217;m not convinced on &lt;strong&gt;how to extract best gamma values&lt;/strong&gt; from the cross validation procedure.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Is there a combinatorial way &lt;strong&gt;to get the best (c, gamma) pair&lt;/strong&gt; that I still don&amp;#8217;t know about ?&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Maybe SVM was not the best technique&lt;/strong&gt; for this classification problem&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;It seems that &lt;strong&gt;normalization helps to get better results in SVM&lt;/strong&gt; problems&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;resources&quot;&gt;Resources&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;/files/2020/11/ml_svm_german_credit/german-credit.ipynb&quot;&gt;Jupyter Notebook source code&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://towardsdatascience.com/cross-validation-in-machine-learning-72924a69872f?gi=8733cf0be132&quot;&gt;Cross Validation in Machine Learning&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://monkeylearn.com/blog/introduction-to-support-vector-machines-svm/&quot;&gt;Introduction to SVM&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=efR1C6CvhmE&quot;&gt;Support Vector Machines, clearly exlained!! (Youtube)&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://archive.ics.uci.edu/ml/datasets/Statlog+%28German+Credit+Data%29&quot;&gt;German Credit DataSet (UCI&amp;#8217;s ML dataset repository)&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
     <entry>
         <title>Logistic Regression: firewall rules</title>
         <author>
