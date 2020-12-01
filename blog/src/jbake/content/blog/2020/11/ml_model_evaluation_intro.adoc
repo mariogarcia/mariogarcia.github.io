@@ -1,0 +1,100 @@
+= Model Evaluation: Intro
+@marioggar
+2020-11-26
+:jbake-type: post
+:jbake-status: draft
+:jbake-tags: ds, ml, python
+:sources: ../../../../../../../sources/2020/11/ml_key_concepts
+:idprefix:
+:summary: An intro on how to evaluate a supervised model
+:summary_image: machine_learning.png
+
+The machine learning workflow usually involves several steps: getting a **representation of the data**, looking for the most suitable **features**, **train the model** with those features, and finally **check whether the current model fits the solution** we were aiming for or it doesn't. This last step is called **evaluation** and tries to check whether our model fits our purposes or not.
+
+== Accuracy
+
+Most of the time I'm focusing on getting the highest score when training my machine learning models. The score I'm looking for is based on accuracy. The accuracy here is the **number of predicted samples that were correctly labeled divided by the total number of samples**. 
+
+[mathx, height=60, align=center]
+.accuracy
+----
+accuracy = \frac{correctly\ predicted\ samples}{total\ number\ of\ samples} 
+----
+
+Is not a bad estimate to get started but is not a silver bullet. Depending on the problem accuracy, may not be the best evaluation method. For example, if we're dealing with a health machine learning problem, such as classifying a certain type of cancer cases, even a 90% of accuracy is not good enough. In this case we are ok by having false positives if we're sure that we don't miss any true positive. False positives can be validated by a doctor afterwards.
+
+=== Accuracy flaws
+
+The usual accuracy flaws are:
+
+- Imbalanced class
+- Innefective, erroneous or missing features
+- Poor choice of kernel or hyperparams
+
+**Imbalanced class problem** happens when in a classification problem **most of the data belongs to a certain class**. For instance, imagine the following problem:
+
+[source, python]
+.challenger
+----
+df = pd.read_csv("o-ring-erosion-only.data", delim_whitespace=True)
+df.columns = ["total", "distress", "ltemp", "leak_psi", "flight_order"]
+df.head()
+----
+
+Then we create a simple classifier and get the score of prediction.
+
+[source, python]
+.LogisticRegression classifier
+----
+
+----
+
+We get a score greater than 80% great. But what if we generate a dummy classifier that only looks for the most likely outcome:
+
+[source, python]
+.dummy classifier in action
+----
+
+----
+
+WTF? It gets the same scoring. Clearly I'm doing something wrong.
+
+=== Resources
+
+- http://archive.ics.uci.edu/ml/index.php[UCI's Machine Learning Repository]
+- http://archive.ics.uci.edu/ml/datasets/Qualitative_Bankruptcy[decision rules from qualitative bankruptcy data using genetic algorithms' by Myoung-Jong Kim (Dataset from UCI's Machine Learning Repository)]
+- https://machinelearningmastery.com/tactics-to-combat-imbalanced-classes-in-your-machine-learning-dataset/[Imbalanced classes in your machine learning dataset]
+
+== Confusion matrix
+
+Binary prediction
+
+[ditaa, align="center"]
+.binary prediction outcomes
+....
+
++---------------+---------------+
+|cGRE           |cPNK           |
+|               |               |
+|      True     |     False     |
+|    Negative   |    Positive   |
+|      (TN)     |      (FP)     |
+|               |               |
+|               |               |
++---------------+---------------+
+|cPNK           |cGRE           |
+|               |               |
+|      False    |     True      |
+|    Negative   |    Positive   |
+|      (FN)     |      (TP)     |
+|               |               |
+|               |               |
++---------------+---------------+
+
+....
+
+TODO
+
+== Resources
+
+TODO

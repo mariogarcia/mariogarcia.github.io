@@ -1,0 +1,118 @@
+= Voltage drop across resistors
+@marioggar
+2020-11-30
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: electronics, basics
+:sources: ../../../../../../../sources/2020/11/ml_key_concepts
+:idprefix:
+:summary: How to calculate it and how to measure it with multimeter
+:summary_image: electronics.png
+
+One of the ways to step down a circuit tension is using resistors and obtain a voltage drop between those resistors. The technique is pretty forward: in a circuit with a given tension the tension is chopped inversely proportional across the resistors sections depending on each resistor value. This means that a section with a higher resistor value will have a lower tension value.
+
+== Calculating voltage drop
+
+Follow up we have a circuit with an input tension of **3V** and **two resistors** (R1 and R2) in series. That means that the total resistor value is R1 + R2. So lets say R1 has a value of **1KΩ** and R2 has a value of **2KΩ**, making a total value of **3KΩ**. If we look at the picture, we would like to know what is the voltage drop across the first resistor, and what is the voltage drop across the second resistor. 
+
+[alt=example, width=400, align="center"]
+.Circuit
+image::2020/11/el_voltage_drop/voltage_drop_circuit.png[]
+
+The beauty of the problem is that **in the end the sum of the voltage across R1 and R2 must be the total voltage we had from the input source**. That way we will know whether our calculations were ok or not. 
+
+=== Using Ohm's law
+
+Now, **How do I calculate the voltage across R1 ?** Well, short answer is, **using https://en.wikipedia.org/wiki/Ohm%27s_law[Ohm's law]** which says that tension equals current times resistance. Here's the formula and its derivatives:
+
+[mathx, height=50, align="center"]
+.Ohm's law
+----
+V = I \times R, I = \frac{V}{R}, R = \frac{V}{I}
+----
+
+In order to use the Ohm's law in each section, first **we need to know the total current of the circuit**. Applying the formula we've got that:
+
+[mathx, height=50, align="center"]
+.Calculate total current
+----
+I_{total} = \frac{3V}{3K\Omega} \implies I_{total} = \frac{3}{3000} \implies I_{total} = 0.001A
+----
+
+Then with this value we can apply the Ohm's law in each section:
+
+[mathx, height=60, align="center"]
+.Calculate voltage across section 1 and section 2
+----
+V_{section1} = I_{total} \times R_1 \implies V_{section1} = 0.001A \times 1K\Omega \implies V_{section1} = 0.0001 \times 1000 \implies V_{section1} = 1V \\
+V_{section2} = I_{total} \times R_2 \implies V_{section2} = 0.001A \times 2K\Omega \implies V_{section2} = 0.0002 \times 2000 \implies V_{section2} = 2V
+----
+
+There's another formula based on Ohm's law that I've found in this https://www.youtube.com/watch?v=XxLKfAZrhbM&list=PLYVmB1muVDvVqIoek40gkdb9-kYH9JHni&index=4[Youtube video], I've found it very direct and practical:
+
+[mathx, height=70, align="center"]
+.Calculate voltage across section with new formula
+----
+V_{section} = V_{input} \times \frac{R_{section}}{R_{total}}
+----
+
+As I mentioned earlier, we can now whether this new formula works or not because we should get the same results:
+
+[mathx, height=120, align="center"]
+.Calculate voltage across section 1 and section 2
+----
+V_{section1} = 3V \times \frac{1K\Omega}{3K\Omega} \implies V_{section1} = 3 \times \frac{1000}{3000} \implies V_{section1} = 1V \\
+V_{section2} = 3V \times \frac{2K\Omega}{3K\Omega} \implies V_{section2} = 3 \times \frac{2000}{3000} \implies V_{section2} = 2V
+----
+
+Ok, so we can use each section to provide different tension to different components. 
+
+=== Calculating Power dissipation
+
+The resistor choice should take into account the power dissipation. The amount of Watts the resistors are going to dissipate. **A low ohm value for your resistors could end up with your resistors burning out in a blink of an eye**.
+
+[mathx, height=70, align="center"]
+.Calculate power dissipation
+----
+Power\ dissipation = \frac{V_{input}^2}{R_{total}}
+----
+
+With this formula in mind, we can calculate the power dissipation of our current resistors:
+
+[mathx, height=60, align="center"]
+.Current power dissipation
+----
+Power\ dissipation = \frac{3V^2}{3K\Omega} \implies PWD = \frac{9}{3000} \implies PWD = 0.001W
+----
+
+As you can see is almost nothing. Maybe we could even chose a lower resistor value. But imagine we were using resistors adding up **3Ω** with an input value of **12V**:
+
+[mathx, height=60, align="center"]
+.catastrophic
+----
+Power\ dissipation = \frac{12V^2}{3\Omega} \implies PWD = \frac{144}{2} \implies PWD = 72W
+----
+
+Well **72W** for such a small circuit is a lot of heat to handle and resistors could end up burning out. So bear in mind to calculate the power dissipation to avoid further problems.
+
+== Measuring voltage drop with multimeter
+
+Now that we know how to split the circuit so that we can have different voltage sections, I would like to know how to wire different components requiring different voltage. I drawed a couple of examples showing how I should be using the multimeter to make sure sections have the expected voltage drop.
+
+[alt=example, width="50%", align="center"]
+.Multimeter measurement
+image::2020/11/el_voltage_drop/voltage_drop_multimeter.png[]
+
+== A practical example
+
+I've a led which supports maximum tension of **2V** and a couple of **AA** batteries providing **3V** to feed the circuit. I've put a couple of resistors following the previous circuit layout to extract the **2V** required for the led across the second resistor section (2KΩ).
+
+[alt=example, height=300, align="center"]
+.Led circuit
+image::2020/11/el_voltage_drop/led_circuit.jpg[]
+
+== Resources
+
+- https://en.wikipedia.org/wiki/Ohm%27s_law[Ohm's law (Wikipedia)]
+- https://www.youtube.com/watch?v=YYSKRU1kDt4[How To Calculate The Voltage Drop Across a Resistor - Electronics (Youtube)]
+- https://www.youtube.com/watch?v=XxLKfAZrhbM&list=PLYVmB1muVDvVqIoek40gkdb9-kYH9JHni&index=4[Voltage divider tutorial (Youtube]
