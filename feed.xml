@@ -4,8 +4,175 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2020-11-17T15:48:39Z</updated>
-    <id>tag:null,2020:11</id>
+    <updated>2020-12-01T09:17:27Z</updated>
+    <id>tag:null,2020:12</id>
+    <entry>
+        <title>Voltage drop across resistors</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2020/11/el_voltage_drop.html"/>
+        <updated>2020-11-30T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2020/11/el_voltage_drop.html</id>
+        <category term="electronics"/>
+        <category term="basics"/>
+        <content type="html">
+            &lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;One of the ways to step down a circuit tension is using resistors and obtain a voltage drop between those resistors. The technique is pretty forward: in a circuit with a given tension the tension is chopped inversely proportional across the resistors sections depending on each resistor value. This means that a section with a higher resistor value will have a lower tension value.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;calculating_voltage_drop&quot;&gt;Calculating voltage drop&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Follow up we have a circuit with an input tension of &lt;strong&gt;3V&lt;/strong&gt; and &lt;strong&gt;two resistors&lt;/strong&gt; (R1 and R2) in series. That means that the total resistor value is R1 + R2. So lets say R1 has a value of &lt;strong&gt;1KΩ&lt;/strong&gt; and R2 has a value of &lt;strong&gt;2KΩ&lt;/strong&gt;, making a total value of &lt;strong&gt;3KΩ&lt;/strong&gt;. If we look at the picture, we would like to know what is the voltage drop across the first resistor, and what is the voltage drop across the second resistor.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/11/el_voltage_drop/voltage_drop_circuit.png&quot; alt=&quot;example&quot; width=&quot;400&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 1. Circuit&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The beauty of the problem is that &lt;strong&gt;in the end the sum of the voltage across R1 and R2 must be the total voltage we had from the input source&lt;/strong&gt;. That way we will know whether our calculations were ok or not.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;using_ohms_law&quot;&gt;Using Ohm&amp;#8217;s law&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now, &lt;strong&gt;How do I calculate the voltage across R1 ?&lt;/strong&gt; Well, short answer is, &lt;strong&gt;using &lt;a href=&quot;https://en.wikipedia.org/wiki/Ohm%27s_law&quot;&gt;Ohm&amp;#8217;s law&lt;/a&gt;&lt;/strong&gt; which says that tension equals current times resistance. Here&amp;#8217;s the formula and its derivatives:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/0c02315625ddcbb871d00b77526a6eb9.png&quot; alt=&quot;0c02315625ddcbb871d00b77526a6eb9.png&quot; height=&quot;50&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 2. Ohm&amp;#8217;s law&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In order to use the Ohm&amp;#8217;s law in each section, first &lt;strong&gt;we need to know the total current of the circuit&lt;/strong&gt;. Applying the formula we&amp;#8217;ve got that:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/380397178623ad7bdc4475f9333c4ad5.png&quot; alt=&quot;380397178623ad7bdc4475f9333c4ad5.png&quot; height=&quot;50&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 3. Calculate total current&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then with this value we can apply the Ohm&amp;#8217;s law in each section:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2d3b9b453b83f7662ce654005578744e.png&quot; alt=&quot;2d3b9b453b83f7662ce654005578744e.png&quot; height=&quot;60&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 4. Calculate voltage across section 1 and section 2&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There&amp;#8217;s another formula based on Ohm&amp;#8217;s law that I&amp;#8217;ve found in this &lt;a href=&quot;https://www.youtube.com/watch?v=XxLKfAZrhbM&amp;amp;list=PLYVmB1muVDvVqIoek40gkdb9-kYH9JHni&amp;amp;index=4&quot;&gt;Youtube video&lt;/a&gt;, I&amp;#8217;ve found it very direct and practical:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/ffc62ebbd9ec1126e6b72e14ddf83f78.png&quot; alt=&quot;ffc62ebbd9ec1126e6b72e14ddf83f78.png&quot; height=&quot;70&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 5. Calculate voltage across section with new formula&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As I mentioned earlier, we can now whether this new formula works or not because we should get the same results:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/5504335e95897cd329152654796047ba.png&quot; alt=&quot;5504335e95897cd329152654796047ba.png&quot; height=&quot;120&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 6. Calculate voltage across section 1 and section 2&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ok, so we can use each section to provide different tension to different components.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;calculating_power_dissipation&quot;&gt;Calculating Power dissipation&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The resistor choice should take into account the power dissipation. The amount of Watts the resistors are going to dissipate. &lt;strong&gt;A low ohm value for your resistors could end up with your resistors burning out in a blink of an eye&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/c45553e0fb5dda4fed3eca95056244da.png&quot; alt=&quot;c45553e0fb5dda4fed3eca95056244da.png&quot; height=&quot;70&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 7. Calculate power dissipation&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;With this formula in mind, we can calculate the power dissipation of our current resistors:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/953cf3cb8e7f088db40a5a9cb34d288b.png&quot; alt=&quot;953cf3cb8e7f088db40a5a9cb34d288b.png&quot; height=&quot;60&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 8. Current power dissipation&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As you can see is almost nothing. Maybe we could even chose a lower resistor value. But imagine we were using resistors adding up &lt;strong&gt;3Ω&lt;/strong&gt; with an input value of &lt;strong&gt;12V&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/d9a13e6c06c6befea1320810705d3b5f.png&quot; alt=&quot;d9a13e6c06c6befea1320810705d3b5f.png&quot; height=&quot;60&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 9. catastrophic&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Well &lt;strong&gt;72W&lt;/strong&gt; for such a small circuit is a lot of heat to handle and resistors could end up burning out. So bear in mind to calculate the power dissipation to avoid further problems.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;measuring_voltage_drop_with_multimeter&quot;&gt;Measuring voltage drop with multimeter&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now that we know how to split the circuit so that we can have different voltage sections, I would like to know how to wire different components requiring different voltage. I drawed a couple of examples showing how I should be using the multimeter to make sure sections have the expected voltage drop.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/11/el_voltage_drop/voltage_drop_multimeter.png&quot; alt=&quot;example&quot; width=&quot;50%&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 10. Multimeter measurement&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;a_practical_example&quot;&gt;A practical example&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I&amp;#8217;ve a led which supports maximum tension of &lt;strong&gt;2V&lt;/strong&gt; and a couple of &lt;strong&gt;AA&lt;/strong&gt; batteries providing &lt;strong&gt;3V&lt;/strong&gt; to feed the circuit. I&amp;#8217;ve put a couple of resistors following the previous circuit layout to extract the &lt;strong&gt;2V&lt;/strong&gt; required for the led across the second resistor section (2KΩ).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2020/11/el_voltage_drop/led_circuit.jpg&quot; alt=&quot;example&quot; height=&quot;300&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 11. Led circuit&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;resources&quot;&gt;Resources&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Ohm%27s_law&quot;&gt;Ohm&amp;#8217;s law (Wikipedia)&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=YYSKRU1kDt4&quot;&gt;How To Calculate The Voltage Drop Across a Resistor - Electronics (Youtube)&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=XxLKfAZrhbM&amp;amp;list=PLYVmB1muVDvVqIoek40gkdb9-kYH9JHni&amp;amp;index=4&quot;&gt;Voltage divider tutorial (Youtube&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
     <entry>
         <title>Credit approval using SVM</title>
         <author>

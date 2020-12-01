@@ -1,0 +1,222 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><div class="metadata"><em class="fa fa-calendar-o"></em><b>2020-11-30</b></div><h1>Voltage drop across resistors</h1></header><yieldScaped><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>One of the ways to step down a circuit tension is using resistors and obtain a voltage drop between those resistors. The technique is pretty forward: in a circuit with a given tension the tension is chopped inversely proportional across the resistors sections depending on each resistor value. This means that a section with a higher resistor value will have a lower tension value.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="calculating_voltage_drop">Calculating voltage drop</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Follow up we have a circuit with an input tension of <strong>3V</strong> and <strong>two resistors</strong> (R1 and R2) in series. That means that the total resistor value is R1 + R2. So lets say R1 has a value of <strong>1KΩ</strong> and R2 has a value of <strong>2KΩ</strong>, making a total value of <strong>3KΩ</strong>. If we look at the picture, we would like to know what is the voltage drop across the first resistor, and what is the voltage drop across the second resistor.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/11/el_voltage_drop/voltage_drop_circuit.png" alt="example" width="400">
+</div>
+<div class="title">Figure 1. Circuit</div>
+</div>
+<div class="paragraph">
+<p>The beauty of the problem is that <strong>in the end the sum of the voltage across R1 and R2 must be the total voltage we had from the input source</strong>. That way we will know whether our calculations were ok or not.</p>
+</div>
+<div class="sect2">
+<h3 id="using_ohms_law">Using Ohm&#8217;s law</h3>
+<div class="paragraph">
+<p>Now, <strong>How do I calculate the voltage across R1 ?</strong> Well, short answer is, <strong>using <a href="https://en.wikipedia.org/wiki/Ohm%27s_law">Ohm&#8217;s law</a></strong> which says that tension equals current times resistance. Here&#8217;s the formula and its derivatives:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/0c02315625ddcbb871d00b77526a6eb9.png" alt="0c02315625ddcbb871d00b77526a6eb9.png" height="50">
+</div>
+<div class="title">Figure 2. Ohm&#8217;s law</div>
+</div>
+<div class="paragraph">
+<p>In order to use the Ohm&#8217;s law in each section, first <strong>we need to know the total current of the circuit</strong>. Applying the formula we&#8217;ve got that:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/380397178623ad7bdc4475f9333c4ad5.png" alt="380397178623ad7bdc4475f9333c4ad5.png" height="50">
+</div>
+<div class="title">Figure 3. Calculate total current</div>
+</div>
+<div class="paragraph">
+<p>Then with this value we can apply the Ohm&#8217;s law in each section:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2d3b9b453b83f7662ce654005578744e.png" alt="2d3b9b453b83f7662ce654005578744e.png" height="60">
+</div>
+<div class="title">Figure 4. Calculate voltage across section 1 and section 2</div>
+</div>
+<div class="paragraph">
+<p>There&#8217;s another formula based on Ohm&#8217;s law that I&#8217;ve found in this <a href="https://www.youtube.com/watch?v=XxLKfAZrhbM&amp;list=PLYVmB1muVDvVqIoek40gkdb9-kYH9JHni&amp;index=4">Youtube video</a>, I&#8217;ve found it very direct and practical:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/ffc62ebbd9ec1126e6b72e14ddf83f78.png" alt="ffc62ebbd9ec1126e6b72e14ddf83f78.png" height="70">
+</div>
+<div class="title">Figure 5. Calculate voltage across section with new formula</div>
+</div>
+<div class="paragraph">
+<p>As I mentioned earlier, we can now whether this new formula works or not because we should get the same results:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/5504335e95897cd329152654796047ba.png" alt="5504335e95897cd329152654796047ba.png" height="120">
+</div>
+<div class="title">Figure 6. Calculate voltage across section 1 and section 2</div>
+</div>
+<div class="paragraph">
+<p>Ok, so we can use each section to provide different tension to different components.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="calculating_power_dissipation">Calculating Power dissipation</h3>
+<div class="paragraph">
+<p>The resistor choice should take into account the power dissipation. The amount of Watts the resistors are going to dissipate. <strong>A low ohm value for your resistors could end up with your resistors burning out in a blink of an eye</strong>.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/c45553e0fb5dda4fed3eca95056244da.png" alt="c45553e0fb5dda4fed3eca95056244da.png" height="70">
+</div>
+<div class="title">Figure 7. Calculate power dissipation</div>
+</div>
+<div class="paragraph">
+<p>With this formula in mind, we can calculate the power dissipation of our current resistors:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/953cf3cb8e7f088db40a5a9cb34d288b.png" alt="953cf3cb8e7f088db40a5a9cb34d288b.png" height="60">
+</div>
+<div class="title">Figure 8. Current power dissipation</div>
+</div>
+<div class="paragraph">
+<p>As you can see is almost nothing. Maybe we could even chose a lower resistor value. But imagine we were using resistors adding up <strong>3Ω</strong> with an input value of <strong>12V</strong>:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/d9a13e6c06c6befea1320810705d3b5f.png" alt="d9a13e6c06c6befea1320810705d3b5f.png" height="60">
+</div>
+<div class="title">Figure 9. catastrophic</div>
+</div>
+<div class="paragraph">
+<p>Well <strong>72W</strong> for such a small circuit is a lot of heat to handle and resistors could end up burning out. So bear in mind to calculate the power dissipation to avoid further problems.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="measuring_voltage_drop_with_multimeter">Measuring voltage drop with multimeter</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Now that we know how to split the circuit so that we can have different voltage sections, I would like to know how to wire different components requiring different voltage. I drawed a couple of examples showing how I should be using the multimeter to make sure sections have the expected voltage drop.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/11/el_voltage_drop/voltage_drop_multimeter.png" alt="example" width="50%">
+</div>
+<div class="title">Figure 10. Multimeter measurement</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="a_practical_example">A practical example</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I&#8217;ve a led which supports maximum tension of <strong>2V</strong> and a couple of <strong>AA</strong> batteries providing <strong>3V</strong> to feed the circuit. I&#8217;ve put a couple of resistors following the previous circuit layout to extract the <strong>2V</strong> required for the led across the second resistor section (2KΩ).</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2020/11/el_voltage_drop/led_circuit.jpg" alt="example" height="300">
+</div>
+<div class="title">Figure 11. Led circuit</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="resources">Resources</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://en.wikipedia.org/wiki/Ohm%27s_law">Ohm&#8217;s law (Wikipedia)</a></p>
+</li>
+<li>
+<p><a href="https://www.youtube.com/watch?v=YYSKRU1kDt4">How To Calculate The Voltage Drop Across a Resistor - Electronics (Youtube)</a></p>
+</li>
+<li>
+<p><a href="https://www.youtube.com/watch?v=XxLKfAZrhbM&amp;list=PLYVmB1muVDvVqIoek40gkdb9-kYH9JHni&amp;index=4">Voltage divider tutorial (Youtube</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>
