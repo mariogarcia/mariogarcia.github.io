@@ -1,8 +1,8 @@
 = Imbalanced classes
 @marioggar
-2021-02-11
+2021-02-10
 :jbake-type: post
-:jbake-status: draft
+:jbake-status: published
 :jbake-tags: ds, ml, python
 :idprefix:
 :summary: How to deal with binary imbalanced classes
@@ -33,7 +33,7 @@ df = pd.read_csv("haberman.data", names=['age', 'year', 'aux_nodes', 'status'])
 df.head()
 ----
 
-image::2021/01/ml_imbalanced_classes/imbalanced_01.png[alt="Cancer cells"]
+image::2021/02/ml_imbalanced_classes/imbalanced_01.png[alt="Cancer cells"]
 
 I'd like to train a classifier to choose between target values (possible values in the **status** column):
 
@@ -118,7 +118,7 @@ image::2021/02/ml_imbalanced_classes/imbalanced_02.png[alt="imbalanced"]
 
 Ok so instead of having the same amount of samples of each target class, I've got 73% of class "1" and 27% of class "2", so **it's clearly imbalanced**. That situation favors that the dummy classifier because the dummy classifier only classifies correctly the majority class, meaning that 73% of the time would be getting the right outcome.
 
-WARNING: You may be wondering (I did)... if the majority class is 73% of the samples, then **Why the dummy classifier is not getting 73% of accuracy ?** Because we're splitting the samples into training and test sets, and that changes the percentages, lowering them.
+WARNING: You may be wondering (I did)... if the majority class is 73% of the samples, then **Why the dummy classifier is not getting 73% of accuracy ?** The answer is because we're splitting the samples into training and test sets, and that changes the percentages, decreasing them.
 
 The objective now would be having the same amount of samples for each class. There're several techniques that can help me mitigating the problem with imbalanced classes. In this entry I'm focusing in two of them:
 
@@ -300,9 +300,19 @@ logistic = LogisticRegression(class_weight=weights).fit(X_train, y_train)
 logistic.score(X_test, y_test)
 ----
 
+As expected I'm getting a similar score:
+
+[source, shell]
+.score
+----
+0.6493506493506493
+----
+
 === Resources
 
 - https://www.analyticsvidhya.com/blog/2020/10/improve-class-imbalance-class-weights/
 TODO
 - https://machinelearningmastery.com/cost-sensitive-logistic-regression/
+- link:/files/2021/02/ml_imbalanced_classes/haberman_survival_data.ipynb[Jupyter notebook source of this article]
+
 
