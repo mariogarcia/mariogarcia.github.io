@@ -1,0 +1,45 @@
+= Links of the week
+@marioggar
+2021-02-05
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: ds, java, vue
+:idprefix:
+:summary: Stuff I'm interested in
+:summary_image: computer_science.png
+
+== Data Science
+
+- https://jack-clark.net/[Import AI]: Import AI is a weekly newsletter about artificial intelligence
+- https://openai.com/[OpenAI]: OpenAI is an AI research and deployment company
+- https://medium.com/dataprophet/4-big-data-architectures-data-streaming-lambda-architecture-kappa-architecture-and-unifield-d9bcbf711eb9[Machine Learning Architecture]: Once you start having problems scaling your ML projects, Which architecture would fit the best ?
+- https://docs.quandl.com[Quandl]:  sources for financial, economic, and alternative datasets
+
+These days I'm looking into model evaluation and there're plenty of links I've used both to study and practice.
+
+- https://machinelearningmastery.com/feature-selection-with-real-and-categorical-data/
+- https://machinelearningmastery.com/classification-accuracy-is-not-enough-more-performance-measures-you-can-use/
+- https://machinelearningmastery.com/tactics-to-combat-imbalanced-classes-in-your-machine-learning-dataset/
+- https://imbalanced-learn.org/stable/over_sampling.html
+
+== Vue
+
+- https://euvl.github.io/vue-js-modal/[vue-js-modal]: a modal windows library
+- https://github.com/euvl/vue-notification[vue-notification]: Notifications library
+
+When bootstraping a project it comes handy to have a UI admin template to build the backoffice. I've found two Vue projects that look great:
+
+- https://github.com/wobsoriano/v-dashboard
+- https://github.com/pratik227/quasar-admin
+
+There're a couple more to keep in mind:
+
+- https://adminlte.io/[AdminLTE]: A very popular HTML5 admin template
+- https://github.com/BootstrapDash/corona-free-dark-bootstrap-admin-template[Corona]: A dark theme HTML5 admin template
+
+== Java
+
+- https://github.com/hierynomus/sshj[SSHJ]: Library to establish SSH and SCP sessions
+- https://github.com/hierynomus/sshj/blob/master/examples/src/main/java/net/schmizz/sshj/examples/Exec.java[Simple example of SSHJ]
+- https://www.baeldung.com/rxjava-string[rxjava-string]: Very util library to capture output executions and stream them to different destinations
+- https://www.baeldung.com/java-metrics[Getting Hardware Metrics with Java]

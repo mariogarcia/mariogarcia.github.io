@@ -1,0 +1,59 @@
+= Model Evaluation: Confusion Matrix
+@marioggar
+2021-02-12
+:jbake-type: post
+:jbake-status: draft
+:jbake-tags: ds, ml, python
+:sources: ../../../../../../../sources/2020/11/ml_key_concepts
+:idprefix:
+:summary: An intro on how to evaluate a supervised model
+:summary_image: machine_learning.png
+
+image::2021/01/ml_imbalanced_classes/header.png[alt="Cancer cells", align="center", width="100%"]
+
+The machine learning workflow usually involves several steps: getting a **representation of the data**, looking for the most suitable **features**, **train the model** with those features, and finally **check whether the current model fits the solution** we were aiming for or it doesn't. This last step is called **evaluation** and tries to check whether our model fits our purposes or not.
+
+[quote]
+Depending on the problem, accuracy may not be the best evaluation method
+
+== Accuracy
+
+Most of the time I'm focusing on getting the highest score when training my machine learning models. The score I'm looking for is based on accuracy. The accuracy here is the **number of predicted samples that were correctly labeled divided by the total number of samples**. 
+
+[mathx, height=50, align=center]
+.accuracy formula
+----
+accuracy = \frac{correctly\ predicted\ samples}{total\ number\ of\ samples} 
+----
+
+Is not a bad estimate to get started but **is not a silver bullet**. Depending on the problem, accuracy may not be the best evaluation method. For example, if we're dealing with a health related machine learning problem, such as classifying a certain type of cancer cases, even a 90% of accuracy is not good enough. In this case we are ok by having false positives if we're sure that we don't miss any true positive. False positives can be validated by a doctor afterwards. The usual **accuracy flaws** are:
+
+- **Imbalanced class**
+- **Innefective, erroneous or missing features**
+- **Poor choice of kernel or hyperparams**
+
+[ditaa, align="center"]
+.Confusion matrix
+....
+
++---------------+---------------+
+|cGRE           |cPNK           |
+|               |               |
+|      True     |     False     |
+|    Negative   |    Positive   |
+|      (TN)     |      (FP)     |
+|               |               |
+|               |               |
++---------------+---------------+
+|cPNK           |cGRE           |
+|               |               |
+|      False    |     True      |
+|    Negative   |    Positive   |
+|      (FN)     |      (TP)     |
+|               |               |
+|               |               |
++---------------+---------------+
+
+....
+
+WARNING: In this example a positive class is digit 1, and negative class 0. Is a binary classification problem. So a 1 means is not critical (positive) and a 0 is critical (negative).

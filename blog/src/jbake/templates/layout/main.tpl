@@ -17,6 +17,13 @@ html(lang:'en'){
                         }
                         ul(class: "icons") {
                             li {
+                                a(href: "${config?.site_contextPath}feed.xml", class: "icon fa-rss") {
+                                    span(class: "label") {
+                                        yieldUnescaped "Twitter"
+                                    }
+                                }
+                            }
+                            li {
                                 a(href: "${config.social_twitter}", class: "icon fa-twitter") {
                                     span(class: "label") {
                                         yieldUnescaped "Twitter"
