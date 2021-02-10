@@ -4,8 +4,465 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2021-02-10T16:06:13Z</updated>
+    <updated>2021-02-10T16:35:15Z</updated>
     <id>tag:null,2021:02</id>
+    <entry>
+        <title>Imbalanced classes</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2021/01/ml_imbalanced_classes.html"/>
+        <updated>2021-02-10T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2021/01/ml_imbalanced_classes.html</id>
+        <category term="ds"/>
+        <category term="ml"/>
+        <category term="python"/>
+        <content type="html">
+            &lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2021/02/ml_imbalanced_classes/header.png&quot; alt=&quot;raw&quot; width=&quot;100%&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;accuracy_is_not_always_what_you_think&quot;&gt;Accuracy is not always what you think&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Most of the time I&amp;#8217;m focusing on getting the highest score when training my machine learning models. Lets remember the definition of accuracy: &lt;strong&gt;The number of predicted samples that were correctly labeled divided by the total number of samples&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/54b5899f9d81d5aacad393ee14400f9b.png&quot; alt=&quot;54b5899f9d81d5aacad393ee14400f9b.png&quot; height=&quot;50&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 1. accuracy formula&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;But what happens (imagine we&amp;#8217;re in a binary classification problem) and there are many samples labeled with a possitive class or the other way around, How that situation could affect the score? Moreover, What the score would mean in these situations ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To dig a little bit into that I&amp;#8217;m creating a classification model with the &lt;a href=&quot;http://archive.ics.uci.edu/ml/datasets/Haberman%27s+Survival&quot;&gt;Haberman&amp;#8217;s Survival Data Set&lt;/a&gt; which contains cases from a study that was conducted between 1958 and 1970 at the University of Chicago&amp;#8217;s Billings Hospital on the survival of patients who had undergone surgery for breast cancer. This dataset is available from the &lt;a href=&quot;http://archive.ics.uci.edu/ml/datasets.php&quot;&gt;UCI Machine Learning Repository&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Loading data&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import pandas as pd
+
+df = pd.read_csv(&quot;haberman.data&quot;, names=[&apos;age&apos;, &apos;year&apos;, &apos;aux_nodes&apos;, &apos;status&apos;])
+df.head()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2021/02/ml_imbalanced_classes/imbalanced_01.png&quot; alt=&quot;Cancer cells&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I&amp;#8217;d like to train a classifier to choose between target values (possible values in the &lt;strong&gt;status&lt;/strong&gt; column):&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;1&lt;/strong&gt;: the patient survived 5 years or longer&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;2&lt;/strong&gt;: the patient died within 5 year&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The firts classification uses a support vector classifier (SVC) and I&amp;#8217;m getting the following score:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Classifying with SVC&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+
+features = [col for col in df.columns.values if col != &apos;status&apos;]
+
+X = df[features]
+y = df[&apos;status&apos;]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state = 0)
+
+svc = SVC().fit(X_train, y_train)
+svc.score(X_test, y_test)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;accuracy&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;0.5974025974025974&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Hold on a second. &lt;strong&gt;Is this the best I could do ?&lt;/strong&gt; Well, there&amp;#8217;s the concept of a &lt;strong&gt;baseline model&lt;/strong&gt;. You can think of the baseline as &lt;strong&gt;the worst possible classificator you could come up with&lt;/strong&gt;. In other words &lt;strong&gt;I should always come up with something better than the baseline model&lt;/strong&gt;. If not, my model is as useful as tossing a coin.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In Scikit you can create a baseline classification model using the dummy classifier. I&amp;#8217;m creating a baseline for my dataset:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Using DummyClassifier for the baseline&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.dummy import DummyClassifier
+
+dummy = DummyClassifier(strategy = &quot;most_frequent&quot;).fit(X_train, y_train)
+dummy.score(X_test, y_test)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;accuracy&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;0.5974025974025974&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2021/02/ml_imbalanced_classes/wtf.jpg&quot; alt=&quot;Why?&quot; width=&quot;30%&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;Why am I getting the same score ?&lt;/strong&gt; There could be several reasons why my classification model is scoring as bad as the dummy classifier:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Imbalanced class&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Innefective, erroneous or missing features&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Poor choice of kernel or hyperparams&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;quoteblock&quot;&gt;
+&lt;blockquote&gt;
+If my model performs almost the same as the baseline model, it could be considered as good as tossing a coin.
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For the shake of the article, lets say I suspect my dataset is imbalanced. How can I be sure that&amp;#8217;s the case ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Checking the percentages of each target class&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;def show_balance(dataframe):
+    rates_df = dataframe[[&apos;status&apos;, &apos;age&apos;]]\
+        .copy()\
+        .groupby(&apos;status&apos;)\
+        .count()\
+        .rename(columns={&apos;age&apos;: &apos;count&apos;})\
+        .reset_index(drop=False)
+    rates_df[&apos;pct&apos;] = rates_df[&apos;count&apos;] / rates_df[&apos;count&apos;].sum()
+
+    return rates_df
+
+show_balance(df)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2021/02/ml_imbalanced_classes/imbalanced_02.png&quot; alt=&quot;imbalanced&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ok so instead of having the same amount of samples of each target class, I&amp;#8217;ve got 73% of class &quot;1&quot; and 27% of class &quot;2&quot;, so &lt;strong&gt;it&amp;#8217;s clearly imbalanced&lt;/strong&gt;. That situation favors that the dummy classifier because the dummy classifier only classifies correctly the majority class, meaning that 73% of the time would be getting the right outcome.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock warning&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-warning&quot; title=&quot;Warning&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+You may be wondering (I did)&amp;#8230;&amp;#8203; if the majority class is 73% of the samples, then &lt;strong&gt;Why the dummy classifier is not getting 73% of accuracy ?&lt;/strong&gt; The answer is because we&amp;#8217;re splitting the samples into training and test sets, and that changes the percentages, decreasing them.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The objective now would be having the same amount of samples for each class. There&amp;#8217;re several techniques that can help me mitigating the problem with imbalanced classes. In this entry I&amp;#8217;m focusing in two of them:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Resampling the dataset&lt;/strong&gt;: ways of increasing an under-represented class or decreasing an over-represented target class.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Using penalized models&lt;/strong&gt;: penalizations applied to models to take into account the under/over representation of a given target class.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To check out more techniques to reduce the impact of imbalanced classes I recommend you to take a look to &lt;a href=&quot;https://machinelearningmastery.com/tactics-to-combat-imbalanced-classes-in-your-machine-learning-dataset/&quot;&gt;this wonderful article from machinelearningmastery.com&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;resources&quot;&gt;Resources&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://archive.ics.uci.edu/ml/datasets/Haberman%27s+Survival&quot; class=&quot;bare&quot;&gt;http://archive.ics.uci.edu/ml/datasets/Haberman%27s+Survival&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://machinelearningmastery.com/tactics-to-combat-imbalanced-classes-in-your-machine-learning-dataset/&quot; class=&quot;bare&quot;&gt;https://machinelearningmastery.com/tactics-to-combat-imbalanced-classes-in-your-machine-learning-dataset/&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;over_sampling_vs_under_sampling&quot;&gt;Over-Sampling vs Under-Sampling&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In a binary classification problem when you have many samples from one class and very few from the other you can choose between:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Over-Sampling&lt;/strong&gt;: Create more samples from the under-represented class&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Under-Sampling&lt;/strong&gt;: Reduce the number of samples from the over-represented class&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In any case the optimal situation would be to have both classes equally represented. There&amp;#8217;re a couple of things worth mentioning when trying to decide whether to choose one technique or the other:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Use &lt;strong&gt;under-sampling&lt;/strong&gt; when you have a &lt;strong&gt;big dataset&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Use &lt;strong&gt;over-sampling&lt;/strong&gt; when you have a &lt;strong&gt;small dataset&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In the dataset I&amp;#8217;m working on, the problem is that there&amp;#8217;s not much data, just 300 samples, it doesn&amp;#8217;t make sense to reduce even more the dataset by under-sampling the over-represented class. Therefore I&amp;#8217;m going to over-sampling the under-represented class. To do so, I&amp;#8217;m adding to my toolbox the &lt;a href=&quot;https://imbalanced-learn.org&quot; class=&quot;bare&quot;&gt;https://imbalanced-learn.org&lt;/a&gt; library, which is an add-on to the scikit-learn framework focused (as the name implies) on dealing with imbalanced classes.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To install a Python library in my Jupyter notebook using pip I followed the instructions found at &lt;a href=&quot;https://jakevdp.github.io/blog/2017/12/05/installing-python-packages-from-jupyter/&quot; class=&quot;bare&quot;&gt;https://jakevdp.github.io/blog/2017/12/05/installing-python-packages-from-jupyter/&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;installing imbalance-learn in my jupyter notebook&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;# Install a pip package in the current Jupyter kernel
+import sys
+!{sys.executable} -m pip install -U imbalanced-learn&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then I applied the over-sampling strategy over my dataset. &lt;strong&gt;You don&amp;#8217;t have to tell the library which target class is under-represented, the algorithm figures it out&lt;/strong&gt;. As a result the execution it returns the new resampled X and y.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;over-sampling under-represented class&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from imblearn.over_sampling import SMOTE
+
+smote = SMOTE()
+X_resampled, y_resampled = smote.fit_resample(X, y)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now both target classes should be even:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;show classes new balance&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;new_df = X_resampled.copy()
+new_df[&apos;status&apos;] = y_resampled.copy()
+
+show_balance(new_df)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2021/02/ml_imbalanced_classes/imbalanced_03.png&quot; alt=&quot;balanced&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then I can start using the new resampled dataset to create the new training/test sets.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;creating the new TRAINING/TEST sets&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X_resampled, y_resampled, random_state=0)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Follow up I&amp;#8217;m applying the new training/testing datasets to the baseline:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;baseline resampled&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.dummy import DummyClassifier
+
+dummy = DummyClassifier(strategy = &quot;most_frequent&quot;).fit(X_train, y_train)
+dummy.score(X_test, y_test)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;resampled dummy score&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;0.48672566371681414&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now the score is lower than before and close to the 50%. That makes sense due to the fact that now both target classes are even and there&amp;#8217;s no target class more predominant than the other.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;But the most important thing is to check how the SVC classificator is now performing:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;resampled SVC model&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.svm import SVC
+
+svc = SVC().fit(X_train, y_train)
+svc.score(X_test, y_test)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;resampled SVC score&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;0.6283185840707964&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Well is performing slightly better than before, and it&amp;#8217;s performing way better than the baseline.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;quoteblock&quot;&gt;
+&lt;blockquote&gt;
+All target classes should be equally represented
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;resources_2&quot;&gt;Resources&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Oversampling_and_undersampling_in_data_analysis&quot; class=&quot;bare&quot;&gt;https://en.wikipedia.org/wiki/Oversampling_and_undersampling_in_data_analysis&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://imbalanced-learn.org/stable/index.html&quot; class=&quot;bare&quot;&gt;https://imbalanced-learn.org/stable/index.html&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://machinelearningmastery.com/tactics-to-combat-imbalanced-classes-in-your-machine-learning-dataset/&quot;&gt;machinelearningmastery.com article on dealing with imbalanced classes&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;penalized_models&quot;&gt;Penalized models&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Another technique is to tune machine learning algorithms to make them aware of the target class imbalance. Lets get the initial imbalanced train/test sets.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now using SVC I&amp;#8217;m telling the algorithm to be aware of imbalance classes:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;tuned SVC&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.svm import SVC
+
+# https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html
+svc = SVC(class_weight=&apos;balanced&apos;).fit(X_train, y_train)
+svc.score(X_test, y_test)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;score&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;0.6363636363636364&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And the same goes with LogisticRegression:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;tuned LogisticRegression&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.linear_model import LogisticRegression
+
+# https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html
+logistic = LogisticRegression(class_weight=&apos;balanced&apos;).fit(X_train, y_train)
+logistic.score(X_test, y_test)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;score&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;0.6493506493506493&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;According to the Scikit documentation the “balanced” mode uses the values of y to automatically adjust weights inversely proportional to class frequencies in the input data as n_samples / (n_classes * np.bincount(y)). &lt;strong&gt;You can also tune it manually passing the weight associated with classes&lt;/strong&gt; in the form {class_label: weight}.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It seems that a general rule of thumb could be &lt;strong&gt;using the inverse of the class distribution present in the training dataset&lt;/strong&gt;. In the example class &quot;1&quot; had 73% and class &quot;2&quot; had 27%, so if we inverted the weights:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;manually tuned&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.linear_model import LogisticRegression
+
+# https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html
+weights  = {1: 0.27, 2: 0.73}
+logistic = LogisticRegression(class_weight=weights).fit(X_train, y_train)
+
+logistic.score(X_test, y_test)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As expected I&amp;#8217;m getting a similar score:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;score&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;0.6493506493506493&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;resources_3&quot;&gt;Resources&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.analyticsvidhya.com/blog/2020/10/improve-class-imbalance-class-weights/&quot; class=&quot;bare&quot;&gt;https://www.analyticsvidhya.com/blog/2020/10/improve-class-imbalance-class-weights/&lt;/a&gt;
+TODO&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://machinelearningmastery.com/cost-sensitive-logistic-regression/&quot; class=&quot;bare&quot;&gt;https://machinelearningmastery.com/cost-sensitive-logistic-regression/&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;/files/2021/02/ml_imbalanced_classes/haberman_survival_data.ipynb&quot;&gt;Jupyter notebook source of this article&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
     <entry>
         <title>Links of the week</title>
         <author>

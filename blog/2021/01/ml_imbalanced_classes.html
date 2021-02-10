@@ -37,7 +37,7 @@
                                 </a>
                             </li>
                         </ul>
-                    </header><section><header class="main"><div class="metadata"><em class="fa fa-calendar-o"></em><b>2021-02-11</b></div><h1>Imbalanced classes</h1></header><yieldScaped><div id="preamble">
+                    </header><section><header class="main"><div class="metadata"><em class="fa fa-calendar-o"></em><b>2021-02-10</b></div><h1>Imbalanced classes</h1></header><yieldScaped><div id="preamble">
 <div class="sectionbody">
 <div class="imageblock text-center">
 <div class="content">
@@ -75,7 +75,7 @@ df.head()</code></pre>
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="/img/2021/01/ml_imbalanced_classes/imbalanced_01.png" alt="Cancer cells">
+<img src="/img/2021/02/ml_imbalanced_classes/imbalanced_01.png" alt="Cancer cells">
 </div>
 </div>
 <div class="paragraph">
@@ -199,7 +199,7 @@ show_balance(df)</code></pre>
 <i class="fa icon-warning" title="Warning"></i>
 </td>
 <td class="content">
-You may be wondering (I did)&#8230;&#8203; if the majority class is 73% of the samples, then <strong>Why the dummy classifier is not getting 73% of accuracy ?</strong> Because we&#8217;re splitting the samples into training and test sets, and that changes the percentages, lowering them.
+You may be wondering (I did)&#8230;&#8203; if the majority class is 73% of the samples, then <strong>Why the dummy classifier is not getting 73% of accuracy ?</strong> The answer is because we&#8217;re splitting the samples into training and test sets, and that changes the percentages, decreasing them.
 </td>
 </tr>
 </table>
@@ -452,6 +452,15 @@ logistic = LogisticRegression(class_weight=weights).fit(X_train, y_train)
 logistic.score(X_test, y_test)</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>As expected I&#8217;m getting a similar score:</p>
+</div>
+<div class="listingblock">
+<div class="title">score</div>
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">0.6493506493506493</code></pre>
+</div>
+</div>
 <div class="sect2">
 <h3 id="resources_3">Resources</h3>
 <div class="ulist">
@@ -462,6 +471,9 @@ TODO</p>
 </li>
 <li>
 <p><a href="https://machinelearningmastery.com/cost-sensitive-logistic-regression/" class="bare">https://machinelearningmastery.com/cost-sensitive-logistic-regression/</a></p>
+</li>
+<li>
+<p><a href="/files/2021/02/ml_imbalanced_classes/haberman_survival_data.ipynb">Jupyter notebook source of this article</a></p>
 </li>
 </ul>
 </div>
