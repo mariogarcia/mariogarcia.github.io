@@ -1,0 +1,505 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="/feed.xml" class="icon fa-rss">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><div class="metadata"><em class="fa fa-calendar-o"></em><b>2021-02-11</b></div><h1>Imbalanced classes</h1></header><yieldScaped><div id="preamble">
+<div class="sectionbody">
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2021/02/ml_imbalanced_classes/header.png" alt="raw" width="100%">
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="accuracy_is_not_always_what_you_think">Accuracy is not always what you think</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Most of the time I&#8217;m focusing on getting the highest score when training my machine learning models. Lets remember the definition of accuracy: <strong>The number of predicted samples that were correctly labeled divided by the total number of samples</strong>.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/54b5899f9d81d5aacad393ee14400f9b.png" alt="54b5899f9d81d5aacad393ee14400f9b.png" height="50">
+</div>
+<div class="title">Figure 1. accuracy formula</div>
+</div>
+<div class="paragraph">
+<p>But what happens (imagine we&#8217;re in a binary classification problem) and there are many samples labeled with a possitive class or the other way around, How that situation could affect the score? Moreover, What the score would mean in these situations ?</p>
+</div>
+<div class="paragraph">
+<p>To dig a little bit into that I&#8217;m creating a classification model with the <a href="http://archive.ics.uci.edu/ml/datasets/Haberman%27s+Survival">Haberman&#8217;s Survival Data Set</a> which contains cases from a study that was conducted between 1958 and 1970 at the University of Chicago&#8217;s Billings Hospital on the survival of patients who had undergone surgery for breast cancer. This dataset is available from the <a href="http://archive.ics.uci.edu/ml/datasets.php">UCI Machine Learning Repository</a>.</p>
+</div>
+<div class="listingblock">
+<div class="title">Loading data</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import pandas as pd
+
+df = pd.read_csv("haberman.data", names=['age', 'year', 'aux_nodes', 'status'])
+df.head()</code></pre>
+</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/img/2021/01/ml_imbalanced_classes/imbalanced_01.png" alt="Cancer cells">
+</div>
+</div>
+<div class="paragraph">
+<p>I&#8217;d like to train a classifier to choose between target values (possible values in the <strong>status</strong> column):</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>1</strong>: the patient survived 5 years or longer</p>
+</li>
+<li>
+<p><strong>2</strong>: the patient died within 5 year</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The firts classification uses a support vector classifier (SVC) and I&#8217;m getting the following score:</p>
+</div>
+<div class="listingblock">
+<div class="title">Classifying with SVC</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+
+features = [col for col in df.columns.values if col != 'status']
+
+X = df[features]
+y = df['status']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state = 0)
+
+svc = SVC().fit(X_train, y_train)
+svc.score(X_test, y_test)</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">accuracy</div>
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">0.5974025974025974</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Hold on a second. <strong>Is this the best I could do ?</strong> Well, there&#8217;s the concept of a <strong>baseline model</strong>. You can think of the baseline as <strong>the worst possible classificator you could come up with</strong>. In other words <strong>I should always come up with something better than the baseline model</strong>. If not, my model is as useful as tossing a coin.</p>
+</div>
+<div class="paragraph">
+<p>In Scikit you can create a baseline classification model using the dummy classifier. I&#8217;m creating a baseline for my dataset:</p>
+</div>
+<div class="listingblock">
+<div class="title">Using DummyClassifier for the baseline</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from sklearn.dummy import DummyClassifier
+
+dummy = DummyClassifier(strategy = "most_frequent").fit(X_train, y_train)
+dummy.score(X_test, y_test)</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">accuracy</div>
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">0.5974025974025974</code></pre>
+</div>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2021/02/ml_imbalanced_classes/wtf.jpg" alt="Why?" width="30%">
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Why am I getting the same score ?</strong> There could be several reasons why my classification model is scoring as bad as the dummy classifier:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Imbalanced class</strong></p>
+</li>
+<li>
+<p><strong>Innefective, erroneous or missing features</strong></p>
+</li>
+<li>
+<p><strong>Poor choice of kernel or hyperparams</strong></p>
+</li>
+</ul>
+</div>
+<div class="quoteblock">
+<blockquote>
+If my model performs almost the same as the baseline model, it could be considered as good as tossing a coin.
+</blockquote>
+</div>
+<div class="paragraph">
+<p>For the shake of the article, lets say I suspect my dataset is imbalanced. How can I be sure that&#8217;s the case ?</p>
+</div>
+<div class="listingblock">
+<div class="title">Checking the percentages of each target class</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">def show_balance(dataframe):
+    rates_df = dataframe[['status', 'age']]\
+        .copy()\
+        .groupby('status')\
+        .count()\
+        .rename(columns={'age': 'count'})\
+        .reset_index(drop=False)
+    rates_df['pct'] = rates_df['count'] / rates_df['count'].sum()
+
+    return rates_df
+
+show_balance(df)</code></pre>
+</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/img/2021/02/ml_imbalanced_classes/imbalanced_02.png" alt="imbalanced">
+</div>
+</div>
+<div class="paragraph">
+<p>Ok so instead of having the same amount of samples of each target class, I&#8217;ve got 73% of class "1" and 27% of class "2", so <strong>it&#8217;s clearly imbalanced</strong>. That situation favors that the dummy classifier because the dummy classifier only classifies correctly the majority class, meaning that 73% of the time would be getting the right outcome.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+You may be wondering (I did)&#8230;&#8203; if the majority class is 73% of the samples, then <strong>Why the dummy classifier is not getting 73% of accuracy ?</strong> Because we&#8217;re splitting the samples into training and test sets, and that changes the percentages, lowering them.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The objective now would be having the same amount of samples for each class. There&#8217;re several techniques that can help me mitigating the problem with imbalanced classes. In this entry I&#8217;m focusing in two of them:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Resampling the dataset</strong>: ways of increasing an under-represented class or decreasing an over-represented target class.</p>
+</li>
+<li>
+<p><strong>Using penalized models</strong>: penalizations applied to models to take into account the under/over representation of a given target class.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>To check out more techniques to reduce the impact of imbalanced classes I recommend you to take a look to <a href="https://machinelearningmastery.com/tactics-to-combat-imbalanced-classes-in-your-machine-learning-dataset/">this wonderful article from machinelearningmastery.com</a>.</p>
+</div>
+<div class="sect2">
+<h3 id="resources">Resources</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="http://archive.ics.uci.edu/ml/datasets/Haberman%27s+Survival" class="bare">http://archive.ics.uci.edu/ml/datasets/Haberman%27s+Survival</a></p>
+</li>
+<li>
+<p><a href="https://machinelearningmastery.com/tactics-to-combat-imbalanced-classes-in-your-machine-learning-dataset/" class="bare">https://machinelearningmastery.com/tactics-to-combat-imbalanced-classes-in-your-machine-learning-dataset/</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="over_sampling_vs_under_sampling">Over-Sampling vs Under-Sampling</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In a binary classification problem when you have many samples from one class and very few from the other you can choose between:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Over-Sampling</strong>: Create more samples from the under-represented class</p>
+</li>
+<li>
+<p><strong>Under-Sampling</strong>: Reduce the number of samples from the over-represented class</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In any case the optimal situation would be to have both classes equally represented. There&#8217;re a couple of things worth mentioning when trying to decide whether to choose one technique or the other:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Use <strong>under-sampling</strong> when you have a <strong>big dataset</strong></p>
+</li>
+<li>
+<p>Use <strong>over-sampling</strong> when you have a <strong>small dataset</strong></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In the dataset I&#8217;m working on, the problem is that there&#8217;s not much data, just 300 samples, it doesn&#8217;t make sense to reduce even more the dataset by under-sampling the over-represented class. Therefore I&#8217;m going to over-sampling the under-represented class. To do so, I&#8217;m adding to my toolbox the <a href="https://imbalanced-learn.org" class="bare">https://imbalanced-learn.org</a> library, which is an add-on to the scikit-learn framework focused (as the name implies) on dealing with imbalanced classes.</p>
+</div>
+<div class="paragraph">
+<p>To install a Python library in my Jupyter notebook using pip I followed the instructions found at <a href="https://jakevdp.github.io/blog/2017/12/05/installing-python-packages-from-jupyter/" class="bare">https://jakevdp.github.io/blog/2017/12/05/installing-python-packages-from-jupyter/</a></p>
+</div>
+<div class="listingblock">
+<div class="title">installing imbalance-learn in my jupyter notebook</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python"># Install a pip package in the current Jupyter kernel
+import sys
+!{sys.executable} -m pip install -U imbalanced-learn</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then I applied the over-sampling strategy over my dataset. <strong>You don&#8217;t have to tell the library which target class is under-represented, the algorithm figures it out</strong>. As a result the execution it returns the new resampled X and y.</p>
+</div>
+<div class="listingblock">
+<div class="title">over-sampling under-represented class</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from imblearn.over_sampling import SMOTE
+
+smote = SMOTE()
+X_resampled, y_resampled = smote.fit_resample(X, y)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now both target classes should be even:</p>
+</div>
+<div class="listingblock">
+<div class="title">show classes new balance</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">new_df = X_resampled.copy()
+new_df['status'] = y_resampled.copy()
+
+show_balance(new_df)</code></pre>
+</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/img/2021/02/ml_imbalanced_classes/imbalanced_03.png" alt="balanced">
+</div>
+</div>
+<div class="paragraph">
+<p>Then I can start using the new resampled dataset to create the new training/test sets.</p>
+</div>
+<div class="listingblock">
+<div class="title">creating the new TRAINING/TEST sets</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X_resampled, y_resampled, random_state=0)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Follow up I&#8217;m applying the new training/testing datasets to the baseline:</p>
+</div>
+<div class="listingblock">
+<div class="title">baseline resampled</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from sklearn.dummy import DummyClassifier
+
+dummy = DummyClassifier(strategy = "most_frequent").fit(X_train, y_train)
+dummy.score(X_test, y_test)</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">resampled dummy score</div>
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">0.48672566371681414</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now the score is lower than before and close to the 50%. That makes sense due to the fact that now both target classes are even and there&#8217;s no target class more predominant than the other.</p>
+</div>
+<div class="paragraph">
+<p>But the most important thing is to check how the SVC classificator is now performing:</p>
+</div>
+<div class="listingblock">
+<div class="title">resampled SVC model</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from sklearn.svm import SVC
+
+svc = SVC().fit(X_train, y_train)
+svc.score(X_test, y_test)</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">resampled SVC score</div>
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">0.6283185840707964</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Well is performing slightly better than before, and it&#8217;s performing way better than the baseline.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+All target classes should be equally represented
+</blockquote>
+</div>
+<div class="sect2">
+<h3 id="resources_2">Resources</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://en.wikipedia.org/wiki/Oversampling_and_undersampling_in_data_analysis" class="bare">https://en.wikipedia.org/wiki/Oversampling_and_undersampling_in_data_analysis</a></p>
+</li>
+<li>
+<p><a href="https://imbalanced-learn.org/stable/index.html" class="bare">https://imbalanced-learn.org/stable/index.html</a></p>
+</li>
+<li>
+<p><a href="https://machinelearningmastery.com/tactics-to-combat-imbalanced-classes-in-your-machine-learning-dataset/">machinelearningmastery.com article on dealing with imbalanced classes</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="penalized_models">Penalized models</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Another technique is to tune machine learning algorithms to make them aware of the target class imbalance. Lets get the initial imbalanced train/test sets.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now using SVC I&#8217;m telling the algorithm to be aware of imbalance classes:</p>
+</div>
+<div class="listingblock">
+<div class="title">tuned SVC</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from sklearn.svm import SVC
+
+# https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html
+svc = SVC(class_weight='balanced').fit(X_train, y_train)
+svc.score(X_test, y_test)</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">score</div>
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">0.6363636363636364</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And the same goes with LogisticRegression:</p>
+</div>
+<div class="listingblock">
+<div class="title">tuned LogisticRegression</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from sklearn.linear_model import LogisticRegression
+
+# https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html
+logistic = LogisticRegression(class_weight='balanced').fit(X_train, y_train)
+logistic.score(X_test, y_test)</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">score</div>
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">0.6493506493506493</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>According to the Scikit documentation the “balanced” mode uses the values of y to automatically adjust weights inversely proportional to class frequencies in the input data as n_samples / (n_classes * np.bincount(y)). <strong>You can also tune it manually passing the weight associated with classes</strong> in the form {class_label: weight}.</p>
+</div>
+<div class="paragraph">
+<p>It seems that a general rule of thumb could be <strong>using the inverse of the class distribution present in the training dataset</strong>. In the example class "1" had 73% and class "2" had 27%, so if we inverted the weights:</p>
+</div>
+<div class="listingblock">
+<div class="title">manually tuned</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from sklearn.linear_model import LogisticRegression
+
+# https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html
+weights  = {1: 0.27, 2: 0.73}
+logistic = LogisticRegression(class_weight=weights).fit(X_train, y_train)
+
+logistic.score(X_test, y_test)</code></pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="resources_3">Resources</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://www.analyticsvidhya.com/blog/2020/10/improve-class-imbalance-class-weights/" class="bare">https://www.analyticsvidhya.com/blog/2020/10/improve-class-imbalance-class-weights/</a>
+TODO</p>
+</li>
+<li>
+<p><a href="https://machinelearningmastery.com/cost-sensitive-logistic-regression/" class="bare">https://machinelearningmastery.com/cost-sensitive-logistic-regression/</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>

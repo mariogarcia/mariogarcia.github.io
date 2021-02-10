@@ -18,6 +18,12 @@
                             </strong> - POST
                         </a><ul class="icons">
                             <li>
+                                <a href="/feed.xml" class="icon fa-rss">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
                                 <a href="https://twitter.com/marioggar" class="icon fa-twitter">
                                     <span class="label">
                                         Twitter
@@ -31,10 +37,20 @@
                                 </a>
                             </li>
                         </ul>
-                    </header><section><header class="main"><div class="metadata"><em class="fa fa-calendar-o"></em><b>2020-11-26</b></div><h1>Model Evaluation: Intro</h1></header><yieldScaped><div id="preamble">
+                    </header><section><header class="main"><div class="metadata"><em class="fa fa-calendar-o"></em><b>2021-02-12</b></div><h1>Model Evaluation: Confusion Matrix</h1></header><yieldScaped><div id="preamble">
 <div class="sectionbody">
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2021/01/ml_imbalanced_classes/header.png" alt="Cancer cells" width="100%">
+</div>
+</div>
 <div class="paragraph">
 <p>The machine learning workflow usually involves several steps: getting a <strong>representation of the data</strong>, looking for the most suitable <strong>features</strong>, <strong>train the model</strong> with those features, and finally <strong>check whether the current model fits the solution</strong> we were aiming for or it doesn&#8217;t. This last step is called <strong>evaluation</strong> and tries to check whether our model fits our purposes or not.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+Depending on the problem, accuracy may not be the best evaluation method
+</blockquote>
 </div>
 </div>
 </div>
@@ -46,104 +62,43 @@
 </div>
 <div class="imageblock text-center">
 <div class="content">
-<img src="/img/54b5899f9d81d5aacad393ee14400f9b.png" alt="54b5899f9d81d5aacad393ee14400f9b.png" height="60">
+<img src="/img/54b5899f9d81d5aacad393ee14400f9b.png" alt="54b5899f9d81d5aacad393ee14400f9b.png" height="50">
 </div>
-<div class="title">Figure 1. accuracy</div>
+<div class="title">Figure 1. accuracy formula</div>
 </div>
 <div class="paragraph">
-<p>Is not a bad estimate to get started but is not a silver bullet. Depending on the problem accuracy, may not be the best evaluation method. For example, if we&#8217;re dealing with a health machine learning problem, such as classifying a certain type of cancer cases, even a 90% of accuracy is not good enough. In this case we are ok by having false positives if we&#8217;re sure that we don&#8217;t miss any true positive. False positives can be validated by a doctor afterwards.</p>
-</div>
-<div class="sect2">
-<h3 id="accuracy_flaws">Accuracy flaws</h3>
-<div class="paragraph">
-<p>The usual accuracy flaws are:</p>
+<p>Is not a bad estimate to get started but <strong>is not a silver bullet</strong>. Depending on the problem, accuracy may not be the best evaluation method. For example, if we&#8217;re dealing with a health related machine learning problem, such as classifying a certain type of cancer cases, even a 90% of accuracy is not good enough. In this case we are ok by having false positives if we&#8217;re sure that we don&#8217;t miss any true positive. False positives can be validated by a doctor afterwards. The usual <strong>accuracy flaws</strong> are:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>Imbalanced class</p>
+<p><strong>Imbalanced class</strong></p>
 </li>
 <li>
-<p>Innefective, erroneous or missing features</p>
+<p><strong>Innefective, erroneous or missing features</strong></p>
 </li>
 <li>
-<p>Poor choice of kernel or hyperparams</p>
+<p><strong>Poor choice of kernel or hyperparams</strong></p>
 </li>
 </ul>
-</div>
-<div class="paragraph">
-<p><strong>Imbalanced class problem</strong> happens when in a classification problem <strong>most of the data belongs to a certain class</strong>. For instance, imagine the following problem:</p>
-</div>
-<div class="listingblock">
-<div class="title">challenger</div>
-<div class="content">
-<pre class="highlight"><code class="language-python" data-lang="python">df = pd.read_csv("o-ring-erosion-only.data", delim_whitespace=True)
-df.columns = ["total", "distress", "ltemp", "leak_psi", "flight_order"]
-df.head()</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Then we create a simple classifier and get the score of prediction.</p>
-</div>
-<div class="listingblock">
-<div class="title">LogisticRegression classifier</div>
-<div class="content">
-<pre class="highlight"><code class="language-python" data-lang="python"></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>We get a score greater than 80% great. But what if we generate a dummy classifier that only looks for the most likely outcome:</p>
-</div>
-<div class="listingblock">
-<div class="title">dummy classifier in action</div>
-<div class="content">
-<pre class="highlight"><code class="language-python" data-lang="python"></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>WTF? It gets the same scoring. Clearly I&#8217;m doing something wrong.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="resources">Resources</h3>
-<div class="ulist">
-<ul>
-<li>
-<p><a href="http://archive.ics.uci.edu/ml/index.php">UCI&#8217;s Machine Learning Repository</a></p>
-</li>
-<li>
-<p><a href="http://archive.ics.uci.edu/ml/datasets/Qualitative_Bankruptcy">decision rules from qualitative bankruptcy data using genetic algorithms' by Myoung-Jong Kim (Dataset from UCI&#8217;s Machine Learning Repository)</a></p>
-</li>
-<li>
-<p><a href="https://machinelearningmastery.com/tactics-to-combat-imbalanced-classes-in-your-machine-learning-dataset/">Imbalanced classes in your machine learning dataset</a></p>
-</li>
-</ul>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="confusion_matrix">Confusion matrix</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Binary prediction</p>
 </div>
 <div class="imageblock text-center">
 <div class="content">
-<img src="/img/diag-91f4f1da766bf5002efaa795e96313f3.png" alt="binary prediction outcomes" width="370" height="308">
+<img src="/img/diag-b9576e02d6f87bbe683b9b888762b778.png" alt="Confusion matrix" width="370" height="308">
 </div>
-<div class="title">binary prediction outcomes</div>
+<div class="title">Confusion matrix</div>
 </div>
-<div class="paragraph">
-<p>TODO</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="resources_2">Resources</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>TODO</p>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+In this example a positive class is digit 1, and negative class 0. Is a binary classification problem. So a 1 means is not critical (positive) and a 0 is critical (negative).
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div></yieldScaped></section>

@@ -4,8 +4,124 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2020-12-01T09:17:27Z</updated>
-    <id>tag:null,2020:12</id>
+    <updated>2021-02-10T16:06:13Z</updated>
+    <id>tag:null,2021:02</id>
+    <entry>
+        <title>Links of the week</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2021/01/links_of_the_week_01.html"/>
+        <updated>2021-02-05T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2021/01/links_of_the_week_01.html</id>
+        <category term="ds"/>
+        <category term="java"/>
+        <category term="vue"/>
+        <content type="html">
+            &lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;data_science&quot;&gt;Data Science&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://jack-clark.net/&quot;&gt;Import AI&lt;/a&gt;: Import AI is a weekly newsletter about artificial intelligence&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://openai.com/&quot;&gt;OpenAI&lt;/a&gt;: OpenAI is an AI research and deployment company&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://medium.com/dataprophet/4-big-data-architectures-data-streaming-lambda-architecture-kappa-architecture-and-unifield-d9bcbf711eb9&quot;&gt;Machine Learning Architecture&lt;/a&gt;: Once you start having problems scaling your ML projects, Which architecture would fit the best ?&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://docs.quandl.com&quot;&gt;Quandl&lt;/a&gt;:  sources for financial, economic, and alternative datasets&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;These days I&amp;#8217;m looking into model evaluation and there&amp;#8217;re plenty of links I&amp;#8217;ve used both to study and practice.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://machinelearningmastery.com/feature-selection-with-real-and-categorical-data/&quot; class=&quot;bare&quot;&gt;https://machinelearningmastery.com/feature-selection-with-real-and-categorical-data/&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://machinelearningmastery.com/classification-accuracy-is-not-enough-more-performance-measures-you-can-use/&quot; class=&quot;bare&quot;&gt;https://machinelearningmastery.com/classification-accuracy-is-not-enough-more-performance-measures-you-can-use/&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://machinelearningmastery.com/tactics-to-combat-imbalanced-classes-in-your-machine-learning-dataset/&quot; class=&quot;bare&quot;&gt;https://machinelearningmastery.com/tactics-to-combat-imbalanced-classes-in-your-machine-learning-dataset/&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://imbalanced-learn.org/stable/over_sampling.html&quot; class=&quot;bare&quot;&gt;https://imbalanced-learn.org/stable/over_sampling.html&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;vue&quot;&gt;Vue&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://euvl.github.io/vue-js-modal/&quot;&gt;vue-js-modal&lt;/a&gt;: a modal windows library&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/euvl/vue-notification&quot;&gt;vue-notification&lt;/a&gt;: Notifications library&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;When bootstraping a project it comes handy to have a UI admin template to build the backoffice. I&amp;#8217;ve found two Vue projects that look great:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/wobsoriano/v-dashboard&quot; class=&quot;bare&quot;&gt;https://github.com/wobsoriano/v-dashboard&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/pratik227/quasar-admin&quot; class=&quot;bare&quot;&gt;https://github.com/pratik227/quasar-admin&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There&amp;#8217;re a couple more to keep in mind:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://adminlte.io/&quot;&gt;AdminLTE&lt;/a&gt;: A very popular HTML5 admin template&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/BootstrapDash/corona-free-dark-bootstrap-admin-template&quot;&gt;Corona&lt;/a&gt;: A dark theme HTML5 admin template&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;java&quot;&gt;Java&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/hierynomus/sshj&quot;&gt;SSHJ&lt;/a&gt;: Library to establish SSH and SCP sessions&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/hierynomus/sshj/blob/master/examples/src/main/java/net/schmizz/sshj/examples/Exec.java&quot;&gt;Simple example of SSHJ&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.baeldung.com/rxjava-string&quot;&gt;rxjava-string&lt;/a&gt;: Very util library to capture output executions and stream them to different destinations&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.baeldung.com/java-metrics&quot;&gt;Getting Hardware Metrics with Java&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
     <entry>
         <title>Voltage drop across resistors</title>
         <author>
