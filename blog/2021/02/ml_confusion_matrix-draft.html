@@ -1,0 +1,340 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="/feed.xml" class="icon fa-rss">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><div class="metadata"><em class="fa fa-calendar-o"></em><b>2021-02-22</b></div><h1>Model Evaluation: Confusion Matrix</h1></header><yieldScaped><div id="preamble">
+<div class="sectionbody">
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2021/02/ml_confusion_matrix/header.png" alt="ConfusionAndMatrix" width="100%">
+</div>
+</div>
+<div class="paragraph">
+<p>The machine learning workflow usually involves several steps: getting a <strong>representation of the data</strong>, looking for the most suitable <strong>features</strong>, <strong>train the model</strong> with those features, and finally <strong>check whether the current model fits the solution</strong> we were aiming for or it doesn&#8217;t. This last step is called <strong>evaluation</strong> and tries to check whether our model fits our purposes or not.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="accuracy">Accuracy</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Most of the time I&#8217;m focusing on getting the highest score when training my machine learning models. The score I&#8217;m looking for is based on accuracy. The accuracy here is the <strong>number of predicted samples that were correctly labeled divided by the total number of samples</strong>.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/54b5899f9d81d5aacad393ee14400f9b.png" alt="54b5899f9d81d5aacad393ee14400f9b.png" height="50">
+</div>
+<div class="title">Figure 1. accuracy formula</div>
+</div>
+<div class="paragraph">
+<p>Is not a bad estimate to get started but <strong>is not a silver bullet</strong>. Depending on the problem, accuracy may not be the best evaluation method. For example, if we&#8217;re dealing with a health related machine learning problem, such as classifying a certain type of cancer cases, even a 90% of accuracy is not good enough. In this case we are ok by having false positives if we&#8217;re sure that we don&#8217;t miss any true positive. False positives can be validated by a doctor afterwards.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="confusion_matrix">Confusion Matrix</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In orther to choose which could be the most suitable metric used for a given problem, we need to know which is the goal of the solution.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Is a health related app and we want to make sure we don&#8217;t miss any positive case</p>
+</li>
+<li>
+<p>We need to store items into boxes and we need to make sure the accuracy is close to 100%, in other words, to be accurate</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>One helpful way to visualize how the model is performing is to use a confusion matrix. A confusion matrix is a matrix were all posible outcomes of the model are classified in different quadrants. Depending on which quadrant is most important for us to highlight as result, we will choose one metric evaluation or another. An evaluation matrix for a binary classification problem could look like the following:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/diag-b9576e02d6f87bbe683b9b888762b778.png" alt="Confusion matrix" width="370" height="308">
+</div>
+<div class="title">Confusion matrix</div>
+</div>
+<div class="paragraph">
+<p>Lets create a theoretical example. Lets say we have a binary classification problem. We&#8217;re classifying images, and we need to classify 100 images between cats and dogs. The confusion matrix for my actual model is the following:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/img/diag-a6c2fd35c7716a2e67354ab85f472d8d.png" alt="Binary classification" width="230" height="182">
+</div>
+<div class="title">Binary classification</div>
+</div>
+<div class="paragraph">
+<p>If we establish that the positive class (1) is to find a dog and a negative class (0) is to find a cat, according to this confusion matrix of a 100 samples we can make certain assumptions:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>20% of the time</strong> the model <strong>classifies correctly that a given animal is not a dog</strong> (True Negative - TN)</p>
+</li>
+<li>
+<p><strong>30% of the time</strong> the model <strong>classifies incorrectly that a given animal is not a dog</strong>  (False Negative - FN)</p>
+</li>
+<li>
+<p><strong>19% of the time</strong> the model <strong>classifies incorrectly that a given animal is a dog</strong> (False Positive - FP)</p>
+</li>
+<li>
+<p><strong>31% of the time</strong> the model <strong>classifies correctly that a given animal is a dog</strong>  (True Positive - TP)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The evaluation matrix helps us to sort all of the samples in four different boxes and then applying different metrics depending on the goal we&#8217;re aiming, Do we want to not miss any dog even if we accept to classify a cat as a dog from time to time ? Do we want to have a 100% of accuracy classifying dogs ? How 100% of accuracy would be represented in the confusion matrix by the way ?</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/img/diag-4db0c3962c4a164e0e2a06953b9a6004.png" alt="Accuracy metric" width="230" height="182">
+</div>
+<div class="title">Accuracy metric</div>
+</div>
+<div class="paragraph">
+<p>But as we&#8217;re mentioned so far, we may want to prioritize some other type of metric. Other metrics could be: <strong>precision, recall or specificity</strong>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="precision_recall_and_f1_score">Precision, Recall and F1 score</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="precision">Precision</h3>
+<div class="paragraph">
+<p>If you&#8217;d like to maximize precision, that would mean (in the current example), that everytime we say a given sample is a dog, it&#8217;s going to be a dog. But that also could mean that when we say something is a cat we may find out it&#8217;s a dog.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/img/96d2dbcd621a2da7cff58eaed68d87c2.png" alt="96d2dbcd621a2da7cff58eaed68d87c2.png" height="50">
+</div>
+<div class="title">Figure 2. precision formula</div>
+</div>
+<div class="paragraph">
+<p>In our example our first model was performing like this:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/img/diag-57774fa62355fba088d5a5dd983f0dc4.png" alt="Precision" width="230" height="182">
+</div>
+<div class="title">Precision</div>
+</div>
+<div class="paragraph">
+<p>Calculating the precision would give us 31 / 31 + 19 = 0.62, 62% precision. A model that improves precision would look like the following:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/img/diag-88cb8f1b476096aecc6d7d937cd04d90.png" alt="Improved precission" width="230" height="182">
+</div>
+<div class="title">Improved precission</div>
+</div>
+<div class="paragraph">
+<p>Which would give us a precision of: 41 / 41 + 0 = 1, 100% precision. Notice we are still missing some dogs (49 dogs are classified as false negatives), but here <strong>the point is that whenever the model say it&#8217;s a dog, it&#8217;s a dog</strong>.</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Precision is good for&#8230;&#8203;</div>
+<div class="paragraph">
+<p>In general <strong>precision could be a good metric for</strong> tasks such as:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>search engine rankings, query suggestion</p>
+</li>
+<li>
+<p>document classification</p>
+</li>
+<li>
+<p>many customer-facing tasks as customers are very sensitive to errors</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="recall">Recall</h3>
+<div class="paragraph">
+<p>What if we don&#8217;t want to miss any dog even though we can end up classifying cats as a dog ? We want a high recall. First the formula:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/img/9fc030ab004eb3b12a815227ce62da52.png" alt="9fc030ab004eb3b12a815227ce62da52.png" height="50">
+</div>
+<div class="title">Figure 3. recall formula</div>
+</div>
+<div class="paragraph">
+<p>We start with a model that performs like this:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/img/diag-017910e3ef77f64dea76c25998e12058.png" alt="Recall" width="230" height="182">
+</div>
+<div class="title">Recall</div>
+</div>
+<div class="paragraph">
+<p>Calculating the recall we end up with: 31 / 31 + 30 = 0.508, around 50% of time time when we say it&#8217;s a dog it&#8217;s a dog, that&#8217;s not better than flipping a coin. Let&#8217;s checkout another model:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/img/diag-f26038a9289566f902d11ce38b0fd0c3.png" alt="Improved recall" width="230" height="182">
+</div>
+<div class="title">Improved recall</div>
+</div>
+<div class="paragraph">
+<p>In this ocassion we&#8217;ve got that: 31 / 31 + 0 = 1, 100% of recall. This time this would mean that every time we say a dog is a dog we may get a cat, but we are completely sure, that no dogs have been classified as cats. Looking at the matrix:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>50% of the samples</strong> have been <strong>correctly classified as cats</strong> (True Negative - TN)</p>
+</li>
+<li>
+<p><strong>0% of the samples</strong> have been <strong>incorrectly classified as cats</strong> (False Negative - FN)</p>
+</li>
+<li>
+<p><strong>19% of the samples</strong> have been <strong>incorrectly classified as dogs</strong> (False Positive - FP)</p>
+</li>
+<li>
+<p><strong>31% of the samples</strong> have been <strong>correctly classified as dogs</strong> (True Positive - TP)</p>
+</li>
+</ul>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Recall is good for&#8230;&#8203;</div>
+<div class="paragraph">
+<p>In general <strong>recall could be a good metric for tasks</strong> such as:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Search and information extraction in legal discovery</p>
+</li>
+<li>
+<p>tumor detection</p>
+</li>
+<li>
+<p>tasks with a man-in-the-loop to filter out false positives</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="f1_score">F1 score</h3>
+<div class="paragraph">
+<p>F1 score combines precision and recall into a single number. The formula is:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/img/f7ce964042ecded59c4495ac23e5e10b.png" alt="f7ce964042ecded59c4495ac23e5e10b.png" height="50">
+</div>
+<div class="title">Figure 4. f1 score formula</div>
+</div>
+<div class="paragraph">
+<p>As it&#8217;s mentioned <a href="https://towardsdatascience.com/accuracy-precision-recall-or-f1-331fb37c5cb9">this article</a> F1 Score might be a better measure to use <strong>if we need to seek a balance between Precision and Recall AND there is an uneven class distribution</strong> (large number of Actual Negatives).</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="using_scikit_to_show_metrics">Using Scikit to show metrics</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>TODO</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="resources">Resources</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://en.wikipedia.org/wiki/Confusion_matrix">Confusion Matrix</a>: Wikipedia definition</p>
+</li>
+<li>
+<p><a href="https://towardsdatascience.com/metrics-to-evaluate-your-machine-learning-algorithm-f10ba6e38234">Different Evaluation Metrics</a>: Interesting article talking about different evaluation metrics</p>
+</li>
+<li>
+<p><a href="https://towardsdatascience.com/accuracy-precision-recall-or-f1-331fb37c5cb9">Accuracy, precision, recall or F1</a>: article in towardsdatascience.com</p>
+</li>
+</ul>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>
