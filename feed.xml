@@ -4,16 +4,508 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2021-02-22T19:13:44Z</updated>
-    <id>tag:null,2021:02</id>
+    <updated>2021-03-16T13:05:07Z</updated>
+    <id>tag:null,2021:03</id>
+    <entry>
+        <title>Model Evaluation: Confusion Matrix</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2021/03/ml_confusion_matrix.html"/>
+        <updated>2021-03-15T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2021/03/ml_confusion_matrix.html</id>
+        <category term="ds"/>
+        <category term="ml"/>
+        <category term="python"/>
+        <content type="html">
+            &lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2021/03/ml_confusion_matrix/header.png&quot; alt=&quot;ConfusionAndMatrix&quot; width=&quot;100%&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The machine learning workflow usually involves several steps: getting a &lt;strong&gt;representation of the data&lt;/strong&gt;, looking for the most suitable &lt;strong&gt;features&lt;/strong&gt;,
+&lt;strong&gt;train the model&lt;/strong&gt; with those features, and finally &lt;strong&gt;check whether the current model fits the solution&lt;/strong&gt; we were aiming for or not.
+This last step is called &lt;strong&gt;evaluation&lt;/strong&gt; and tries to check whether our model fits our purposes or not.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;accuracy&quot;&gt;Accuracy&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Most of the time I&amp;#8217;m focusing on getting the highest score when training my machine learning models. The score I&amp;#8217;m looking for is based on accuracy. The accuracy here is the &lt;strong&gt;number of predicted samples that were correctly labeled divided by the total number of samples&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/54b5899f9d81d5aacad393ee14400f9b.png&quot; alt=&quot;54b5899f9d81d5aacad393ee14400f9b.png&quot; height=&quot;50&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 1. accuracy formula&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Is not a bad estimate to get started but &lt;strong&gt;is not a silver bullet&lt;/strong&gt;. Depending on the problem, accuracy may not be the best evaluation method. For example, if we&amp;#8217;re dealing with a health related machine learning problem, such as classifying a certain type of cancer cases, even a 90% of accuracy is not good enough. In this case we are ok by having false positives if we&amp;#8217;re sure that we don&amp;#8217;t miss any true positive. False positives can be validated by a doctor afterwards.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;confusion_matrix&quot;&gt;Confusion Matrix&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In order to choose which could be the most suitable metric used for a given problem, we need to know which is the goal of the solution.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Is a health related app and we want to &lt;strong&gt;make sure we don&amp;#8217;t miss any positive case&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;We need to store items into boxes and we need to &lt;strong&gt;make sure the accuracy is close to 100%&lt;/strong&gt;, in other words, to be accurate&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;One helpful way to visualize how the model is performing is to use a confusion matrix. A confusion matrix is &lt;strong&gt;a matrix were all posible outcomes of
+the model are classified in different quadrants&lt;/strong&gt;. Depending on which quadrant is most important for us to highlight as result,
+&lt;strong&gt;we will choose the classifier that fits best the quadrants we are interested in&lt;/strong&gt;. An evaluation matrix for a binary classification problem could look like the following:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/diag-b9576e02d6f87bbe683b9b888762b778.png&quot; alt=&quot;Confusion matrix&quot; width=&quot;370&quot; height=&quot;308&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Confusion matrix&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Lets create a theoretical example. Lets say we have a binary classification problem. We&amp;#8217;re classifying images, and we need to classify 100 images between cats and dogs. The confusion matrix for my actual model is the following:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/diag-37ba68dacf2cfa390df4dfc1ea237905.png&quot; alt=&quot;Binary classification&quot; width=&quot;230&quot; height=&quot;182&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Binary classification&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If we establish that the positive class (1) is to find a dog and a negative class (0) is to find a cat, according to this confusion matrix of a 100 samples we can make certain assumptions:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;20% of the time&lt;/strong&gt; the model &lt;strong&gt;classifies correctly that a given animal is not a dog&lt;/strong&gt; (True Negative - TN)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;30% of the time&lt;/strong&gt; the model &lt;strong&gt;classifies incorrectly that a given animal is not a dog&lt;/strong&gt;  (False Negative - FN)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;19% of the time&lt;/strong&gt; the model &lt;strong&gt;classifies incorrectly that a given animal is a dog&lt;/strong&gt; (False Positive - FP)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;31% of the time&lt;/strong&gt; the model &lt;strong&gt;classifies correctly that a given animal is a dog&lt;/strong&gt;  (True Positive - TP)&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The evaluation matrix helps us to sort all of the samples in four different boxes and then applying different metrics depending on the goal we&amp;#8217;re aiming, Do we want to not miss any dog even if we accept to classify a cat as a dog from time to time ? Do we want to have a 100% of accuracy classifying dogs ? How 100% of accuracy would be represented in the confusion matrix by the way ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/diag-89a77d67a4b8a56ee372c45cf6f23bd1.png&quot; alt=&quot;Accuracy metric&quot; width=&quot;230&quot; height=&quot;182&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Accuracy metric&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;But as we&amp;#8217;re mentioned so far, we may want to prioritize some other type of metric. Other metrics could be: &lt;strong&gt;precision, recall or specificity&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;precision_recall_and_f1_score&quot;&gt;Precision, Recall and F1 score&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;precision&quot;&gt;Precision&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If you&amp;#8217;d like to maximize precision, that would mean (in the current example), that everytime we say a given sample is a dog, it&amp;#8217;s going to be a dog. But that also could mean that when we say something is a cat we may find out it&amp;#8217;s a dog.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/96d2dbcd621a2da7cff58eaed68d87c2.png&quot; alt=&quot;96d2dbcd621a2da7cff58eaed68d87c2.png&quot; height=&quot;50&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 2. precision formula&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In our example our first model was performing like this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/diag-68d1981304602339732316ef075af471.png&quot; alt=&quot;Precision&quot; width=&quot;230&quot; height=&quot;182&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Precision&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Calculating the precision would give us 31 / 31 + 19 = 0.62, 62% precision. A model that improves precision would look like the following:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/diag-4f5e940fa1cc0908c1d1c91a57c7e629.png&quot; alt=&quot;Improved precission&quot; width=&quot;230&quot; height=&quot;182&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Improved precission&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Which would give us a precision of: 41 / 41 + 0 = 1, 100% precision. Notice we are still missing some dogs (49 dogs are classified as false negatives), but here &lt;strong&gt;the point is that whenever the model say it&amp;#8217;s a dog, it&amp;#8217;s a dog&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sidebarblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Precision is good for&amp;#8230;&amp;#8203;&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In general &lt;strong&gt;precision could be a good metric for&lt;/strong&gt; tasks such as:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;search engine rankings, query suggestion&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;document classification&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;many customer-facing tasks as customers are very sensitive to errors&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;recall&quot;&gt;Recall&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;What if we don&amp;#8217;t want to miss any dog even though we can end up classifying cats as a dog ? We want a high recall. First the formula:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/9fc030ab004eb3b12a815227ce62da52.png&quot; alt=&quot;9fc030ab004eb3b12a815227ce62da52.png&quot; height=&quot;50&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 3. recall formula&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We start with a model that performs like this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/diag-5617d16bad9ec93391f16c79749a657c.png&quot; alt=&quot;Recall&quot; width=&quot;230&quot; height=&quot;182&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Recall&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Calculating the recall we end up with: 31 / 31 + 30 = 0.508, around 50% of time time when we say it&amp;#8217;s a dog it&amp;#8217;s a dog, that&amp;#8217;s not better than flipping a coin. Let&amp;#8217;s checkout another model:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/diag-17d45278c488a99230a68ffe7a7f7708.png&quot; alt=&quot;Improved recall&quot; width=&quot;230&quot; height=&quot;182&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Improved recall&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In this ocassion we&amp;#8217;ve got that: 31 / 31 + 0 = 1, 100% of recall. This time this would mean that every time we say a dog is a dog we may get a cat, but we are completely sure, that no dogs have been classified as cats. Looking at the matrix:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;50% of the samples&lt;/strong&gt; have been &lt;strong&gt;correctly classified as cats&lt;/strong&gt; (True Negative - TN)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;0% of the samples&lt;/strong&gt; have been &lt;strong&gt;incorrectly classified as cats&lt;/strong&gt; (False Negative - FN)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;19% of the samples&lt;/strong&gt; have been &lt;strong&gt;incorrectly classified as dogs&lt;/strong&gt; (False Positive - FP)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;31% of the samples&lt;/strong&gt; have been &lt;strong&gt;correctly classified as dogs&lt;/strong&gt; (True Positive - TP)&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sidebarblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Recall is good for&amp;#8230;&amp;#8203;&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In general &lt;strong&gt;recall could be a good metric for tasks&lt;/strong&gt; such as:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Search and information extraction in legal discovery&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;tumor detection&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;tasks with a man-in-the-loop to filter out false positives&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;f1_score&quot;&gt;F1 score&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;F1 score combines precision and recall into a single number. The formula is:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/f7ce964042ecded59c4495ac23e5e10b.png&quot; alt=&quot;f7ce964042ecded59c4495ac23e5e10b.png&quot; height=&quot;50&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 4. f1 score formula&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As it&amp;#8217;s mentioned &lt;a href=&quot;https://towardsdatascience.com/accuracy-precision-recall-or-f1-331fb37c5cb9&quot;&gt;this article&lt;/a&gt; F1 Score might be a better measure to use &lt;strong&gt;if we need to seek a balance between Precision and Recall AND there is an uneven class distribution&lt;/strong&gt; (large number of Actual Negatives).&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;using_scikit_to_show_metrics&quot;&gt;Using Scikit to show metrics&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To show how confusion matrix can help deciding which classifier to use I&amp;#8217;m using a dataset from Madrid City Open Data.
+This &lt;a href=&quot;https://datos.madrid.es/portal/site/egob/menuitem.c05c1f754a33a9fbe4b2e4b284f1a5a0/?vgnextoid=50d7d35982d6f510VgnVCM1000001d4a900aRCRD&amp;amp;vgnextchannel=374512b9ace9f310VgnVCM100000171f5a0aRCRD&amp;amp;vgnextfmt=default&quot;&gt;dataset&lt;/a&gt;
+shows the interventions of the urgency and rescue city service (SAMUR in spanish) in 2020.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2021/03/ml_confusion_matrix/samur_data.png&quot; alt=&quot;SAMUR&quot; width=&quot;100%&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;With this dataset I&amp;#8217;d like to be able to find a classifier that answers the question: &lt;strong&gt;Is this type of intervention going to take
+to the urgency service more time than average to respond ?&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;First I did some work to prepare the data the best I could:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Converting categorical data to numerical&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Applying under-sampling to correct imbalance&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Choosing best features&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then I chose several classifiers:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;classifiers&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.linear_model import LogisticRegression
+from sklearn.svm import LinearSVC
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
+from sklearn.dummy import DummyClassifier
+
+# different classifiers
+logistic    = LogisticRegression().fit(X_train, y_train)
+svc         = LinearSVC(random_state=0).fit(X_train, y_train)
+knn         = KNeighborsClassifier(5).fit(X_train, y_train)
+tree        = DecisionTreeClassifier(max_depth=3).fit(X_train, y_train)
+rff         = RandomForestClassifier(max_depth=2, n_estimators=4, max_features=2).fit(X_train, y_train)
+ada         = AdaBoostClassifier(n_estimators=100).fit(X_train, y_train)
+dummy       = DummyClassifier(strategy = &apos;most_frequent&apos;).fit(X_train, y_train)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And then I printed out their confusion matrices:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;confusion matrix of every classifier&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.metrics import confusion_matrix
+
+classifiers = [dummy, logistic, svc, knn, tree, rff, ada]
+
+for clsf in classifiers:
+    y_predicted = clsf.predict(X_test)
+    print(clsf.__class__.__name__)
+    print(&apos;===========================================&apos;)
+    print(confusion_matrix(y_test, y_predicted))
+    print()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Here&amp;#8217;s a nicer representation of the confusion matrices.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/diag-83c2392ea6863c27796bbacd74ed2018.png&quot; alt=&quot;Confusion matrices&quot; width=&quot;860&quot; height=&quot;350&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Confusion matrices&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;First impressions:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;None of them&lt;/strong&gt; is performing at a decent level&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Is &lt;strong&gt;not even possible to see a decent recall&lt;/strong&gt; because both dummy and linear classifiers are the different sides of choosing the most frequent outcome&amp;#8230;&amp;#8203; useless.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;I&amp;#8217;d say that &lt;strong&gt;the classifier  that gives me the highest precision is the AdaBoostClassifier&lt;/strong&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;But to be sure, I&amp;#8217;m producing the precision, recall and f1-score summary with sklearn&amp;#8217;s &lt;strong&gt;classification_report&lt;/strong&gt; of each of them:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;summary&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.metrics import classification_report
+
+classifiers = [dummy, logistic, svc, knn, tree, rff, ada]
+
+for clsf in classifiers:
+    y_predicted = clsf.predict(X_test)
+    print(clsf.__class__.__name__)
+    print(&apos;===========================================&apos;)
+    print(classification_report(y_test, y_predicted, target_names = [&apos;above_avg&apos;, &apos;not_above_avg&apos;]))&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I&amp;#8217;m summarizing the results in the following table:&lt;/p&gt;
+&lt;/div&gt;
+&lt;table class=&quot;tableblock frame-all grid-all stretch&quot;&gt;
+&lt;caption class=&quot;title&quot;&gt;Table 1. Highest results for possitive class&lt;/caption&gt;
+&lt;colgroup&gt;
+&lt;col style=&quot;width: 25%;&quot;&gt;
+&lt;col style=&quot;width: 25%;&quot;&gt;
+&lt;col style=&quot;width: 25%;&quot;&gt;
+&lt;col style=&quot;width: 25%;&quot;&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;Classifier&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;Precision&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;Recall&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;F1&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;DummyClassifier&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0.50&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;1.00&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0.57&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;LogisticRegression&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0.57&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0.70&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0.63&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;LinearSVC&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0.00&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0.00&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0.00&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;KNeighborsClassifier&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0.61&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0.61&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0.61&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;DecisionTreeClassifier&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0.56&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;&lt;strong&gt;0.83&lt;/strong&gt; &amp;#8592;----&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0.67&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;RandomForestClassifier&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0.58&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0.66&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0.61&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;AdaBoostClassifier&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;&lt;strong&gt;0.62&lt;/strong&gt; &amp;#8592;----&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0.70&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0.66&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The summary is telling me that the classifier that ranks best for &lt;strong&gt;precision&lt;/strong&gt; is the &lt;strong&gt;AdaBoostClassifier&lt;/strong&gt; and the classifier that
+ranks best for &lt;strong&gt;recall&lt;/strong&gt; is the &lt;strong&gt;DecisionTreeClassifier&lt;/strong&gt;. The take-away is:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;If I wanted to be sure that &lt;strong&gt;I&amp;#8217;m missing the few positive samples possible&lt;/strong&gt; I&amp;#8217;d look for the &lt;strong&gt;highest recall&lt;/strong&gt; classifier&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;If I wanted to be sure that &lt;strong&gt;I&amp;#8217;m getting a true positive sample every time&lt;/strong&gt; I&amp;#8217;d look for the &lt;strong&gt;highest precision&lt;/strong&gt; classifier&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And finally, &lt;strong&gt;this whole evaluation process has serve to realize that I need to go back to square one&lt;/strong&gt;, because as I mentioned
+earlier &lt;strong&gt;NONE of the classifiers is performing decently&lt;/strong&gt;, so I need to &lt;strong&gt;check where I can improve the process&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Enrich data&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Increase/Decrease samples&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Tune classifiers to get the desired precision/recall/accuracy&amp;#8230;&amp;#8203;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;resources&quot;&gt;Resources&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Confusion_matrix&quot;&gt;Confusion Matrix&lt;/a&gt;: Wikipedia definition&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://towardsdatascience.com/metrics-to-evaluate-your-machine-learning-algorithm-f10ba6e38234&quot;&gt;Different Evaluation Metrics&lt;/a&gt;: Interesting article talking about different evaluation metrics&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://towardsdatascience.com/accuracy-precision-recall-or-f1-331fb37c5cb9&quot;&gt;Accuracy, precision, recall or F1&lt;/a&gt;: article in towardsdatascience.com&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;/files/2021/03/ml_confusion_matrix/SAMUR.ipynb&quot;&gt;SAMUR.ipynb Jupyter Notebook&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
     <entry>
         <title>Imbalanced classes</title>
         <author>
             <name>@marioggar</name>
         </author>
-        <link href="http://github.com/mariogarcia/blog/2021/01/ml_imbalanced_classes.html"/>
+        <link href="http://github.com/mariogarcia/blog/2021/02/ml_imbalanced_classes.html"/>
         <updated>2021-02-10T00:00:00Z</updated>
-        <id>http://github.com/mariogarcia/blog/2021/01/ml_imbalanced_classes.html</id>
+        <id>http://github.com/mariogarcia/blog/2021/02/ml_imbalanced_classes.html</id>
         <category term="ds"/>
         <category term="ml"/>
         <category term="python"/>
@@ -468,9 +960,9 @@ TODO&lt;/p&gt;
         <author>
             <name>@marioggar</name>
         </author>
-        <link href="http://github.com/mariogarcia/blog/2021/01/links_of_the_week_01.html"/>
+        <link href="http://github.com/mariogarcia/blog/2021/02/links_of_the_week_01.html"/>
         <updated>2021-02-05T00:00:00Z</updated>
-        <id>http://github.com/mariogarcia/blog/2021/01/links_of_the_week_01.html</id>
+        <id>http://github.com/mariogarcia/blog/2021/02/links_of_the_week_01.html</id>
         <category term="ds"/>
         <category term="java"/>
         <category term="vue"/>

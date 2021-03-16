@@ -37,15 +37,17 @@
                                 </a>
                             </li>
                         </ul>
-                    </header><section><header class="main"><div class="metadata"><em class="fa fa-calendar-o"></em><b>2021-02-22</b></div><h1>Model Evaluation: Confusion Matrix</h1></header><yieldScaped><div id="preamble">
+                    </header><section><header class="main"><div class="metadata"><em class="fa fa-calendar-o"></em><b>2021-03-15</b></div><h1>Model Evaluation: Confusion Matrix</h1></header><yieldScaped><div id="preamble">
 <div class="sectionbody">
 <div class="imageblock text-center">
 <div class="content">
-<img src="/img/2021/02/ml_confusion_matrix/header.png" alt="ConfusionAndMatrix" width="100%">
+<img src="/img/2021/03/ml_confusion_matrix/header.png" alt="ConfusionAndMatrix" width="100%">
 </div>
 </div>
 <div class="paragraph">
-<p>The machine learning workflow usually involves several steps: getting a <strong>representation of the data</strong>, looking for the most suitable <strong>features</strong>, <strong>train the model</strong> with those features, and finally <strong>check whether the current model fits the solution</strong> we were aiming for or it doesn&#8217;t. This last step is called <strong>evaluation</strong> and tries to check whether our model fits our purposes or not.</p>
+<p>The machine learning workflow usually involves several steps: getting a <strong>representation of the data</strong>, looking for the most suitable <strong>features</strong>,
+<strong>train the model</strong> with those features, and finally <strong>check whether the current model fits the solution</strong> we were aiming for or not.
+This last step is called <strong>evaluation</strong> and tries to check whether our model fits our purposes or not.</p>
 </div>
 </div>
 </div>
@@ -70,20 +72,22 @@
 <h2 id="confusion_matrix">Confusion Matrix</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>In orther to choose which could be the most suitable metric used for a given problem, we need to know which is the goal of the solution.</p>
+<p>In order to choose which could be the most suitable metric used for a given problem, we need to know which is the goal of the solution.</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>Is a health related app and we want to make sure we don&#8217;t miss any positive case</p>
+<p>Is a health related app and we want to <strong>make sure we don&#8217;t miss any positive case</strong></p>
 </li>
 <li>
-<p>We need to store items into boxes and we need to make sure the accuracy is close to 100%, in other words, to be accurate</p>
+<p>We need to store items into boxes and we need to <strong>make sure the accuracy is close to 100%</strong>, in other words, to be accurate</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>One helpful way to visualize how the model is performing is to use a confusion matrix. A confusion matrix is a matrix were all posible outcomes of the model are classified in different quadrants. Depending on which quadrant is most important for us to highlight as result, we will choose one metric evaluation or another. An evaluation matrix for a binary classification problem could look like the following:</p>
+<p>One helpful way to visualize how the model is performing is to use a confusion matrix. A confusion matrix is <strong>a matrix were all posible outcomes of
+the model are classified in different quadrants</strong>. Depending on which quadrant is most important for us to highlight as result,
+<strong>we will choose the classifier that fits best the quadrants we are interested in</strong>. An evaluation matrix for a binary classification problem could look like the following:</p>
 </div>
 <div class="imageblock text-center">
 <div class="content">
@@ -96,7 +100,7 @@
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="/img/diag-a6c2fd35c7716a2e67354ab85f472d8d.png" alt="Binary classification" width="230" height="182">
+<img src="/img/diag-37ba68dacf2cfa390df4dfc1ea237905.png" alt="Binary classification" width="230" height="182">
 </div>
 <div class="title">Binary classification</div>
 </div>
@@ -124,7 +128,7 @@
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="/img/diag-4db0c3962c4a164e0e2a06953b9a6004.png" alt="Accuracy metric" width="230" height="182">
+<img src="/img/diag-89a77d67a4b8a56ee372c45cf6f23bd1.png" alt="Accuracy metric" width="230" height="182">
 </div>
 <div class="title">Accuracy metric</div>
 </div>
@@ -152,7 +156,7 @@
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="/img/diag-57774fa62355fba088d5a5dd983f0dc4.png" alt="Precision" width="230" height="182">
+<img src="/img/diag-68d1981304602339732316ef075af471.png" alt="Precision" width="230" height="182">
 </div>
 <div class="title">Precision</div>
 </div>
@@ -161,7 +165,7 @@
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="/img/diag-88cb8f1b476096aecc6d7d937cd04d90.png" alt="Improved precission" width="230" height="182">
+<img src="/img/diag-4f5e940fa1cc0908c1d1c91a57c7e629.png" alt="Improved precission" width="230" height="182">
 </div>
 <div class="title">Improved precission</div>
 </div>
@@ -206,7 +210,7 @@
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="/img/diag-017910e3ef77f64dea76c25998e12058.png" alt="Recall" width="230" height="182">
+<img src="/img/diag-5617d16bad9ec93391f16c79749a657c.png" alt="Recall" width="230" height="182">
 </div>
 <div class="title">Recall</div>
 </div>
@@ -215,7 +219,7 @@
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="/img/diag-f26038a9289566f902d11ce38b0fd0c3.png" alt="Improved recall" width="230" height="182">
+<img src="/img/diag-17d45278c488a99230a68ffe7a7f7708.png" alt="Improved recall" width="230" height="182">
 </div>
 <div class="title">Improved recall</div>
 </div>
@@ -281,7 +285,212 @@
 <h2 id="using_scikit_to_show_metrics">Using Scikit to show metrics</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>TODO</p>
+<p>To show how confusion matrix can help deciding which classifier to use I&#8217;m using a dataset from Madrid City Open Data.
+This <a href="https://datos.madrid.es/portal/site/egob/menuitem.c05c1f754a33a9fbe4b2e4b284f1a5a0/?vgnextoid=50d7d35982d6f510VgnVCM1000001d4a900aRCRD&amp;vgnextchannel=374512b9ace9f310VgnVCM100000171f5a0aRCRD&amp;vgnextfmt=default">dataset</a>
+shows the interventions of the urgency and rescue city service (SAMUR in spanish) in 2020.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2021/03/ml_confusion_matrix/samur_data.png" alt="SAMUR" width="100%">
+</div>
+</div>
+<div class="paragraph">
+<p>With this dataset I&#8217;d like to be able to find a classifier that answers the question: <strong>Is this type of intervention going to take
+to the urgency service more time than average to respond ?</strong></p>
+</div>
+<div class="paragraph">
+<p>First I did some work to prepare the data the best I could:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Converting categorical data to numerical</p>
+</li>
+<li>
+<p>Applying under-sampling to correct imbalance</p>
+</li>
+<li>
+<p>Choosing best features</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Then I chose several classifiers:</p>
+</div>
+<div class="listingblock">
+<div class="title">classifiers</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from sklearn.linear_model import LogisticRegression
+from sklearn.svm import LinearSVC
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
+from sklearn.dummy import DummyClassifier
+
+# different classifiers
+logistic    = LogisticRegression().fit(X_train, y_train)
+svc         = LinearSVC(random_state=0).fit(X_train, y_train)
+knn         = KNeighborsClassifier(5).fit(X_train, y_train)
+tree        = DecisionTreeClassifier(max_depth=3).fit(X_train, y_train)
+rff         = RandomForestClassifier(max_depth=2, n_estimators=4, max_features=2).fit(X_train, y_train)
+ada         = AdaBoostClassifier(n_estimators=100).fit(X_train, y_train)
+dummy       = DummyClassifier(strategy = 'most_frequent').fit(X_train, y_train)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And then I printed out their confusion matrices:</p>
+</div>
+<div class="listingblock">
+<div class="title">confusion matrix of every classifier</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from sklearn.metrics import confusion_matrix
+
+classifiers = [dummy, logistic, svc, knn, tree, rff, ada]
+
+for clsf in classifiers:
+    y_predicted = clsf.predict(X_test)
+    print(clsf.__class__.__name__)
+    print('===========================================')
+    print(confusion_matrix(y_test, y_predicted))
+    print()</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s a nicer representation of the confusion matrices.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/img/diag-83c2392ea6863c27796bbacd74ed2018.png" alt="Confusion matrices" width="860" height="350">
+</div>
+<div class="title">Confusion matrices</div>
+</div>
+<div class="paragraph">
+<p>First impressions:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>None of them</strong> is performing at a decent level</p>
+</li>
+<li>
+<p>Is <strong>not even possible to see a decent recall</strong> because both dummy and linear classifiers are the different sides of choosing the most frequent outcome&#8230;&#8203; useless.</p>
+</li>
+<li>
+<p>I&#8217;d say that <strong>the classifier  that gives me the highest precision is the AdaBoostClassifier</strong>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>But to be sure, I&#8217;m producing the precision, recall and f1-score summary with sklearn&#8217;s <strong>classification_report</strong> of each of them:</p>
+</div>
+<div class="listingblock">
+<div class="title">summary</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from sklearn.metrics import classification_report
+
+classifiers = [dummy, logistic, svc, knn, tree, rff, ada]
+
+for clsf in classifiers:
+    y_predicted = clsf.predict(X_test)
+    print(clsf.__class__.__name__)
+    print('===========================================')
+    print(classification_report(y_test, y_predicted, target_names = ['above_avg', 'not_above_avg']))</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I&#8217;m summarizing the results in the following table:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. Highest results for possitive class</caption>
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Classifier</th>
+<th class="tableblock halign-left valign-top">Precision</th>
+<th class="tableblock halign-left valign-top">Recall</th>
+<th class="tableblock halign-left valign-top">F1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DummyClassifier</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.50</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.00</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.57</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">LogisticRegression</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.57</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.70</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.63</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">LinearSVC</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.00</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.00</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.00</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">KNeighborsClassifier</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.61</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.61</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.61</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DecisionTreeClassifier</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.56</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>0.83</strong> &#8592;----</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.67</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">RandomForestClassifier</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.58</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.66</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.61</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">AdaBoostClassifier</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>0.62</strong> &#8592;----</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.70</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.66</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The summary is telling me that the classifier that ranks best for <strong>precision</strong> is the <strong>AdaBoostClassifier</strong> and the classifier that
+ranks best for <strong>recall</strong> is the <strong>DecisionTreeClassifier</strong>. The take-away is:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>If I wanted to be sure that <strong>I&#8217;m missing the few positive samples possible</strong> I&#8217;d look for the <strong>highest recall</strong> classifier</p>
+</li>
+<li>
+<p>If I wanted to be sure that <strong>I&#8217;m getting a true positive sample every time</strong> I&#8217;d look for the <strong>highest precision</strong> classifier</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>And finally, <strong>this whole evaluation process has serve to realize that I need to go back to square one</strong>, because as I mentioned
+earlier <strong>NONE of the classifiers is performing decently</strong>, so I need to <strong>check where I can improve the process</strong>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Enrich data</p>
+</li>
+<li>
+<p>Increase/Decrease samples</p>
+</li>
+<li>
+<p>Tune classifiers to get the desired precision/recall/accuracy&#8230;&#8203;</p>
+</li>
+</ul>
 </div>
 </div>
 </div>
@@ -298,6 +507,9 @@
 </li>
 <li>
 <p><a href="https://towardsdatascience.com/accuracy-precision-recall-or-f1-331fb37c5cb9">Accuracy, precision, recall or F1</a>: article in towardsdatascience.com</p>
+</li>
+<li>
+<p><a href="/files/2021/03/ml_confusion_matrix/SAMUR.ipynb">SAMUR.ipynb Jupyter Notebook</a></p>
 </li>
 </ul>
 </div>
