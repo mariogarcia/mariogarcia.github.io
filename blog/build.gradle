@@ -2,7 +2,7 @@ buildscript {
   repositories {
       maven { url "http://dl.bintray.com/calmdev/gradle-plugins" }
       maven { url "https://dl.bintray.com/grooviter/maven" }
-      mavenLocal()
+      maven { url "https://plugins.gradle.org/m2/" }
       mavenCentral()
       jcenter()
   }
