@@ -4,8 +4,644 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2021-03-16T13:05:07Z</updated>
+    <updated>2021-03-24T12:07:02Z</updated>
     <id>tag:null,2021:03</id>
+    <entry>
+        <title>Model Evaluation: Decision functions</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2021/03/ml_decision_functions.html"/>
+        <updated>2021-03-24T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2021/03/ml_decision_functions.html</id>
+        <category term="ds"/>
+        <category term="ml"/>
+        <category term="python"/>
+        <content type="html">
+            &lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2021/03/ml_confusion_matrix/header.png&quot; alt=&quot;ConfusionAndMatrix&quot; width=&quot;100%&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Another tool for evaluating a classifier are decision functions. Decision functions &lt;strong&gt;show you how a given classifier is classifying positive and negative samples depending on a specific threshold value&lt;/strong&gt;. Knowing the threshold and the score of each sample can help you deciding whether or not to raise or decrease the threshold in order to vary the classification behavior towards recall or precision.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;decision_functions_and_threshold&quot;&gt;Decision functions and threshold&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;span class=&quot;image right&quot;&gt;&lt;img src=&quot;/img/2021/03/ml_decision_functions/decision_function.png&quot; alt=&quot;decision function&quot; height=&quot;300&quot;&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In a binary classification problem a decision function could be thought as &lt;strong&gt;a simple function deciding whether a given sample  lies within the positive class or the negative class&lt;/strong&gt;. They do that by having a threshold value as a reference, anything above or equal to that threshold is considered positive, whereas anything below that threshold is considered negative.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;taiwanese_bankruptcy&quot;&gt;Taiwanese bankruptcy&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I&amp;#8217;m using a &lt;a href=&quot;https://www.kaggle.com/fedesoriano/company-bankruptcy-prediction&quot;&gt;dataset from Kaggle&lt;/a&gt; about company bankruptcy
+prediction. After preparing the data, I came up with these three classifiers parametrized:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
+
+log = LogisticRegression(C=1).fit(X_train, y_train)
+knn = KNeighborsClassifier(n_neighbors=5).fit(X_train, y_train)
+dtc = DecisionTreeClassifier(max_depth=6).fit(X_train, y_train)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I&amp;#8217;d like to know how they perform in terms of precision-recall scoring depending on different classification thresholds.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sidebarblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;&lt;strong&gt;missing decision_function&lt;/strong&gt; in some Scikit-learn classifiers&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Normally there are two functions sklearn classifiers use in order to return the score and the threshold used to classify
+samples:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;decision_function&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;predict_proba&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;While &lt;strong&gt;decision_function&lt;/strong&gt; returns only the score that represents how probable is that the sample is a positive match, the
+&lt;strong&gt;predict_proba&lt;/strong&gt; returns both the pobability that the sample is a positive match and the probability that it&amp;#8217;s a negative
+match.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;Not all classifiers support both functions&lt;/strong&gt; so it&amp;#8217;s important to bear that in mind when evaluating a set of different classifiers
+alltogether.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I&amp;#8217;d like to get predicted values from every classifier, to because I&amp;#8217;m not sure which one has &lt;strong&gt;decision_function&lt;/strong&gt; or &lt;strong&gt;predict_proba&lt;/strong&gt; I&amp;#8217;ve created the following function to help me out:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;decion_function vs predict_proba&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;def get_y_predict(clsf, samples):
+    dec_fun = getattr(clsf, &apos;decision_function&apos;, None)
+    if dec_fun:
+        return clsf.decision_function(samples)
+    else:
+        # only interested in positive score
+        return clsf.predict_proba(samples)[0:, 1:]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now I&amp;#8217;m drawing what is called a precision-recall curve, which shows how the precision and the recall evolve depending on
+the threshold value used each time. This can help me choosing a specific threshold depending on what I&amp;#8217;d like to prioritize
+precision or recall, or maybe a balance between both.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In this example, I&amp;#8217;d like to highlight where precision and recall values are for a threshold of 0.75:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Plotting precision-recall curve&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import numpy as np
+from sklearn.metrics import precision_recall_curve
+import matplotlib.pyplot as plt
+
+# threshold I&apos;m interested in
+THRESHOLD = 0.75
+
+plt.figure()
+_, ax = plt.subplots(1, 3, figsize=(15, 4))
+cols  = 0
+
+# plotting precision-recall charts
+for classifier in lst:
+    y_predict = get_y_predict(classifier, X_test)
+    precision, recall, thresholds = precision_recall_curve(y_test, y_predict)
+    ax[cols].title.set_text(str(type(classifier).__name__))
+    ax[cols].set(xlabel=&apos;Precision&apos;, ylabel=&apos;Recall&apos;)
+    ax[cols].step(precision, recall)
+    criteria = np.argmin(np.abs(thresholds - THRESHOLD))
+    ax[cols].plot(precision[criteria], recall[criteria], &apos;o&apos;, c=&apos;r&apos;)
+    ax[cols].grid(axis=&apos;both&apos;, linestyle=&apos;--&apos;, c=&apos;#cccccc&apos;)
+    cols+=1
+
+plt.show()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Here is how the precision-recall curves look like for every classifier:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2021/03/ml_decision_functions/precision_recall_curves.png&quot; alt=&quot;precision recall curves&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now, keeping in mind that &lt;strong&gt;here my goal is to maximize the recall&lt;/strong&gt;, that is, to detect as many companies likely to go down to avoid investing in them for example, the classifier I&amp;#8217;d choose is the &lt;strong&gt;KNeighborsClassifier as it reaches the highest recall&lt;/strong&gt;. In these charts &lt;strong&gt;I&amp;#8217;ve highlighted with a red point the precision/recall point for a threshold of 0.75&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock note&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-note&quot; title=&quot;Note&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+&lt;strong&gt;Also notice that the ideal point for a classifier would be the top right at (1.0, 1.0)&lt;/strong&gt; that is the point where precision and recall would be maximized.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;resources&quot;&gt;Resources&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.kaggle.com/fedesoriano/company-bankruptcy-prediction&quot;&gt;Taiwanese bankrupcy prediction&lt;/a&gt;: from Kaggle&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://towardsdatascience.com/fine-tuning-a-classifier-in-scikit-learn-66e048c21e65&quot;&gt;Fine Tuning Scikit-learn classifiers Article&lt;/a&gt;: from Towards Data Science site&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;/files/2021/03/ml_decision_functions/taiwan.ipynb&quot;&gt;taiwan.ipynb&lt;/a&gt;: Taiwanese companies bankruptcy notebook&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
+    <entry>
+        <title>Event Sourcing 101</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2021/03/event_sourcing.html"/>
+        <updated>2021-03-16T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2021/03/event_sourcing.html</id>
+        <category term="architecture"/>
+        <category term="event sourcing"/>
+        <content type="html">
+            &lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2021/03/event_sourcing/event_sourcing.png&quot; alt=&quot;event sourcing&quot; width=&quot;100%&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;what_is_event_sourcing&quot;&gt;What is event sourcing ?&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As opposed to store the last state of your data, event sourcing &lt;strong&gt;stores every and each change your system had in the form of events&lt;/strong&gt;. And &lt;strong&gt;event&lt;/strong&gt; is just a piece of information with some contraints:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Contains only the fragment of your system that has changed&lt;/strong&gt;. Usually called &lt;strong&gt;&quot;a fact&quot;&lt;/strong&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;It will &lt;strong&gt;never ever change&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;It should have some information that determines &lt;strong&gt;when it happened&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Imagine the typical bank application where you can see your balance. The bank doesn&amp;#8217;t stores only the balance, it turns out the bank stores every single deposit, withdrawal, commission&amp;#8230;&amp;#8203;etc and when you ask for your balance, it &lt;strong&gt;adds up all the previous events&lt;/strong&gt; that happened to your account and only shows you the computed result or &lt;strong&gt;the projection of these events&lt;/strong&gt;. Imagine a given&amp;#8217;s account transactions:&lt;/p&gt;
+&lt;/div&gt;
+&lt;table class=&quot;tableblock frame-all grid-all stretch&quot;&gt;
+&lt;caption class=&quot;title&quot;&gt;Table 1. Bank transactions&lt;/caption&gt;
+&lt;colgroup&gt;
+&lt;col style=&quot;width: 25%;&quot;&gt;
+&lt;col style=&quot;width: 25%;&quot;&gt;
+&lt;col style=&quot;width: 25%;&quot;&gt;
+&lt;col style=&quot;width: 25%;&quot;&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;ACCOUNT_ID&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;TYPE&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;AMOUNT&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;DATE&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;AGG1000&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;DEPOSIT&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;20000&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2021-12-12 10:23:23&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;AGG1000&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;WITHDRAWAL&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;20000&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2021-12-12 10:24:23&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And the &lt;strong&gt;current state&lt;/strong&gt; of the account, which &lt;strong&gt;is a summary, projection or aggregate of what has happened until now&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;table class=&quot;tableblock frame-all grid-all stretch&quot;&gt;
+&lt;caption class=&quot;title&quot;&gt;Table 2. Account Projection&lt;/caption&gt;
+&lt;colgroup&gt;
+&lt;col style=&quot;width: 25%;&quot;&gt;
+&lt;col style=&quot;width: 25%;&quot;&gt;
+&lt;col style=&quot;width: 25%;&quot;&gt;
+&lt;col style=&quot;width: 25%;&quot;&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;ACCOUNT_ID&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;HOLDER NAME&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;BALANCE&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;DATE&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;AGG1000&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Silvester Stallone&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;0&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2021-12-12 10:24:23&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;That type of behavior allows the bank to be able to answer &lt;strong&gt;WHY&lt;/strong&gt; your balance is 0 EUR and not 20000 EUR. They can show you all
+the facts that lead to that state of your balance:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;This balance projection normally is materialized at some point&lt;/strong&gt; to avoid querying the event store every time&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;The event store notifies when a new event has happened&lt;/strong&gt; in order to take action by interested parties, like updating the projection tables.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Lets review the most important features of event-sourcing.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;temporal_queries&quot;&gt;Temporal queries&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Storing events with a timestamp allows the system to aggregate all events until a given moment of time to see the state
+of the system at that moment. That is very valuable for different scenarios:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;span class=&quot;image right&quot;&gt;&lt;img src=&quot;/img/2021/03/event_sourcing/temporal_query.png&quot; alt=&quot;temporal query&quot; width=&quot;30%&quot;&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Auditing&lt;/strong&gt;: We need to know who did what at a given date&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Forensic Analysis&lt;/strong&gt;: something went wrong with the system and we need to figure out why&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;UX review&lt;/strong&gt;: UX wanted to know how the system looked like at a given point in time&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&amp;#8230;&amp;#8203;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;complete_rebuild&quot;&gt;Complete rebuild&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As I mentioned earlier, you don&amp;#8217;t normally aggregate all events to show a client&amp;#8217;s current balance. You create a projection
+of some of the events, in another table for faster access. That could give you a faster response to the client. But something can go wrong with your data:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Some of your derived &lt;strong&gt;data is lost&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The process that created the balance projection &lt;strong&gt;messed some data&lt;/strong&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;You need to change the schema&lt;/strong&gt; of your projection table&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;span class=&quot;image left&quot;&gt;&lt;img src=&quot;/img/2021/03/event_sourcing/complete_rebuild.png&quot; alt=&quot;temporal query&quot; width=&quot;30%&quot;&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In in this type of scenarios where an event-store can give you the opportunity to read all the events that lead to the current state and rebuild your system state.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;data_freedomkind_of&quot;&gt;Data freedom&amp;#8230;&amp;#8203;kind of&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Well it has to do with the previous feature. &lt;strong&gt;If you need to change the schema of your projections&lt;/strong&gt;, instead of keeping
+a migration log of those changes, you can just delete the projection table, create a new one, and then read the event store
+again to populate the new table.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This feature &lt;strong&gt;can give you a lot of flexibility&lt;/strong&gt; to answer on-demand bussiness requirements faster.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;building_blocks&quot;&gt;Building blocks&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To build a system based on event sourcing there&amp;#8217;re a few building blocks worth mentioning:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Events&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Event Store&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Event Bus&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Snapshots&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;events&quot;&gt;Events&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The event is the basic unit of information. An event should have a specific structure:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Event ID&lt;/strong&gt;: a unique id of the event in the system&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Aggregate ID&lt;/strong&gt;: links a set of events in the system&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Version&lt;/strong&gt;: The version field helps determining which is the natural order of events of a given aggregate&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Type of event&lt;/strong&gt;: what represents the event&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Data&lt;/strong&gt;: facts that represents a change in the system&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;MetaData&lt;/strong&gt;: (Optional) normally contains security related data&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Date&lt;/strong&gt;: when the event was created&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Here&amp;#8217;s an example of different events in a banking system:&lt;/p&gt;
+&lt;/div&gt;
+&lt;table class=&quot;tableblock frame-all grid-all stretch&quot;&gt;
+&lt;caption class=&quot;title&quot;&gt;Table 3. An event store entry example&lt;/caption&gt;
+&lt;colgroup&gt;
+&lt;col style=&quot;width: 4.7619%;&quot;&gt;
+&lt;col style=&quot;width: 4.7619%;&quot;&gt;
+&lt;col style=&quot;width: 4.7619%;&quot;&gt;
+&lt;col style=&quot;width: 19.0476%;&quot;&gt;
+&lt;col style=&quot;width: 22.8571%;&quot;&gt;
+&lt;col style=&quot;width: 22.8571%;&quot;&gt;
+&lt;col style=&quot;width: 20.9525%;&quot;&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;ID&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;AGREGATE_ID&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;V&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;TYPE&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;DATA&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;METADATA&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;DATE&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;EV00001&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;AGG1000&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;1&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;ACCOUNT_CREATED&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;{&quot;name&quot;: &quot;Silvester S.&quot;}&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;{&quot;createdBy&quot;: &quot;Peter Correlo&quot;}&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2021-12-12 10:23:23&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;EV00002&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;AGG1000&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;DEPOSIT_MADE&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;{&quot;amount&quot;: 20400 }&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;{&quot;createdBy&quot;: &quot;Peter Correlo&quot;}&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2021-12-12 10:24:23&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;EV00003&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;AGG1000&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;3&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;WITHDRAWAL_MADE&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;{&quot;amount&quot;: 300 }&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;{&quot;createdBy&quot;: &quot;Peter Correlo&quot;}&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2021-12-12 10:25:23&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;EV00003&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;AGG1000&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;4&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;BANK_COMMISSION&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;{&quot;amount&quot;: 1 }&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;{&quot;createdBy&quot;: &quot;System&quot;}&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2021-12-12 10:26:23&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;EV00004&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;AGG2000&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;1&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;ACCOUNT_CREATED&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;{&quot;name&quot;: &quot;Arnold S.&quot;}&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;{&quot;createdBy&quot;: &quot;Peter Correlo&quot;}&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2021-12-12 10:28:23&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;EV00005&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;AGG2000&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;DEPOSIT_MADE&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;{&quot;amount&quot;: 10000 }&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;{&quot;createdBy&quot;: &quot;Peter Correlo&quot;}&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;2021-12-12 10:30:23&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;All events have a &lt;strong&gt;different EVENT_ID&lt;/strong&gt; but some of them are linked to the same &lt;strong&gt;AGGREGATE_ID&lt;/strong&gt;. In this system the aggregate ID represents the account, meaning all these events are applied to a given account.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;quoteblock&quot;&gt;
+&lt;blockquote&gt;
+In general an aggregate is the link a given set of events are related to
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;event_store&quot;&gt;Event store&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The event store could use any type of storage as long as it is capable of:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Appending events&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Querying those events&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Notifying of new events&lt;/strong&gt; appended.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;appending_events&quot;&gt;Appending events&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As events can&amp;#8217;t be ever modified, they form an endless stream that go forward in time. An even store should be capable of appending new events to that
+stream without allowing any update to the stream.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;querying&quot;&gt;Querying&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Queries should allow the user to restore the system state. Normally the state is rebuild through aggregates, so you should be able to query events by the
+aggregate they are linked to. Some examples could be:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;List all events linked to a given aggregate&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;List all events linked to a given aggregate from a given point in time to another point in time&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;But you can expand the type of queries to all the attributes we defined earlier for a given event:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;List by event type&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;List events between dates&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&amp;#8230;&amp;#8203; you name it&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;notifying&quot;&gt;Notifying&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;span class=&quot;image right&quot;&gt;&lt;img src=&quot;/img/2021/03/event_sourcing/event_bus.png&quot; alt=&quot;event_bus&quot; width=&quot;30%&quot;&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;An event-store can notify to listeners when a new event has been appended to the store. That means that either the event-store has some built-in event-bus or
+the event-store can be connected to an event-bus which eventually will dispatch the event to the desired listener.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;event_bus&quot;&gt;Event bus&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;One of the features of an event store is to be able to notify of every new event added. This is very useful for other systems
+interested in all events or maybe some specific types of events. That can be done with a built-in messaging system or an outside piece of software.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A very common component in event-sourcing applications is &lt;a href=&quot;https://www.confluent.io/blog/event-sourcing-using-apache-kafka/&quot;&gt;Apache Kafka&lt;/a&gt;, specially because it can also be used as event-store due to its unique architecture and
+features. But there&amp;#8217;re many other projects perfect for sending messages to third party interested listeners. Some examples could be &lt;a href=&quot;https://www.rabbitmq.com/&quot;&gt;RabbitMQ&lt;/a&gt;, &lt;a href=&quot;https://nats.io/&quot;&gt;NATS.io&lt;/a&gt;, &lt;a href=&quot;https://pulsar.apache.org/&quot;&gt;Pulsar&lt;/a&gt; &amp;#8230;&amp;#8203;etc&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;and_many_more&quot;&gt;&amp;#8230;&amp;#8203;and many more&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This article is just an introduction of some of the most basic definitions regarding event-sourcing. However there are a few other topics worth studying before building any event-sourcing system:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Hexagonal architecture&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;DDD&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;CQRS&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Kafka as it&amp;#8217;s very often used as event-store&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;resources&quot;&gt;Resources&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.eventstore.com/blog/what-is-event-sourcing&quot; class=&quot;bare&quot;&gt;https://www.eventstore.com/blog/what-is-event-sourcing&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://martinfowler.com/eaaDev/EventSourcing.html&quot; class=&quot;bare&quot;&gt;https://martinfowler.com/eaaDev/EventSourcing.html&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://kickstarter.engineering/event-sourcing-made-simple-4a2625113224&quot; class=&quot;bare&quot;&gt;https://kickstarter.engineering/event-sourcing-made-simple-4a2625113224&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.confluent.io/blog/event-sourcing-using-apache-kafka/&quot;&gt;Using Apache Kafka for event sourcing&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
     <entry>
         <title>Model Evaluation: Confusion Matrix</title>
         <author>
