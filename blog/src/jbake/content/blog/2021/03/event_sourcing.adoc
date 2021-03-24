@@ -1,0 +1,231 @@
+= Event Sourcing 101
+@marioggar
+2021-03-16
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: architecture, event sourcing
+:idprefix:
+:summary: Some very basic concepts on event sourcing
+:summary_image: computer_science.png
+
+image::2021/03/event_sourcing/event_sourcing.png[alt="event sourcing", align="center", width="100%"]
+
+== What is event sourcing ?
+
+As opposed to store the last state of your data, event sourcing **stores every and each change your system had in the form of events**. And **event** is just a piece of information with some contraints:
+
+- **Contains only the fragment of your system that has changed**. Usually called **"a fact"**.
+- It will **never ever change**
+- It should have some information that determines **when it happened**
+
+Imagine the typical bank application where you can see your balance. The bank doesn't stores only the balance, it turns out the bank stores every single deposit, withdrawal, commission...etc and when you ask for your balance, it **adds up all the previous events** that happened to your account and only shows you the computed result or **the projection of these events**. Imagine a given's account transactions:
+
+.Bank transactions
+|===
+|ACCOUNT_ID | TYPE | AMOUNT | DATE
+
+|AGG1000
+|DEPOSIT
+| 20000
+| 2021-12-12 10:23:23
+
+|AGG1000
+|WITHDRAWAL
+| 20000
+| 2021-12-12 10:24:23
+|===
+
+And the **current state** of the account, which **is a summary, projection or aggregate of what has happened until now**:
+
+.Account Projection
+|===
+|ACCOUNT_ID | HOLDER NAME | BALANCE | DATE
+
+|AGG1000
+| Silvester Stallone
+| 0
+| 2021-12-12 10:24:23
+|===
+
+That type of behavior allows the bank to be able to answer **WHY** your balance is 0 EUR and not 20000 EUR. They can show you all
+the facts that lead to that state of your balance:
+
+- **This balance projection normally is materialized at some point** to avoid querying the event store every time
+- **The event store notifies when a new event has happened** in order to take action by interested parties, like updating the projection tables.
+
+Lets review the most important features of event-sourcing.
+
+=== Temporal queries
+
+Storing events with a timestamp allows the system to aggregate all events until a given moment of time to see the state
+of the system at that moment. That is very valuable for different scenarios:
+
+image:2021/03/event_sourcing/temporal_query.png[alt="temporal query", width="30%", role="right"]
+
+- **Auditing**: We need to know who did what at a given date
+- **Forensic Analysis**: something went wrong with the system and we need to figure out why
+- **UX review**: UX wanted to know how the system looked like at a given point in time
+- ...
+
+=== Complete rebuild
+
+As I mentioned earlier, you don't normally aggregate all events to show a client's current balance. You create a projection
+of some of the events, in another table for faster access. That could give you a faster response to the client. But something can go wrong with your data:
+
+- Some of your derived **data is lost**
+- The process that created the balance projection **messed some data**. 
+- **You need to change the schema** of your projection table
+
+image:2021/03/event_sourcing/complete_rebuild.png[alt="temporal query", width="30%", role="left"]
+
+In in this type of scenarios where an event-store can give you the opportunity to read all the events that lead to the current state and rebuild your system state.
+
+
+=== Data freedom...kind of
+
+Well it has to do with the previous feature. **If you need to change the schema of your projections**, instead of keeping
+a migration log of those changes, you can just delete the projection table, create a new one, and then read the event store
+again to populate the new table.
+
+This feature **can give you a lot of flexibility** to answer on-demand bussiness requirements faster.
+
+== Building blocks
+
+To build a system based on event sourcing there're a few building blocks worth mentioning:
+
+- Events
+- Event Store
+- Event Bus
+- Snapshots
+
+=== Events
+
+The event is the basic unit of information. An event should have a specific structure:
+
+- **Event ID**: a unique id of the event in the system
+- **Aggregate ID**: links a set of events in the system
+- **Version**: The version field helps determining which is the natural order of events of a given aggregate
+- **Type of event**: what represents the event
+- **Data**: facts that represents a change in the system
+- **MetaData**: (Optional) normally contains security related data
+- **Date**: when the event was created
+
+Here's an example of different events in a banking system:
+
+.An event store entry example
+[cols="5%,5%,5%,20%,24%,24%,22%"]
+|===
+|ID | AGREGATE_ID | V | TYPE | DATA | METADATA | DATE
+
+|EV00001
+|AGG1000
+| 1
+|ACCOUNT_CREATED
+|{"name": "Silvester S."}
+|{"createdBy": "Peter Correlo"}
+| 2021-12-12 10:23:23
+
+|EV00002
+|AGG1000
+| 2
+|DEPOSIT_MADE
+|{"amount": 20400 }
+|{"createdBy": "Peter Correlo"}
+| 2021-12-12 10:24:23
+
+|EV00003
+|AGG1000
+| 3
+|WITHDRAWAL_MADE
+|{"amount": 300 }
+|{"createdBy": "Peter Correlo"}
+| 2021-12-12 10:25:23
+
+|EV00003
+|AGG1000
+| 4
+|BANK_COMMISSION
+|{"amount": 1 }
+|{"createdBy": "System"}
+| 2021-12-12 10:26:23
+
+|EV00004
+|AGG2000
+| 1
+|ACCOUNT_CREATED
+|{"name": "Arnold S."}
+|{"createdBy": "Peter Correlo"}
+| 2021-12-12 10:28:23
+
+|EV00005
+|AGG2000
+| 2
+|DEPOSIT_MADE
+|{"amount": 10000 }
+|{"createdBy": "Peter Correlo"}
+| 2021-12-12 10:30:23
+
+|===
+
+All events have a **different EVENT_ID** but some of them are linked to the same **AGGREGATE_ID**. In this system the aggregate ID represents the account, meaning all these events are applied to a given account. 
+
+[quote]
+In general an aggregate is the link a given set of events are related to
+
+=== Event store
+
+The event store could use any type of storage as long as it is capable of:
+
+- **Appending events**
+- **Querying those events**
+- **Notifying of new events** appended.
+
+==== Appending events
+
+As events can't be ever modified, they form an endless stream that go forward in time. An even store should be capable of appending new events to that
+stream without allowing any update to the stream.
+
+==== Querying
+
+Queries should allow the user to restore the system state. Normally the state is rebuild through aggregates, so you should be able to query events by the
+aggregate they are linked to. Some examples could be:
+
+- List all events linked to a given aggregate
+- List all events linked to a given aggregate from a given point in time to another point in time
+
+But you can expand the type of queries to all the attributes we defined earlier for a given event:
+
+- List by event type
+- List events between dates
+- ... you name it
+
+==== Notifying
+
+image:2021/03/event_sourcing/event_bus.png[alt="event_bus", width="30%", role="right"]
+
+An event-store can notify to listeners when a new event has been appended to the store. That means that either the event-store has some built-in event-bus or
+the event-store can be connected to an event-bus which eventually will dispatch the event to the desired listener.
+
+=== Event bus
+
+One of the features of an event store is to be able to notify of every new event added. This is very useful for other systems
+interested in all events or maybe some specific types of events. That can be done with a built-in messaging system or an outside piece of software.
+
+A very common component in event-sourcing applications is https://www.confluent.io/blog/event-sourcing-using-apache-kafka/[Apache Kafka], specially because it can also be used as event-store due to its unique architecture and
+features. But there're many other projects perfect for sending messages to third party interested listeners. Some examples could be https://www.rabbitmq.com/[RabbitMQ], https://nats.io/[NATS.io], https://pulsar.apache.org/[Pulsar] ...etc
+
+== ...and many more
+
+This article is just an introduction of some of the most basic definitions regarding event-sourcing. However there are a few other topics worth studying before building any event-sourcing system:
+
+- Hexagonal architecture
+- DDD
+- CQRS
+- Kafka as it's very often used as event-store
+
+== Resources
+
+- https://www.eventstore.com/blog/what-is-event-sourcing
+- https://martinfowler.com/eaaDev/EventSourcing.html
+- https://kickstarter.engineering/event-sourcing-made-simple-4a2625113224
+- https://www.confluent.io/blog/event-sourcing-using-apache-kafka/[Using Apache Kafka for event sourcing]

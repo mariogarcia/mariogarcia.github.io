@@ -1,0 +1,117 @@
+= Model Evaluation: Decision functions
+@marioggar
+2021-03-24
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: ds, ml, python
+:sources: ../../../../../../../sources/2020/11/ml_key_concepts
+:idprefix:
+:summary: Decision functions and precision/recall curves
+:summary_image: machine_learning.png
+
+image::2021/03/ml_confusion_matrix/header.png[alt="ConfusionAndMatrix", align="center", width="100%"]
+
+Another tool for evaluating a classifier are decision functions. Decision functions **show you how a given classifier is classifying positive and negative samples depending on a specific threshold value**. Knowing the threshold and the score of each sample can help you deciding whether or not to raise or decrease the threshold in order to vary the classification behavior towards recall or precision.
+
+== Decision functions and threshold
+
+image:2021/03/ml_decision_functions/decision_function.png[alt="decision function", height="300", role="right"]
+
+In a binary classification problem a decision function could be thought as **a simple function deciding whether a given sample  lies within the positive class or the negative class**. They do that by having a threshold value as a reference, anything above or equal to that threshold is considered positive, whereas anything below that threshold is considered negative.
+
+== Taiwanese bankruptcy
+
+I'm using a https://www.kaggle.com/fedesoriano/company-bankruptcy-prediction[dataset from Kaggle] about company bankruptcy
+prediction. After preparing the data, I came up with these three classifiers parametrized:
+
+[source, python]
+----
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
+
+log = LogisticRegression(C=1).fit(X_train, y_train)
+knn = KNeighborsClassifier(n_neighbors=5).fit(X_train, y_train)
+dtc = DecisionTreeClassifier(max_depth=6).fit(X_train, y_train)
+----
+
+I'd like to know how they perform in terms of precision-recall scoring depending on different classification thresholds.
+
+.**missing decision_function** in some Scikit-learn classifiers
+****
+Normally there are two functions sklearn classifiers use in order to return the score and the threshold used to classify
+samples:
+
+- decision_function
+- predict_proba
+
+While **decision_function** returns only the score that represents how probable is that the sample is a positive match, the
+**predict_proba** returns both the pobability that the sample is a positive match and the probability that it's a negative
+match.
+
+**Not all classifiers support both functions** so it's important to bear that in mind when evaluating a set of different classifiers
+alltogether.
+****
+
+I'd like to get predicted values from every classifier, to because I'm not sure which one has **decision_function** or **predict_proba** I've created the following function to help me out:
+
+[source, python]
+.decion_function vs predict_proba
+----
+def get_y_predict(clsf, samples):
+    dec_fun = getattr(clsf, 'decision_function', None)
+    if dec_fun:
+        return clsf.decision_function(samples)
+    else:
+        # only interested in positive score
+        return clsf.predict_proba(samples)[0:, 1:]
+----
+
+Now I'm drawing what is called a precision-recall curve, which shows how the precision and the recall evolve depending on
+the threshold value used each time. This can help me choosing a specific threshold depending on what I'd like to prioritize
+precision or recall, or maybe a balance between both.
+
+In this example, I'd like to highlight where precision and recall values are for a threshold of 0.75:
+
+[source, python]
+.Plotting precision-recall curve
+----
+import numpy as np
+from sklearn.metrics import precision_recall_curve
+import matplotlib.pyplot as plt
+
+# threshold I'm interested in
+THRESHOLD = 0.75
+
+plt.figure()
+_, ax = plt.subplots(1, 3, figsize=(15, 4))
+cols  = 0
+
+# plotting precision-recall charts
+for classifier in lst:
+    y_predict = get_y_predict(classifier, X_test)
+    precision, recall, thresholds = precision_recall_curve(y_test, y_predict)
+    ax[cols].title.set_text(str(type(classifier).__name__))
+    ax[cols].set(xlabel='Precision', ylabel='Recall')
+    ax[cols].step(precision, recall)
+    criteria = np.argmin(np.abs(thresholds - THRESHOLD))
+    ax[cols].plot(precision[criteria], recall[criteria], 'o', c='r')
+    ax[cols].grid(axis='both', linestyle='--', c='#cccccc')
+    cols+=1
+
+plt.show()
+----
+
+Here is how the precision-recall curves look like for every classifier:
+
+image::2021/03/ml_decision_functions/precision_recall_curves.png[alt="precision recall curves", align="center"]
+
+Now, keeping in mind that **here my goal is to maximize the recall**, that is, to detect as many companies likely to go down to avoid investing in them for example, the classifier I'd choose is the **KNeighborsClassifier as it reaches the highest recall**. In these charts **I've highlighted with a red point the precision/recall point for a threshold of 0.75**.
+
+NOTE: **Also notice that the ideal point for a classifier would be the top right at (1.0, 1.0)** that is the point where precision and recall would be maximized. 
+
+== Resources
+
+- https://www.kaggle.com/fedesoriano/company-bankruptcy-prediction[Taiwanese bankrupcy prediction]: from Kaggle
+- https://towardsdatascience.com/fine-tuning-a-classifier-in-scikit-learn-66e048c21e65[Fine Tuning Scikit-learn classifiers Article]: from Towards Data Science site
+- link:/files/2021/03/ml_decision_functions/taiwan.ipynb[taiwan.ipynb]: Taiwanese companies bankruptcy notebook
