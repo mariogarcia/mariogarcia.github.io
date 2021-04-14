@@ -1,0 +1,207 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="/feed.xml" class="icon fa-rss">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><div class="metadata"><em class="fa fa-calendar-o"></em><b>2021-03-25</b></div><h1>Model Evaluation: ROC Curve and AUC</h1></header><yieldScaped><div id="preamble">
+<div class="sectionbody">
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2021/03/ml_confusion_matrix/header.png" alt="ConfusionAndMatrix" width="100%">
+</div>
+</div>
+<div class="paragraph">
+<p>In the <a href="/blog/2021/03/ml_decision_functions.html">previous entry</a> I was using decision functions and precision-recall curves to decide which threshold and classifier would serve best to my goal, whether it was precision or recall. In this occassion
+I&#8217;m using the ROC curves.</p>
+</div>
+<div class="paragraph">
+<p>The ROC curves (ROC stands for <strong>R</strong>eceiver <strong>O</strong>perating <strong>C</strong>haracteristic) represents the performance of a binary classifier. It shows the relationship between false positive rates (FPR) and true positive rates (TPR). The idea is to choose the classifier that maximizes the TPR. Unlike the precision-recall curves <strong>the ideal point in a ROC curve is at the top left corner</strong> where the TPR is maximized and the FPR is minimized.</p>
+</div>
+<div class="paragraph">
+<p>Here I&#8217;m using the same dataset as in the <a href="/blog/2021/03/ml_decision_functions.html">previous article</a> and extending the Jupyter notebook with the ROC curves and AUC. There&#8217;re a couple of things to keep in mind to understand the following example:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>I&#8217;m using a list of previously trained classifiers (<strong>lst</strong> variable)</p>
+</li>
+<li>
+<p>I&#8217;m using a custom function that uses different decision functions whether they&#8217;re available or not (<strong>get_y_predict(&#8230;&#8203;)</strong>)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>If you have any doubts about where the example came from you can check <a href="/files/2021/03/ml_roc_curve/taiwan.ipynb">the notebook source</a> code at any time.</p>
+</div>
+<div class="listingblock">
+<div class="title">ROC</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import matplotlib.pyplot as plt
+from sklearn.metrics import roc_curve, auc
+
+plt.figure(figsize=(5, 5))
+
+for classifier in lst:
+    classifier_name      = type(classifier).__name__
+
+    # calculating prediction using decision_function() or predict_proba()
+    y_predict            = get_y_predict(classifier, X_test)
+
+    # calculating the roc curves
+    fpr, tpr, thresholds = roc_curve(y_test, y_predict)
+    plt.plot(fpr, tpr, label=classifier_name)
+
+plt.plot([0, 1], [0, 1], c='green', linestyle='--')
+plt.legend(loc="lower right", fontsize=11)
+plt.show()</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As you can see it seems that the KNeighbors classifier is maximizing the TPR.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2021/03/ml_roc_curve/roc_comparison.png" alt="ROC curves">
+</div>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">The diagonal random line</div>
+<div class="paragraph">
+<p>In the previous and following charts, I&#8217;ve drawn a diagonal line that represents the separation between
+bad and good classifiers.</p>
+</div>
+<div class="paragraph">
+<p>This means that any classifier performing close to it, can be considered as good as random, sometimes it could perform
+better than random others less than random. <strong>You should be always be looking for classifiers performing consistenly above that line</strong>.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>To establish the goodness of classifier is oftenly used as a mesure the AUC or <strong>A</strong>rea <strong>U</strong>nder the <strong>C</strong>urve. <strong>The greater the area under the ROC curve the better is the classifier</strong> maximizing the TPR. The KNN classifier was the closest to the upper left corner, lets see the AUC to reasure our suspicions.</p>
+</div>
+<div class="listingblock">
+<div class="title">AUC</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import matplotlib.pyplot as plt
+from sklearn.metrics import roc_curve, auc
+
+plt.figure()
+_, ax = plt.subplots(1, 3, figsize=(15, 4))
+cols  = 0
+
+for classifier in lst:
+    classifier_name      = type(classifier).__name__
+    # getting decision function prediction
+    y_predict            = get_y_predict(classifier, X_test)
+
+    # calculating FPR and TPR
+    fpr, tpr, thresholds = roc_curve(y_test, y_predict)
+
+    # calculating the area under the curve
+    roc_auc              = auc(fpr, tpr)
+
+    ax[cols].title.set_text("{0} (AUC={1:.2f})".format(classifier_name, roc_auc))
+    ax[cols].set(xlabel='False Positive Rate', ylabel='True Positive Rate')
+    ax[cols].plot(fpr, tpr, c='k')
+    ax[cols].plot([0, 1], [0, 1], c='k', linestyle='--')
+    ax[cols].fill_between(fpr, tpr, hatch='\\', color='none', edgecolor='#cccccc')
+    cols+=1
+
+plt.show()</code></pre>
+</div>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2021/03/ml_roc_curve/auc_comparison.png" alt="AUC comparison">
+</div>
+</div>
+<div class="paragraph">
+<p>As we see in the picture, the KNN is the one having the biggest AUC rate (0.96), so according to that it&#8217;s the one performing the best.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="resources">Resources</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://towardsdatascience.com/understanding-auc-roc-curve-68b2303cc9c5">Understanding the AUC ROC curve</a>: from TowardsDataScience.com</p>
+</li>
+<li>
+<p><a href="/files/2021/03/ml_roc_curve/taiwan.ipynb">taiwan.ipynb</a>: Taiwanese companies bankruptcy notebook</p>
+</li>
+</ul>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>
