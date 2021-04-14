@@ -1,0 +1,500 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="/feed.xml" class="icon fa-rss">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><div class="metadata"><em class="fa fa-calendar-o"></em><b>2021-04-14</b></div><h1>Pandas and regex extraction</h1></header><yieldScaped><div id="preamble">
+<div class="sectionbody">
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2021/04/nlp/nlp_header.png" alt="nlp" width="100%">
+</div>
+</div>
+<div class="paragraph">
+<p>Data is everywhere, <strong>even in plain text</strong>, some examples could be:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>an <strong>article</strong> from a newspaper</p>
+</li>
+<li>
+<p>a <strong>paper</strong> from research</p>
+</li>
+<li>
+<p>a <strong>blog post</strong></p>
+</li>
+<li>
+<p>&#8230;&#8203;</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In these cases we could still extract information out of it. One popular way of extracting information from this
+scenario is by using regular expressions aka <strong>regex</strong>. Combining regular expressions and Python Pandas' DataFrame
+we can manage to extract a lot information from a given unstructured text.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="use_case_blog_entries">Use case: blog entries</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To practice a little bit this concept, I&#8217;m extracting the text from all my previous blog post entries. In the end I&#8217;d like
+to be able to extract from the article&#8217;s text:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The <strong>title</strong></p>
+</li>
+<li>
+<p>The <strong>publishing Date</strong></p>
+</li>
+<li>
+<p>The <strong>length</strong> of the text</p>
+</li>
+<li>
+<p>and <strong>the text itself</strong> of course</p>
+</li>
+</ul>
+</div>
+<div class="sect2">
+<h3 id="downloading_articles">Downloading articles</h3>
+<div class="paragraph">
+<p>I&#8217;m downloading all my blog articles using <a href="https://docs.python-requests.org/en/master/">request</a> and <a href="https://www.crummy.com/software/BeautifulSoup/">beautifulsoup</a>. The <strong>request</strong> library is an http client whereas <strong>beautifulsoup</strong> is used to parse the received html and make queries to the parsed html using css selectors.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Because the purpose of this exercise is to extract information using regex I&#8217;m not using the full potential of beautifulsoup to get specific parts from the article&#8217;s html.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>First I need to get the full list of articles from the <strong>archive.html</strong> page:</p>
+</div>
+<div class="listingblock">
+<div class="title">downloading the list of links</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import requests
+from bs4 import BeautifulSoup
+
+ROOT_URL = "https://mariogarcia.github.io"
+
+# getting all articles links list from archive.html page
+article_list_page = requests.get("{}/archive.html".format(ROOT_URL))
+
+# parsing the html with the 'html.parser'
+parsed_page       = BeautifulSoup(article_list_page.content, 'html.parser')
+
+# using css selector 'ul.group a' to get all links
+links             = ["{}{}".format(ROOT_URL, entry['href']) for entry in parsed_page.select('ul.group a')]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then I&#8217;m looping through all links to download all articles' texts and create a Pandas' DataFrame:</p>
+</div>
+<div class="listingblock">
+<div class="title">gathering all articles texts</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import pandas as pd
+
+# downloads html from the link passed as parameter
+# and extracts the article's full text
+def extract_text(link):
+    page       = requests.get(link)
+    html       = BeautifulSoup(page.content, 'html.parser')
+    paragraphs = [p.get_text() for p in html.select('div#main')]
+
+    return " ".join(paragraphs)
+
+# gather all articles text
+texts = [extract_text(link) for link in links]
+
+# create source dataframe
+df_src= pd.DataFrame(texts, columns=['text'])
+
+# show texts
+df_src.head()</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="extract_features">Extract features</h3>
+<div class="paragraph">
+<p>Lets take a first look to see how documents are estructured to see which patterns I&#8217;m going to use to extract important information such as:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Title</p>
+</li>
+<li>
+<p>Date</p>
+</li>
+<li>
+<p>Text</p>
+</li>
+<li>
+<p>Text length</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="title">taking a sample from the dataframe</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">sample = df_src.loc[1, 'text']
+sample</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can check the beggining of the document:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>\n\n\n\n\n                                WORKING IN PROGRESS\n                             - POST\n
+\n\n\n\n                                        Twitter\n
+\n\n\n\n\n                                        Twitter\n
+\n\n\n\n\n                                        Github\n                                    \n\n\n\n2021-03-25Model Evaluation:
+ROC Curve and AUC\n\n\n\n\n\n\n\nIn the previous entry I was using decision functions and precision-recall curves to decide which
+threshold and classifier would serve best to my goal, whether it was precision or recall...</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="plain_python_regular_expressions">Plain Python Regular expressions</h3>
+<div class="paragraph">
+<p>Now I&#8217;m using the Python <a href="https://docs.python.org/3/library/re.html">re</a> module to start testing some regex to extract <strong>title</strong> and <strong>date</strong> afterwards from every entry in the dataframe</p>
+</div>
+<div class="listingblock">
+<div class="title">using plain python</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import re
+
+# regular expression with two groups -&gt; ()
+matcher = re.search('.*(\d{4}-\d{2}-\d{2})(.*)\n*', sample)
+title   = matcher.group(2)
+date    = matcher.group(1)
+
+# showing extracted data
+title, date</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>which outputs:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>('Model Evaluation: ROC Curve and AUC', '2021-03-25')</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Next step is to clean the text:</p>
+</div>
+<div class="listingblock">
+<div class="title">cleaning the text</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import re
+
+# cleaning up excess of \n and \s from text
+sample = re.sub('[\n|\s]{1,}', ' ', sample)
+
+# removing everything until the title (included) from article's text
+text   = re.sub('^.*{} '.format(title), '', sample)
+
+# show cleaned text
+text</code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>In the previous entry I was using decision functions and precision-recall curves to decide which threshold and
+classifier would serve best to my goal, whether it was precision or recall. In this occassion I’m using the ROC curves.
+The ROC curves (ROC stands for Receiver Operating Characteristic) repres...</pre>
+</div>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Copying source dataframe</div>
+<div class="paragraph">
+<p>The code in this article is part of a Jupyter Notebook. Because I&#8217;d like to avoid downloading over and over again
+the articles each time I need to change something, at some point I&#8217;m copying the initial dataframe.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python"># copying source dataframe to avoid downloading every time
+df = df_src.copy()</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>From that point on, I&#8217;m using the copy to do anything else.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="using_dataframe_and_regex_together">Using Dataframe and regex together</h3>
+<div class="paragraph">
+<p>Next step is using Pandas DataFrame to extract features from every entry.</p>
+</div>
+<div class="paragraph">
+<p>a) First is to <strong>extract the length</strong> of every entry&#8217;s text</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">df['len'] = df['text'].str.len()
+
+df.head()</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>b) Then extracting the <strong>title and date</strong> from every entry using the previous regex</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python"># extract_all will create a new DataFrame with the extracted data
+title_date_df = df['text']\
+    .str.extractall(r'.*(?P&lt;date&gt;\d{4}-\d{2}-\d{2})(?P&lt;title&gt;.*)[\n]*')\
+    .reset_index(col_fill='origin')
+
+# getting rid of not_matching and NaN entries
+title_date_df = title_date_df.where(title_date_df['match'] == 0).dropna()
+
+# merging both dataframes
+df = pd.merge(df, title_date_df, left_index=True, right_on='level_0')
+
+# removing not relevant columns once both dataframes are merged
+df = df.drop(['level_0', 'match'], axis=1)
+
+# now we got our data included in the original dataframe
+df.head()</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>c) <strong>reordering columns</strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">df = df[['title', 'date', 'len', 'text']]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>d) <strong>Cleaning article&#8217;s text</strong>: getting rid of headers, title, dates, return characters</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python"># removing return characters
+df['text'] = df['text'].str.replace('[\n|\s]{1,}', ' ', regex=True)
+
+# removing everything before the text
+df['text'] = df.apply(lambda x: re.sub('^.*{} '.format(x['title']), '', x['text']).strip(), axis=1)
+
+df.head()</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>At this point we&#8217;ve got the following dataframe:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2021/04/nlp/pandas_and_regex_features.png" alt="after extracting features" width="70%">
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="sorting_dataframe_using_new_features">Sorting DataFrame using new features</h3>
+<div class="paragraph">
+<p>Although it looks promising the truth is that the data we&#8217;ve collected so far are in their string representation,
+we need to convert text lengths to integers and the text dates to real dates in order to do a fair sorting
+of the data</p>
+</div>
+<div class="paragraph">
+<p>a) Converting <strong>length and date to integer and dates</strong> respectively</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python"># converting dates strings to datetimes
+df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d')
+
+# converting strings to integers
+df['len']  = df['len'].astype(int)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>b) sorting <strong>by length</strong> (descending)</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">df.sort_values('len', ascending=False).head()</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>c) sorting <strong>by date</strong> (ascending)</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">df.sort_values('date').head()</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="extracting_more_information_from_text">Extracting more information from text</h3>
+<div class="paragraph">
+<p>a) Which is the mean number of characters per article ?</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">mean = df['text'].str.len().mean()
+
+print("mean length of characters per article: {0:.2f}".format(mean))</code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>mean length of characters per article: 5580.05</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>a) Which is the <strong>mean number of digits per article</strong> ?</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">mean = df['text'].str.findall(r'\d').apply(lambda x: len(x)).mean()
+
+print("mean length of digits per article {0:.2f}".format(mean))</code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>mean length of digits per article 101.13</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>c) Which are the <strong>adjectives</strong> following the expression <strong>'the most'</strong> ?</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">adjectives = df['text']\
+    .str.extractall(r'the most (?P&lt;most&gt;\w{1,})')\
+    .reset_index(level=1)\
+    .loc[:, 'most']\
+    .unique()
+
+adjectives</code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>array(['important', 'basic', 'suitable', 'frequent', 'significant',
+       'convenient', 'used', 'representative', 'popular', 'common',
+       'famous', 'on', 'appropriate', 'about'], dtype=object)</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>There&#8217;re plenty of functions in the <a href="https://pandas.pydata.org/docs/reference/series.html">Pandas&#8217;s Series api</a> to deal with strings (Look for Series.str.XXX functions). Now is up to you keep practicing and mastering them.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="resources">Resources</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="/files/2021/04/nlp/nlp_pandas_regex_extraction.ipynb">nlp_pandas_regex_extraction.ipynb</a>: Article&#8217;s Jupyter Notebook source</p>
+</li>
+<li>
+<p><a href="https://pandas.pydata.org/docs/reference/series.html">Pandas Series' API</a></p>
+</li>
+<li>
+<p><a href="https://www.crummy.com/software/BeautifulSoup/">Beautifulsoup site</a></p>
+</li>
+<li>
+<p><a href="https://www.dataquest.io/blog/web-scraping-python-using-beautiful-soup/">Beautifulsoup example</a>: An extensive tutorial on how to use Beautifulsoup</p>
+</li>
+<li>
+<p><a href="https://docs.python.org/3/library/re.html">Regular expressions in Python</a>: official documentation</p>
+</li>
+<li>
+<p><a href="http://jonathansoma.com/lede/foundations/classes/pandas%20columns%20and%20functions/apply-a-function-to-every-row-in-a-pandas-dataframe/">Jonathan Soma&#8217;s blog</a>: On how to apply a function to every row in a pandas dataframe</p>
+</li>
+</ul>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>

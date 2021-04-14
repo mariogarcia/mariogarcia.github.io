@@ -4,8 +4,447 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2021-04-14T07:11:29Z</updated>
+    <updated>2021-04-14T22:11:43Z</updated>
     <id>tag:null,2021:04</id>
+    <entry>
+        <title>Pandas and regex extraction</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2021/04/nlp_pandas_regex_extraction.html"/>
+        <updated>2021-04-14T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2021/04/nlp_pandas_regex_extraction.html</id>
+        <category term="nlp"/>
+        <category term="pandas"/>
+        <content type="html">
+            &lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2021/04/nlp/nlp_header.png&quot; alt=&quot;nlp&quot; width=&quot;100%&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Data is everywhere, &lt;strong&gt;even in plain text&lt;/strong&gt;, some examples could be:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;an &lt;strong&gt;article&lt;/strong&gt; from a newspaper&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;a &lt;strong&gt;paper&lt;/strong&gt; from research&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;a &lt;strong&gt;blog post&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&amp;#8230;&amp;#8203;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In these cases we could still extract information out of it. One popular way of extracting information from this
+scenario is by using regular expressions aka &lt;strong&gt;regex&lt;/strong&gt;. Combining regular expressions and Python Pandas&apos; DataFrame
+we can manage to extract a lot information from a given unstructured text.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;use_case_blog_entries&quot;&gt;Use case: blog entries&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To practice a little bit this concept, I&amp;#8217;m extracting the text from all my previous blog post entries. In the end I&amp;#8217;d like
+to be able to extract from the article&amp;#8217;s text:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;The &lt;strong&gt;title&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The &lt;strong&gt;publishing Date&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The &lt;strong&gt;length&lt;/strong&gt; of the text&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;and &lt;strong&gt;the text itself&lt;/strong&gt; of course&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;downloading_articles&quot;&gt;Downloading articles&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I&amp;#8217;m downloading all my blog articles using &lt;a href=&quot;https://docs.python-requests.org/en/master/&quot;&gt;request&lt;/a&gt; and &lt;a href=&quot;https://www.crummy.com/software/BeautifulSoup/&quot;&gt;beautifulsoup&lt;/a&gt;. The &lt;strong&gt;request&lt;/strong&gt; library is an http client whereas &lt;strong&gt;beautifulsoup&lt;/strong&gt; is used to parse the received html and make queries to the parsed html using css selectors.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock warning&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-warning&quot; title=&quot;Warning&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+Because the purpose of this exercise is to extract information using regex I&amp;#8217;m not using the full potential of beautifulsoup to get specific parts from the article&amp;#8217;s html.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;First I need to get the full list of articles from the &lt;strong&gt;archive.html&lt;/strong&gt; page:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;downloading the list of links&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import requests
+from bs4 import BeautifulSoup
+
+ROOT_URL = &quot;https://mariogarcia.github.io&quot;
+
+# getting all articles links list from archive.html page
+article_list_page = requests.get(&quot;{}/archive.html&quot;.format(ROOT_URL))
+
+# parsing the html with the &apos;html.parser&apos;
+parsed_page       = BeautifulSoup(article_list_page.content, &apos;html.parser&apos;)
+
+# using css selector &apos;ul.group a&apos; to get all links
+links             = [&quot;{}{}&quot;.format(ROOT_URL, entry[&apos;href&apos;]) for entry in parsed_page.select(&apos;ul.group a&apos;)]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then I&amp;#8217;m looping through all links to download all articles&apos; texts and create a Pandas&apos; DataFrame:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;gathering all articles texts&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import pandas as pd
+
+# downloads html from the link passed as parameter
+# and extracts the article&apos;s full text
+def extract_text(link):
+    page       = requests.get(link)
+    html       = BeautifulSoup(page.content, &apos;html.parser&apos;)
+    paragraphs = [p.get_text() for p in html.select(&apos;div#main&apos;)]
+
+    return &quot; &quot;.join(paragraphs)
+
+# gather all articles text
+texts = [extract_text(link) for link in links]
+
+# create source dataframe
+df_src= pd.DataFrame(texts, columns=[&apos;text&apos;])
+
+# show texts
+df_src.head()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;extract_features&quot;&gt;Extract features&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Lets take a first look to see how documents are estructured to see which patterns I&amp;#8217;m going to use to extract important information such as:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Title&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Date&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Text&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Text length&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;taking a sample from the dataframe&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;sample = df_src.loc[1, &apos;text&apos;]
+sample&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We can check the beggining of the document:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;literalblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;\n\n\n\n\n                                WORKING IN PROGRESS\n                             - POST\n
+\n\n\n\n                                        Twitter\n
+\n\n\n\n\n                                        Twitter\n
+\n\n\n\n\n                                        Github\n                                    \n\n\n\n2021-03-25Model Evaluation:
+ROC Curve and AUC\n\n\n\n\n\n\n\nIn the previous entry I was using decision functions and precision-recall curves to decide which
+threshold and classifier would serve best to my goal, whether it was precision or recall...&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;plain_python_regular_expressions&quot;&gt;Plain Python Regular expressions&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now I&amp;#8217;m using the Python &lt;a href=&quot;https://docs.python.org/3/library/re.html&quot;&gt;re&lt;/a&gt; module to start testing some regex to extract &lt;strong&gt;title&lt;/strong&gt; and &lt;strong&gt;date&lt;/strong&gt; afterwards from every entry in the dataframe&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;using plain python&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import re
+
+# regular expression with two groups -&amp;gt; ()
+matcher = re.search(&apos;.*(\d{4}-\d{2}-\d{2})(.*)\n*&apos;, sample)
+title   = matcher.group(2)
+date    = matcher.group(1)
+
+# showing extracted data
+title, date&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;which outputs:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;literalblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;(&apos;Model Evaluation: ROC Curve and AUC&apos;, &apos;2021-03-25&apos;)&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Next step is to clean the text:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;cleaning the text&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import re
+
+# cleaning up excess of \n and \s from text
+sample = re.sub(&apos;[\n|\s]{1,}&apos;, &apos; &apos;, sample)
+
+# removing everything until the title (included) from article&apos;s text
+text   = re.sub(&apos;^.*{} &apos;.format(title), &apos;&apos;, sample)
+
+# show cleaned text
+text&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;literalblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;In the previous entry I was using decision functions and precision-recall curves to decide which threshold and
+classifier would serve best to my goal, whether it was precision or recall. In this occassion I’m using the ROC curves.
+The ROC curves (ROC stands for Receiver Operating Characteristic) repres...&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sidebarblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Copying source dataframe&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The code in this article is part of a Jupyter Notebook. Because I&amp;#8217;d like to avoid downloading over and over again
+the articles each time I need to change something, at some point I&amp;#8217;m copying the initial dataframe.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;# copying source dataframe to avoid downloading every time
+df = df_src.copy()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;From that point on, I&amp;#8217;m using the copy to do anything else.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;using_dataframe_and_regex_together&quot;&gt;Using Dataframe and regex together&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Next step is using Pandas DataFrame to extract features from every entry.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;a) First is to &lt;strong&gt;extract the length&lt;/strong&gt; of every entry&amp;#8217;s text&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;df[&apos;len&apos;] = df[&apos;text&apos;].str.len()
+
+df.head()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;b) Then extracting the &lt;strong&gt;title and date&lt;/strong&gt; from every entry using the previous regex&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;# extract_all will create a new DataFrame with the extracted data
+title_date_df = df[&apos;text&apos;]\
+    .str.extractall(r&apos;.*(?P&amp;lt;date&amp;gt;\d{4}-\d{2}-\d{2})(?P&amp;lt;title&amp;gt;.*)[\n]*&apos;)\
+    .reset_index(col_fill=&apos;origin&apos;)
+
+# getting rid of not_matching and NaN entries
+title_date_df = title_date_df.where(title_date_df[&apos;match&apos;] == 0).dropna()
+
+# merging both dataframes
+df = pd.merge(df, title_date_df, left_index=True, right_on=&apos;level_0&apos;)
+
+# removing not relevant columns once both dataframes are merged
+df = df.drop([&apos;level_0&apos;, &apos;match&apos;], axis=1)
+
+# now we got our data included in the original dataframe
+df.head()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;c) &lt;strong&gt;reordering columns&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;df = df[[&apos;title&apos;, &apos;date&apos;, &apos;len&apos;, &apos;text&apos;]]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;d) &lt;strong&gt;Cleaning article&amp;#8217;s text&lt;/strong&gt;: getting rid of headers, title, dates, return characters&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;# removing return characters
+df[&apos;text&apos;] = df[&apos;text&apos;].str.replace(&apos;[\n|\s]{1,}&apos;, &apos; &apos;, regex=True)
+
+# removing everything before the text
+df[&apos;text&apos;] = df.apply(lambda x: re.sub(&apos;^.*{} &apos;.format(x[&apos;title&apos;]), &apos;&apos;, x[&apos;text&apos;]).strip(), axis=1)
+
+df.head()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;At this point we&amp;#8217;ve got the following dataframe:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2021/04/nlp/pandas_and_regex_features.png&quot; alt=&quot;after extracting features&quot; width=&quot;70%&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;sorting_dataframe_using_new_features&quot;&gt;Sorting DataFrame using new features&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Although it looks promising the truth is that the data we&amp;#8217;ve collected so far are in their string representation,
+we need to convert text lengths to integers and the text dates to real dates in order to do a fair sorting
+of the data&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;a) Converting &lt;strong&gt;length and date to integer and dates&lt;/strong&gt; respectively&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;# converting dates strings to datetimes
+df[&apos;date&apos;] = pd.to_datetime(df[&apos;date&apos;], format=&apos;%Y-%m-%d&apos;)
+
+# converting strings to integers
+df[&apos;len&apos;]  = df[&apos;len&apos;].astype(int)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;b) sorting &lt;strong&gt;by length&lt;/strong&gt; (descending)&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;df.sort_values(&apos;len&apos;, ascending=False).head()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;c) sorting &lt;strong&gt;by date&lt;/strong&gt; (ascending)&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;df.sort_values(&apos;date&apos;).head()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;extracting_more_information_from_text&quot;&gt;Extracting more information from text&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;a) Which is the mean number of characters per article ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;mean = df[&apos;text&apos;].str.len().mean()
+
+print(&quot;mean length of characters per article: {0:.2f}&quot;.format(mean))&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;literalblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;mean length of characters per article: 5580.05&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;a) Which is the &lt;strong&gt;mean number of digits per article&lt;/strong&gt; ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;mean = df[&apos;text&apos;].str.findall(r&apos;\d&apos;).apply(lambda x: len(x)).mean()
+
+print(&quot;mean length of digits per article {0:.2f}&quot;.format(mean))&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;literalblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;mean length of digits per article 101.13&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;c) Which are the &lt;strong&gt;adjectives&lt;/strong&gt; following the expression &lt;strong&gt;&apos;the most&apos;&lt;/strong&gt; ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;adjectives = df[&apos;text&apos;]\
+    .str.extractall(r&apos;the most (?P&amp;lt;most&amp;gt;\w{1,})&apos;)\
+    .reset_index(level=1)\
+    .loc[:, &apos;most&apos;]\
+    .unique()
+
+adjectives&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;literalblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;array([&apos;important&apos;, &apos;basic&apos;, &apos;suitable&apos;, &apos;frequent&apos;, &apos;significant&apos;,
+       &apos;convenient&apos;, &apos;used&apos;, &apos;representative&apos;, &apos;popular&apos;, &apos;common&apos;,
+       &apos;famous&apos;, &apos;on&apos;, &apos;appropriate&apos;, &apos;about&apos;], dtype=object)&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There&amp;#8217;re plenty of functions in the &lt;a href=&quot;https://pandas.pydata.org/docs/reference/series.html&quot;&gt;Pandas&amp;#8217;s Series api&lt;/a&gt; to deal with strings (Look for Series.str.XXX functions). Now is up to you keep practicing and mastering them.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;resources&quot;&gt;Resources&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;/files/2021/04/nlp/nlp_pandas_regex_extraction.ipynb&quot;&gt;nlp_pandas_regex_extraction.ipynb&lt;/a&gt;: Article&amp;#8217;s Jupyter Notebook source&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://pandas.pydata.org/docs/reference/series.html&quot;&gt;Pandas Series&apos; API&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.crummy.com/software/BeautifulSoup/&quot;&gt;Beautifulsoup site&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.dataquest.io/blog/web-scraping-python-using-beautiful-soup/&quot;&gt;Beautifulsoup example&lt;/a&gt;: An extensive tutorial on how to use Beautifulsoup&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://docs.python.org/3/library/re.html&quot;&gt;Regular expressions in Python&lt;/a&gt;: official documentation&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://jonathansoma.com/lede/foundations/classes/pandas%20columns%20and%20functions/apply-a-function-to-every-row-in-a-pandas-dataframe/&quot;&gt;Jonathan Soma&amp;#8217;s blog&lt;/a&gt;: On how to apply a function to every row in a pandas dataframe&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
     <entry>
         <title>Model Evaluation: Multiclass evaluation</title>
         <author>
