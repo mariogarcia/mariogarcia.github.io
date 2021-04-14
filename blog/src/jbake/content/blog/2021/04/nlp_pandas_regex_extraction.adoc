@@ -1,0 +1,319 @@
+= Pandas and regex extraction
+@marioggar
+2021-04-14
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: nlp, pandas
+:idprefix:
+:summary: Extracting data from unstructured text
+:summary_image: nlp.png
+
+image::2021/04/nlp/nlp_header.png[alt="nlp", align="center", width="100%"]
+
+Data is everywhere, **even in plain text**, some examples could be:
+
+- an **article** from a newspaper
+- a **paper** from research
+- a **blog post**
+- ...
+
+In these cases we could still extract information out of it. One popular way of extracting information from this
+scenario is by using regular expressions aka **regex**. Combining regular expressions and Python Pandas' DataFrame
+we can manage to extract a lot information from a given unstructured text.
+
+== Use case: blog entries
+
+To practice a little bit this concept, I'm extracting the text from all my previous blog post entries. In the end I'd like
+to be able to extract from the article's text: 
+
+- The **title**
+- The **publishing Date**
+- The **length** of the text
+- and **the text itself** of course
+
+=== Downloading articles
+
+I'm downloading all my blog articles using https://docs.python-requests.org/en/master/[request] and https://www.crummy.com/software/BeautifulSoup/[beautifulsoup]. The **request** library is an http client whereas **beautifulsoup** is used to parse the received html and make queries to the parsed html using css selectors. 
+
+WARNING: Because the purpose of this exercise is to extract information using regex I'm not using the full potential of beautifulsoup to get specific parts from the article's html.
+
+First I need to get the full list of articles from the **archive.html** page:
+
+[source, python]
+.downloading the list of links
+----
+import requests
+from bs4 import BeautifulSoup
+
+ROOT_URL = "https://mariogarcia.github.io"
+
+# getting all articles links list from archive.html page
+article_list_page = requests.get("{}/archive.html".format(ROOT_URL))
+
+# parsing the html with the 'html.parser'
+parsed_page       = BeautifulSoup(article_list_page.content, 'html.parser')
+
+# using css selector 'ul.group a' to get all links
+links             = ["{}{}".format(ROOT_URL, entry['href']) for entry in parsed_page.select('ul.group a')]
+----
+
+Then I'm looping through all links to download all articles' texts and create a Pandas' DataFrame:
+
+[source, python]
+.gathering all articles texts
+----
+import pandas as pd
+
+# downloads html from the link passed as parameter
+# and extracts the article's full text
+def extract_text(link):
+    page       = requests.get(link)
+    html       = BeautifulSoup(page.content, 'html.parser')
+    paragraphs = [p.get_text() for p in html.select('div#main')]
+    
+    return " ".join(paragraphs)
+
+# gather all articles text
+texts = [extract_text(link) for link in links]
+
+# create source dataframe
+df_src= pd.DataFrame(texts, columns=['text'])
+
+# show texts
+df_src.head()
+----
+
+=== Extract features
+
+Lets take a first look to see how documents are estructured to see which patterns I'm going to use to extract important information such as:
+
+- Title
+- Date
+- Text
+- Text length
+
+[source, python]
+.taking a sample from the dataframe
+----
+sample = df_src.loc[1, 'text']
+sample
+----
+
+We can check the beggining of the document:
+
+....
+\n\n\n\n\n                                WORKING IN PROGRESS\n                             - POST\n                       
+\n\n\n\n                                        Twitter\n                                  
+\n\n\n\n\n                                        Twitter\n                                  
+\n\n\n\n\n                                        Github\n                                    \n\n\n\n2021-03-25Model Evaluation:
+ROC Curve and AUC\n\n\n\n\n\n\n\nIn the previous entry I was using decision functions and precision-recall curves to decide which
+threshold and classifier would serve best to my goal, whether it was precision or recall...
+....
+
+=== Plain Python Regular expressions
+
+Now I'm using the Python https://docs.python.org/3/library/re.html[re] module to start testing some regex to extract **title** and **date** afterwards from every entry in the dataframe
+
+[source, python]
+.using plain python
+----
+import re
+
+# regular expression with two groups -> ()
+matcher = re.search('.*(\d{4}-\d{2}-\d{2})(.*)\n*', sample)
+title   = matcher.group(2)
+date    = matcher.group(1)
+
+# showing extracted data
+title, date
+----
+
+which outputs:
+
+....
+('Model Evaluation: ROC Curve and AUC', '2021-03-25')
+....
+
+Next step is to clean the text:
+
+[source, python]
+.cleaning the text
+----
+import re
+
+# cleaning up excess of \n and \s from text
+sample = re.sub('[\n|\s]{1,}', ' ', sample)
+
+# removing everything until the title (included) from article's text
+text   = re.sub('^.*{} '.format(title), '', sample)
+
+# show cleaned text
+text
+----
+
+....
+In the previous entry I was using decision functions and precision-recall curves to decide which threshold and 
+classifier would serve best to my goal, whether it was precision or recall. In this occassion I’m using the ROC curves. 
+The ROC curves (ROC stands for Receiver Operating Characteristic) repres...
+....
+
+.Copying source dataframe
+****
+The code in this article is part of a Jupyter Notebook. Because I'd like to avoid downloading over and over again
+the articles each time I need to change something, at some point I'm copying the initial dataframe.
+
+[source, python]
+----
+# copying source dataframe to avoid downloading every time
+df = df_src.copy()
+----
+
+From that point on, I'm using the copy to do anything else.
+****
+
+=== Using Dataframe and regex together
+
+Next step is using Pandas DataFrame to extract features from every entry.
+
+a) First is to **extract the length** of every entry's text
+
+[source, python]
+----
+df['len'] = df['text'].str.len()
+
+df.head()
+----
+
+b) Then extracting the **title and date** from every entry using the previous regex
+
+[source, python]
+----
+# extract_all will create a new DataFrame with the extracted data
+title_date_df = df['text']\
+    .str.extractall(r'.*(?P<date>\d{4}-\d{2}-\d{2})(?P<title>.*)[\n]*')\
+    .reset_index(col_fill='origin')
+
+# getting rid of not_matching and NaN entries
+title_date_df = title_date_df.where(title_date_df['match'] == 0).dropna()
+
+# merging both dataframes
+df = pd.merge(df, title_date_df, left_index=True, right_on='level_0')
+
+# removing not relevant columns once both dataframes are merged
+df = df.drop(['level_0', 'match'], axis=1)
+
+# now we got our data included in the original dataframe
+df.head()
+----
+
+c) **reordering columns**
+
+[source, python]
+----
+df = df[['title', 'date', 'len', 'text']]
+----
+
+d) **Cleaning article's text**: getting rid of headers, title, dates, return characters
+
+[source, python]
+----
+# removing return characters
+df['text'] = df['text'].str.replace('[\n|\s]{1,}', ' ', regex=True)
+
+# removing everything before the text
+df['text'] = df.apply(lambda x: re.sub('^.*{} '.format(x['title']), '', x['text']).strip(), axis=1)
+
+df.head()
+----
+
+At this point we've got the following dataframe:
+
+image::2021/04/nlp/pandas_and_regex_features.png[alt="after extracting features", align="center", width="70%"]
+
+=== Sorting DataFrame using new features
+Although it looks promising the truth is that the data we've collected so far are in their string representation, 
+we need to convert text lengths to integers and the text dates to real dates in order to do a fair sorting
+of the data
+
+a) Converting **length and date to integer and dates** respectively
+
+[source, python]
+----
+# converting dates strings to datetimes
+df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d')
+
+# converting strings to integers
+df['len']  = df['len'].astype(int)
+----
+
+b) sorting **by length** (descending)
+
+[source, python]
+----
+df.sort_values('len', ascending=False).head()
+----
+
+c) sorting **by date** (ascending)
+
+[source, python]
+----
+df.sort_values('date').head()
+----
+
+=== Extracting more information from text
+
+a) Which is the mean number of characters per article ?
+
+[source, python]
+----
+mean = df['text'].str.len().mean()
+
+print("mean length of characters per article: {0:.2f}".format(mean))
+----
+
+....
+mean length of characters per article: 5580.05
+....
+
+a) Which is the **mean number of digits per article** ?
+
+[source, python]
+----
+mean = df['text'].str.findall(r'\d').apply(lambda x: len(x)).mean()
+
+print("mean length of digits per article {0:.2f}".format(mean))
+----
+
+....
+mean length of digits per article 101.13
+....
+
+c) Which are the **adjectives** following the expression **'the most'** ?
+
+[source, python]
+----
+adjectives = df['text']\
+    .str.extractall(r'the most (?P<most>\w{1,})')\
+    .reset_index(level=1)\
+    .loc[:, 'most']\
+    .unique()
+
+adjectives
+----
+
+....
+array(['important', 'basic', 'suitable', 'frequent', 'significant',
+       'convenient', 'used', 'representative', 'popular', 'common',
+       'famous', 'on', 'appropriate', 'about'], dtype=object)
+....
+
+There're plenty of functions in the https://pandas.pydata.org/docs/reference/series.html[Pandas's Series api] to deal with strings (Look for Series.str.XXX functions). Now is up to you keep practicing and mastering them.
+
+== Resources
+
+- link:/files/2021/04/nlp/nlp_pandas_regex_extraction.ipynb[nlp_pandas_regex_extraction.ipynb]: Article's Jupyter Notebook source
+- https://pandas.pydata.org/docs/reference/series.html[Pandas Series' API]
+- https://www.crummy.com/software/BeautifulSoup/[Beautifulsoup site]
+- https://www.dataquest.io/blog/web-scraping-python-using-beautiful-soup/[Beautifulsoup example]: An extensive tutorial on how to use Beautifulsoup
+- https://docs.python.org/3/library/re.html[Regular expressions in Python]: official documentation
+- http://jonathansoma.com/lede/foundations/classes/pandas%20columns%20and%20functions/apply-a-function-to-every-row-in-a-pandas-dataframe/[Jonathan Soma's blog]: On how to apply a function to every row in a pandas dataframe
