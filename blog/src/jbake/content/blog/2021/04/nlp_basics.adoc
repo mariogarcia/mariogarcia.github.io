@@ -1,0 +1,343 @@
+= NLP basics with NLTK
+@marioggar
+2021-04-15
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: nlp, nltk
+:idprefix:
+:summary: Reviewing NLP basics with NLTK
+:summary_image: nlp.png
+
+image::2021/04/nlp/nlp_header.png[alt="nlp", align="center", width="100%"]
+
+In the link:/blog/2021/04/nlp_pandas_regex_extraction.html[previous post] I've started extracting data from text. So far I've used some basic operations like extracting interesting parts with regular expressions, using Pandas dataframes to get some information from it, like the mean of characters, digits per article. Now if I want to get a little bit further and keep getting more information from text, I need to stop and review some important concepts and tasks around NLP.
+
+== NLP
+
+[quote]
+techiques applied for extracting information from the human language using computers
+
+NLP stands for **Natural Language Processing** and it refers to the techiques applied for extracting information from the human language using computers. Natural language can be represented in many forms, in this article I'm only focusing on natural language found in text.
+
+=== Building blocks
+
+Before applying any technique is important to start getting familiar with some of the vocabulary used in NLP tasks: sentences, tokens, and POS.
+
+==== Corpus
+
+[quote]
+A text corpus is a large body of text, normally specialized in a given area of knowledge
+
+A text corpus is a large body of text, normally specialized in a given area of knowledge. Many corpora are designed to contain a careful balance of material in one or more genres. It's important when analyzing a given text to have a related corpus. This corpus may help you, for example, to correct spelling mistakes in the current text.
+
+==== Sentences 
+
+[quote]
+A sentence is a set of words that is complete in itself, typically containing a subject and predicate, conveying a statement, question, exclamation, or command, and consisting of a main clause and sometimes one or more subordinate clauses
+
+To me, the take away idea would be **a set of words that is complete in itself** or **a set of words that has a meaning by itself**. Daily basis we don't think about that, we just know it by looking at it, but in order to help a machine to understand what a sentence is, we need to teach it.
+
+==== Tokens
+
+Tokens as a general rule, are the minimal part of a text. Altough in a initial phase we could think of a token as anything: a word, a digit, even some isolated character, later on we will realize we need to tag those tokens in order to extract some meaning of a given text. For example, if we want to extract the tokens of the following sentence:
+
+[source, python]
+.tokens
+----
+sentence = "Peter says hello to Mary"
+tokens   = sentence.split(' ')
+
+tokens
+----
+
+....
+["Peter", "says", "hello', "to', "Mary"]
+....
+
+These are the tokens extracted from the given text. By theirselves they don't mean much, but as we will se in a moment they could have a given role in the context of the sentence they are part of.
+
+[quote]
+Tokens as a general rule, are the minimal part of a text
+
+==== POS
+
+[quote]
+POS stands for "Parts Of Speech" and tags each token with the role it plays within the context it is found
+
+As I mentioned earlier, tokens may have different roles, in the previous sentence we've got the following tokens: 
+
+....
+["Peter", "says", "hello', "to', "Mary"]
+....
+
+Under the human eye could be clear that **Peter** is a noun and **says** is the verb, but again, that something we've learn from school, and we need to transfer that information to the machine in order to extract that information. That way we may start asking questions like "Who did what ?" or "Which verbs are used in the text?" and so on.
+
+In NLP the task of tagging tokens to specific parts of the speech is called **POS** or **P**arts **O**f **S**peech. And there are libraries like NLTK that will help us doing this.
+
+=== Common Tasks with NLTK
+
+What is NLTK ? https://www.nltk.org/[NLTK] is a platform for building Python programs to work with human language data. It will make it easier to deal with NLP related tasks. First things first, in order to install nltk you can use pip:
+
+[source, shell]
+----
+pip install --upgrade nltk
+----
+
+And then there are a few other utilities required that you need to download in order to be fully functional when analyzing text. Depending on the task at hand you may want to download different packages, I recommend you to take a look to the NLTK documentation. For the time being, it's fine with me downloading the popular packages.
+
+[source, python]
+----
+import nltk
+
+nltk.download('popular')
+----
+
+==== Finding sentences
+
+First step, from a given text, lets get the different sentences composing the text. I'm using a fragment of the https://www.who.int/director-general/speeches/detail/who-director-general-s-opening-remarks-at-the-media-briefing-on-covid-19---11-march-2020[declaration of COVID-19 as pandemic by the OMS] in March 2020:
+
+[source, python]
+----
+text = """Good afternoon.
+
+In the past two weeks, the number of cases of COVID-19 outside China has increased 13-fold, and the number of 
+affected countries has tripled.  
+
+There are now more than 118,000 cases in 114 countries, and 4,291 people have lost their lives. 
+
+Thousands more are fighting for their lives in hospitals.
+
+In the days and weeks ahead, we expect to see the number of cases, the number of deaths, and the number of 
+affected countries climb even higher.
+
+WHO has been assessing this outbreak around the clock and we are deeply concerned both by the alarming levels 
+of spread and severity, and by the alarming levels of inaction.
+
+We have therefore made the assessment that COVID-19 can be characterized as a pandemic."""
+----
+
+[source, python]
+.get sentences out of a given text
+----
+import nltk
+
+sentences = nltk.sent_tokenize(text)
+length    = len(sentences)
+
+print("this fragment has {} sentences".format(length))
+print("first sentence is: \"{}\"".format(sentences[0]))
+----
+
+....
+this fragment has 7 sentences
+first sentence is: "Good afternoon."
+....
+
+==== Counting words
+
+From a given sentence, lets see how many words there are in a sentence:
+
+[source, python]
+----
+words = sentences[0].split(' ')
+length = len(words)
+
+print("words of the first sentence {}".format(words))
+print("the first sentence has {} words".format(length))
+----
+
+....
+words of the first sentence ['Good', 'afternoon.']
+the first sentence has 2 words
+....
+
+Has we'll see in a moment it's different when we just split a sentence into words than splitting a sentence into tokens. **Tokens can add more information to the words**. For example, I know that **'afternoon.'** (with the full stop) it's not a word, it's a word with a point, two different things.
+
+==== Frequency of words
+
+Questions like what is the most common word or the less common word could be answered by creating a frequency distribution. Of course we have to make sure we're counting words with different case as the same like  **'We'** or **'we'**. Therefore we can, for example, to transform all words to lower case.
+
+[source, python]
+.Frequency distribution
+----
+import nltk
+
+# split and lower case
+words = [word.lower() for word in text.split(' ')]
+
+# create frequency distribution with NLTK
+freq  = nltk.FreqDist(words)
+
+# sort by less common and by most common
+
+by_value    = lambda x: x[1]
+freq_tuples = freq.items()
+
+less_common_first = sorted(freq_tuples, key=by_value)
+most_common_first = sorted(freq_tuples, key=by_value, reverse=True)
+
+less_common_first[0], most_common_first[0]
+----
+
+....
+(('good', 1), ('the', 11))
+....
+
+==== Normalization and Stemming
+
+Until this point to get the list of words we've just splitted the text by using. But what if we'd like to know if we are using words with similar roots. In the following sentence I'm using the verb "to want" in different forms. There's a way to detect the different forms of this verb by stemming each token in the sentence.
+
+[source, python]
+----
+sentence  = "I want to do this, and she wants to do that, and they wanted to do otherwise"
+words     = sentence.split(' ')
+words
+----
+
+....
+['I', 'want', 'to', 'do', 'this,', 'and', 'she', 'wants', 'to', 'do', 'that,', 'and', 'they', 'wanted', 'to', 'do', 'otherwise']
+....
+
+We can see how we've got **want**, **wants**, and **wanted** as different tokens. Now applying stemming:
+
+[source, python]
+.stemming
+----
+import nltk
+
+porter = nltk.PorterStemmer()
+
+stemmed_words = [porter.stem(word) for word in words]
+stemmed_words
+----
+
+....
+['i', 'want', 'to', 'do', 'this,', 'and', 'she', 'want', 'to', 'do', 'that,', 'and', 'they', 'want', 'to', 'do', 'otherwis']
+....
+
+We can now do operations like how many times the verb "to want" is used in different forms throughout the sentence:
+
+[source, python]
+----
+import nltk
+
+freq_dist = nltk.FreqDist(stemmed_words)
+count     = freq_dist['want']
+
+print("the verb 'to want' is used {} times in the text".format(count))
+----
+
+....
+the verb 'to want' is used 3 times in the text
+....
+
+Notice that some of the stemmed words has been **corrupted** like **otherwis**. If we'd like to try to do the same but having an output with only valid words we could try **lemmatization**.
+
+==== Lemmatization
+
+Lemmatization goes a step forward than stemmatization, and tries to do the same, but finding a true word found in the context of a valid dictionary or corpus.
+
+[source, python]
+.lemmatizing
+----
+sentence         = "I want to do this, and she wants to do that, and they wanted to do otherwise"
+words            = sentence.split(' ')
+lemmatizer       = nltk.WordNetLemmatizer()
+lemmatized_words = [lemmatizer.lemmatize(word) for word in words]
+
+lemmatized_words
+----
+
+....
+['I', 'want', 'to', 'do', 'this,', 'and', 'she', 'want', 'to', 'do', 'that,', 'and', 'they', 'wanted', 'to', 'do', 
+'otherwise']
+....
+
+Now **otherwise** is respected, but our lemmatizer missed one occurrence of **want**. Nobody is perfect, take into account that in this particular article I'm using a general corpuses for a particular text. There are corpuses created for specific areas of knowledge.
+
+==== Tokenization
+
+Remember how we splitted sentences by using **split()** ? Lets compare how to get the different parts of a sentence by using **split** vs using NLTK tokenization: 
+
+[source, python]
+.words vs tokens
+----
+sentence = "I haven't done that"
+words    = sentence.split(' ')
+tokens   = nltk.word_tokenize(sentence)
+
+print(words)
+print(tokens)
+----
+
+....
+['I', "haven't", 'done', 'that']
+['I', 'have', "n't", 'done', 'that']
+....
+
+Notice that a verb form like **haven't** has **n't**, and **have** because as tokens  **n't** stands for **not** and that could modify the meaning of another token like **have**. 
+
+[quote]
+Tokenization, gets a little bit more context than simple word splitting.
+
+==== Finding POS (Parts of Speech)
+
+Sometimes to know the role of a given token in a sentence is important. Is this token an adjective ? Is it a verb ? In order to extract the roles that a token may have we make use of the POS tagging technique, or parts of speech (POS) tagging.
+
+[source, python]
+.getting roles of red token
+----
+import nltk
+
+sentence = "He went with Red to the red shop"
+tokens   = nltk.word_tokenize(sentence)
+pos_tags = nltk.pos_tag(tokens)
+
+pos_tags
+----
+
+....
+[('He', 'PRP'), ('went', 'VBD'), ('with', 'IN'), ('Red', 'NNP'), ('to', 'TO'), ('the', 'DT'), ('red', 'JJ'), ('shop', 'NN')]
+....
+
+Notice how **Red** is treated as a noun (NNP) whereas **red** is considered as an adjective (NN). We can use this information, for example, to look for nouns, or adjectives...etc. If you'd like to know what a given tag means you can use the function **nltk.help.upenn_tagset(tag_string)**.
+
+[source, python]
+.what a POS means
+----
+import nltk
+
+sentence = "He went with Red to the red shop"
+tokens   = nltk.word_tokenize(sentence)
+pos_tags = nltk.pos_tag(tokens)
+tags     = set([tag[1] for tag in pos_tags])
+
+for tag in tags:
+    print(nltk.help.upenn_tagset(tag)) 
+----
+
+....
+NN: noun, common, singular or mass
+    common-carrier cabbage knuckle-duster Casino afghan shed thermostat
+    investment slide humour falloff slick wind hyena override subhumanity
+    machinist ...
+None
+DT: determiner
+    all an another any both del each either every half la many much nary
+    neither no some such that the them these this those
+None
+TO: "to" as preposition or infinitive marker
+    to
+None
+JJ: adjective or numeral, ordinal
+    third ill-mannered pre-war regrettable oiled calamitous first separable
+    ectoplasmic battery-powered participatory fourth still-to-be-named
+    multilingual multi-disciplinary ...
+...
+....
+
+== Resources
+
+- https://en.wikipedia.org/wiki/Natural_language_processing[NLP definition]: from Wikipedia
+- https://www.nltk.org/[NLTK]: NLP Python Library
+- http://www.nltk.org/book/[NLP with Python]: From the creators of NLTK. Very useful tutorial on how to use NLTK.
