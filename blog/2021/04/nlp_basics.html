@@ -1,0 +1,493 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="/feed.xml" class="icon fa-rss">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><div class="metadata"><em class="fa fa-calendar-o"></em><b>2021-04-15</b></div><h1>NLP basics with NLTK</h1></header><yieldScaped><div id="preamble">
+<div class="sectionbody">
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2021/04/nlp/nlp_header.png" alt="nlp" width="100%">
+</div>
+</div>
+<div class="paragraph">
+<p>In the <a href="/blog/2021/04/nlp_pandas_regex_extraction.html">previous post</a> I&#8217;ve started extracting data from text. So far I&#8217;ve used some basic operations like extracting interesting parts with regular expressions, using Pandas dataframes to get some information from it, like the mean of characters, digits per article. Now if I want to get a little bit further and keep getting more information from text, I need to stop and review some important concepts and tasks around NLP.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="nlp">NLP</h2>
+<div class="sectionbody">
+<div class="quoteblock">
+<blockquote>
+techiques applied for extracting information from the human language using computers
+</blockquote>
+</div>
+<div class="paragraph">
+<p>NLP stands for <strong>Natural Language Processing</strong> and it refers to the techiques applied for extracting information from the human language using computers. Natural language can be represented in many forms, in this article I&#8217;m only focusing on natural language found in text.</p>
+</div>
+<div class="sect2">
+<h3 id="building_blocks">Building blocks</h3>
+<div class="paragraph">
+<p>Before applying any technique is important to start getting familiar with some of the vocabulary used in NLP tasks: sentences, tokens, and POS.</p>
+</div>
+<div class="sect3">
+<h4 id="corpus">Corpus</h4>
+<div class="quoteblock">
+<blockquote>
+A text corpus is a large body of text, normally specialized in a given area of knowledge
+</blockquote>
+</div>
+<div class="paragraph">
+<p>A text corpus is a large body of text, normally specialized in a given area of knowledge. Many corpora are designed to contain a careful balance of material in one or more genres. It&#8217;s important when analyzing a given text to have a related corpus. This corpus may help you, for example, to correct spelling mistakes in the current text.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="sentences">Sentences</h4>
+<div class="quoteblock">
+<blockquote>
+A sentence is a set of words that is complete in itself, typically containing a subject and predicate, conveying a statement, question, exclamation, or command, and consisting of a main clause and sometimes one or more subordinate clauses
+</blockquote>
+</div>
+<div class="paragraph">
+<p>To me, the take away idea would be <strong>a set of words that is complete in itself</strong> or <strong>a set of words that has a meaning by itself</strong>. Daily basis we don&#8217;t think about that, we just know it by looking at it, but in order to help a machine to understand what a sentence is, we need to teach it.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="tokens">Tokens</h4>
+<div class="paragraph">
+<p>Tokens as a general rule, are the minimal part of a text. Altough in a initial phase we could think of a token as anything: a word, a digit, even some isolated character, later on we will realize we need to tag those tokens in order to extract some meaning of a given text. For example, if we want to extract the tokens of the following sentence:</p>
+</div>
+<div class="listingblock">
+<div class="title">tokens</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">sentence = "Peter says hello to Mary"
+tokens   = sentence.split(' ')
+
+tokens</code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>["Peter", "says", "hello', "to', "Mary"]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>These are the tokens extracted from the given text. By theirselves they don&#8217;t mean much, but as we will se in a moment they could have a given role in the context of the sentence they are part of.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+Tokens as a general rule, are the minimal part of a text
+</blockquote>
+</div>
+</div>
+<div class="sect3">
+<h4 id="pos">POS</h4>
+<div class="quoteblock">
+<blockquote>
+POS stands for "Parts Of Speech" and tags each token with the role it plays within the context it is found
+</blockquote>
+</div>
+<div class="paragraph">
+<p>As I mentioned earlier, tokens may have different roles, in the previous sentence we&#8217;ve got the following tokens:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>["Peter", "says", "hello', "to', "Mary"]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Under the human eye could be clear that <strong>Peter</strong> is a noun and <strong>says</strong> is the verb, but again, that something we&#8217;ve learn from school, and we need to transfer that information to the machine in order to extract that information. That way we may start asking questions like "Who did what ?" or "Which verbs are used in the text?" and so on.</p>
+</div>
+<div class="paragraph">
+<p>In NLP the task of tagging tokens to specific parts of the speech is called <strong>POS</strong> or <strong>P</strong>arts <strong>O</strong>f <strong>S</strong>peech. And there are libraries like NLTK that will help us doing this.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="common_tasks_with_nltk">Common Tasks with NLTK</h3>
+<div class="paragraph">
+<p>What is NLTK ? <a href="https://www.nltk.org/">NLTK</a> is a platform for building Python programs to work with human language data. It will make it easier to deal with NLP related tasks. First things first, in order to install nltk you can use pip:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">pip install --upgrade nltk</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And then there are a few other utilities required that you need to download in order to be fully functional when analyzing text. Depending on the task at hand you may want to download different packages, I recommend you to take a look to the NLTK documentation. For the time being, it&#8217;s fine with me downloading the popular packages.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import nltk
+
+nltk.download('popular')</code></pre>
+</div>
+</div>
+<div class="sect3">
+<h4 id="finding_sentences">Finding sentences</h4>
+<div class="paragraph">
+<p>First step, from a given text, lets get the different sentences composing the text. I&#8217;m using a fragment of the <a href="https://www.who.int/director-general/speeches/detail/who-director-general-s-opening-remarks-at-the-media-briefing-on-covid-19---11-march-2020">declaration of COVID-19 as pandemic by the OMS</a> in March 2020:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">text = """Good afternoon.
+
+In the past two weeks, the number of cases of COVID-19 outside China has increased 13-fold, and the number of
+affected countries has tripled.
+
+There are now more than 118,000 cases in 114 countries, and 4,291 people have lost their lives.
+
+Thousands more are fighting for their lives in hospitals.
+
+In the days and weeks ahead, we expect to see the number of cases, the number of deaths, and the number of
+affected countries climb even higher.
+
+WHO has been assessing this outbreak around the clock and we are deeply concerned both by the alarming levels
+of spread and severity, and by the alarming levels of inaction.
+
+We have therefore made the assessment that COVID-19 can be characterized as a pandemic."""</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">get sentences out of a given text</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import nltk
+
+sentences = nltk.sent_tokenize(text)
+length    = len(sentences)
+
+print("this fragment has {} sentences".format(length))
+print("first sentence is: \"{}\"".format(sentences[0]))</code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>this fragment has 7 sentences
+first sentence is: "Good afternoon."</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="counting_words">Counting words</h4>
+<div class="paragraph">
+<p>From a given sentence, lets see how many words there are in a sentence:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">words = sentences[0].split(' ')
+length = len(words)
+
+print("words of the first sentence {}".format(words))
+print("the first sentence has {} words".format(length))</code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>words of the first sentence ['Good', 'afternoon.']
+the first sentence has 2 words</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Has we&#8217;ll see in a moment it&#8217;s different when we just split a sentence into words than splitting a sentence into tokens. <strong>Tokens can add more information to the words</strong>. For example, I know that <strong>'afternoon.'</strong> (with the full stop) it&#8217;s not a word, it&#8217;s a word with a point, two different things.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="frequency_of_words">Frequency of words</h4>
+<div class="paragraph">
+<p>Questions like what is the most common word or the less common word could be answered by creating a frequency distribution. Of course we have to make sure we&#8217;re counting words with different case as the same like  <strong>'We'</strong> or <strong>'we'</strong>. Therefore we can, for example, to transform all words to lower case.</p>
+</div>
+<div class="listingblock">
+<div class="title">Frequency distribution</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import nltk
+
+# split and lower case
+words = [word.lower() for word in text.split(' ')]
+
+# create frequency distribution with NLTK
+freq  = nltk.FreqDist(words)
+
+# sort by less common and by most common
+
+by_value    = lambda x: x[1]
+freq_tuples = freq.items()
+
+less_common_first = sorted(freq_tuples, key=by_value)
+most_common_first = sorted(freq_tuples, key=by_value, reverse=True)
+
+less_common_first[0], most_common_first[0]</code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>(('good', 1), ('the', 11))</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="normalization_and_stemming">Normalization and Stemming</h4>
+<div class="paragraph">
+<p>Until this point to get the list of words we&#8217;ve just splitted the text by using. But what if we&#8217;d like to know if we are using words with similar roots. In the following sentence I&#8217;m using the verb "to want" in different forms. There&#8217;s a way to detect the different forms of this verb by stemming each token in the sentence.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">sentence  = "I want to do this, and she wants to do that, and they wanted to do otherwise"
+words     = sentence.split(' ')
+words</code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>['I', 'want', 'to', 'do', 'this,', 'and', 'she', 'wants', 'to', 'do', 'that,', 'and', 'they', 'wanted', 'to', 'do', 'otherwise']</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can see how we&#8217;ve got <strong>want</strong>, <strong>wants</strong>, and <strong>wanted</strong> as different tokens. Now applying stemming:</p>
+</div>
+<div class="listingblock">
+<div class="title">stemming</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import nltk
+
+porter = nltk.PorterStemmer()
+
+stemmed_words = [porter.stem(word) for word in words]
+stemmed_words</code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>['i', 'want', 'to', 'do', 'this,', 'and', 'she', 'want', 'to', 'do', 'that,', 'and', 'they', 'want', 'to', 'do', 'otherwis']</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can now do operations like how many times the verb "to want" is used in different forms throughout the sentence:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import nltk
+
+freq_dist = nltk.FreqDist(stemmed_words)
+count     = freq_dist['want']
+
+print("the verb 'to want' is used {} times in the text".format(count))</code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>the verb 'to want' is used 3 times in the text</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Notice that some of the stemmed words has been <strong>corrupted</strong> like <strong>otherwis</strong>. If we&#8217;d like to try to do the same but having an output with only valid words we could try <strong>lemmatization</strong>.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="lemmatization">Lemmatization</h4>
+<div class="paragraph">
+<p>Lemmatization goes a step forward than stemmatization, and tries to do the same, but finding a true word found in the context of a valid dictionary or corpus.</p>
+</div>
+<div class="listingblock">
+<div class="title">lemmatizing</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">sentence         = "I want to do this, and she wants to do that, and they wanted to do otherwise"
+words            = sentence.split(' ')
+lemmatizer       = nltk.WordNetLemmatizer()
+lemmatized_words = [lemmatizer.lemmatize(word) for word in words]
+
+lemmatized_words</code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>['I', 'want', 'to', 'do', 'this,', 'and', 'she', 'want', 'to', 'do', 'that,', 'and', 'they', 'wanted', 'to', 'do',
+'otherwise']</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now <strong>otherwise</strong> is respected, but our lemmatizer missed one occurrence of <strong>want</strong>. Nobody is perfect, take into account that in this particular article I&#8217;m using a general corpuses for a particular text. There are corpuses created for specific areas of knowledge.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="tokenization">Tokenization</h4>
+<div class="paragraph">
+<p>Remember how we splitted sentences by using <strong>split()</strong> ? Lets compare how to get the different parts of a sentence by using <strong>split</strong> vs using NLTK tokenization:</p>
+</div>
+<div class="listingblock">
+<div class="title">words vs tokens</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">sentence = "I haven't done that"
+words    = sentence.split(' ')
+tokens   = nltk.word_tokenize(sentence)
+
+print(words)
+print(tokens)</code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>['I', "haven't", 'done', 'that']
+['I', 'have', "n't", 'done', 'that']</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Notice that a verb form like <strong>haven&#8217;t</strong> has <strong>n&#8217;t</strong>, and <strong>have</strong> because as tokens  <strong>n&#8217;t</strong> stands for <strong>not</strong> and that could modify the meaning of another token like <strong>have</strong>.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+Tokenization, gets a little bit more context than simple word splitting.
+</blockquote>
+</div>
+</div>
+<div class="sect3">
+<h4 id="finding_pos_parts_of_speech">Finding POS (Parts of Speech)</h4>
+<div class="paragraph">
+<p>Sometimes to know the role of a given token in a sentence is important. Is this token an adjective ? Is it a verb ? In order to extract the roles that a token may have we make use of the POS tagging technique, or parts of speech (POS) tagging.</p>
+</div>
+<div class="listingblock">
+<div class="title">getting roles of red token</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import nltk
+
+sentence = "He went with Red to the red shop"
+tokens   = nltk.word_tokenize(sentence)
+pos_tags = nltk.pos_tag(tokens)
+
+pos_tags</code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[('He', 'PRP'), ('went', 'VBD'), ('with', 'IN'), ('Red', 'NNP'), ('to', 'TO'), ('the', 'DT'), ('red', 'JJ'), ('shop', 'NN')]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Notice how <strong>Red</strong> is treated as a noun (NNP) whereas <strong>red</strong> is considered as an adjective (NN). We can use this information, for example, to look for nouns, or adjectives&#8230;&#8203;etc. If you&#8217;d like to know what a given tag means you can use the function <strong>nltk.help.upenn_tagset(tag_string)</strong>.</p>
+</div>
+<div class="listingblock">
+<div class="title">what a POS means</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import nltk
+
+sentence = "He went with Red to the red shop"
+tokens   = nltk.word_tokenize(sentence)
+pos_tags = nltk.pos_tag(tokens)
+tags     = set([tag[1] for tag in pos_tags])
+
+for tag in tags:
+    print(nltk.help.upenn_tagset(tag))</code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>NN: noun, common, singular or mass
+    common-carrier cabbage knuckle-duster Casino afghan shed thermostat
+    investment slide humour falloff slick wind hyena override subhumanity
+    machinist ...
+None
+DT: determiner
+    all an another any both del each either every half la many much nary
+    neither no some such that the them these this those
+None
+TO: "to" as preposition or infinitive marker
+    to
+None
+JJ: adjective or numeral, ordinal
+    third ill-mannered pre-war regrettable oiled calamitous first separable
+    ectoplasmic battery-powered participatory fourth still-to-be-named
+    multilingual multi-disciplinary ...
+...</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="resources">Resources</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://en.wikipedia.org/wiki/Natural_language_processing">NLP definition</a>: from Wikipedia</p>
+</li>
+<li>
+<p><a href="https://www.nltk.org/">NLTK</a>: NLP Python Library</p>
+</li>
+<li>
+<p><a href="http://www.nltk.org/book/">NLP with Python</a>: From the creators of NLTK. Very useful tutorial on how to use NLTK.</p>
+</li>
+</ul>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>
