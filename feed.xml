@@ -4,10 +4,457 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2021-04-15T14:41:30Z</updated>
-    <id>tag:null,2021:04</id>
+    <updated>2021-04-21T07:11:21Z</updated>
+    <id>http://github.com/mariogarcia</id>
     <entry>
-        <title>NLP basics with NLTK</title>
+        <title>NLP: Text Similarity</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2021/04/nlp_text_similarity.html"/>
+        <updated>2021-04-18T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2021/04/nlp_text_similarity.html</id>
+        <category term="nlp"/>
+        <category term="nltk"/>
+        <content type="html">
+            &lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2021/04/nlp/nlp_header.png&quot; alt=&quot;nlp&quot; width=&quot;100%&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In NLP, the study of text similarities could be very helpul for tasks such as &lt;strong&gt;looking for similar texts&lt;/strong&gt;, or creating &lt;strong&gt;spell checkers&lt;/strong&gt; replacing a mispelled word by the right one.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;looking_for_similar_texts&quot;&gt;Looking for similar texts&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;In order to measure how similar two different texts are, we usually calculate &quot;the distance&quot; between them&lt;/strong&gt;, how far two text  are to be the same. There are a few &lt;a href=&quot;https://www.nltk.org/_modules/nltk/metrics/distance.html&quot;&gt;distance metrics available in NLTK&lt;/a&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Jaccard distance&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Levenshtein edit-distance&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Jaro-Winkler distance&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&amp;#8230;&amp;#8203;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In this article I&amp;#8217;ll be using the Jaccard distance to calculate the similarity of two texts. I leave some links about the theory behind the Jaccard distance in the resources section.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sidebarblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;SIMILARITY != DISTANCE&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Similarity is not the same as distance. While similarity is how similar a text is compared to another one, distance would be how far is a given text to be the same as another text. They&amp;#8217;re kind two sides of the same story. Mathematically speaking The similarity is 1 minus the distance between both texts, therefore, regarding Jaccard distance / similarity:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;a &lt;strong&gt;similarity of 1&lt;/strong&gt; means both texts are &lt;strong&gt;identical&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;a &lt;strong&gt;similarity of 0&lt;/strong&gt; means both texts have &lt;strong&gt;nothing in common&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;a &lt;strong&gt;distance of 0&lt;/strong&gt; means both texts are &lt;strong&gt;identical&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;a &lt;strong&gt;distance of 1&lt;/strong&gt; means both texts have &lt;strong&gt;nothing in common&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I went to a famous sentences site and I picked a few and mixed them with another few made-up sentences:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;famous sentences&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;sentences = [
+&quot;If you look at what you have in life, you&apos;ll always have more. If you look at what you don&apos;t have in life, you&apos;ll never have enough.&quot;,
+&quot;Are you ok with that situation ?&quot;,
+&quot;If you set your goals ridiculously high and it&apos;s a failure, you will fail above everyone else&apos;s success.&quot;,
+&quot;Life is what happens when you&apos;re busy making other plans.&quot;,
+&quot;I don&apos;t like to wake up early&quot;,
+&quot;Did you do your homework ?&quot;,
+&quot;This sentences is made up to be an outsider&quot;,
+&quot;I don&apos;t like the way he drives&quot;
+]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So I&amp;#8217;m basically going &lt;strong&gt;to compare all of them using the Jaccard similarity&lt;/strong&gt;, which, as I mentioned earlier would be the result of 1 minus the Jaccard distance between two sentences. I&amp;#8217;m calculating Jaccard similarity using &lt;a href=&quot;https://www.nltk.org/_modules/nltk/metrics/distance.html&quot;&gt;NLTK&amp;#8217;s nltk.metrics.distance.jaccard_distance&lt;/a&gt; in the following function:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;jaccard similarity with NLTK&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from nltk.metrics.distance import jaccard_distance
+
+def jaccard_similarity(x, y):
+    return 1 - jaccard_distance(x, y)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The &lt;strong&gt;jaccard_distance&lt;/strong&gt; function receives two sequences (x and y). These sequences could be:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;sequences of characters&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;sequences of tokens&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;sequences of n-grams&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We&amp;#8217;ll see along the next sections how &lt;strong&gt;using one type of sequences or another will impact in the distance result&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;comparing_characters&quot;&gt;Comparing characters&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The first stop it&amp;#8217;s to compare texts by their characters. Our initial asumption is that a given text could be similar to another text if they share enough characters between them. With that in mind we&amp;#8217;re calculating the Jaccard similarity between all sentences, this time &lt;strong&gt;using sequences of characters&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;creating an 8x8 matrix with Jaccard similarities&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import pandas as pd
+
+rows = []
+
+for text_1 in sentences:
+    row = []
+    for text_2 in sentences:
+        sequence_1 = set(text_1) # sequence of characters
+        sequence_2 = set(text_2) # sequence of characters
+
+        row.append(jaccard_similarity(sequence_1, sequence_2))
+    rows.append(row)
+
+df = pd.DataFrame(data=rows, columns=[&quot;sentence_{}&quot;.format(i + 1) for i in range(0,8)])&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Remember that &lt;strong&gt;the arguments for the jaccard_distance function are sequences&lt;/strong&gt;. In this particular case I&amp;#8217;m passing a sequence of characters as a result of invoking &lt;strong&gt;set(string)&lt;/strong&gt; which returns all unique characters contained in the string passed as parameter. As I&amp;#8217;ll point out in the next section, you can also pass a sequence of words (tokens) or n-grams.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I&amp;#8217;m using a &lt;strong&gt;heatmap to highlight which sentences are more similar than others&lt;/strong&gt;. The darker the color the more similar two sentences are. You can see how the main diagonal is comparing a sentence with itself, that&amp;#8217;s why it&amp;#8217;s always 1.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;similarity matrix&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import seaborn as sns
+import numpy as np
+import matplotlib.pyplot as plt
+
+corr_matrix = np.corrcoef(df.T)
+
+plt.figure(figsize=(5, 5))
+sns.heatmap(
+    corr_matrix,
+    cbar=False,
+    annot=True,
+    square=True,
+    linewidths=.5,
+    cmap=&quot;YlGnBu&quot;,
+    xticklabels=df.columns,
+    yticklabels=df.columns)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2021/04/nlp/jaccard_similarities_heatmap.png&quot; alt=&quot;jaccard similarities&quot; width=&quot;40%&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;After looking the heatmap carefully it seems that sentences 5 and 8 have a higher similarity than the rest:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;&quot;I don&apos;t like to wake up early&quot;
+&quot;I don&apos;t like the way he drives&quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Well, both sentences seemed to have similar grammar constructs, yes. But &lt;strong&gt;there&amp;#8217;re other pairs that have a relative high similarity even though it&amp;#8217;s clear that they don&amp;#8217;t have much to do with each other&lt;/strong&gt;. There must be a better way of comparing texts without that much noise.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;comparing_tokens&quot;&gt;Comparing tokens&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As a perfect example of how wrong could be to compare texts using just characters, you can find the following sentences:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from nltk.metrics.distance import jaccard_distance
+
+sentence_1 = &quot;aloha amigo is fun&quot;
+sentence_2 = &quot;I am a go fan&quot;
+
+similarity_by_chars = 1 - jaccard_distance(set(sentence_1), set(sentence_2))
+similarity_by_chars&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;0.5384615384615384&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As I was saying, altough they have nothing to do with each other, still the output raised a 0.53 similarity which makes little sense. On the other hand if we compare both sentences using a sequence of tokens we will demostrate that they have nothing to do with each other:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import nltk
+from nltk.metrics.distance import jaccard_distance
+
+def get_similarity_by_tokens(left, right):
+    tokens_1 = set(nltk.word_tokenize(left)) # sequence of tokens
+    tokens_2 = set(nltk.word_tokenize(right)) # sequence of tokens
+
+    similarity = 1 - jaccard_distance(tokens_1, tokens_2)
+    return similarity
+
+
+similarity_by_tokens = get_similarity_by_tokens(sentence_1, sentence_2)
+similarity_by_tokens&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;0.0&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;However comparing two similar sentences outputs a fair result:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;sentence_1 = &quot;I am a big fan&quot;
+sentence_2 = &quot;I am a tennis fan&quot;
+
+similarity_by_tokens = get_similarity_by_tokens(sentence_1, sentence_2)
+similarity_by_tokens&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;0.6666666666666667&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;comparing_n_grams&quot;&gt;Comparing n-grams&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;A n-gram is a sequence of phonems where n could be any positive number&lt;/strong&gt;. That allows our comparison procedure to be smarter. Instead of comparing all characters, or word by word, in this case, we would like to find certain tuples of common tokens between two sentences. For example, &lt;strong&gt;What are the n-grams of sentence_1, with n=2 using tokens ?&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import nltk
+from nltk.util import ngrams
+
+seq_1 = set(nltk.word_tokenize(&quot;I am a big fan&quot;))
+seq_2 = set(nltk.word_tokenize(&quot;I am a tennis fan&quot;))
+
+list(ngrams(seq_1, n=2)), list(ngrams(seq_2, n=2))&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;n-grams&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;([(&apos;am&apos;, &apos;fan&apos;), (&apos;fan&apos;, &apos;big&apos;), (&apos;big&apos;, &apos;I&apos;), (&apos;I&apos;, &apos;a&apos;)],
+ [(&apos;am&apos;, &apos;tennis&apos;), (&apos;tennis&apos;, &apos;fan&apos;), (&apos;fan&apos;, &apos;I&apos;), (&apos;I&apos;, &apos;a&apos;)])&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Which shows that only 1 out of 4 tuples is the same. Now I&amp;#8217;m creating a function which calculates the similarity using n-grams and jaccard distance:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;def get_similarity_by_ngrams(left, right, n):
+    seq_1 = set(ngrams(nltk.word_tokenize(left), n=n))
+    seq_2 = set(ngrams(nltk.word_tokenize(right), n=n))
+
+    similarity = 1 - jaccard_distance(seq_1, seq_2)
+    return similarity&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And apply it to the previous sentences:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;sentence_1 = &quot;I am a big fan&quot;
+sentence_2 = &quot;I am a tennis fan&quot;
+
+similarity_by_tokens = get_similarity_by_ngrams(sentence_1, sentence_2, n=2)
+similarity_by_tokens&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;0.33333333333333337&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Which outputs something I would expect.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In this section, we&amp;#8217;ve tried different strategies of comparing texts, we started comparing characters, then moving to tokens, and finally with n-grams. The overall idea, is that every step we took the higher was the normalization of the comparison. &lt;strong&gt;With characters we had a lot of noise&lt;/strong&gt; trying to find similar sentences and as we went through the other to types, we managed to reduce the noise by a lot. In the end &lt;strong&gt;n-grams and specially the n parameter could reduce the noise as a form of normalization&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;quoteblock&quot;&gt;
+&lt;blockquote&gt;
+n-grams and specially the n parameter could be used as a form of normalization
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Before moving forward, lets show the heatmap of the beginning using n-grams (n=2):&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2021/04/nlp/jaccard_similarities_heatmap_with_ngrams.png&quot; alt=&quot;jaccard similarities&quot; width=&quot;40%&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;Now it&amp;#8217;s pretty clear&lt;/strong&gt; that the only two sentences with some significant similarity are the 5th and 8th:&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;a_simple_spell_checker&quot;&gt;A simple spell checker&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Another possible use of text similarity is to correct spelling mistakes. For instance, lets say we&amp;#8217;ve got the following text written incorrectly:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;quoteblock&quot;&gt;
+&lt;blockquote&gt;
+it could be a greal busines
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For us, humans, is easy to check the dictionary and spot the error we did while writing a word, but it&amp;#8217;s not as easy for a computer. In this section I&amp;#8217;m using NLTK and the Jaccard distance to create a basic spell checker. What do we need to create a spell checker ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;A corpus&lt;/strong&gt;: the ground truth where the correct words can be found. Generally speaking a &lt;strong&gt;corpus would be the dictionary where we go looking for the right spelling&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;A method&lt;/strong&gt;: to check the similarity between the wrong word and the most similar word from the corpus. The method in this case would be the Jaccard similarity.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So in this context &lt;strong&gt;we&amp;#8217;re using n-grams to establish which is the minimal number of similar phonemes to compare&lt;/strong&gt;. In other words, instead of comparing two words letter by letter, we will be comparing two words by n-grams.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;using jaccard distance&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from nltk.util import ngrams
+
+def get_ngrams(word, n):
+    return set(ngrams(word,n=n))
+
+def get_recommendation_for(word, n=3):
+    from nltk.corpus import words
+    from nltk.metrics.distance import jaccard_distance
+
+    # we don&apos;t want stop-words to be processed
+    if len(word) &amp;lt; 3:
+        return word
+
+    ngram        = get_ngrams(word, n)
+    spellings    = words.words()
+    scores       = [(w, jaccard_distance(ngram, get_ngrams(w, n))) for w in spellings if w.startswith(word[0])]
+    higest_first = sorted(scores, key=lambda entry: entry[1])
+
+    return highest_first[0][0]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now we can apply the recommender with our initial text using &lt;strong&gt;n=3&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;applying jaccard distance recommender&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;wrong_text     = &quot;it could be a greal busines&quot;
+tokens         = nltk.word_tokenize(wrong_text)
+correct_words  = [get_recommendation_for(w) for w in tokens]
+corrected_text = &quot; &quot;.join(correct_words)
+
+print(corrected_text)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Which outputs:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;literalblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;it could be a great business&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I&amp;#8217;m curious and I wanted to see what the output would be &lt;strong&gt;playing with the value of n&lt;/strong&gt;, and for &lt;strong&gt;n=1&lt;/strong&gt; (aka comparing letter by letter) the spell checker turned out to be a spell mess:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;literalblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;it cloud be a gaggler busine&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;resources&quot;&gt;Resources&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Jaccard_index&quot;&gt;Jaccard Index in Wikipedia&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance&quot;&gt;Levenshtein_distance in Wikipedia&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/N-gram&quot;&gt;N-Gram in Wikipedia&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://towardsdatascience.com/from-dataframe-to-n-grams-e34e29df3460&quot;&gt;N-Gram ranking explained&lt;/a&gt;: A quick-start guide to creating and visualizing n-gram ranking using nltk for natural language processing&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://billchambers.me/tutorials/2014/12/21/tf-idf-explained-in-python.html&quot; class=&quot;bare&quot;&gt;http://billchambers.me/tutorials/2014/12/21/tf-idf-explained-in-python.html&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://studymachinelearning.com/jaccard-similarity-text-similarity-metric-in-nlp/&quot;&gt;Jaccard Similarity as similarity metric&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://datascience.stackexchange.com/questions/63325/cosine-similarity-vs-the-levenshtein-distance&quot;&gt;Cosine similarity vs The Levenshtein distance&lt;/a&gt;: from datascience.stackexchange.com&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
+    <entry>
+        <title>NLP: NLTK basics</title>
         <author>
             <name>@marioggar</name>
         </author>
@@ -439,7 +886,7 @@ JJ: adjective or numeral, ordinal
         </content>
     </entry>
     <entry>
-        <title>Pandas and regex extraction</title>
+        <title>NLP: Pandas and regex extraction</title>
         <author>
             <name>@marioggar</name>
         </author>

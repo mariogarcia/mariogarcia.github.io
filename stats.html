@@ -1,0 +1,232 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - Statistics
+                        </a><ul class="icons">
+                            <li>
+                                <a href="/feed.xml" class="icon fa-rss">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><h1>Statistics</h1></header><yieldScaped><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this section, I wanted to get a little bit of insight about the things I&#8217;ve been writing along the years. These statistics are updated for every new blog entry. A XML file is generated with some statistics that are later on used to create the following charts.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_entries_per_year">Entries per year</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This chart shows the number of entries per year. It&#8217;s obvious some years I&#8217;ve been more active than others.</p>
+</div>
+<div id="per_year" style="width: 50%;height:300px;"></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_topics_and_terms">Topics And Terms</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The following charts show the top topics I wrote about in my blog, and a word cloud with the most used terms within the texts.</p>
+</div>
+<div class="row">
+    <div id="top_five" class="col-6" style="height: 300px;"></div>
+    <div id="word_cloud" class="col-6" style="height: 225px;"></div>
+</div>
+<script type="text/javascript">
+    window.onload = () => {
+        // -------------------------------------------------------------
+        // -------------------------- TOP FIVE -------------------------
+        // -------------------------------------------------------------
+        var topFive = echarts.init(document.getElementById('top_five'));
+        $.ajax({
+            type: "GET",
+            url: "stats-data.html",
+            dataType: "xml",
+            success: (xml) => {
+                const tags = $(xml)
+                    .find("tag")
+                    .map((index, entry) => ({
+                        order: index,
+                        name: $(entry).find('name').text(),
+                        count: $(entry).find('count').text()
+                    }));
+
+                var option = {
+                    title: {
+                        text: "Top Five Tags",
+                        left: "center",
+                        top: "8%",
+                        textStyle: {
+                            color: "#CCC"
+                        }
+                    },
+                    grid: {
+                        top: 10,
+                        left: 25
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        formatter: 'Number of entries of {b} : {c}'
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: tags.map((_, entry) => entry.name)
+                    },
+                    yAxis: {
+                        type: 'value',
+                        splitNumber: 4
+                    },
+                    series: [{
+                        data: tags.map((_, entry) => entry.count),
+                        type: 'bar'
+                    }]
+                }
+
+                topFive.setOption(option);
+            }
+        });
+
+        // -------------------------------------------------------------
+        // --------------------- ENTRIES PER YEAR ----------------------
+        // -------------------------------------------------------------
+        var myChart = echarts.init(document.getElementById('per_year'));
+        $.ajax({
+            type: "GET",
+            url: "stats-data.html",
+            dataType: "xml",
+            success: (xml) => {
+                const entriesByYear = $(xml).find("entriesByYear");
+                const entries       = $(entriesByYear)
+                    .find("entry")
+                    .map((index, entry) => ({
+                        order: index,
+                        year: $(entry).attr('year'),
+                        count: $(entry).attr('count')
+                    }));
+
+                var option = {
+                    title: {
+                        text: "Entries Per Year",
+                        left: "center",
+                        top: "8%",
+                        textStyle: {
+                            color: "#CCC"
+                        }
+                    },
+                    legend: {
+                        type: 'plain'
+                    },
+                    grid: {
+                        top: 10,
+                        left: 25,
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: entries.map((ix, entry) => entry.year)
+                    },
+                    yAxis: {
+                        type: 'value',
+                        splitNumber: 4
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        formatter: 'Number of entries in {b} : {c}'
+                    },
+                    series: [{
+                        data: entries.map((ix, entry) => entry.count),
+                        type: 'line'
+                    }]
+                };
+
+                myChart.setOption(option);
+            }
+        });
+
+        // -------------------------------------------------------------
+        // ------------------------- WORD CLOUD ------------------------
+        // -------------------------------------------------------------
+        var wordCloud = document.getElementById('word_cloud');
+        $.ajax({
+            type: "GET",
+            url: "stats-data.html",
+            dataType: "xml",
+            success: (xml) => {
+                const words = $(xml)
+                    .find("term")
+                    .map((_, next) => [ [$(next).attr("name"), $(next).attr("count")] ] );
+
+                WordCloud(wordCloud, { list: words } );
+            }
+        });
+    }
+</script>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/stats.html">Statistics</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script><script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/4.1.0/echarts.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/4.1.0/echarts-en.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/4.1.0/echarts.common.min.js"></script><script src="/js/charts/wordcloud2.js"></script>
+        </div>
+    </body>
+</html>
