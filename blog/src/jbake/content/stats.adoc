@@ -1,0 +1,158 @@
+= Statistics
+Admin
+2013-10-17
+:jbake-type: stats
+:jbake-tags: documentation, manual
+:jbake-status: published
+:scripts: https://cdnjs.cloudflare.com/ajax/libs/echarts/4.1.0/echarts.js|https://cdnjs.cloudflare.com/ajax/libs/echarts/4.1.0/echarts-en.min.js|https://cdnjs.cloudflare.com/ajax/libs/echarts/4.1.0/echarts.common.min.js|js/charts/wordcloud2.js
+
+In this section, I wanted to get a little bit of insight about the things I've been writing along the years. These statistics are updated for every new blog entry. A XML file is generated with some statistics that are later on used to create the following charts.
+
+== Entries per year
+
+This chart shows the number of entries per year. It's obvious some years I've been more active than others.
+++++
+<div id="per_year" style="width: 50%;height:300px;"></div>
+++++
+
+== Topics And Terms
+
+The following charts show the top topics I wrote about in my blog, and a word cloud with the most used terms within the texts.
+
+++++
+<div class="row">
+    <div id="top_five" class="col-6" style="height: 300px;"></div>
+    <div id="word_cloud" class="col-6" style="height: 225px;"></div>
+</div>
+++++
+
+++++
+<script type="text/javascript">
+    window.onload = () => {                
+        // -------------------------------------------------------------
+        // -------------------------- TOP FIVE -------------------------
+        // -------------------------------------------------------------       
+        var topFive = echarts.init(document.getElementById('top_five'));
+        $.ajax({
+            type: "GET",
+            url: "stats-data.html",
+            dataType: "xml",
+            success: (xml) => {
+                const tags = $(xml)
+                    .find("tag")
+                    .map((index, entry) => ({ 
+                        order: index,
+                        name: $(entry).find('name').text(), 
+                        count: $(entry).find('count').text()
+                    }));
+
+                var option = {
+                    title: {
+                        text: "Top Five Tags",
+                        left: "center",
+                        top: "8%",
+                        textStyle: {
+                            color: "#CCC"
+                        }                        
+                    },
+                    grid: {
+                        top: 10,
+                        left: 25
+                    },          
+                    tooltip: {
+                        trigger: 'axis',
+                        formatter: 'Number of entries of {b} : {c}'
+                    },                                
+                    xAxis: {
+                        type: 'category',
+                        data: tags.map((_, entry) => entry.name)
+                    },
+                    yAxis: {
+                        type: 'value',
+                        splitNumber: 4                        
+                    },
+                    series: [{
+                        data: tags.map((_, entry) => entry.count),
+                        type: 'bar'
+                    }]
+                }
+
+                topFive.setOption(option);                
+            }            
+        });        
+        
+        // -------------------------------------------------------------
+        // --------------------- ENTRIES PER YEAR ----------------------
+        // -------------------------------------------------------------        
+        var myChart = echarts.init(document.getElementById('per_year'));        
+        $.ajax({
+            type: "GET",
+            url: "stats-data.html",
+            dataType: "xml",
+            success: (xml) => {            
+                const entriesByYear = $(xml).find("entriesByYear");
+                const entries       = $(entriesByYear)
+                    .find("entry")
+                    .map((index, entry) => ({ 
+                        order: index,
+                        year: $(entry).attr('year'), 
+                        count: $(entry).attr('count')
+                    }));
+
+                var option = {
+                    title: {
+                        text: "Entries Per Year",
+                        left: "center",
+                        top: "8%",
+                        textStyle: {
+                            color: "#CCC"
+                        }                        
+                    },                    
+                    legend: {
+                        type: 'plain'
+                    },
+                    grid: {
+                        top: 10,
+                        left: 25,
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: entries.map((ix, entry) => entry.year)
+                    },
+                    yAxis: {
+                        type: 'value',
+                        splitNumber: 4
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        formatter: 'Number of entries in {b} : {c}'
+                    },                    
+                    series: [{
+                        data: entries.map((ix, entry) => entry.count),
+                        type: 'line'
+                    }]
+                };
+
+                myChart.setOption(option);     
+            }
+        });
+
+        // -------------------------------------------------------------
+        // ------------------------- WORD CLOUD ------------------------
+        // -------------------------------------------------------------
+        var wordCloud = document.getElementById('word_cloud');
+        $.ajax({
+            type: "GET",
+            url: "stats-data.html",
+            dataType: "xml",
+            success: (xml) => {            
+                const words = $(xml)
+                    .find("term")
+                    .map((_, next) => [ [$(next).attr("name"), $(next).attr("count")] ] );
+
+                WordCloud(wordCloud, { list: words } );
+            }
+        });
+    }
+</script>
+++++

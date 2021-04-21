@@ -1,4 +1,4 @@
-= NLP basics with NLTK
+= NLP: NLTK basics
 @marioggar
 2021-04-15
 :jbake-type: post

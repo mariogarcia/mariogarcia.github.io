@@ -1,0 +1,30 @@
+= Links of the week
+@marioggar
+2021-04-19
+:jbake-type: post
+:jbake-status: draft
+:jbake-tags: ds, jupyter
+:idprefix:
+:summary: Links of the week
+:summary_image: computer_science.png
+
+== NLP
+
+Natural Language Processing related articles
+
+- https://towardsdatascience.com/bert-explained-state-of-the-art-language-model-for-nlp-f8b21a9b6270[BERT Explained]: It turns out BERT is a state-of-the-art NLP algorithm in the area of NLP, so I wanted to know more about it.
+- https://www.kaggle.com/pavansanagapati/knowledge-graph-nlp-tutorial-bert-spacy-nltk[Review of NLP history article/notebook]: This is a notebook someone did in Kaggle to review the history of NLP and some of the most popular Python's NLP libraries.
+- https://towardsdatascience.com/sentimental-analysis-using-vader-a3415fef7664[Sentiment Analysis using Vader]
+- https://www.kaggle.com/zeeshanarif53/a-method-using-sentimentintensityanalyzer[Kaggle example of NLTK Vader module]
+
+== Executing Jupyter Notebooks online
+
+The more I study data science staff the more I need to have some Jupyter Notebook at hand to test the ideas and exercises crossing my way.
+
+- https://colab.research.google.com/[Google Collab]
+- https://www.kaggle.com/[Kaggle]
+- https://mybinder.org/[Binder]
+
+== Kubernetes
+
+- https://litmuschaos.io/[Litmus]: Litmus is a tool for doing chaos engineering for Kubernetes

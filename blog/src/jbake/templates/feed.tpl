@@ -11,7 +11,7 @@ feed(xmlns:"http://www.w3.org/2005/Atom"){
     newLine()
     updated("${published_date.format('yyyy-MM-dd\'T\'HH:mm:ss\'Z\'')}")
     newLine()
-    id("tag:${config.feed_id},${published_date.format('yyyy:MM')}")
+    id("${config.site_host}")
     newLine()
     published_posts.each {post ->
         entry{

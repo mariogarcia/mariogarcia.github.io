@@ -22,9 +22,9 @@ div(id: "sidebar") {
                 li {
                     a(href: "${contextPath}archive.html", "Archive")
                 }
-//                li {
-//                    a(href: "${contextPath}stats.html", "Statistics")
-//                }
+                li {
+                    a(href: "${contextPath}stats.html", "Statistics")
+                }
 //                li {
 //                    span(class: "opener", "Awesome Links")
 //                    ul {
