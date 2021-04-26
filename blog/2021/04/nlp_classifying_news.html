@@ -1,0 +1,642 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="/feed.xml" class="icon fa-rss">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><div class="metadata"><em class="fa fa-calendar-o"></em><b>2021-04-24</b></div><h1>NLP: Classifying Business News</h1></header><yieldScaped><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this article I&#8217;ve collected different news from different online newspapers. These news are about politics, business, sports and general news about the world. The idea is to train a <strong>binary classifier to decide whether a given article is about business or not</strong>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="preparing_data">Preparing data</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>First of all I would like to <strong>load the xml source files</strong> and create a Pandas DataFrame. For traversing the document&#8217;s xml I&#8217;m using the <a href="https://docs.python.org/3/library/xml.etree.elementtree.html">ElementTree API</a>.</p>
+</div>
+<div class="listingblock">
+<div class="title">loading xml files and create a DataFrame</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import numpy as np
+import pandas as pd
+import xml.etree.ElementTree as ET
+
+from os import walk
+
+# all files are in the news directory
+_, _, filenames = next(walk('news'))
+df       = pd.DataFrame()
+
+for file in filenames:
+    xml = ET.parse("news/" + file).getroot()
+    for entry in xml.findall('entry'):
+        title= entry.find("title").text
+        text = entry.find("text").text
+        site = entry.find("link").text
+        tag  = entry.find("tag").text
+
+        df = df.append({"title": title, "text": text, "tag": tag, "site": site}, ignore_index=True)
+
+df.head()</code></pre>
+</div>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2021/04/nlp_classifying_news/dataframe.png" alt="loaded dataframe" width="80%">
+</div>
+</div>
+<div class="sect2">
+<h3 id="creating_labels">Creating labels</h3>
+<div class="paragraph">
+<p>Because this is a binary classification, I need to create a column with the <strong>instances' labels</strong>. I&#8217;m creating column <strong>"business"</strong> with possible values 0 or 1 .Business related news will have <strong>1</strong>, and the rest <strong>0</strong>. I&#8217;m making use of Numpy&#8217;s <a href="https://numpy.org/doc/stable/reference/generated/numpy.where.html">where</a> function.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">df = df\
+    .fillna({"tag": "unknown"})\
+    .dropna()
+
+df['business'] = np.where(df['tag'] == 'business', 1, 0)</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="checking_class_imbalance">Checking class imbalance</h3>
+<div class="paragraph">
+<p>Class imbalance is an important issue. If there&#8217;are many more instances of one class than the other, the model could end up performing as if it were a dummy classifier taking the most frequent outcome as prediction. To address that problem there&#8217;re some techniques to apply like under-sampling or over-sampling. But first, lets see if there&#8217;s a clear imbalance between our two classes:</p>
+</div>
+<div class="listingblock">
+<div class="title">Checking class imbalance</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">df.loc[:, ['title', 'business']]\
+    .groupby('business')\
+    .count()\
+    .reset_index()\
+    .rename(columns={'title': 'count'})</code></pre>
+</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/img/2021/04/nlp_classifying_news/imbalance.png" alt="imbalance" width="15%">
+</div>
+</div>
+<div class="paragraph">
+<p>It seems there&#8217;s nothing to worry about, <strong>both classes are around 50%</strong> (52/47).</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="avoid_data_leakage">Avoid data leakage</h3>
+<div class="paragraph">
+<p>Another important issue when dealing with data is <a href="https://en.wikipedia.org/wiki/Leakage_(machine_learning)">data leakage (Wikipedia)</a>. Leaking information while training the model could create over-optimistic models that generalize badly. I&#8217;ve found <strong>some data I need to remove from text</strong> before training the model: <strong>site name and topic name</strong>.</p>
+</div>
+<div class="paragraph">
+<p>Of course there could be more potential data leakages, for example, leaving article authors, could be a potential data leakage if those journalists are only specialized in a specific topic. For this exercise I stopped looking for data leakages when the different model predictions were performing decently with the testing datasets. There&#8217;s a very <a href="https://machinelearningmastery.com/data-leakage-machine-learning/">interesting article</a> regarding data leakage that I&#8217;d like to review when I have the time.</p>
+</div>
+<div class="sect3">
+<h4 id="removing_site_information">Removing site information</h4>
+<div class="paragraph">
+<p>Lets say an article is from the Financial Times and inside the text there is <strong>www.ft.com</strong>. Because most articles from Financial Times are supposed to be about businesses, the model could immediately correlate the site with the business class, creating overfitted models. Therefore I had to <strong>extract the different site names</strong> from the articles' links (site column in the data-frame):</p>
+</div>
+<div class="listingblock">
+<div class="title">getting different site names</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">sites = df['site']\
+    .str.extractall(r'https://.*\.(?P&lt;www&gt;\w*)\..*')\
+    .reset_index(col_fill='origin')['www']\
+    .unique()
+
+sites</code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[bbc, cnn, cnbc, investing...]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Once I had the site names, it was time to <strong>remove all these names from text</strong>, whether they were found as upper, lower or capitalize case.</p>
+</div>
+<div class="listingblock">
+<div class="title">removing site related information</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">for site in sites:
+    df['text'] = df['text'].str.replace(site, ' ', regex=False)
+    df['text'] = df['text'].str.replace(site.upper(), ' ', regex=False)
+    df['text'] = df['text'].str.replace(site.capitalize(), ' ', regex=False)</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="removing_topic_words_in_text">Removing topic words in text</h4>
+<div class="paragraph">
+<p>If the training text has the section it belongs: business, sports&#8230;&#8203; etc, that could end up ending in a bad generalization as well.</p>
+</div>
+<div class="listingblock">
+<div class="title">removing topic words</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">for topic in ['business', 'sport', 'politics', 'investing']:
+    df['text'] = df['text'].str.replace(topic, ' ', regex=False)
+    df['text'] = df['text'].str.replace(topic.upper(), ' ', regex=False)
+    df['text'] = df['text'].str.replace(topic.capitalize(), ' ', regex=False)</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="removing_stopwords">Removing stopwords</h3>
+<div class="paragraph">
+<p><a href="https://medium.com/@saitejaponugoti/stop-words-in-nlp-5b248dadad47">Stopwords</a> are everywhere in text, and most of the time, they only add noise to the model, and makes training longer, so it&#8217;s better to get rid of them.</p>
+</div>
+<div class="listingblock">
+<div class="title">removing stopwords</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from nltk.corpus import stopwords
+
+for sw in stopwords.words('english'):
+    df['text'] = df['text'].str.replace("\s{}\s".format(sw), ' ', regex=True)
+    df['text'] = df['text'].str.replace("\s{}\s".format(sw.upper()), ' ', regex=True)
+    df['text'] = df['text'].str.replace("{}\s".format(sw.capitalize()), ' ', regex=True)</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="training_model">Training model</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Once I&#8217;ve finished preparing the data, it&#8217;s time to create the model.</p>
+</div>
+<div class="sect2">
+<h3 id="splitting_data">Splitting data</h3>
+<div class="paragraph">
+<p>First lets <strong>split the initial dataset</strong> to create training and testing datasets.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(df['text'], df['business'], random_state=0)</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="vectorizing_data_sets">Vectorizing data sets</h3>
+<div class="paragraph">
+<p>Unfortunately classifiers don&#8217;t deal well with categorical data such text, that&#8217;s why I&#8217;m going to use a vectorizer. According to the <a href="https://scikit-learn.org/stable/modules/feature_extraction.html#text-feature-extraction">Scikit-Learn site</a> <strong>Vectorization is the general process of turning a collection of text documents into numerical feature vectors</strong>. There are a few different vectorizers available in Scikit-Learn: <a href="https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html">CountVectorizer</a> and <a href="https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html#sklearn.feature_extraction.text.TfidfVectorizer">TfidfVectorizer</a>. In this case I&#8217;m using CountVectorizer.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from sklearn.feature_extraction.text import CountVectorizer
+
+vec = CountVectorizer(min_df=8, ngram_range=(1,2)).fit(X_train)
+
+print("no of features:", len(vec.get_feature_names()))</code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>no of features: 6551</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>There are a couple of parameters woth commenting:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>min_df</strong>: I&#8217;d like to ignore terms don&#8217;t appearing in at least in 8 documents</p>
+</li>
+<li>
+<p><strong>ngram_range</strong>: I&#8217;d like the vectorizer to create means unigrams (1, 1) and bigrams (1, 2).</p>
+</li>
+</ul>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">ngrams</div>
+<div class="paragraph">
+<p>A n-gram is a sequence of phonems where n could be any positive number. That allows our comparison procedure to be smarter. Instead of comparing all characters, or word by word, in this case, we would like to find certain tuples of common tokens between two sentences. For example, What are the n-grams of sentence_1, with n=2 using tokens ?</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import nltk
+from nltk.util import ngrams
+
+seq_1 = set(nltk.word_tokenize("I am a big fan"))
+seq_2 = set(nltk.word_tokenize("I am a tennis fan"))
+
+list(ngrams(seq_1, n=2)), list(ngrams(seq_2, n=2))
+
+n-grams</code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>([('am', 'fan'), ('fan', 'big'), ('big', 'I'), ('I', 'a')],
+ [('am', 'tennis'), ('tennis', 'fan'), ('fan', 'I'), ('I', 'a')])</pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://en.wikipedia.org/wiki/N-gram">NGrams (Wikipedia)</a></p>
+</li>
+<li>
+<p><a href="https://towardsdatascience.com/from-dataframe-to-n-grams-e34e29df3460">N-Gram Ranking @towardsdatascience</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Once the vectorizer has been trained I can create my vectorized versions of <strong>X_train</strong> and <strong>X_test</strong> features.</p>
+</div>
+<div class="listingblock">
+<div class="title">transforming datasets</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">X_train_vectorized = vec.transform(X_train)
+X_test_vectorized  = vec.transform(X_test)</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="cross_validation">Cross Validation</h3>
+<div class="paragraph">
+<p>To figure out which classifier works best with the data at hand, I&#8217;m going to make use of cross validation to train three different classifiers.</p>
+</div>
+<div class="listingblock">
+<div class="title">classifiers to use</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from sklearn.svm import SVC
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.linear_model import LogisticRegression
+
+classifiers = [
+    {
+        'classifier': SVC(),
+        'params': {
+            'C': [1, 5, 10, 20, 30, 40],
+            'kernel': ['rbf', 'linear']
+        }
+    },
+    {
+        'classifier': LogisticRegression(),
+        'params': {
+            'C': [1, 5, 10, 20, 30, 40],
+            'solver': ['newton-cg', 'saga']
+        }
+    },
+    {
+        'classifier': AdaBoostClassifier(),
+        'params': {
+            'n_estimators': [50, 60, 75, 100]
+        }
+    }
+]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I&#8217;ve created the following function that uses <a href="https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GridSearchCV.html">GridSearchCV</a> to look for the best params to use for a given dataset.</p>
+</div>
+<div class="listingblock">
+<div class="title">function to get best parameters</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import confusion_matrix
+
+def resolve_best_params(classifier_entry, X_param, y_param):
+    clsf_instance = classifier_entry['classifier']
+    clsf_params   = classifier_entry['params']
+    grid_search   = GridSearchCV(
+        clsf_instance,
+        cv=5,
+        param_grid=clsf_params,
+        scoring='precision_macro')
+    grid_result   = grid_search.fit(X_param, y_param)
+
+    return grid_result.best_params_</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For every classifier I&#8217;m using <strong>resolve_best_params</strong> to find the best params for every one of them. I&#8217;m storing that information in the classifier&#8217;s dictionary to use it later.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">for clsf in classifiers:
+    best_params = resolve_best_params(clsf, X_train_vectorized, y_train)
+    classifier  = clsf['classifier'].set_params(**best_params).fit(X_train_vectorized, y_train)
+    clsf_name   = type(classifier).__name__
+
+    # storing information for later use
+    clsf['predicted']   = classifier.predict(X_test_vectorized)
+    clsf['matrix']      = confusion_matrix(y_test, clsf['predicted'])
+    clsf['best_params'] = best_params</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="evaluation">Evaluation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>After training different models, it&#8217;s time to see which one performs best.</p>
+</div>
+<div class="sect2">
+<h3 id="confusion_matrix">Confusion Matrix</h3>
+<div class="paragraph">
+<p>The first evaluation method I&#8217;d like to use is a <a href="/blog/2021/03/ml_confusion_matrix.html">confusion matrix</a>. That will give me an idea of the precision/recall relationship for each one of them.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import seaborn as sns
+import matplotlib.pyplot as plt
+
+f, ax = plt.subplots(1, 3, figsize=(15, 5))
+cols  = 0
+
+for clsf in classifiers:
+    clsf_name   = type(clsf['classifier']).__name__
+    matrix      = clsf['matrix']
+
+    ax[cols].title.set_text(clsf_name)
+    sns.heatmap(matrix, cbar=False, square=True, annot=True, fmt='g',ax=ax[cols],cmap="YlGnBu")
+    cols += 1
+
+plt.show()</code></pre>
+</div>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2021/04/nlp_classifying_news/confusion_matrices.png" alt="confusion matrices" width="80%">
+</div>
+</div>
+<div class="paragraph">
+<p>It seems that the best classifier is the one using <strong>LogicRegression</strong>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="auc">AUC</h3>
+<div class="paragraph">
+<p>To establish the goodness of classifier is oftenly used as a mesure the <a href="/blog/2021/03/ml_roc_curve.html">AUC or Area Under the Curve</a>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import matplotlib.pyplot as plt
+from sklearn.metrics import roc_curve, auc
+
+f, ax = plt.subplots(1, 3, figsize=(15, 5))
+cols  = 0
+
+for clsf in classifiers:
+    clsf_name   = type(clsf['classifier']).__name__
+
+    y_test_predicted     = clsf['predicted']
+    fpr, tpr, thresholds = roc_curve(y_test, y_test_predicted)
+    roc_auc              = auc(fpr, tpr)
+
+    ax[cols].title.set_text("{0} -- AUC: {1:.2f}".format(clsf_name, roc_auc))
+    ax[cols].set_xlabel("False Positive Rate")
+    ax[cols].set_ylabel("True Positive Rate")
+    ax[cols].plot(fpr, tpr, c='k')
+    ax[cols].plot([0, 1], [0, 1], c='k', linestyle='--')
+    ax[cols].fill_between(fpr, tpr, hatch='\\', color='none', edgecolor='#cccccc')
+    cols +=1
+
+plt.show()</code></pre>
+</div>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2021/04/nlp_classifying_news/auc.png" alt="area under the curve" width="80%">
+</div>
+</div>
+<div class="paragraph">
+<p>Again, it seems the classifier that is performing the best is the <strong>LogisticRegression</strong> classifier.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="wordcloud">WordCloud</h3>
+<div class="paragraph">
+<p>Now that it seems that the best classifier to use is <a href="https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html">LogisticRegression</a>, I&#8217;d like to see which features are used the most when classifying a new instance as 'business'. In order to do that I&#8217;m extracting LogisticRegression&#8217;s feature coeficients.</p>
+</div>
+<div class="paragraph">
+<p>First thing to do, I need <strong>to get the best parameters for the LogisticRegression classifier</strong> found during the cross validation I did earlier.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">for clsf in classifiers:
+    name   = type(clsf['classifier']).__name__
+    params = clsf['best_params']
+    print(name, params)</code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>SVC {'C': 20, 'kernel': 'rbf'}
+LogisticRegression {'C': 5, 'solver': 'newton-cg'}
+AdaBoostClassifier {'n_estimators': 75}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then I&#8217;m creating two groups: less and most significant features</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">feature_names     = np.array(vec.get_feature_names())
+model             = LogisticRegression(C=5, solver='newton-cg').fit(X_train_vectorized, y_train)
+sorted_coef_index = model.coef_[0].argsort()
+
+less = feature_names[sorted_coef_index[:50]]
+most = feature_names[sorted_coef_index[:-51:-1]]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And finally I&#8217;m using the <a href="https://github.com/amueller/word_cloud">WordCloud</a> library to show a word cloud showing the most significant features and another showing the less significant features.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import matplotlib.pyplot as plt
+from wordcloud import WordCloud
+
+less_cloud = WordCloud(max_font_size=50, max_words=100, background_color="white").generate(" ".join(less))
+most_cloud = WordCloud(max_font_size=50, max_words=100, background_color="white").generate(" ".join(most))
+
+_, ax = plt.subplots(1, 2, figsize=(15, 15))
+
+ax[0].set_title("MOST SIGNIFICANT WORDS")
+ax[0].imshow(most_cloud, interpolation="bilinear")
+ax[0].axis("off")
+
+ax[1].set_title("LESS SIGNIFICANT WORDS")
+ax[1].imshow(less_cloud, interpolation="bilinear")
+ax[1].axis("off")
+
+plt.show()</code></pre>
+</div>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2021/04/nlp_classifying_news/wordcloud.png" alt="wordcloud" width="80%">
+</div>
+</div>
+<div class="paragraph">
+<p>Lets use the created model to classify new instances:</p>
+</div>
+<div class="listingblock">
+<div class="title">predicting</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">news = [
+    "The last Roaring Twenties ended in disaster. Should investors be worried?",
+    "Bunny attends baseball game and everyone is in love with it"
+]
+
+model.predict(vec.transform(news))</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Which outputs the expected results: 1 for the first text (busines) and 0 for the second text (not business):</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[1, 0]</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Wrapping up. These are the <strong>steps I followed</strong>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Data cleaning</strong>: loading, cleaning, data leakage removal</p>
+</li>
+<li>
+<p><strong>Training model</strong>: splitting data, vectorization, cross validation to look for best parametrization</p>
+</li>
+<li>
+<p><strong>Evaluation</strong>: confusion matrix, area under the curve</p>
+</li>
+<li>
+<p><strong>Testing model with new instances</strong></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Things I <strong>could have done better</strong>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>I didn&#8217;t keep some data apart</strong> from the beginning</p>
+</li>
+<li>
+<p><strong>I didn&#8217;t create a baseline</strong> to compare the performance of the real classifiers</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="resources">Resources</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://en.wikipedia.org/wiki/Leakage_(machine_learning)">Data Leakage definition</a>: Wikipedia</p>
+</li>
+<li>
+<p><a href="https://machinelearningmastery.com/data-leakage-machine-learning/">Data leakage article</a>: at machinelearningmastery.com</p>
+</li>
+<li>
+<p><a href="https://medium.com/@saitejaponugoti/stop-words-in-nlp-5b248dadad47">Stopwords in NLP</a></p>
+</li>
+<li>
+<p><a href="https://scikit-learn.org/stable/modules/feature_extraction.html#text-feature-extraction">Text Feature Extraction in Scikit-Learn</a></p>
+</li>
+<li>
+<p><a href="https://github.com/amueller/word_cloud">Wordcloud</a>: Python library to create word clouds</p>
+</li>
+</ul>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/stats.html">Statistics</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>

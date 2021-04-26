@@ -4,8 +4,684 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2021-04-21T07:11:21Z</updated>
+    <updated>2021-04-26T11:47:58Z</updated>
     <id>http://github.com/mariogarcia</id>
+    <entry>
+        <title>NLP: Classifying Business News</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2021/04/nlp_classifying_news.html"/>
+        <updated>2021-04-24T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2021/04/nlp_classifying_news.html</id>
+        <category term="nlp"/>
+        <category term="ml"/>
+        <content type="html">
+            &lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In this article I&amp;#8217;ve collected different news from different online newspapers. These news are about politics, business, sports and general news about the world. The idea is to train a &lt;strong&gt;binary classifier to decide whether a given article is about business or not&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;preparing_data&quot;&gt;Preparing data&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;First of all I would like to &lt;strong&gt;load the xml source files&lt;/strong&gt; and create a Pandas DataFrame. For traversing the document&amp;#8217;s xml I&amp;#8217;m using the &lt;a href=&quot;https://docs.python.org/3/library/xml.etree.elementtree.html&quot;&gt;ElementTree API&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;loading xml files and create a DataFrame&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import numpy as np
+import pandas as pd
+import xml.etree.ElementTree as ET
+
+from os import walk
+
+# all files are in the news directory
+_, _, filenames = next(walk(&apos;news&apos;))
+df       = pd.DataFrame()
+
+for file in filenames:
+    xml = ET.parse(&quot;news/&quot; + file).getroot()
+    for entry in xml.findall(&apos;entry&apos;):
+        title= entry.find(&quot;title&quot;).text
+        text = entry.find(&quot;text&quot;).text
+        site = entry.find(&quot;link&quot;).text
+        tag  = entry.find(&quot;tag&quot;).text
+
+        df = df.append({&quot;title&quot;: title, &quot;text&quot;: text, &quot;tag&quot;: tag, &quot;site&quot;: site}, ignore_index=True)
+
+df.head()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2021/04/nlp_classifying_news/dataframe.png&quot; alt=&quot;loaded dataframe&quot; width=&quot;80%&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;creating_labels&quot;&gt;Creating labels&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Because this is a binary classification, I need to create a column with the &lt;strong&gt;instances&apos; labels&lt;/strong&gt;. I&amp;#8217;m creating column &lt;strong&gt;&quot;business&quot;&lt;/strong&gt; with possible values 0 or 1 .Business related news will have &lt;strong&gt;1&lt;/strong&gt;, and the rest &lt;strong&gt;0&lt;/strong&gt;. I&amp;#8217;m making use of Numpy&amp;#8217;s &lt;a href=&quot;https://numpy.org/doc/stable/reference/generated/numpy.where.html&quot;&gt;where&lt;/a&gt; function.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;df = df\
+    .fillna({&quot;tag&quot;: &quot;unknown&quot;})\
+    .dropna()
+
+df[&apos;business&apos;] = np.where(df[&apos;tag&apos;] == &apos;business&apos;, 1, 0)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;checking_class_imbalance&quot;&gt;Checking class imbalance&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Class imbalance is an important issue. If there&amp;#8217;are many more instances of one class than the other, the model could end up performing as if it were a dummy classifier taking the most frequent outcome as prediction. To address that problem there&amp;#8217;re some techniques to apply like under-sampling or over-sampling. But first, lets see if there&amp;#8217;s a clear imbalance between our two classes:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Checking class imbalance&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;df.loc[:, [&apos;title&apos;, &apos;business&apos;]]\
+    .groupby(&apos;business&apos;)\
+    .count()\
+    .reset_index()\
+    .rename(columns={&apos;title&apos;: &apos;count&apos;})&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2021/04/nlp_classifying_news/imbalance.png&quot; alt=&quot;imbalance&quot; width=&quot;15%&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It seems there&amp;#8217;s nothing to worry about, &lt;strong&gt;both classes are around 50%&lt;/strong&gt; (52/47).&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;avoid_data_leakage&quot;&gt;Avoid data leakage&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Another important issue when dealing with data is &lt;a href=&quot;https://en.wikipedia.org/wiki/Leakage_(machine_learning)&quot;&gt;data leakage (Wikipedia)&lt;/a&gt;. Leaking information while training the model could create over-optimistic models that generalize badly. I&amp;#8217;ve found &lt;strong&gt;some data I need to remove from text&lt;/strong&gt; before training the model: &lt;strong&gt;site name and topic name&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Of course there could be more potential data leakages, for example, leaving article authors, could be a potential data leakage if those journalists are only specialized in a specific topic. For this exercise I stopped looking for data leakages when the different model predictions were performing decently with the testing datasets. There&amp;#8217;s a very &lt;a href=&quot;https://machinelearningmastery.com/data-leakage-machine-learning/&quot;&gt;interesting article&lt;/a&gt; regarding data leakage that I&amp;#8217;d like to review when I have the time.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;removing_site_information&quot;&gt;Removing site information&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Lets say an article is from the Financial Times and inside the text there is &lt;strong&gt;www.ft.com&lt;/strong&gt;. Because most articles from Financial Times are supposed to be about businesses, the model could immediately correlate the site with the business class, creating overfitted models. Therefore I had to &lt;strong&gt;extract the different site names&lt;/strong&gt; from the articles&apos; links (site column in the data-frame):&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;getting different site names&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;sites = df[&apos;site&apos;]\
+    .str.extractall(r&apos;https://.*\.(?P&amp;lt;www&amp;gt;\w*)\..*&apos;)\
+    .reset_index(col_fill=&apos;origin&apos;)[&apos;www&apos;]\
+    .unique()
+
+sites&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;literalblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;[bbc, cnn, cnbc, investing...]&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Once I had the site names, it was time to &lt;strong&gt;remove all these names from text&lt;/strong&gt;, whether they were found as upper, lower or capitalize case.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;removing site related information&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;for site in sites:
+    df[&apos;text&apos;] = df[&apos;text&apos;].str.replace(site, &apos; &apos;, regex=False)
+    df[&apos;text&apos;] = df[&apos;text&apos;].str.replace(site.upper(), &apos; &apos;, regex=False)
+    df[&apos;text&apos;] = df[&apos;text&apos;].str.replace(site.capitalize(), &apos; &apos;, regex=False)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;removing_topic_words_in_text&quot;&gt;Removing topic words in text&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If the training text has the section it belongs: business, sports&amp;#8230;&amp;#8203; etc, that could end up ending in a bad generalization as well.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;removing topic words&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;for topic in [&apos;business&apos;, &apos;sport&apos;, &apos;politics&apos;, &apos;investing&apos;]:
+    df[&apos;text&apos;] = df[&apos;text&apos;].str.replace(topic, &apos; &apos;, regex=False)
+    df[&apos;text&apos;] = df[&apos;text&apos;].str.replace(topic.upper(), &apos; &apos;, regex=False)
+    df[&apos;text&apos;] = df[&apos;text&apos;].str.replace(topic.capitalize(), &apos; &apos;, regex=False)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;removing_stopwords&quot;&gt;Removing stopwords&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;https://medium.com/@saitejaponugoti/stop-words-in-nlp-5b248dadad47&quot;&gt;Stopwords&lt;/a&gt; are everywhere in text, and most of the time, they only add noise to the model, and makes training longer, so it&amp;#8217;s better to get rid of them.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;removing stopwords&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from nltk.corpus import stopwords
+
+for sw in stopwords.words(&apos;english&apos;):
+    df[&apos;text&apos;] = df[&apos;text&apos;].str.replace(&quot;\s{}\s&quot;.format(sw), &apos; &apos;, regex=True)
+    df[&apos;text&apos;] = df[&apos;text&apos;].str.replace(&quot;\s{}\s&quot;.format(sw.upper()), &apos; &apos;, regex=True)
+    df[&apos;text&apos;] = df[&apos;text&apos;].str.replace(&quot;{}\s&quot;.format(sw.capitalize()), &apos; &apos;, regex=True)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;training_model&quot;&gt;Training model&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Once I&amp;#8217;ve finished preparing the data, it&amp;#8217;s time to create the model.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;splitting_data&quot;&gt;Splitting data&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;First lets &lt;strong&gt;split the initial dataset&lt;/strong&gt; to create training and testing datasets.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(df[&apos;text&apos;], df[&apos;business&apos;], random_state=0)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;vectorizing_data_sets&quot;&gt;Vectorizing data sets&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Unfortunately classifiers don&amp;#8217;t deal well with categorical data such text, that&amp;#8217;s why I&amp;#8217;m going to use a vectorizer. According to the &lt;a href=&quot;https://scikit-learn.org/stable/modules/feature_extraction.html#text-feature-extraction&quot;&gt;Scikit-Learn site&lt;/a&gt; &lt;strong&gt;Vectorization is the general process of turning a collection of text documents into numerical feature vectors&lt;/strong&gt;. There are a few different vectorizers available in Scikit-Learn: &lt;a href=&quot;https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html&quot;&gt;CountVectorizer&lt;/a&gt; and &lt;a href=&quot;https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html#sklearn.feature_extraction.text.TfidfVectorizer&quot;&gt;TfidfVectorizer&lt;/a&gt;. In this case I&amp;#8217;m using CountVectorizer.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.feature_extraction.text import CountVectorizer
+
+vec = CountVectorizer(min_df=8, ngram_range=(1,2)).fit(X_train)
+
+print(&quot;no of features:&quot;, len(vec.get_feature_names()))&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;literalblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;no of features: 6551&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There are a couple of parameters woth commenting:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;min_df&lt;/strong&gt;: I&amp;#8217;d like to ignore terms don&amp;#8217;t appearing in at least in 8 documents&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;ngram_range&lt;/strong&gt;: I&amp;#8217;d like the vectorizer to create means unigrams (1, 1) and bigrams (1, 2).&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sidebarblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;ngrams&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A n-gram is a sequence of phonems where n could be any positive number. That allows our comparison procedure to be smarter. Instead of comparing all characters, or word by word, in this case, we would like to find certain tuples of common tokens between two sentences. For example, What are the n-grams of sentence_1, with n=2 using tokens ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import nltk
+from nltk.util import ngrams
+
+seq_1 = set(nltk.word_tokenize(&quot;I am a big fan&quot;))
+seq_2 = set(nltk.word_tokenize(&quot;I am a tennis fan&quot;))
+
+list(ngrams(seq_1, n=2)), list(ngrams(seq_2, n=2))
+
+n-grams&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;literalblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;([(&apos;am&apos;, &apos;fan&apos;), (&apos;fan&apos;, &apos;big&apos;), (&apos;big&apos;, &apos;I&apos;), (&apos;I&apos;, &apos;a&apos;)],
+ [(&apos;am&apos;, &apos;tennis&apos;), (&apos;tennis&apos;, &apos;fan&apos;), (&apos;fan&apos;, &apos;I&apos;), (&apos;I&apos;, &apos;a&apos;)])&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/N-gram&quot;&gt;NGrams (Wikipedia)&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://towardsdatascience.com/from-dataframe-to-n-grams-e34e29df3460&quot;&gt;N-Gram Ranking @towardsdatascience&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Once the vectorizer has been trained I can create my vectorized versions of &lt;strong&gt;X_train&lt;/strong&gt; and &lt;strong&gt;X_test&lt;/strong&gt; features.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;transforming datasets&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;X_train_vectorized = vec.transform(X_train)
+X_test_vectorized  = vec.transform(X_test)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;cross_validation&quot;&gt;Cross Validation&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To figure out which classifier works best with the data at hand, I&amp;#8217;m going to make use of cross validation to train three different classifiers.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;classifiers to use&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.svm import SVC
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.linear_model import LogisticRegression
+
+classifiers = [
+    {
+        &apos;classifier&apos;: SVC(),
+        &apos;params&apos;: {
+            &apos;C&apos;: [1, 5, 10, 20, 30, 40],
+            &apos;kernel&apos;: [&apos;rbf&apos;, &apos;linear&apos;]
+        }
+    },
+    {
+        &apos;classifier&apos;: LogisticRegression(),
+        &apos;params&apos;: {
+            &apos;C&apos;: [1, 5, 10, 20, 30, 40],
+            &apos;solver&apos;: [&apos;newton-cg&apos;, &apos;saga&apos;]
+        }
+    },
+    {
+        &apos;classifier&apos;: AdaBoostClassifier(),
+        &apos;params&apos;: {
+            &apos;n_estimators&apos;: [50, 60, 75, 100]
+        }
+    }
+]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I&amp;#8217;ve created the following function that uses &lt;a href=&quot;https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GridSearchCV.html&quot;&gt;GridSearchCV&lt;/a&gt; to look for the best params to use for a given dataset.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;function to get best parameters&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import confusion_matrix
+
+def resolve_best_params(classifier_entry, X_param, y_param):
+    clsf_instance = classifier_entry[&apos;classifier&apos;]
+    clsf_params   = classifier_entry[&apos;params&apos;]
+    grid_search   = GridSearchCV(
+        clsf_instance,
+        cv=5,
+        param_grid=clsf_params,
+        scoring=&apos;precision_macro&apos;)
+    grid_result   = grid_search.fit(X_param, y_param)
+
+    return grid_result.best_params_&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For every classifier I&amp;#8217;m using &lt;strong&gt;resolve_best_params&lt;/strong&gt; to find the best params for every one of them. I&amp;#8217;m storing that information in the classifier&amp;#8217;s dictionary to use it later.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;for clsf in classifiers:
+    best_params = resolve_best_params(clsf, X_train_vectorized, y_train)
+    classifier  = clsf[&apos;classifier&apos;].set_params(**best_params).fit(X_train_vectorized, y_train)
+    clsf_name   = type(classifier).__name__
+
+    # storing information for later use
+    clsf[&apos;predicted&apos;]   = classifier.predict(X_test_vectorized)
+    clsf[&apos;matrix&apos;]      = confusion_matrix(y_test, clsf[&apos;predicted&apos;])
+    clsf[&apos;best_params&apos;] = best_params&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;evaluation&quot;&gt;Evaluation&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;After training different models, it&amp;#8217;s time to see which one performs best.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;confusion_matrix&quot;&gt;Confusion Matrix&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The first evaluation method I&amp;#8217;d like to use is a &lt;a href=&quot;/blog/2021/03/ml_confusion_matrix.html&quot;&gt;confusion matrix&lt;/a&gt;. That will give me an idea of the precision/recall relationship for each one of them.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import seaborn as sns
+import matplotlib.pyplot as plt
+
+f, ax = plt.subplots(1, 3, figsize=(15, 5))
+cols  = 0
+
+for clsf in classifiers:
+    clsf_name   = type(clsf[&apos;classifier&apos;]).__name__
+    matrix      = clsf[&apos;matrix&apos;]
+
+    ax[cols].title.set_text(clsf_name)
+    sns.heatmap(matrix, cbar=False, square=True, annot=True, fmt=&apos;g&apos;,ax=ax[cols],cmap=&quot;YlGnBu&quot;)
+    cols += 1
+
+plt.show()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2021/04/nlp_classifying_news/confusion_matrices.png&quot; alt=&quot;confusion matrices&quot; width=&quot;80%&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It seems that the best classifier is the one using &lt;strong&gt;LogicRegression&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;auc&quot;&gt;AUC&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To establish the goodness of classifier is oftenly used as a mesure the &lt;a href=&quot;/blog/2021/03/ml_roc_curve.html&quot;&gt;AUC or Area Under the Curve&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import matplotlib.pyplot as plt
+from sklearn.metrics import roc_curve, auc
+
+f, ax = plt.subplots(1, 3, figsize=(15, 5))
+cols  = 0
+
+for clsf in classifiers:
+    clsf_name   = type(clsf[&apos;classifier&apos;]).__name__
+
+    y_test_predicted     = clsf[&apos;predicted&apos;]
+    fpr, tpr, thresholds = roc_curve(y_test, y_test_predicted)
+    roc_auc              = auc(fpr, tpr)
+
+    ax[cols].title.set_text(&quot;{0} -- AUC: {1:.2f}&quot;.format(clsf_name, roc_auc))
+    ax[cols].set_xlabel(&quot;False Positive Rate&quot;)
+    ax[cols].set_ylabel(&quot;True Positive Rate&quot;)
+    ax[cols].plot(fpr, tpr, c=&apos;k&apos;)
+    ax[cols].plot([0, 1], [0, 1], c=&apos;k&apos;, linestyle=&apos;--&apos;)
+    ax[cols].fill_between(fpr, tpr, hatch=&apos;\\&apos;, color=&apos;none&apos;, edgecolor=&apos;#cccccc&apos;)
+    cols +=1
+
+plt.show()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2021/04/nlp_classifying_news/auc.png&quot; alt=&quot;area under the curve&quot; width=&quot;80%&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Again, it seems the classifier that is performing the best is the &lt;strong&gt;LogisticRegression&lt;/strong&gt; classifier.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;wordcloud&quot;&gt;WordCloud&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now that it seems that the best classifier to use is &lt;a href=&quot;https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html&quot;&gt;LogisticRegression&lt;/a&gt;, I&amp;#8217;d like to see which features are used the most when classifying a new instance as &apos;business&apos;. In order to do that I&amp;#8217;m extracting LogisticRegression&amp;#8217;s feature coeficients.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;First thing to do, I need &lt;strong&gt;to get the best parameters for the LogisticRegression classifier&lt;/strong&gt; found during the cross validation I did earlier.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;for clsf in classifiers:
+    name   = type(clsf[&apos;classifier&apos;]).__name__
+    params = clsf[&apos;best_params&apos;]
+    print(name, params)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;literalblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;SVC {&apos;C&apos;: 20, &apos;kernel&apos;: &apos;rbf&apos;}
+LogisticRegression {&apos;C&apos;: 5, &apos;solver&apos;: &apos;newton-cg&apos;}
+AdaBoostClassifier {&apos;n_estimators&apos;: 75}&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then I&amp;#8217;m creating two groups: less and most significant features&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;feature_names     = np.array(vec.get_feature_names())
+model             = LogisticRegression(C=5, solver=&apos;newton-cg&apos;).fit(X_train_vectorized, y_train)
+sorted_coef_index = model.coef_[0].argsort()
+
+less = feature_names[sorted_coef_index[:50]]
+most = feature_names[sorted_coef_index[:-51:-1]]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And finally I&amp;#8217;m using the &lt;a href=&quot;https://github.com/amueller/word_cloud&quot;&gt;WordCloud&lt;/a&gt; library to show a word cloud showing the most significant features and another showing the less significant features.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import matplotlib.pyplot as plt
+from wordcloud import WordCloud
+
+less_cloud = WordCloud(max_font_size=50, max_words=100, background_color=&quot;white&quot;).generate(&quot; &quot;.join(less))
+most_cloud = WordCloud(max_font_size=50, max_words=100, background_color=&quot;white&quot;).generate(&quot; &quot;.join(most))
+
+_, ax = plt.subplots(1, 2, figsize=(15, 15))
+
+ax[0].set_title(&quot;MOST SIGNIFICANT WORDS&quot;)
+ax[0].imshow(most_cloud, interpolation=&quot;bilinear&quot;)
+ax[0].axis(&quot;off&quot;)
+
+ax[1].set_title(&quot;LESS SIGNIFICANT WORDS&quot;)
+ax[1].imshow(less_cloud, interpolation=&quot;bilinear&quot;)
+ax[1].axis(&quot;off&quot;)
+
+plt.show()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2021/04/nlp_classifying_news/wordcloud.png&quot; alt=&quot;wordcloud&quot; width=&quot;80%&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Lets use the created model to classify new instances:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;predicting&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;news = [
+    &quot;The last Roaring Twenties ended in disaster. Should investors be worried?&quot;,
+    &quot;Bunny attends baseball game and everyone is in love with it&quot;
+]
+
+model.predict(vec.transform(news))&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Which outputs the expected results: 1 for the first text (busines) and 0 for the second text (not business):&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;literalblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre&gt;[1, 0]&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Wrapping up. These are the &lt;strong&gt;steps I followed&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Data cleaning&lt;/strong&gt;: loading, cleaning, data leakage removal&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Training model&lt;/strong&gt;: splitting data, vectorization, cross validation to look for best parametrization&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Evaluation&lt;/strong&gt;: confusion matrix, area under the curve&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Testing model with new instances&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Things I &lt;strong&gt;could have done better&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;I didn&amp;#8217;t keep some data apart&lt;/strong&gt; from the beginning&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;I didn&amp;#8217;t create a baseline&lt;/strong&gt; to compare the performance of the real classifiers&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;resources&quot;&gt;Resources&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Leakage_(machine_learning)&quot;&gt;Data Leakage definition&lt;/a&gt;: Wikipedia&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://machinelearningmastery.com/data-leakage-machine-learning/&quot;&gt;Data leakage article&lt;/a&gt;: at machinelearningmastery.com&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://medium.com/@saitejaponugoti/stop-words-in-nlp-5b248dadad47&quot;&gt;Stopwords in NLP&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://scikit-learn.org/stable/modules/feature_extraction.html#text-feature-extraction&quot;&gt;Text Feature Extraction in Scikit-Learn&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/amueller/word_cloud&quot;&gt;Wordcloud&lt;/a&gt;: Python library to create word clouds&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
+    <entry>
+        <title>Links of the week</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2021/04/links_otw_20210419.html"/>
+        <updated>2021-04-19T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2021/04/links_otw_20210419.html</id>
+        <category term="ds"/>
+        <category term="jupyter"/>
+        <content type="html">
+            &lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;nlp&quot;&gt;NLP&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Natural Language Processing related articles&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/huggingface/transformers&quot;&gt;Transformers&lt;/a&gt;: State-of-the-art Natural Language Processing for PyTorch and TensorFlow 2.0 (GPT, Bert&amp;#8230;&amp;#8203;)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://towardsdatascience.com/bert-explained-state-of-the-art-language-model-for-nlp-f8b21a9b6270&quot;&gt;BERT Explained&lt;/a&gt;: It turns out BERT is a state-of-the-art NLP algorithm in the area of NLP, so I wanted to know more about it.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://towardsdatascience.com/text-generation-with-python-and-gpt-2-1fecbff1635b&quot;&gt;Using Pytorch and Transformers to generate text&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.analyticsvidhya.com/blog/2019/07/openai-gpt2-text-generator-python/&quot;&gt;Article about generating text with GPT and Python&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.kaggle.com/pavansanagapati/knowledge-graph-nlp-tutorial-bert-spacy-nltk&quot;&gt;Review of NLP history article/notebook&lt;/a&gt;: This is a notebook someone did in Kaggle to review the history of NLP and some of the most popular Python&amp;#8217;s NLP libraries.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://towardsdatascience.com/sentimental-analysis-using-vader-a3415fef7664&quot;&gt;Sentiment Analysis using Vader&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.kaggle.com/zeeshanarif53/a-method-using-sentimentintensityanalyzer&quot;&gt;Kaggle example of NLTK Vader module&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.iflexion.com/blog/sentiment-analysis-python&quot;&gt;Sentimen Analysis libraries in Python&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.digitalocean.com/community/tutorials/how-to-perform-sentiment-analysis-in-python-3-using-the-natural-language-toolkit-nltk&quot;&gt;Sentiment Analysis with NLTK&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;executing_jupyter_notebooks_online&quot;&gt;Executing Jupyter Notebooks online&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The more I study data science staff the more I need to have some Jupyter Notebook at hand to test the ideas and exercises crossing my way.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://colab.research.google.com/&quot;&gt;Google Collab&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.kaggle.com/&quot;&gt;Kaggle&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://mybinder.org/&quot;&gt;Binder&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;kubernetes&quot;&gt;Kubernetes&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://litmuschaos.io/&quot;&gt;Litmus&lt;/a&gt;: Litmus is a tool for doing chaos engineering for Kubernetes&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;orchestrating_ml&quot;&gt;Orchestrating ML&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://airflow.apache.org/&quot;&gt;Apache Airflow&lt;/a&gt;: Airflow is a platform created by the community to programmatically author, schedule and monitor workflows&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
     <entry>
         <title>NLP: Text Similarity</title>
         <author>
