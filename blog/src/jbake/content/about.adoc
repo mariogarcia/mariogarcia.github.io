@@ -4,7 +4,7 @@ type=page
 status=published
 ~~~~~~
 
-Hi, my name is **Mario Garcia** and I'm a software developer. You can
+Hi, my name is **Mario Garcia** and I'm a software engineer. You can
 find some of the code I'm working on at
 https://github.com/mariogarcia[Github]. In order to keep up with
 things happening in the tech world I normally use
@@ -12,5 +12,6 @@ https://twitter.com/marioggar[Twitter]. In case you're interested in
 hiring me, you can reach me at
 https://www.linkedin.com/in/mario-garcia-software-developer[Linkedin]
 
-Because the best way of learning something it trying to explain it to
-others, this blog is my way to explain everything I try to learn.
+[quote]
+Because the best way of learning something is trying to explain it to
+others.
