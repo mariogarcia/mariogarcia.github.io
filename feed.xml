@@ -4,8 +4,1277 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2021-04-26T11:47:58Z</updated>
+    <updated>2021-05-31T12:58:38Z</updated>
     <id>http://github.com/mariogarcia</id>
+    <entry>
+        <title>Bintray is dead! long live Sonatype!</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2021/05/deploy_to_maven_central.html"/>
+        <updated>2021-05-31T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2021/05/deploy_to_maven_central.html</id>
+        <category term="java"/>
+        <category term="gradle"/>
+        <content type="html">
+            &lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2021/05/deploy_to_maven_central/bintray_mess.png&quot; alt=&quot;Bintray is dead&quot; width=&quot;100%&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 1. image by Noah Buscher &lt;a href=&quot;https://unsplash.com/photos/f2feIgqsIXY?utm_source=unsplash&amp;amp;utm_medium=referral&amp;amp;utm_content=creditShareLink&quot;&gt;from Unsplash&lt;/a&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;bintray_is_dead_fk&quot;&gt;Bintray is dead&amp;#8230;&amp;#8203; F##k!&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On February the 3rd, JFrog &lt;a href=&quot;https://jfrog.com/blog/into-the-sunset-bintray-jcenter-gocenter-and-chartcenter/&quot;&gt;announced the EOL (End of Life) of Bintray&lt;/a&gt;. I rekon that at the time I didn&amp;#8217;t believe it could be true. For me Bintray shutting down was like if Github was shutting down, highly improbable.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For many JVM developers Bintay had become the way of publishing jars in the wild. Even Gradle dependency resolution treated Bintray as eternal. But as the song says, &lt;em&gt;nothing lasts forever&amp;#8230;&amp;#8203;&lt;/em&gt; and the day has come, and all these projects need to change the way they&amp;#8217;re published publicly. How ? What was going to be the alternative ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;index&quot;&gt;Index&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This is not supposed to be a detailed guide on how to publish your artefacts, but a general view of the requirements you will need to accomplish in order to be able to publish your artefacts via Sonatype.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#sonatype&quot;&gt;Sonatype&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#pgp&quot;&gt;PGP&lt;/a&gt;&lt;/p&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#creating_keys&quot;&gt;Creating keys&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#creating_subkeys&quot;&gt;Creating Subkeys&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#upload_keys_to_a_public_keyring&quot;&gt;Upload keys to a public keyring&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#gradle&quot;&gt;Gradle&lt;/a&gt;&lt;/p&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#creating_a_gradlekordamp_project&quot;&gt;Creating a Gradle/Kordamp project&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#signing_artifacts&quot;&gt;Signing artifacts&lt;/a&gt;&lt;/p&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#using_private_ring&quot;&gt;Using private ring&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#using_armored_key&quot;&gt;Using armored key&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#publishing_to_sonatype&quot;&gt;Publishing To Sonatype&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#checking_published_artifacts&quot;&gt;Checking published artifacts&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#conclusions&quot;&gt;Conclusions&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;sonatype&quot;&gt;Sonatype&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;After spending a couple of hours looking for an alternative, I found how Sonatype enables you to &lt;a href=&quot;https://central.sonatype.org/publish/publish-guide/#releasing-to-central&quot;&gt;publish to Maven Central&lt;/a&gt;. Sonatype is well known by its artifact repository management tool &lt;a href=&quot;https://www.sonatype.com/products/repository-oss?topnav=true&quot;&gt;Nexus&lt;/a&gt;, but also is a way to deploy your Java artefacts to maven central. Basically the whole process will go through the following steps:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;olist arabic&quot;&gt;
+&lt;ol class=&quot;arabic&quot;&gt;
+&lt;li&gt;
+&lt;p&gt;Create a Sonatype&amp;#8217;s &lt;strong&gt;JIRA account&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Opening a &lt;strong&gt;Jira Ticket&lt;/strong&gt; asking for adding your project space in the public repository&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Sonatype will &lt;strong&gt;challenge&lt;/strong&gt; you to make sure you are the owner of the open source repository you claim you own.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Once they confirm you are who you claim to be, you can start uploading your artifacts, but only after &lt;strong&gt;signing the project artifacts&lt;/strong&gt; with your PGP key.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Publish your signed artifacts&lt;/strong&gt; to Sonatype and sync with Maven central&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A good place to start is to follow the steps at &lt;a href=&quot;https://central.sonatype.org/publish/publish-guide/&quot;&gt;reviewing Sonatype&amp;#8217;s documentation about how to publish new artefacts&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sidebarblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Scope of this article&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This article is only focused on &lt;strong&gt;how to sign and publish your artifacts&lt;/strong&gt; with PGP and Gradle once you&amp;#8217;ve configured your Sonatype account. So it basically covers steps 4 and 5 of the list above.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;#index&quot;&gt;Back to Index&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;pgp&quot;&gt;PGP&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;One of the last steps before configuring your building tool to publish your artifacts is to create your PGP keys. These keys will be used later on to sign your artifacts. Artifacts won&amp;#8217;t be publicly available until they are properly signed.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;creating_keys&quot;&gt;Creating keys&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;One of the requirements to deploy artifacts to Sonatype is to be able to sign those artefacts with a PGP key. Moreover the public key should be available in a public server so that everybody can verify the artifacts&apos; signature. If you&amp;#8217;ve got a Linux OS in your system PGP is probably already installed. To create a new PGP key just execute:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;generate keys&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;gpg --gen-key&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You will be asked to enter the name and email address the key is linked to.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;output&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;john@john-doe:~/Development/repositories$ gpg --gen-key
+gpg (GnuPG) 2.2.20; Copyright (C) 2020 Free Software Foundation, Inc.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+gpg: directory &apos;/home/john/.gnupg&apos; created
+gpg: keybox &apos;/home/john/.gnupg/pubring.kbx&apos; created
+Note: Use &quot;gpg --full-generate-key&quot; for a full featured key generation dialog.
+
+GnuPG needs to construct a user ID to identify your key.
+
+Real name: John Doe
+Email address: john.doe@gmail.com
+You selected this USER-ID:
+    &quot;John Doe &amp;lt;john.doe@gmail.com&amp;gt;&quot;
+
+Change (N)ame, (E)mail, or (O)kay/(Q)uit? O
+We need to generate a lot of random bytes. It is a good idea to perform
+some other action (type on the keyboard, move the mouse, utilize the
+disks) during the prime generation; this gives the random number
+generator a better chance to gain enough entropy.
+We need to generate a lot of random bytes. It is a good idea to perform
+some other action (type on the keyboard, move the mouse, utilize the
+disks) during the prime generation; this gives the random number
+generator a better chance to gain enough entropy.
+gpg: /home/john/.gnupg/trustdb.gpg: trustdb created
+gpg: key 72AC5723BDF6A21E marked as ultimately trusted
+gpg: directory &apos;/home/john/.gnupg/openpgp-revocs.d&apos; created
+gpg: revocation certificate stored as &apos;/home/john/.gnupg/openpgp-revocs.d/5D6F1DECC2C80E320732DADC72AC5723BDF6A21E.rev&apos;
+public and secret key created and signed.
+
+pub   rsa3072 2021-05-09 [SC] [expires: 2023-05-09]
+      5D6F1DECC2C80E320732DADC72AC5723BDF6A21E
+uid                      John Doe &amp;lt;john.doe@gmail.com&amp;gt;
+sub   rsa3072 2021-05-09 [E] [expires: 2023-05-09]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sidebarblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;What are these &apos;pub&apos;, &apos;sub&apos;, &apos;ssb&apos;&amp;#8230;&amp;#8203;&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There&amp;#8217;s &lt;a href=&quot;https://superuser.com/questions/1371088/what-do-ssb-and-sec-mean-in-gpgs-output&quot;&gt;a StackOverflow entry&lt;/a&gt; explaining these terms:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;sec&lt;/strong&gt; &amp;#8658; &apos;SECret key&apos;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;ssb&lt;/strong&gt; &amp;#8658; &apos;Secret SuBkey&apos;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;pub&lt;/strong&gt; &amp;#8658; &apos;PUBlic key&apos;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;sub&lt;/strong&gt; &amp;#8658; &apos;public SUBkey&apos;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;creating_subkeys&quot;&gt;Creating subkeys&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Instead of using our primary key everytime, is better to create a subkey to use it and avoid compromising the primary key. I&amp;#8217;ve found a great tutorial to create subkeys &lt;a href=&quot;https://wiki.debian.org/Subkeys&quot;&gt;here&lt;/a&gt;. The idea is that once the subkey has been created we can create a backup for our primary key, then remove it from the local pubring, publish the subkey to public servers and finally start using the subkey to start signing our artifacts.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;First lets take the primary key id:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;getting primary key id&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;john@john-doe:~/myprojects$ gpg --list-secret-keys --keyid-format short
+/home/john/.gnupg/pubring.kbx
+------------------------------
+sec   rsa3072/99708DF2 2021-05-10 [SC] [expires: 2023-05-10]
+      10DA4D2A8C65A037ADBE2DF0E45B5B8199708DF2
+uid         [ultimate] John Doe &amp;lt;john.doe@gmail.com&amp;gt;
+ssb   rsa3072/17ECACBF 2021-05-10 [E] [expires: 2023-05-10]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sidebarblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;What do [SC] and [E] mean ?&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Another entry at &lt;a href=&quot;https://unix.stackexchange.com/questions/31996/how-are-the-gpg-usage-flags-defined-in-the-key-details-listing&quot;&gt;StackOverflow&lt;/a&gt; answers these questions:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;S &amp;#8594; for signing&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;E &amp;#8594; for encrypting&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Or more specifically:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;PUBKEY_USAGE_SIG: S&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;PUBKEY_USAGE_CERT: C&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;PUBKEY_USAGE_ENC: E&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;PUBKEY_USAGE_AUTH: A&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;With the id &lt;strong&gt;99708DF2&lt;/strong&gt; we can now add a new subkey with the parameter &lt;strong&gt;--edit-key&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;create subkey&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;john@john-doe:~/myprojects$ gpg --edit-key 99708DF2
+gpg (GnuPG) 2.2.20; Copyright (C) 2020 Free Software Foundation, Inc.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Secret key is available.
+
+sec  rsa3072/E45B5B8199708DF2
+     created: 2021-05-10  expires: 2023-05-10  usage: SC
+     trust: ultimate      validity: ultimate
+ssb  rsa3072/58CD43FC17ECACBF
+     created: 2021-05-10  expires: 2023-05-10  usage: E
+[ultimate] (1). John Doe &amp;lt;john.doe@gmail.com&amp;gt;
+
+gpg&amp;gt; addkey
+Please select what kind of key you want:
+   (3) DSA (sign only)
+   (4) RSA (sign only)
+   (5) Elgamal (encrypt only)
+   (6) RSA (encrypt only)
+  (14) Existing key from card
+Your selection? 4
+RSA keys may be between 1024 and 4096 bits long.
+What keysize do you want? (3072) 4096
+Requested keysize is 4096 bits
+Please specify how long the key should be valid.
+         0 = key does not expire
+      &amp;lt;n&amp;gt;  = key expires in n days
+      &amp;lt;n&amp;gt;w = key expires in n weeks
+      &amp;lt;n&amp;gt;m = key expires in n months
+      &amp;lt;n&amp;gt;y = key expires in n years
+Key is valid for? (0) 6m
+Key expires at sáb 06 nov 2021 09:15:10 CET
+Is this correct? (y/N) y
+Really create? (y/N) y
+We need to generate a lot of random bytes. It is a good idea to perform
+some other action (type on the keyboard, move the mouse, utilize the
+disks) during the prime generation; this gives the random number
+generator a better chance to gain enough entropy.
+
+sec  rsa3072/E45B5B8199708DF2
+     created: 2021-05-10  expires: 2023-05-10  usage: SC
+     trust: ultimate      validity: ultimate
+ssb  rsa3072/58CD43FC17ECACBF
+     created: 2021-05-10  expires: 2023-05-10  usage: E
+ssb  rsa4096/B73C6F790D7D2738
+     created: 2021-05-10  expires: 2021-11-06  usage: S
+[ultimate] (1). John Doe &amp;lt;john.doe@gmail.com&amp;gt;
+
+gpg&amp;gt; save&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now in order to keep the primary key safe we need to apply a few more steps:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;BACKUP&lt;/strong&gt; of our &lt;strong&gt;.gnupg&lt;/strong&gt; directory&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;REMOVE&lt;/strong&gt; the entry of your private key at $HOME/.gnupg/private-keys-v1.d/KEYGRIP&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To remove your master private key from the local registry we need to look for an specific entry at &lt;strong&gt;$HOME/.gnupg/private-keys-v1.d/KEYGRIP&lt;/strong&gt; where &lt;strong&gt;KEYGRIP&lt;/strong&gt; value can be found by executing:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;gpg --with-keygrip --list-key
+john@john-doe:~/myprojects$ gpg --with-keygrip --list-key
+/home/john/.gnupg/pubring.kbx
+------------------------------
+pub   rsa3072 2021-05-26 [SC] [expires: 2023-05-26]
+      3E1848F2436069CE448356EDE4E85A9D556DD9BF
+      Keygrip = CBB7481937CA046D81CBB9DC8D7730828F9419D8
+uid           [ultimate] John Doe &amp;lt;john.doe@gmail.com&amp;gt;
+sub   rsa3072 2021-05-26 [E] [expires: 2023-05-26]
+      Keygrip = 7CCE676066967B78D602267DD0E7612F65FF3857
+sub   rsa4096 2021-05-26 [S] [expires: 2021-11-22]
+      Keygrip = DCE1C14FC7815969DD7FB11EAD9A62D92616D49D&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The master keygrip is the one ending in &lt;strong&gt;&amp;#8230;&amp;#8203;419D8&lt;/strong&gt;, so lets go to $HOME/.gnupg/private-keys-v1.d/ list all keys, and delete the master secret key.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;john@john-doe:~/myprojects$ cd $HOME/.gnupg/private-keys-v1.d/
+john@john-doe:~/myprojects$ ls -l
+total 12
+-rw------- 1 john john 1624 may 26 19:21 7CCE676066967B78D602267DD0E7612F65FF3857.key
+-rw------- 1 john john 1608 may 26 19:21 CBB7481937CA046D81CBB9DC8D7730828F9419D8.key
+-rw------- 1 john john 2056 may 26 19:24 DCE1C14FC7815969DD7FB11EAD9A62D92616D49D.key
+
+john@john-doe:~/myprojects$ rm CBB7481937CA046D81CBB9DC8D7730828F9419D8.key&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now if you execute:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;john@john-doe:~/myprojects$ gpg --list-secret-keys --keyid-format short
+/home/john/.gnupg/pubring.kbx
+------------------------------
+sec#  rsa3072/556DD9BF 2021-05-26 [SC] [expires: 2023-05-26]
+      3E1848F2436069CE448356EDE4E85A9D556DD9BF
+uid         [ultimate] John Doe &amp;lt;john.doe@gmail.com&amp;gt;
+ssb   rsa3072/8FD152E3 2021-05-26 [E] [expires: 2023-05-26]
+ssb   rsa4096/E37A78A2 2021-05-26 [S] [expires: 2021-11-22]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You can see that the secret key appears with &lt;strong&gt;sec#&lt;/strong&gt; meaning it&amp;#8217;s not present.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;CHANGE&lt;/strong&gt; the passphrase of the remaining keys&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To add another layer of security, lets change the passphrase so that the primary key has a different passphrase other than the one used for the rest of the keys. To change the rest of the keys passphrase:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;john@john-doe:~/myprojects$ gpg --list-secret-keys --keyid-format short
+/home/john/.gnupg/pubring.kbx
+------------------------------
+sec#  rsa3072/556DD9BF 2021-05-26 [SC] [expires: 2023-05-26]
+      3E1848F2436069CE448356EDE4E85A9D556DD9BF
+uid         [ultimate] John Doe &amp;lt;john.doe@gmail.com&amp;gt;
+ssb   rsa3072/8FD152E3 2021-05-26 [E] [expires: 2023-05-26]
+ssb   rsa4096/E37A78A2 2021-05-26 [S] [expires: 2021-11-22]
+
+john@john-doe:~/myprojects$ gpg --edit-key 556DD9BF
+gpg (GnuPG) 2.2.20; Copyright (C) 2020 Free Software Foundation, Inc.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Secret subkeys are available.
+
+pub  rsa3072/E4E85A9D556DD9BF
+     created: 2021-05-26  expires: 2023-05-26  usage: SC
+     trust: ultimate      validity: ultimate
+ssb  rsa3072/0F75EB9F8FD152E3
+     created: 2021-05-26  expires: 2023-05-26  usage: E
+ssb  rsa4096/B651C5F5E37A78A2
+     created: 2021-05-26  expires: 2021-11-22  usage: S
+[ultimate] (1). John Doe &amp;lt;john.doe@gmail.com&amp;gt;
+
+gpg&amp;gt; passwd
+gpg: key E4E85A9D556DD9BF/E4E85A9D556DD9BF: error changing passphrase: No secret key&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Don&amp;#8217;t bother with the last error, it&amp;#8217;s because it&amp;#8217;s applying the new passphrase to all keys and subkeys, and it can&amp;#8217;t apply it to the primary key because is no longer there.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;upload_keys_to_a_public_keyring&quot;&gt;Upload keys to a public keyring&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Although you&amp;#8217;ve removed the private key all subkeys contain implicitly the original public key. So if you&amp;#8217;re wondering whether you should upload your subkeys or your primary key, the answer is that &lt;strong&gt;either way your master public key&lt;/strong&gt; will be published. Your secret key will remain safe wherever you decided to store it.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To upload your public keys to a public server you can just execute:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;uploading keys to public keyrings&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;gpg --keyserver https://keyserver.ubuntu.com --send-keys 8FD152E3&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In fact, because you can upload your keys to any public server, instead of waiting them to sync each other you can directly upload your keys to the most important ones (see &quot;Which servers does gradle use by default?&quot; below).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Just change they key (--send-keys) with they key you want to publish and the server (-keyserver) with the server you want to upload your key to. From now on everyone who wants to check your artifacts&apos; signatures, they can use your published public keys to do so.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sidebarblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Which servers does Gradle use by default ?&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Because I&amp;#8217;m normally using Gradle for dependency management I was curious to know which PGP servers are configured by default. The &lt;a href=&quot;https://docs.gradle.org/current/userguide/dependency_verification.html&quot;&gt;Gradle documentation about dependency verification&lt;/a&gt; says that it&amp;#8217;s best to look to the current implementation to see which servers are used by default because they may change from version to version.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The thing is that doing a quick search in Gradle&amp;#8217;s github repository gave me &lt;a href=&quot;https://github.com/gradle/gradle/blob/master/subprojects/dependency-management/src/main/java/org/gradle/api/internal/artifacts/ivyservice/ivyresolve/verification/DefaultKeyServers.java&quot;&gt;DefaultKeyServers.java&lt;/a&gt; as the file where default servers are set.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;DefaultKeyServers.java&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-java&quot; data-lang=&quot;java&quot;&gt; private final static List&amp;lt;URI&amp;gt; DEFAULT_KEYSERVERS = ImmutableList.of(
+     uri(&quot;hkp://ha.pool.sks-keyservers.net&quot;),
+     uri(&quot;https://keys.fedoraproject.org&quot;),
+     uri(&quot;https://keyserver.ubuntu.com&quot;),
+     uri(&quot;https://keys.openpgp.org&quot;)
+);&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;#index&quot;&gt;Back to Index&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;gradle&quot;&gt;Gradle&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Because I&amp;#8217;m using Gradle as my build tool of choice for JVM related projects, I need to know how to configure my Gradle project to sign my artifacts (with my previously created PGP keys) and publish them to Maven Central. There&amp;#8217;re some options but lately I&amp;#8217;ve found that using the &lt;a href=&quot;https://kordamp.org/kordamp-gradle-plugins/&quot;&gt;Kordamp Gradle plugins&lt;/a&gt; makes Gradle configuration easier and cleaner, but of course, using directly the &lt;a href=&quot;https://docs.gradle.org/current/userguide/signing_plugin.html&quot;&gt;Gradle signing plugin&lt;/a&gt; is good enough.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;quoteblock&quot;&gt;
+&lt;blockquote&gt;
+This project provides a set of Gradle plugins that follow an opinionated way to build Java and Groovy projects. The conventions define by these plugins closely follow common practices observed in many Open Source projects.
+&lt;/blockquote&gt;
+&lt;div class=&quot;attribution&quot;&gt;
+&amp;#8212; Kordamp documentation
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;creating_a_gradlekordamp_project&quot;&gt;Creating a Gradle/Kordamp project&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;First I&amp;#8217;m creating a Gradle project:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;john@john-doe:~/myprojects$ mkdir mc
+john@john-doe:~/myprojects$ cd mc
+john@john-doe:~/myprojects$ gradle init
+
+Select type of project to generate:
+  1: basic
+  2: application
+  3: library
+  4: Gradle plugin
+Enter selection (default: basic) [1..4] 1
+
+Select build script DSL:
+  1: Groovy
+  2: Kotlin
+Enter selection (default: Groovy) [1..2] 1
+
+Project name (default: gradleinit): mc
+
+
+&amp;gt; Task :init
+Get more help with your project: Learn more about Gradle by exploring our samples at https://docs.gradle.org/6.8/samples&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Next, I&amp;#8217;m creating a structure with two modules that I want to be published to Maven Central: &lt;strong&gt;mc-core&lt;/strong&gt; and &lt;strong&gt;mc-micronaut&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;mc
+ |
+ +---modules
+ |      |
+ |      +---mc-core
+ |      |           |
+ |      |           +----src
+ |      |           |     |
+ |      |           |     +----main
+ |      |           |           |
+ |      |           |           +------groovy
+ |      |           |
+ |      |           +----mc-core.gradle
+ |      |           |
+ |      +---mc-micronaut
+ |      |           |
+ |      |           +----src
+ |      |           |     |
+ |      |           |     +----main
+ |      |           |           |
+ |      |           |           +------groovy
+ |      |           |
+ |      |           +----mc-micronaut.gradle
+ |
+ +---build.gradle
+ |
+ +---settings.gradle&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then, following the &lt;a href=&quot;https://kordamp.org/kordamp-gradle-plugins/&quot;&gt;Kordamp&lt;/a&gt; guide, I&amp;#8217;m configuring my project with Kordamp so that Gradle understands my project structure. First I need to change my &lt;strong&gt;settings.gradle&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;buildscript {
+    repositories {
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath &apos;org.kordamp.gradle:settings-gradle-plugin:0.45.0&apos;
+    }
+}
+apply plugin: &apos;org.kordamp.gradle.settings&apos;
+
+rootProject.name = &apos;mc&apos;
+
+projects {
+    directories = [&apos;modules&apos;]
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And finally I&amp;#8217;m configuring the top &lt;strong&gt;build.gradle&lt;/strong&gt; file and the modules &lt;strong&gt;mc-*.gradle&lt;/strong&gt;. First the &lt;strong&gt;build.gradle&lt;/strong&gt; file. Here we are adding basic information about our project and some common behaviors among all modules such as:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;general info&lt;/strong&gt;: name, description, where is the scm, website&amp;#8230;&amp;#8203;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;licensing&lt;/strong&gt;: which is the source license&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;allprojects&lt;/strong&gt;: common configuration for all projects. In this case I&amp;#8217;m declaring that all modules should be using maven central to resolve their dependencies.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;build.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;plugins {
+    id &apos;org.kordamp.gradle.groovy-project&apos; version &apos;0.45.0&apos;
+}
+
+config {
+
+    info {
+        name          = &apos;mc&apos;
+        vendor        = &apos;mc&apos;
+        description   = &apos;mc does this and that&apos;
+        inceptionYear = &apos;2021&apos;
+        tags          = [&apos;great stuff&apos;]
+
+        links {
+            website      = &apos;https://github.com/somewhere/mc&apos;
+            issueTracker = &apos;https://github.com/somewhere/mc/issues&apos;
+            scm          = &apos;https://github.com/somewhere/mc.git&apos;
+        }
+    }
+
+    licensing {
+        enabled = false
+        includes = [&apos;**/*.groovy&apos;, &apos;**/*.gradle&apos;]
+        licenses {
+            license {
+                id = &apos;Apache-2.0&apos;
+            }
+        }
+    }
+}
+
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Later on I&amp;#8217;m editing &lt;strong&gt;build.gradle&lt;/strong&gt; for adding publishing and signing related information for all modules. For the time being lets finish with the modules &lt;strong&gt;.gradle&lt;/strong&gt; files. These files only are declaring enough information to compile Groovy code.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;mc-core.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;plugins {
+     id &quot;groovy&quot;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;mc-micronaut.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;plugins {
+     id &quot;groovy&quot;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Finally there&amp;#8217;re some properties that I wan&amp;#8217;t to keep tracked by SCM such as:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;group&lt;/strong&gt;: is the group id of the artifacts&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;version&lt;/strong&gt;: the version of the artifacts&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Dependencies in the Java world can be located by their group id, the artifact name and the artifact version. For example if you are using Maven, you will &lt;a href=&quot;https://maven.apache.org/guides/getting-started/index.html#how-do-i-use-external-dependencies&quot;&gt;declare an external dependency&lt;/a&gt; as:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-xml&quot; data-lang=&quot;xml&quot;&gt;&amp;lt;dependencies&amp;gt;
+    &amp;lt;dependency&amp;gt;
+      &amp;lt;groupId&amp;gt;junit&amp;lt;/groupId&amp;gt;
+      &amp;lt;artifactId&amp;gt;junit&amp;lt;/artifactId&amp;gt;
+      &amp;lt;version&amp;gt;4.11&amp;lt;/version&amp;gt;
+      &amp;lt;scope&amp;gt;test&amp;lt;/scope&amp;gt;
+    &amp;lt;/dependency&amp;gt;
+  &amp;lt;/dependencies&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In Gradle, &lt;a href=&quot;https://docs.gradle.org/current/userguide/declaring_dependencies.html&quot;&gt;dependencies&lt;/a&gt; can be declared with different strategies, for example groupId, artifactId and version can be declared explicitly or using a string convention &quot;groupId:artifactId:version&quot;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;dependencies {
+     testImplementation &quot;junit:junit:4.11&quot;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So our modules should declare the group they belong to, their artifact name and their current version.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Here &lt;strong&gt;the artifact name by default corresponds with the module name&lt;/strong&gt;. So we only have to &lt;strong&gt;declare manually the missing properties: version and group&lt;/strong&gt;. You can hardcode them in the build.gradle file directly or in the project&amp;#8217;s gradle.properties file.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;project&amp;#8217;s gradle.properties file&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-properties&quot; data-lang=&quot;properties&quot;&gt;group   = com.github.mc
+version = 0.1.0&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock warning&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-warning&quot; title=&quot;Warning&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+&lt;strong&gt;gradle.properties&lt;/strong&gt; file in the project&amp;#8217;s root directory is only applied to the project whereas the &lt;strong&gt;gradle.properties&lt;/strong&gt; file at $HOME/.gradle/gradle.properties is applied to all Gradle projects in your system, so &lt;strong&gt;make sure you are setting group and version in your project, not in the shared properties file&lt;/strong&gt;.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;When the artifact are published, you will be able, for example to reference &lt;strong&gt;mc-core&lt;/strong&gt; as an external dependency in your project as:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;dependencies {
+     implementation &quot;com.github.mc:mc-core:0.1.0&quot;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;signing_artifacts&quot;&gt;Signing artifacts&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I&amp;#8217;ve considered two ways of signing and deploying your artifacts.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;using_private_ring&quot;&gt;Using private ring&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The first one is to sign and upload your artifacts from your local machine using the private keyring. First of all we need to enable artifact signing in &lt;strong&gt;build.gradle&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;build.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;config {
+     info {
+          // add this after licensing block
+          publishing {
+               signing {
+                    enabled = true
+               }
+          }
+     }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then we need to get the key we&amp;#8217;re using for signing our artefacts:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;john@john-doe:~/myprojects$ gpg --list-keys --keyid-format short
+/home/john/.gnupg/pubring.kbx
+------------------------------
+pub   rsa3072/29F2E1CA 2021-05-08 [SC] [expires: 2023-05-08]
+      642D639C538EF46CC4FA04164B41DF7F29F2E1CA
+uid         [ultimate] johndoe &amp;lt;john.doe@gmail.com&amp;gt;
+sub   rsa3072/EC8AFB99 2021-05-08 [E] [expires: 2023-05-08]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The way the Kordamp Gradle plugin picks up the secret PGP key requires one more step. I need to export my secret subkey to a secret ring.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;export keys&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;gpg --export-secret-keys -o secring.gpg&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;From PGP 2.1 this file has to be created explicitly. The way I&amp;#8217;m configuring the Gradle signing plugin needs the secret ring to be present, but &lt;a href=&quot;https://docs.gradle.org/current/userguide/signing_plugin.html#sec:signatory_credentials&quot;&gt;there&amp;#8217;re other options&lt;/a&gt; as we&amp;#8217;ll see in a moment for the CI mode.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Because credentials &lt;strong&gt;MUST NOT&lt;/strong&gt; be hardcoded in the &lt;strong&gt;build.gradle&lt;/strong&gt; file I&amp;#8217;m keeping credentials values in the &lt;strong&gt;$HOME/.gradle/gradle.properties&lt;/strong&gt; file so that Gradle execution can read them:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Common gradle.properties file at $HOME&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;# to sign artifacts
+signing.keyId=29F2E1CA
+signing.password=mypassphrase
+signing.secretKeyRingFile=/home/john/.gnupg/secring.gpg&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock warning&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-warning&quot; title=&quot;Warning&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+Again, don&amp;#8217;t confuse &lt;strong&gt;$HOME/.gradle/gradle.properties&lt;/strong&gt; with the &lt;strong&gt;project&amp;#8217;s own gradle.properties file&lt;/strong&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This variable name convention comes the official &lt;a href=&quot;https://docs.gradle.org/current/userguide/signing_plugin.html#sec:signatory_credentials&quot;&gt;Gradle signing plugin&lt;/a&gt;. Now before publishing to Sonatype we can test that signing the artifacts is properly configured by publishing artifacts locally:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;publishing locally&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;./gradlew publishToMavenLocal&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Go to your maven local directory and check whether artifacts have been signed or not. You must find some &lt;strong&gt;.asc&lt;/strong&gt; files along with your normal artifacts. For example, our project has two modules, lets check how &lt;strong&gt;mc-core&lt;/strong&gt; has been published to local maven repository:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;publish locally&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;john@john-doe:~/myprojects$ ls -l ~/.m2/repository/com/github/mc/mc-core/0.1.0
+
+-rw-rw-r-- 1 john john  261 may 30 18:43 mc-core-0.1.0-groovydoc.jar
+-rw-rw-r-- 1 john john  821 may 30 18:43 mc-core-0.1.0-groovydoc.jar.asc
+-rw-rw-r-- 1 john john 1310 may 30 18:43 mc-core-0.1.0.jar
+-rw-rw-r-- 1 john john  821 may 30 18:43 mc-core-0.1.0.jar.asc
+-rw-rw-r-- 1 john john  261 may 30 18:43 mc-core-0.1.0-javadoc.jar
+-rw-rw-r-- 1 john john  821 may 30 18:43 mc-core-0.1.0-javadoc.jar.asc
+-rw-rw-r-- 1 john john  798 may 30 18:43 mc-core-0.1.0.pom
+-rw-rw-r-- 1 john john  821 may 30 18:43 mc-core-0.1.0.pom.asc
+-rw-rw-r-- 1 john john  261 may 30 18:43 mc-core-0.1.0-sources.jar
+-rw-rw-r-- 1 john john  821 may 30 18:43 mc-core-0.1.0-sources.jar.asc&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ok everything seems ok, every file produced by Gradle has been signed, now we could start publishing our artifacts to Sonatype. But before that, lets see another way of signing our artifacts.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sidebarblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;verify your files&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You can verify that a given file has been properly signed with your signature by executing for example:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;john@john-doe:~/myprojects$ gpg --verify mc-core-0.1.0.jar.asc mc-core-0.1.0.jar&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You should see in the output something like this at the end:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;gpg: Good signature from &quot;JohnDoe &amp;lt;john.doe@gmail.com&amp;gt;&quot; [ultimate]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect3&quot;&gt;
+&lt;h4 id=&quot;using_armored_key&quot;&gt;Using armored key&lt;/h4&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Another way to use our key is creating an ASCII version of the key, an &lt;strong&gt;armored key&lt;/strong&gt;. This way of signing our artifacts &lt;strong&gt;is specially convenient in a continuous integration environment&lt;/strong&gt; where uploading your private ring is not an option. The idea is to use a configuration file to set anything we need in order to sign the artifacts without depending on any key file.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To do that I&amp;#8217;m going to export a signing subkey (instead of the primary key) as ASCII text, and use that text as a value in a properties file along with the subkey password and keyId. That should allowed me to use that strategy in a continuous integration environment.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sidebarblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Beware of the wild wild west&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Even the most secured CI environment could be compromised, so be careful when using your keys as environment variables:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;If you can avoid it, don&amp;#8217;t use your private keys in public servers, if possible use a private CI&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Never use your primary private key, use a subkey&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Set an expiration date for your subkeys, so that even if exposed, the security hole could also have an expiration date&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Make sure the CI has a mechanism to avoid exposing the private key value to any user in the system&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Remember that if your keys are stolen, the problem is that you may don&amp;#8217;t know they are stolen and somebody could be using them without you noticing it. Really frightening right ? Well not everything is bad news, you can revoke a compromised key at any time with a revocation key.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Before setting the armored key, I&amp;#8217;m setting the key id, and the password of the signing key (the signing subkey we created earlier) in the common gradle.properties file:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;common gradle.properties at $HOME&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-properties&quot; data-lang=&quot;properties&quot;&gt;signingKeyId    = 261EB37A
+signingPassword = passwordyousetforthesubkey&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock note&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-note&quot; title=&quot;Note&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+leave a new line after signingPassword because the next step will add the secret subkey at the end of the file.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As I mentioned an armored key is an plain ASCII version of a key. In this case I&amp;#8217;m getting the armored version of the subkey I want to use to sign my artifacts and setting the &lt;strong&gt;signingKey&lt;/strong&gt; variable value in my common &lt;strong&gt;gradle.properties&lt;/strong&gt;. Because in order to be able to use it as a property value I need to escape newline characters, I&amp;#8217;m using the following snippet &lt;a href=&quot;https://stackoverflow.com/questions/57921325/gradle-signarchives-unable-to-read-secret-key&quot;&gt;I found at stackoverflow&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;setting armored key in $HOME/gradle/gradle.properties&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;gpg --armor --export-secret-subkeys 261EB37A \
+    | awk &apos;NR == 1 { print &quot;signingKey=&quot; } 1&apos; ORS=&apos;\\n&apos; \
+    &amp;gt;&amp;gt; $HOME/.gradle/gradle.properties&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You should see something like the following:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;common gradle.properties at $HOME&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-properties&quot; data-lang=&quot;properties&quot;&gt;signingKeyId    = 261EB37A
+signingPassword = passwordyousetforthesubkey
+signingKey      = signingKey=\n-----BEGIN PGP PRIVATE KEY BLOCK-----\n\nlQGVBGCzu5MMMMMdupzgGgmK4YenNnswpzRELAHWdRSUjus4f...&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then I&amp;#8217;m changing &lt;strong&gt;build.gradle&lt;/strong&gt; in order Gradle to find these values with the name I used in the properties file.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;publishing {
+     signing {
+          enabled    = true
+          keyId      = findProperty(&quot;signingKeyId&quot;)
+          secretKey  = findProperty(&quot;signingKey&quot;)
+          password   = findProperty(&quot;signingPassword&quot;)
+     }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And finally execute the gradle task to publish signed artifacts to local maven repository to check that the artifacts have been signed:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;execute local publishing&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;./gradlew publishToMavenLocal&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;publishToMavenLocal&lt;/strong&gt; task signs the artifacts when publishing because I set the variable &quot;enabled=true&quot; within the publising&amp;#8594;signing configuration block inside &lt;strong&gt;build.gradle&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;publishing_to_sonatype&quot;&gt;Publishing to Sonatype&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ok I&amp;#8217;ve got my artifacts properly signed it&amp;#8217;s time to share them with the rest of the world uploading them to Sonatype. In order to do that, first I need to add the &lt;strong&gt;remote repositories&lt;/strong&gt; where my artifacts are going to be uploaded to the &lt;strong&gt;build.gradle&lt;/strong&gt; file:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;build.gradle&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;config {
+     info {
+          repositories {
+               repository {
+                    name = &apos;releases&apos;
+                    url  = &apos;https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/&apos;
+
+                    credentials {
+                         username = findProperty(&quot;maven.username&quot;)
+                         password = findProperty(&quot;maven.password&quot;)
+                    }
+               }
+               repository {
+                    name = &apos;snapshots&apos;
+                    url  = &apos;https://s01.oss.sonatype.org/content/repositories/snapshots/&apos;
+
+                    credentials {
+                         username = findProperty(&quot;maven.username&quot;)
+                         password = findProperty(&quot;maven.password&quot;)
+                    }
+               }
+          }
+     }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And complete the publishing block:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;build.gradle (cont.)&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;config {
+     info {
+          publishing {
+               enabled             = true
+               releasesRepository  = &apos;releases&apos;
+               snapshotsRepository = &apos;snapshots&apos;
+               signing {
+                    enabled    = !version.endsWith(&quot;-SNAPSHOT&quot;)
+                    keyId      = findProperty(&quot;signingKeyId&quot;)
+                    secretKey  = findProperty(&quot;signingKey&quot;)
+                    password   = findProperty(&quot;signingPassword&quot;)
+               }
+          }
+     }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sidebarblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Don&amp;#8217;t sign SNAPSHOTS&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Snapshots are meant to be overwritten several times before releasing an stable version, so in general signing them is considered overkill. Notice in the build.gradle file how signing is disabled when the version ends with &apos;-SNAPSHOT&apos;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Instead of using your username/password, Sonatype allows you to get an alternative username/password. That way we can avoid using our master username/password everytime a new artifact is signed and deployed. You can reset these credentials at any time, so it may be suitable for example for CI environments. There&amp;#8217;s a &lt;a href=&quot;https://www.youtube.com/watch?v=b5D2EBjLp40&quot;&gt;video tutorial&lt;/a&gt; on how to do that.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock note&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-note&quot; title=&quot;Note&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+Remember that the URL to get your new credentials is not &lt;a href=&quot;https://oss.sonatype.org&quot; class=&quot;bare&quot;&gt;https://oss.sonatype.org&lt;/a&gt; but &lt;a href=&quot;https://s01.oss.sonatype.org&quot; class=&quot;bare&quot;&gt;https://s01.oss.sonatype.org&lt;/a&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Again use &lt;strong&gt;$HOME/.gradle/gradle.properties&lt;/strong&gt; file to store your variable names:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;gradle.properties at $HOME/.gradle/gradle.properties&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-properties&quot; data-lang=&quot;properties&quot;&gt;maven.username=username
+maven.password=alternativepassword&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If you&amp;#8217;d like to start uploading your artifacts as snapshots to test your settings, change your version to &apos;0.1.0-SNAPSHOT&apos; and publish to Sonatype as:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;publishing snapshots&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;./gradlew publishAllPublicationsToSnapshotsRepository&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And once your are completely sure you&amp;#8217;d like to release an stable version (remember you can&amp;#8217;t remove an already published release from maven central), you can execute:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;publish to sonatype&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;./gradlew publish&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If everything went ok, all our signed artifacts will be uploaded to Sonatype and eventually synchronized to Maven Central.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;#index&quot;&gt;Back to Index&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;checking_published_artifacts&quot;&gt;Checking published artifacts&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To check that your files have been uploaded properly you can go to &lt;a href=&quot;https://s01.oss.sonatype.org&quot; class=&quot;bare&quot;&gt;https://s01.oss.sonatype.org&lt;/a&gt; with your JIRA credentials.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;When you created your namespace in Sonatype, according to the mail the send you (see below), you should comment to that email to tell them to synchronize the repo to maven central, but sometimes, depending on your publishing configuration, after a couple minutes it&amp;#8217;s not necessary, and your artifacts can be found at central.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;#index&quot;&gt;Back to Index&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;conclusions&quot;&gt;Conclusions&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Writing this article I realized how Bintray made our lifes easier, specially not having to deal with security issues such as managing our own PGP keys. But hey! somebody said that with a great power comes a great responsibility, that&amp;#8217;s why, besides the building tool you are going to use for publishing your artifacts, I think is worth remembering the following tips:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;PGP KEYS&lt;/p&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Use decent passwords for your keys&lt;/strong&gt;: Don&amp;#8217;t leave keys without password or with an obvious one like admin and alike.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Keep master and subkeys separated&lt;/strong&gt;: It will make it easier to keep the primary key safe.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Always use a subkey&lt;/strong&gt;: if your lose your subkey or it is stolen you can always revoke it so that everybody knows that key is no longer valid.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Set a reasonable expiration date&lt;/strong&gt;: you can always change expiration time later on.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Backup your keys&lt;/strong&gt;: Redundancy&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;SONATYPE CREDENTIALS&lt;/p&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;use alternative username/password&lt;/strong&gt;: you can always revoke them using the original username/passwords.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;GRADLE&lt;/p&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Don&amp;#8217;t include your credentials inside your project&amp;#8217;s files&lt;/strong&gt;: make sure your credentials stay away from your source control system (Git, Subversion&amp;#8230;&amp;#8203;etc). To store your credentials, you can use &lt;strong&gt;$HOME/.gradle/gradle.properties&lt;/strong&gt; which is outside your project, but still visible for Gradle when building your project. You can also set temporary &lt;a href=&quot;https://docs.gradle.org/current/userguide/build_environment.html#sec:project_properties&quot;&gt;local environment variables&lt;/a&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;CONTINUOUS INTEGRATION&lt;/p&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;use armored keys&lt;/strong&gt;: armored keys content can be easily used in a CI environment as variable value.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;use CI features for protecting sensitive variables&lt;/strong&gt;: Don&amp;#8217;t expose your credentials as plain text variables. Environments like Github or Gitlab can set sensitive variables.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;always use subkeys&lt;/strong&gt;: don&amp;#8217;t use your primary key in a public environment, keep your primary key safe. If a subkey gets exposed, you can always create a revocation key with your primary subkey.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;#index&quot;&gt;Back to Index&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;resources&quot;&gt;RESOURCES&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Here are most, if not all the resources I&amp;#8217;ve checked to create the current article.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;gradlemaven&quot;&gt;Gradle/Maven&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://docs.gradle.org/current/userguide/signing_plugin.html&quot;&gt;Gradle Signing Plugin&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://kordamp.org/kordamp-gradle-plugins/&quot;&gt;Kordamp Gradle Plugins&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://central.sonatype.org/publish/publish-guide/&quot;&gt;Sonatype Publish Guide&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://jfrog.com/blog/into-the-sunset-bintray-jcenter-gocenter-and-chartcenter/&quot;&gt;End of life of Bintray&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://kordamp.org/kordamp-gradle-plugins/#_publishing_signing&quot;&gt;Signing artifacts with Kordamp section&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://blog.sonatype.com/2010/01/how-to-generate-pgp-signatures-with-maven/&quot;&gt;Generate PGP signatures with Maven&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://medium.com/geekculture/how-to-publish-artifacts-on-maven-central-24342fd286cd&quot;&gt;How to Publish Artifacts on Maven Central&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://zambrovski.medium.com/foss-ci-cd-with-github-actions-c65c37236c19&quot;&gt;Deploying to Maven Central using CI&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://stackoverflow.com/questions/27936119/gradle-uploadarchives-task-unable-to-read-secret-key&quot;&gt;StackOverflow&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://stackoverflow.com/questions/49273023/gradle-build-configured-signatory/52479032&quot;&gt;StackOverflow&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://stackoverflow.com/questions/57921325/gradle-signarchives-unable-to-read-secret-key&quot;&gt;StackOverflow&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://docs.gradle.org/current/userguide/build_environment.html&quot;&gt;How to setup variables&lt;/a&gt;: use of gradle.properties&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/vanniktech/gradle-maven-publish-plugin&quot;&gt;alternative Gradle plugin for signing artifacts&lt;/a&gt; having support for setting all types of parameters in gradle.properties by convention.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://jorge.aguilera.soy/blog/2021/publicar-maven.html&quot;&gt;Como publicar en Maven Central (Spanish)&lt;/a&gt;: Una buenisima guia en español para publicar tus artefactos en Sonatype y que sincroncen en Maven Central de la mano del gran Jorge Aguilera.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;gnupg&quot;&gt;GNUPG&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.gnupg.org/gph/en/manual/x56.html&quot;&gt;GNUPG: Exporting PGP keys&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.gnupg.org/gph/en/manual/c235.html&quot;&gt;GNUPG: Key Management&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://help.ubuntu.com/community/GnuPrivacyGuardHowto&quot;&gt;Some basic commands to manage your PGP keys&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://wiki.debian.org/Subkeys&quot;&gt;How to create subkeys&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Buff, that was a lot to read, I hope it helps.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;#index&quot;&gt;Back to Index&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
     <entry>
         <title>NLP: Classifying Business News</title>
         <author>
