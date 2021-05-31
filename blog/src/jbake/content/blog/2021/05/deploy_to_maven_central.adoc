@@ -1,0 +1,881 @@
+= Bintray is dead! long live Sonatype!
+@marioggar
+2021-05-31
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: java, gradle
+:idprefix:
+:summary: Kordamp + Gradle + PGP
+:summary_image: java.png
+
+.image by Noah Buscher https://unsplash.com/photos/f2feIgqsIXY?utm_source=unsplash&utm_medium=referral&utm_content=creditShareLink[from Unsplash]
+image::2021/05/deploy_to_maven_central/bintray_mess.png[alt="Bintray is dead", align="center", width="100%"]
+
+== Bintray is dead... F##k!
+
+On February the 3rd, JFrog https://jfrog.com/blog/into-the-sunset-bintray-jcenter-gocenter-and-chartcenter/[announced the EOL (End of Life) of Bintray]. I rekon that at the time I didn't believe it could be true. For me Bintray shutting down was like if Github was shutting down, highly improbable.
+
+For many JVM developers Bintay had become the way of publishing jars in the wild. Even Gradle dependency resolution treated Bintray as eternal. But as the song says, _nothing lasts forever..._ and the day has come, and all these projects need to change the way they're published publicly. How ? What was going to be the alternative ? 
+
+== Index
+
+This is not supposed to be a detailed guide on how to publish your artefacts, but a general view of the requirements you will need to accomplish in order to be able to publish your artefacts via Sonatype.
+
+* link:#sonatype[Sonatype]
+* link:#pgp[PGP]
+** link:#creating_keys[Creating keys]
+** link:#creating_subkeys[Creating Subkeys]
+** link:#upload_keys_to_a_public_keyring[Upload keys to a public keyring]
+* link:#gradle[Gradle]
+** link:#creating_a_gradlekordamp_project[Creating a Gradle/Kordamp project]
+** link:#signing_artifacts[Signing artifacts]
+*** link:#using_private_ring[Using private ring]
+*** link:#using_armored_key[Using armored key]
+** link:#publishing_to_sonatype[Publishing To Sonatype]
+* link:#checking_published_artifacts[Checking published artifacts]
+* link:#conclusions[Conclusions]
+
+== Sonatype
+
+After spending a couple of hours looking for an alternative, I found how Sonatype enables you to https://central.sonatype.org/publish/publish-guide/#releasing-to-central[publish to Maven Central]. Sonatype is well known by its artifact repository management tool https://www.sonatype.com/products/repository-oss?topnav=true[Nexus], but also is a way to deploy your Java artefacts to maven central. Basically the whole process will go through the following steps:
+
+1. Create a Sonatype's **JIRA account**
+2. Opening a **Jira Ticket** asking for adding your project space in the public repository
+3. Sonatype will **challenge** you to make sure you are the owner of the open source repository you claim you own.
+4. Once they confirm you are who you claim to be, you can start uploading your artifacts, but only after **signing the project artifacts** with your PGP key.
+5. **Publish your signed artifacts** to Sonatype and sync with Maven central
+
+A good place to start is to follow the steps at https://central.sonatype.org/publish/publish-guide/[reviewing Sonatype's documentation about how to publish new artefacts]. 
+
+.Scope of this article
+****
+This article is only focused on **how to sign and publish your artifacts** with PGP and Gradle once you've configured your Sonatype account. So it basically covers steps 4 and 5 of the list above.
+****
+
+link:#index[Back to Index]
+
+== PGP
+
+One of the last steps before configuring your building tool to publish your artifacts is to create your PGP keys. These keys will be used later on to sign your artifacts. Artifacts won't be publicly available until they are properly signed.
+
+=== Creating keys
+
+One of the requirements to deploy artifacts to Sonatype is to be able to sign those artefacts with a PGP key. Moreover the public key should be available in a public server so that everybody can verify the artifacts' signature. If you've got a Linux OS in your system PGP is probably already installed. To create a new PGP key just execute:
+
+[source, shell]
+.generate keys
+----
+gpg --gen-key
+----
+
+You will be asked to enter the name and email address the key is linked to.
+
+[source, shell]
+.output
+----
+john@john-doe:~/Development/repositories$ gpg --gen-key
+gpg (GnuPG) 2.2.20; Copyright (C) 2020 Free Software Foundation, Inc.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+gpg: directory '/home/john/.gnupg' created
+gpg: keybox '/home/john/.gnupg/pubring.kbx' created
+Note: Use "gpg --full-generate-key" for a full featured key generation dialog.
+
+GnuPG needs to construct a user ID to identify your key.
+
+Real name: John Doe
+Email address: john.doe@gmail.com
+You selected this USER-ID:
+    "John Doe <john.doe@gmail.com>"
+
+Change (N)ame, (E)mail, or (O)kay/(Q)uit? O
+We need to generate a lot of random bytes. It is a good idea to perform
+some other action (type on the keyboard, move the mouse, utilize the
+disks) during the prime generation; this gives the random number
+generator a better chance to gain enough entropy.
+We need to generate a lot of random bytes. It is a good idea to perform
+some other action (type on the keyboard, move the mouse, utilize the
+disks) during the prime generation; this gives the random number
+generator a better chance to gain enough entropy.
+gpg: /home/john/.gnupg/trustdb.gpg: trustdb created
+gpg: key 72AC5723BDF6A21E marked as ultimately trusted
+gpg: directory '/home/john/.gnupg/openpgp-revocs.d' created
+gpg: revocation certificate stored as '/home/john/.gnupg/openpgp-revocs.d/5D6F1DECC2C80E320732DADC72AC5723BDF6A21E.rev'
+public and secret key created and signed.
+
+pub   rsa3072 2021-05-09 [SC] [expires: 2023-05-09]
+      5D6F1DECC2C80E320732DADC72AC5723BDF6A21E
+uid                      John Doe <john.doe@gmail.com>
+sub   rsa3072 2021-05-09 [E] [expires: 2023-05-09]
+----
+
+.What are these 'pub', 'sub', 'ssb'...
+****
+
+There's https://superuser.com/questions/1371088/what-do-ssb-and-sec-mean-in-gpgs-output[a StackOverflow entry] explaining these terms:
+
+- **sec** => 'SECret key'
+- **ssb** => 'Secret SuBkey'
+- **pub** => 'PUBlic key'
+- **sub** => 'public SUBkey'
+
+****
+
+=== Creating subkeys
+
+Instead of using our primary key everytime, is better to create a subkey to use it and avoid compromising the primary key. I've found a great tutorial to create subkeys https://wiki.debian.org/Subkeys[here]. The idea is that once the subkey has been created we can create a backup for our primary key, then remove it from the local pubring, publish the subkey to public servers and finally start using the subkey to start signing our artifacts. 
+
+First lets take the primary key id:
+
+[source, shell]
+.getting primary key id
+----
+john@john-doe:~/myprojects$ gpg --list-secret-keys --keyid-format short
+/home/john/.gnupg/pubring.kbx
+------------------------------                                                                           
+sec   rsa3072/99708DF2 2021-05-10 [SC] [expires: 2023-05-10]
+      10DA4D2A8C65A037ADBE2DF0E45B5B8199708DF2
+uid         [ultimate] John Doe <john.doe@gmail.com> 
+ssb   rsa3072/17ECACBF 2021-05-10 [E] [expires: 2023-05-10]
+----
+
+.What do [SC] and [E] mean ?
+****
+Another entry at https://unix.stackexchange.com/questions/31996/how-are-the-gpg-usage-flags-defined-in-the-key-details-listing[StackOverflow] answers these questions:
+
+- S -> for signing
+- E -> for encrypting
+
+Or more specifically:
+
+- PUBKEY_USAGE_SIG: S
+- PUBKEY_USAGE_CERT: C
+- PUBKEY_USAGE_ENC: E
+- PUBKEY_USAGE_AUTH: A
+****
+
+With the id **99708DF2** we can now add a new subkey with the parameter **--edit-key**:
+
+[source, shell]
+.create subkey
+----
+john@john-doe:~/myprojects$ gpg --edit-key 99708DF2
+gpg (GnuPG) 2.2.20; Copyright (C) 2020 Free Software Foundation, Inc.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Secret key is available.
+
+sec  rsa3072/E45B5B8199708DF2
+     created: 2021-05-10  expires: 2023-05-10  usage: SC  
+     trust: ultimate      validity: ultimate
+ssb  rsa3072/58CD43FC17ECACBF
+     created: 2021-05-10  expires: 2023-05-10  usage: E   
+[ultimate] (1). John Doe <john.doe@gmail.com>
+
+gpg> addkey 
+Please select what kind of key you want:
+   (3) DSA (sign only)
+   (4) RSA (sign only)
+   (5) Elgamal (encrypt only)
+   (6) RSA (encrypt only)
+  (14) Existing key from card
+Your selection? 4
+RSA keys may be between 1024 and 4096 bits long.
+What keysize do you want? (3072) 4096
+Requested keysize is 4096 bits
+Please specify how long the key should be valid.
+         0 = key does not expire
+      <n>  = key expires in n days
+      <n>w = key expires in n weeks
+      <n>m = key expires in n months
+      <n>y = key expires in n years
+Key is valid for? (0) 6m
+Key expires at sáb 06 nov 2021 09:15:10 CET
+Is this correct? (y/N) y
+Really create? (y/N) y
+We need to generate a lot of random bytes. It is a good idea to perform
+some other action (type on the keyboard, move the mouse, utilize the
+disks) during the prime generation; this gives the random number
+generator a better chance to gain enough entropy.
+
+sec  rsa3072/E45B5B8199708DF2
+     created: 2021-05-10  expires: 2023-05-10  usage: SC  
+     trust: ultimate      validity: ultimate
+ssb  rsa3072/58CD43FC17ECACBF
+     created: 2021-05-10  expires: 2023-05-10  usage: E   
+ssb  rsa4096/B73C6F790D7D2738
+     created: 2021-05-10  expires: 2021-11-06  usage: S   
+[ultimate] (1). John Doe <john.doe@gmail.com>
+
+gpg> save
+----
+
+Now in order to keep the primary key safe we need to apply a few more steps:
+
+- **BACKUP** of our **.gnupg** directory
+- **REMOVE** the entry of your private key at $HOME/.gnupg/private-keys-v1.d/KEYGRIP 
+
+To remove your master private key from the local registry we need to look for an specific entry at **$HOME/.gnupg/private-keys-v1.d/KEYGRIP** where **KEYGRIP** value can be found by executing:
+
+[source, shell]
+----
+gpg --with-keygrip --list-key 
+john@john-doe:~/myprojects$ gpg --with-keygrip --list-key
+/home/john/.gnupg/pubring.kbx
+------------------------------
+pub   rsa3072 2021-05-26 [SC] [expires: 2023-05-26]
+      3E1848F2436069CE448356EDE4E85A9D556DD9BF
+      Keygrip = CBB7481937CA046D81CBB9DC8D7730828F9419D8
+uid           [ultimate] John Doe <john.doe@gmail.com>
+sub   rsa3072 2021-05-26 [E] [expires: 2023-05-26]
+      Keygrip = 7CCE676066967B78D602267DD0E7612F65FF3857
+sub   rsa4096 2021-05-26 [S] [expires: 2021-11-22]
+      Keygrip = DCE1C14FC7815969DD7FB11EAD9A62D92616D49D
+----
+
+The master keygrip is the one ending in **...419D8**, so lets go to $HOME/.gnupg/private-keys-v1.d/ list all keys, and delete the master secret key.
+
+[source, shell]
+----
+john@john-doe:~/myprojects$ cd $HOME/.gnupg/private-keys-v1.d/
+john@john-doe:~/myprojects$ ls -l
+total 12
+-rw------- 1 john john 1624 may 26 19:21 7CCE676066967B78D602267DD0E7612F65FF3857.key
+-rw------- 1 john john 1608 may 26 19:21 CBB7481937CA046D81CBB9DC8D7730828F9419D8.key
+-rw------- 1 john john 2056 may 26 19:24 DCE1C14FC7815969DD7FB11EAD9A62D92616D49D.key
+
+john@john-doe:~/myprojects$ rm CBB7481937CA046D81CBB9DC8D7730828F9419D8.key
+----
+
+Now if you execute:
+
+[source, shell]
+----
+john@john-doe:~/myprojects$ gpg --list-secret-keys --keyid-format short
+/home/john/.gnupg/pubring.kbx
+------------------------------
+sec#  rsa3072/556DD9BF 2021-05-26 [SC] [expires: 2023-05-26]
+      3E1848F2436069CE448356EDE4E85A9D556DD9BF
+uid         [ultimate] John Doe <john.doe@gmail.com>
+ssb   rsa3072/8FD152E3 2021-05-26 [E] [expires: 2023-05-26]
+ssb   rsa4096/E37A78A2 2021-05-26 [S] [expires: 2021-11-22]
+----
+
+You can see that the secret key appears with **sec#** meaning it's not present.
+
+- **CHANGE** the passphrase of the remaining keys
+
+To add another layer of security, lets change the passphrase so that the primary key has a different passphrase other than the one used for the rest of the keys. To change the rest of the keys passphrase: 
+
+[source, shell]
+----
+john@john-doe:~/myprojects$ gpg --list-secret-keys --keyid-format short
+/home/john/.gnupg/pubring.kbx
+------------------------------
+sec#  rsa3072/556DD9BF 2021-05-26 [SC] [expires: 2023-05-26]
+      3E1848F2436069CE448356EDE4E85A9D556DD9BF
+uid         [ultimate] John Doe <john.doe@gmail.com>
+ssb   rsa3072/8FD152E3 2021-05-26 [E] [expires: 2023-05-26]
+ssb   rsa4096/E37A78A2 2021-05-26 [S] [expires: 2021-11-22]
+
+john@john-doe:~/myprojects$ gpg --edit-key 556DD9BF
+gpg (GnuPG) 2.2.20; Copyright (C) 2020 Free Software Foundation, Inc.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Secret subkeys are available.
+
+pub  rsa3072/E4E85A9D556DD9BF
+     created: 2021-05-26  expires: 2023-05-26  usage: SC  
+     trust: ultimate      validity: ultimate
+ssb  rsa3072/0F75EB9F8FD152E3
+     created: 2021-05-26  expires: 2023-05-26  usage: E   
+ssb  rsa4096/B651C5F5E37A78A2
+     created: 2021-05-26  expires: 2021-11-22  usage: S   
+[ultimate] (1). John Doe <john.doe@gmail.com>
+
+gpg> passwd 
+gpg: key E4E85A9D556DD9BF/E4E85A9D556DD9BF: error changing passphrase: No secret key
+----
+
+Don't bother with the last error, it's because it's applying the new passphrase to all keys and subkeys, and it can't apply it to the primary key because is no longer there.
+
+=== Upload keys to a public keyring
+
+Although you've removed the private key all subkeys contain implicitly the original public key. So if you're wondering whether you should upload your subkeys or your primary key, the answer is that **either way your master public key** will be published. Your secret key will remain safe wherever you decided to store it.
+
+To upload your public keys to a public server you can just execute: 
+
+[source, shell]
+.uploading keys to public keyrings
+----
+gpg --keyserver https://keyserver.ubuntu.com --send-keys 8FD152E3
+----
+
+In fact, because you can upload your keys to any public server, instead of waiting them to sync each other you can directly upload your keys to the most important ones (see "Which servers does gradle use by default?" below).
+
+Just change they key (--send-keys) with they key you want to publish and the server (-keyserver) with the server you want to upload your key to. From now on everyone who wants to check your artifacts' signatures, they can use your published public keys to do so.
+
+.Which servers does Gradle use by default ?
+****
+
+Because I'm normally using Gradle for dependency management I was curious to know which PGP servers are configured by default. The https://docs.gradle.org/current/userguide/dependency_verification.html[Gradle documentation about dependency verification] says that it's best to look to the current implementation to see which servers are used by default because they may change from version to version.
+
+The thing is that doing a quick search in Gradle's github repository gave me https://github.com/gradle/gradle/blob/master/subprojects/dependency-management/src/main/java/org/gradle/api/internal/artifacts/ivyservice/ivyresolve/verification/DefaultKeyServers.java[DefaultKeyServers.java] as the file where default servers are set.
+
+[source, java]
+.DefaultKeyServers.java
+----
+ private final static List<URI> DEFAULT_KEYSERVERS = ImmutableList.of(
+     uri("hkp://ha.pool.sks-keyservers.net"),
+     uri("https://keys.fedoraproject.org"),
+     uri("https://keyserver.ubuntu.com"),
+     uri("https://keys.openpgp.org")
+);
+----
+****
+
+link:#index[Back to Index]
+
+== Gradle
+
+Because I'm using Gradle as my build tool of choice for JVM related projects, I need to know how to configure my Gradle project to sign my artifacts (with my previously created PGP keys) and publish them to Maven Central. There're some options but lately I've found that using the https://kordamp.org/kordamp-gradle-plugins/[Kordamp Gradle plugins] makes Gradle configuration easier and cleaner, but of course, using directly the https://docs.gradle.org/current/userguide/signing_plugin.html[Gradle signing plugin] is good enough.
+
+[quote, Kordamp documentation]
+This project provides a set of Gradle plugins that follow an opinionated way to build Java and Groovy projects. The conventions define by these plugins closely follow common practices observed in many Open Source projects.
+
+=== Creating a Gradle/Kordamp project
+
+First I'm creating a Gradle project: 
+
+[source, shell]
+----
+john@john-doe:~/myprojects$ mkdir mc
+john@john-doe:~/myprojects$ cd mc
+john@john-doe:~/myprojects$ gradle init
+
+Select type of project to generate:
+  1: basic
+  2: application
+  3: library
+  4: Gradle plugin
+Enter selection (default: basic) [1..4] 1
+
+Select build script DSL:
+  1: Groovy
+  2: Kotlin
+Enter selection (default: Groovy) [1..2] 1
+
+Project name (default: gradleinit): mc
+
+
+> Task :init
+Get more help with your project: Learn more about Gradle by exploring our samples at https://docs.gradle.org/6.8/samples
+----
+
+Next, I'm creating a structure with two modules that I want to be published to Maven Central: **mc-core** and **mc-micronaut**:
+
+[source, text]
+----
+mc
+ |
+ +---modules
+ |      |
+ |      +---mc-core
+ |      |           |
+ |      |           +----src
+ |      |           |     |
+ |      |           |     +----main
+ |      |           |           |
+ |      |           |           +------groovy
+ |      |           |
+ |      |           +----mc-core.gradle
+ |      |           |
+ |      +---mc-micronaut
+ |      |           |
+ |      |           +----src
+ |      |           |     |
+ |      |           |     +----main
+ |      |           |           |
+ |      |           |           +------groovy
+ |      |           |
+ |      |           +----mc-micronaut.gradle
+ |
+ +---build.gradle
+ |
+ +---settings.gradle
+----
+
+Then, following the https://kordamp.org/kordamp-gradle-plugins/[Kordamp] guide, I'm configuring my project with Kordamp so that Gradle understands my project structure. First I need to change my **settings.gradle**
+
+[source, groovy]
+----
+buildscript {
+    repositories {
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath 'org.kordamp.gradle:settings-gradle-plugin:0.45.0'
+    }
+}
+apply plugin: 'org.kordamp.gradle.settings'
+
+rootProject.name = 'mc'
+
+projects {
+    directories = ['modules']
+}
+----
+
+And finally I'm configuring the top **build.gradle** file and the modules **mc-*.gradle**. First the **build.gradle** file. Here we are adding basic information about our project and some common behaviors among all modules such as: 
+
+- **general info**: name, description, where is the scm, website...
+- **licensing**: which is the source license
+- **allprojects**: common configuration for all projects. In this case I'm declaring that all modules should be using maven central to resolve their dependencies.
+
+[source, groovy]
+.build.gradle
+----
+plugins {
+    id 'org.kordamp.gradle.groovy-project' version '0.45.0'
+}
+
+config {
+    
+    info {
+        name          = 'mc'
+        vendor        = 'mc'
+        description   = 'mc does this and that'
+        inceptionYear = '2021'
+        tags          = ['great stuff']
+
+        links {
+            website      = 'https://github.com/somewhere/mc'
+            issueTracker = 'https://github.com/somewhere/mc/issues'
+            scm          = 'https://github.com/somewhere/mc.git'
+        }
+    }
+
+    licensing {
+        enabled = false
+        includes = ['**/*.groovy', '**/*.gradle']
+        licenses {
+            license {
+                id = 'Apache-2.0'
+            }
+        }
+    }
+}
+
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+}
+----
+
+Later on I'm editing **build.gradle** for adding publishing and signing related information for all modules. For the time being lets finish with the modules **.gradle** files. These files only are declaring enough information to compile Groovy code.
+
+[source, groovy]
+.mc-core.gradle
+----
+plugins {
+     id "groovy"
+}
+----
+
+[source, groovy]
+.mc-micronaut.gradle
+----
+plugins {
+     id "groovy"
+}
+----
+
+Finally there're some properties that I wan't to keep tracked by SCM such as: 
+
+- **group**: is the group id of the artifacts
+- **version**: the version of the artifacts
+
+Dependencies in the Java world can be located by their group id, the artifact name and the artifact version. For example if you are using Maven, you will https://maven.apache.org/guides/getting-started/index.html#how-do-i-use-external-dependencies[declare an external dependency] as:
+
+[source, xml]
+----
+<dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+----
+
+In Gradle, https://docs.gradle.org/current/userguide/declaring_dependencies.html[dependencies] can be declared with different strategies, for example groupId, artifactId and version can be declared explicitly or using a string convention "groupId:artifactId:version":
+
+[source, groovy]
+----
+dependencies {
+     testImplementation "junit:junit:4.11"
+}
+----
+
+So our modules should declare the group they belong to, their artifact name and their current version.
+
+Here **the artifact name by default corresponds with the module name**. So we only have to **declare manually the missing properties: version and group**. You can hardcode them in the build.gradle file directly or in the project's gradle.properties file.
+
+[source, properties]
+.project's gradle.properties file
+----
+group   = com.github.mc
+version = 0.1.0
+----
+
+WARNING: **gradle.properties** file in the project's root directory is only applied to the project whereas the **gradle.properties** file at $HOME/.gradle/gradle.properties is applied to all Gradle projects in your system, so **make sure you are setting group and version in your project, not in the shared properties file**.
+
+When the artifact are published, you will be able, for example to reference **mc-core** as an external dependency in your project as: 
+
+[source, groovy]
+----
+dependencies {
+     implementation "com.github.mc:mc-core:0.1.0"
+}
+----
+
+=== Signing artifacts
+
+I've considered two ways of signing and deploying your artifacts. 
+
+==== Using private ring
+
+The first one is to sign and upload your artifacts from your local machine using the private keyring. First of all we need to enable artifact signing in **build.gradle**:
+
+[source, groovy]
+.build.gradle
+----
+config {
+     info {
+          // add this after licensing block
+          publishing {
+               signing {
+                    enabled = true
+               }
+          }
+     }
+}
+----
+
+Then we need to get the key we're using for signing our artefacts:
+
+[source, shell]
+----
+john@john-doe:~/myprojects$ gpg --list-keys --keyid-format short
+/home/john/.gnupg/pubring.kbx
+------------------------------
+pub   rsa3072/29F2E1CA 2021-05-08 [SC] [expires: 2023-05-08]
+      642D639C538EF46CC4FA04164B41DF7F29F2E1CA
+uid         [ultimate] johndoe <john.doe@gmail.com>
+sub   rsa3072/EC8AFB99 2021-05-08 [E] [expires: 2023-05-08]
+----
+
+The way the Kordamp Gradle plugin picks up the secret PGP key requires one more step. I need to export my secret subkey to a secret ring.
+
+[source, shell]
+.export keys
+----
+gpg --export-secret-keys -o secring.gpg
+----
+
+From PGP 2.1 this file has to be created explicitly. The way I'm configuring the Gradle signing plugin needs the secret ring to be present, but https://docs.gradle.org/current/userguide/signing_plugin.html#sec:signatory_credentials[there're other options] as we'll see in a moment for the CI mode.
+
+Because credentials **MUST NOT** be hardcoded in the **build.gradle** file I'm keeping credentials values in the **$HOME/.gradle/gradle.properties** file so that Gradle execution can read them:
+
+[source, shell]
+.Common gradle.properties file at $HOME
+----
+# to sign artifacts
+signing.keyId=29F2E1CA
+signing.password=mypassphrase
+signing.secretKeyRingFile=/home/john/.gnupg/secring.gpg
+----
+
+WARNING: Again, don't confuse **$HOME/.gradle/gradle.properties** with the **project's own gradle.properties file**
+
+This variable name convention comes the official https://docs.gradle.org/current/userguide/signing_plugin.html#sec:signatory_credentials[Gradle signing plugin]. Now before publishing to Sonatype we can test that signing the artifacts is properly configured by publishing artifacts locally: 
+
+[source, shell]
+.publishing locally
+----
+./gradlew publishToMavenLocal
+----
+
+Go to your maven local directory and check whether artifacts have been signed or not. You must find some **.asc** files along with your normal artifacts. For example, our project has two modules, lets check how **mc-core** has been published to local maven repository:
+
+[source, shell]
+.publish locally
+----
+john@john-doe:~/myprojects$ ls -l ~/.m2/repository/com/github/mc/mc-core/0.1.0
+
+-rw-rw-r-- 1 john john  261 may 30 18:43 mc-core-0.1.0-groovydoc.jar
+-rw-rw-r-- 1 john john  821 may 30 18:43 mc-core-0.1.0-groovydoc.jar.asc
+-rw-rw-r-- 1 john john 1310 may 30 18:43 mc-core-0.1.0.jar
+-rw-rw-r-- 1 john john  821 may 30 18:43 mc-core-0.1.0.jar.asc
+-rw-rw-r-- 1 john john  261 may 30 18:43 mc-core-0.1.0-javadoc.jar
+-rw-rw-r-- 1 john john  821 may 30 18:43 mc-core-0.1.0-javadoc.jar.asc
+-rw-rw-r-- 1 john john  798 may 30 18:43 mc-core-0.1.0.pom
+-rw-rw-r-- 1 john john  821 may 30 18:43 mc-core-0.1.0.pom.asc
+-rw-rw-r-- 1 john john  261 may 30 18:43 mc-core-0.1.0-sources.jar
+-rw-rw-r-- 1 john john  821 may 30 18:43 mc-core-0.1.0-sources.jar.asc
+----
+
+Ok everything seems ok, every file produced by Gradle has been signed, now we could start publishing our artifacts to Sonatype. But before that, lets see another way of signing our artifacts.
+
+.verify your files
+****
+You can verify that a given file has been properly signed with your signature by executing for example:
+
+[source, shell]
+----
+john@john-doe:~/myprojects$ gpg --verify mc-core-0.1.0.jar.asc mc-core-0.1.0.jar
+----
+
+You should see in the output something like this at the end: 
+
+[source, shell]
+----
+gpg: Good signature from "JohnDoe <john.doe@gmail.com>" [ultimate]
+----
+****
+
+==== Using armored key
+
+Another way to use our key is creating an ASCII version of the key, an **armored key**. This way of signing our artifacts **is specially convenient in a continuous integration environment** where uploading your private ring is not an option. The idea is to use a configuration file to set anything we need in order to sign the artifacts without depending on any key file.
+
+To do that I'm going to export a signing subkey (instead of the primary key) as ASCII text, and use that text as a value in a properties file along with the subkey password and keyId. That should allowed me to use that strategy in a continuous integration environment.
+
+.Beware of the wild wild west
+****
+Even the most secured CI environment could be compromised, so be careful when using your keys as environment variables: 
+
+- If you can avoid it, don't use your private keys in public servers, if possible use a private CI
+- Never use your primary private key, use a subkey
+- Set an expiration date for your subkeys, so that even if exposed, the security hole could also have an expiration date
+- Make sure the CI has a mechanism to avoid exposing the private key value to any user in the system
+
+Remember that if your keys are stolen, the problem is that you may don't know they are stolen and somebody could be using them without you noticing it. Really frightening right ? Well not everything is bad news, you can revoke a compromised key at any time with a revocation key.
+****
+
+Before setting the armored key, I'm setting the key id, and the password of the signing key (the signing subkey we created earlier) in the common gradle.properties file:
+
+[source, properties]
+.common gradle.properties at $HOME
+----
+signingKeyId    = 261EB37A
+signingPassword = passwordyousetforthesubkey
+----
+
+NOTE: leave a new line after signingPassword because the next step will add the secret subkey at the end of the file.
+
+As I mentioned an armored key is an plain ASCII version of a key. In this case I'm getting the armored version of the subkey I want to use to sign my artifacts and setting the **signingKey** variable value in my common **gradle.properties**. Because in order to be able to use it as a property value I need to escape newline characters, I'm using the following snippet https://stackoverflow.com/questions/57921325/gradle-signarchives-unable-to-read-secret-key[I found at stackoverflow].
+
+[source, shell]
+.setting armored key in $HOME/gradle/gradle.properties
+----
+gpg --armor --export-secret-subkeys 261EB37A \
+    | awk 'NR == 1 { print "signingKey=" } 1' ORS='\\n' \
+    >> $HOME/.gradle/gradle.properties
+----
+
+You should see something like the following:
+
+[source, properties]
+.common gradle.properties at $HOME
+----
+signingKeyId    = 261EB37A
+signingPassword = passwordyousetforthesubkey
+signingKey      = signingKey=\n-----BEGIN PGP PRIVATE KEY BLOCK-----\n\nlQGVBGCzu5MMMMMdupzgGgmK4YenNnswpzRELAHWdRSUjus4f...
+----
+
+Then I'm changing **build.gradle** in order Gradle to find these values with the name I used in the properties file.
+
+[source, groovy]
+----
+publishing {
+     signing {
+          enabled    = true
+          keyId      = findProperty("signingKeyId")
+          secretKey  = findProperty("signingKey")
+          password   = findProperty("signingPassword")
+     }
+}
+----
+
+And finally execute the gradle task to publish signed artifacts to local maven repository to check that the artifacts have been signed:
+
+[source, shell]
+.execute local publishing
+----
+./gradlew publishToMavenLocal
+----
+
+**publishToMavenLocal** task signs the artifacts when publishing because I set the variable "enabled=true" within the publising->signing configuration block inside **build.gradle**
+
+=== Publishing to Sonatype
+
+Ok I've got my artifacts properly signed it's time to share them with the rest of the world uploading them to Sonatype. In order to do that, first I need to add the **remote repositories** where my artifacts are going to be uploaded to the **build.gradle** file:
+
+[source, groovy]
+.build.gradle
+----
+config {
+     info {
+          repositories {
+               repository {
+                    name = 'releases'
+                    url  = 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+
+                    credentials {
+                         username = findProperty("maven.username")
+                         password = findProperty("maven.password")
+                    }
+               }
+               repository {
+                    name = 'snapshots'
+                    url  = 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
+
+                    credentials {
+                         username = findProperty("maven.username")
+                         password = findProperty("maven.password")                         
+                    }
+               }
+          }
+     }
+}
+----
+
+And complete the publishing block: 
+
+[source, groovy]
+.build.gradle (cont.)
+---- 
+config {
+     info {
+          publishing {
+               enabled             = true
+               releasesRepository  = 'releases'
+               snapshotsRepository = 'snapshots'
+               signing {
+                    enabled    = !version.endsWith("-SNAPSHOT")
+                    keyId      = findProperty("signingKeyId")
+                    secretKey  = findProperty("signingKey")
+                    password   = findProperty("signingPassword")
+               }
+          }
+     }
+}
+----
+
+.Don't sign SNAPSHOTS
+****
+Snapshots are meant to be overwritten several times before releasing an stable version, so in general signing them is considered overkill. Notice in the build.gradle file how signing is disabled when the version ends with '-SNAPSHOT'
+****
+
+Instead of using your username/password, Sonatype allows you to get an alternative username/password. That way we can avoid using our master username/password everytime a new artifact is signed and deployed. You can reset these credentials at any time, so it may be suitable for example for CI environments. There's a https://www.youtube.com/watch?v=b5D2EBjLp40[video tutorial] on how to do that. 
+
+NOTE: Remember that the URL to get your new credentials is not https://oss.sonatype.org but https://s01.oss.sonatype.org
+
+Again use **$HOME/.gradle/gradle.properties** file to store your variable names:
+
+[source, properties]
+.gradle.properties at $HOME/.gradle/gradle.properties
+----
+maven.username=username
+maven.password=alternativepassword
+----
+
+If you'd like to start uploading your artifacts as snapshots to test your settings, change your version to '0.1.0-SNAPSHOT' and publish to Sonatype as: 
+
+[source, shell]
+.publishing snapshots
+----
+./gradlew publishAllPublicationsToSnapshotsRepository
+----
+
+And once your are completely sure you'd like to release an stable version (remember you can't remove an already published release from maven central), you can execute: 
+
+[source, shell]
+.publish to sonatype
+----
+./gradlew publish
+----
+
+If everything went ok, all our signed artifacts will be uploaded to Sonatype and eventually synchronized to Maven Central. 
+
+link:#index[Back to Index]
+
+== Checking published artifacts
+
+To check that your files have been uploaded properly you can go to https://s01.oss.sonatype.org with your JIRA credentials.
+
+When you created your namespace in Sonatype, according to the mail the send you (see below), you should comment to that email to tell them to synchronize the repo to maven central, but sometimes, depending on your publishing configuration, after a couple minutes it's not necessary, and your artifacts can be found at central.
+
+link:#index[Back to Index]
+
+== Conclusions
+
+Writing this article I realized how Bintray made our lifes easier, specially not having to deal with security issues such as managing our own PGP keys. But hey! somebody said that with a great power comes a great responsibility, that's why, besides the building tool you are going to use for publishing your artifacts, I think is worth remembering the following tips:
+
+* PGP KEYS
+** **Use decent passwords for your keys**: Don't leave keys without password or with an obvious one like admin and alike.
+** **Keep master and subkeys separated**: It will make it easier to keep the primary key safe.
+** **Always use a subkey**: if your lose your subkey or it is stolen you can always revoke it so that everybody knows that key is no longer valid.
+** **Set a reasonable expiration date**: you can always change expiration time later on.
+** **Backup your keys**: Redundancy
+
+* SONATYPE CREDENTIALS
+** **use alternative username/password**: you can always revoke them using the original username/passwords.
+
+* GRADLE
+** **Don't include your credentials inside your project's files**: make sure your credentials stay away from your source control system (Git, Subversion...etc). To store your credentials, you can use **$HOME/.gradle/gradle.properties** which is outside your project, but still visible for Gradle when building your project. You can also set temporary https://docs.gradle.org/current/userguide/build_environment.html#sec:project_properties[local environment variables].
+
+* CONTINUOUS INTEGRATION
+** **use armored keys**: armored keys content can be easily used in a CI environment as variable value.
+** **use CI features for protecting sensitive variables**: Don't expose your credentials as plain text variables. Environments like Github or Gitlab can set sensitive variables.
+** **always use subkeys**: don't use your primary key in a public environment, keep your primary key safe. If a subkey gets exposed, you can always create a revocation key with your primary subkey.
+
+link:#index[Back to Index]
+
+== RESOURCES
+
+Here are most, if not all the resources I've checked to create the current article.
+
+=== Gradle/Maven
+
+- https://docs.gradle.org/current/userguide/signing_plugin.html[Gradle Signing Plugin]
+- https://kordamp.org/kordamp-gradle-plugins/[Kordamp Gradle Plugins]
+- https://central.sonatype.org/publish/publish-guide/[Sonatype Publish Guide]
+- https://jfrog.com/blog/into-the-sunset-bintray-jcenter-gocenter-and-chartcenter/[End of life of Bintray]
+- https://kordamp.org/kordamp-gradle-plugins/#_publishing_signing[Signing artifacts with Kordamp section]
+- https://blog.sonatype.com/2010/01/how-to-generate-pgp-signatures-with-maven/[Generate PGP signatures with Maven]
+- https://medium.com/geekculture/how-to-publish-artifacts-on-maven-central-24342fd286cd[How to Publish Artifacts on Maven Central]
+- https://zambrovski.medium.com/foss-ci-cd-with-github-actions-c65c37236c19[Deploying to Maven Central using CI]
+
+- https://stackoverflow.com/questions/27936119/gradle-uploadarchives-task-unable-to-read-secret-key[StackOverflow]
+- https://stackoverflow.com/questions/49273023/gradle-build-configured-signatory/52479032[StackOverflow]
+- https://stackoverflow.com/questions/57921325/gradle-signarchives-unable-to-read-secret-key[StackOverflow]
+- https://docs.gradle.org/current/userguide/build_environment.html[How to setup variables]: use of gradle.properties
+- https://github.com/vanniktech/gradle-maven-publish-plugin[alternative Gradle plugin for signing artifacts] having support for setting all types of parameters in gradle.properties by convention.
+- https://jorge.aguilera.soy/blog/2021/publicar-maven.html[Como publicar en Maven Central (Spanish)]: Una buenisima guia en español para publicar tus artefactos en Sonatype y que sincroncen en Maven Central de la mano del gran Jorge Aguilera.
+
+=== GNUPG 
+
+- https://www.gnupg.org/gph/en/manual/x56.html[GNUPG: Exporting PGP keys]
+- https://www.gnupg.org/gph/en/manual/c235.html[GNUPG: Key Management]
+- https://help.ubuntu.com/community/GnuPrivacyGuardHowto[Some basic commands to manage your PGP keys]
+- https://wiki.debian.org/Subkeys[How to create subkeys]
+
+Buff, that was a lot to read, I hope it helps.
+
+link:#index[Back to Index]
