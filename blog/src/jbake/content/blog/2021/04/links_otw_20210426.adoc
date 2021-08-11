@@ -1,0 +1,21 @@
+= Links of the week
+@marioggar
+2021-04-26
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: ds, jupyter
+:idprefix:
+:summary: Links of the week
+:summary_image: computer_science.png
+
+== Data Science
+
+- https://analyticsindiamag.com/top-mlops-tools-github-repos/[MLOps Tools]: List of different machine learning deployment frameworks. Interesting tools to deploy machine learning workflows.
+- https://towardsdatascience.com/3-python-pandas-tricks-for-efficient-data-analysis-6324d013ef39[Some Pandas Tricks]: Some tricks worth knowing to be more efficient when doing data analysis using Pandas.
+- https://machinelearningmastery.com/weighted-average-ensemble-with-python/[Weighted Average Ensemble models]: Article about mixing different machine learning models to tackle classification or regression problems.
+- https://texthero.org/[Text Hero]: NLP related library. Texthero is a python package to work with text data efficiently
+
+== Python 
+
+- https://github.com/johnbywater/eventsourcing
+- https://github.com/tiangolo/full-stack-fastapi-postgresql
