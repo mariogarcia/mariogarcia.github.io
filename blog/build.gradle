@@ -1,7 +1,6 @@
 buildscript {
   repositories {
-      maven { url "http://dl.bintray.com/calmdev/gradle-plugins" }
-      maven { url "https://dl.bintray.com/grooviter/maven" }
+      
       maven { url "https://plugins.gradle.org/m2/" }
       mavenCentral()
       jcenter()
@@ -24,7 +23,7 @@ apply plugin: 'groovy'
 apply plugin: 'org.ajoberstar.github-pages'
 
 jbake {
-    version = "2.6.5"
+    version = "2.6.7"
     asciidoctorjVersion = "1.6.0"
     configuration['render.tag'] = 'true'
     configuration['social.twitter'] = 'https://twitter.com/marioggar'
