@@ -4,8 +4,538 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2021-05-31T12:58:38Z</updated>
+    <updated>2021-08-12T15:47:33Z</updated>
     <id>http://github.com/mariogarcia</id>
+    <entry>
+        <title>Hbase series: Data Model</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2021/08/hbase_series_03.html"/>
+        <updated>2021-08-10T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2021/08/hbase_series_03.html</id>
+        <category term="nosql"/>
+        <category term="bigdata"/>
+        <category term="hbase"/>
+        <content type="html">
+            &lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;data_model&quot;&gt;Data Model&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;How data is stored in Hbase differs from what we are used to from relational databases. Although terminology is similar the meaning is not. So lets walk through the different pieces of the data model:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Table&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Row&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Column Family&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Column qualifier&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Cell&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A &lt;strong&gt;Table&lt;/strong&gt; is the top hierarchical aggregation in Hbase. &lt;strong&gt;A table have rows&lt;/strong&gt;, and these rows can have the &lt;strong&gt;rowkey&lt;/strong&gt;, the &lt;strong&gt;timestamp&lt;/strong&gt;, and the data, grouped in what is called &lt;strong&gt;column families&lt;/strong&gt;. Finally a &lt;strong&gt;cell&lt;/strong&gt; is the unit of storage in HBase consisting of the following fields: row, column family, column qualifier, timestamp, type, MVCC version, and value. The concept of cell is important because introduces the topic of versioning, but lets leave that topic for another day.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/diag-17817cbe9de0d24fc152f352ccc9be1c.png&quot; alt=&quot;diag 17817cbe9de0d24fc152f352ccc9be1c&quot; width=&quot;820&quot; height=&quot;154&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Imagine I&amp;#8217;ve got the information about all taxi trips in Madrid during the past year and I would like to store them in Hbase. I would like to keep the data regarding the trip (price, number of passengers) apart from the data regarding the attributes of the taxi (car brand, taxi driver license number):&lt;/p&gt;
+&lt;/div&gt;
+&lt;table class=&quot;tableblock frame-all grid-all stretch&quot;&gt;
+&lt;caption class=&quot;title&quot;&gt;Table 1. Table taxi-trip&lt;/caption&gt;
+&lt;colgroup&gt;
+&lt;col style=&quot;width: 25%;&quot;&gt;
+&lt;col style=&quot;width: 25%;&quot;&gt;
+&lt;col style=&quot;width: 25%;&quot;&gt;
+&lt;col style=&quot;width: 25%;&quot;&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;rowkey&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;timestamp&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;column_family &quot;trip&quot;&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;column_family &quot;taxi&quot;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;&quot;mad01&quot;&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;T0&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;trip:price=&quot;23&quot;, trip:passengers=&quot;2&quot;&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;taxi:brand=&quot;ford&quot;, taxi:driver=&quot;0001&quot;&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;&quot;mad02&quot;&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;T1&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;trip:price=&quot;12&quot;, trip:passengers=&quot;4&quot;&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;taxi:brand=&quot;ford&quot;, taxi:driver=&quot;0010&quot;&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As you can see, trip information is stored in the column family &lt;strong&gt;&quot;trip&quot;&lt;/strong&gt; and the taxi information is stored within the &lt;strong&gt;&quot;taxi&quot;&lt;/strong&gt; column family. The &lt;strong&gt;&quot;taxi:&quot;or &quot;trip:&quot; prefixes&lt;/strong&gt; are called &lt;strong&gt;column qualifiers&lt;/strong&gt; and they tell Hbase which column family the data belongs to.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now, in terms of building a query, How would I get the trip price and taxi driver license in those trips where the number of passengers was greater than 2 ? A basic approach could be:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;dangerous query&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;scan &apos;taxi-trip&apos;, {
+    LIMIT =&amp;gt; 10,
+    COLUMNS =&amp;gt; [&apos;trip:price&apos;, &apos;taxi:driver&apos;],
+    FILTER =&amp;gt; &quot;SingleColumnValueFilter(&apos;trip&apos;, &apos;passengers&apos;, &amp;gt;=, &apos;binary:2&apos;)&quot;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Don&amp;#8217;t worry about the query syntax, that&amp;#8217;s not important for now, the takeaway point here is why this query doesn&amp;#8217;t scale well. That query could work well &lt;em&gt;for a few records&lt;/em&gt;, but remember that &lt;strong&gt;the only index available in Hbase is the row key&lt;/strong&gt;. If my database has billions of rows, this query will wait forever because &lt;strong&gt;it will do a full scan&lt;/strong&gt;. That&amp;#8217;s why it&amp;#8217;s crucial to have a rowkey policy to allow certain queries to be performant. Now I&amp;#8217;ve changed how I&amp;#8217;m writing the rowkey, so that I can use it to narrow down results:&lt;/p&gt;
+&lt;/div&gt;
+&lt;table class=&quot;tableblock frame-all grid-all stretch&quot;&gt;
+&lt;caption class=&quot;title&quot;&gt;Table 2. Table taxi-trip&lt;/caption&gt;
+&lt;colgroup&gt;
+&lt;col style=&quot;width: 25%;&quot;&gt;
+&lt;col style=&quot;width: 25%;&quot;&gt;
+&lt;col style=&quot;width: 25%;&quot;&gt;
+&lt;col style=&quot;width: 25%;&quot;&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;rowkey&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;timestamp&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;column_family &quot;trip&quot;&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;column_family &quot;taxi&quot;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;&quot;mad20200101-01&quot;&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;T0&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;trip:price=&quot;23&quot;, trip:passengers=&quot;2&quot;&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;taxi:brand=&quot;ford&quot;, taxi:driver=&quot;0001&quot;&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;&quot;mad20200102-02&quot;&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;T1&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;trip:price=&quot;12&quot;, trip:passengers=&quot;4&quot;&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;taxi:brand=&quot;ford&quot;, taxi:driver=&quot;0010&quot;&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now in my queries I can use the rowkey as a filter, and because it is indexed, Hbase will know which partitions it has to look at to get the data, avoiding a full scan.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;optimized query&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;scan &apos;taxi-trip&apos;, {
+    LIMIT =&amp;gt; 10,
+    COLUMNS =&amp;gt; [&apos;trip:price&apos;, &apos;taxi:driver&apos;],
+    STARTROW =&amp;gt; &quot;mad202001-01&quot;,
+    STOPROW =&amp;gt; &quot;mad202001-03&quot;,
+    FILTER =&amp;gt; &quot;SingleColumnValueFilter(&apos;trip&apos;, &apos;passengers&apos;, &amp;gt;=, &apos;binary:2&apos;)&quot;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There&amp;#8217;re at least a couple of row key filters available so you can create a more flexible searches based on rowkeys. But as a joke I would say that&amp;#8230;&amp;#8203; the key in Hbase is the key X)&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;resources&quot;&gt;Resources&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://hbase.apache.org/book.html#datamodel&quot;&gt;Hbase Data Model&lt;/a&gt;: Official Hbase documentation about its data model&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.dezyre.com/article/overview-of-hbase-architecture-and-its-components/295&quot;&gt;Hbase architecture&lt;/a&gt;: Article describing the different Hbase components.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;next&quot;&gt;Next&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;/blog/2021/08/hbase_series_04.html&quot;&gt;Query Model&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
+    <entry>
+        <title>Hbase series: Components</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2021/08/hbase_series_02.html"/>
+        <updated>2021-08-09T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2021/08/hbase_series_02.html</id>
+        <category term="nosql"/>
+        <category term="bigdata"/>
+        <category term="hbase"/>
+        <content type="html">
+            &lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2021/08/hbase/architecture.webp&quot; alt=&quot;Hbase architecture&quot; width=&quot;50%&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 1. Hbase architecture (Credit: Cloudera)&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;hbase_components&quot;&gt;Hbase Components&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As a distributed data store, you can see in the diagram above how tables are spread among the different &lt;strong&gt;Region Servers (RS)&lt;/strong&gt;. That&amp;#8217;s because data can be partitioned and these partitions, called &lt;strong&gt;regions&lt;/strong&gt;, are automatically distributed among Region Servers (auto-sharding).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Data is ultimately written and read to and from regions, as I mentioned earlier think of a region as a database partition. Regions are managed by Region Servers (RS) and &lt;strong&gt;Region Servers are handled by the HMaster (HM)&lt;/strong&gt; and monitored by &lt;strong&gt;Zookeeper (ZK)&lt;/strong&gt;. When a &lt;a href=&quot;http://hbase.apache.org/book.html#architecture.client&quot;&gt;client&lt;/a&gt; wants to read/write data to Hbase it first asks ZooKeeper which Region Server I should send the data to.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock note&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-note&quot; title=&quot;Note&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+From version 3.X the master is required by the client &lt;a href=&quot;http://hbase.apache.org/book.html#_staring_release_3_0_0&quot;&gt;in some cases&lt;/a&gt; when reading/writing data
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/asciidoctor-diagram-classes.png&quot; alt=&quot;asciidoctor diagram classes&quot; width=&quot;316&quot; height=&quot;214&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 2. How a client writes data to Hbase&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The &lt;strong&gt;HMaster&lt;/strong&gt; main responsibilities are administration tasks and how regions are handled among region servers. &lt;strong&gt;Region Servers&lt;/strong&gt; responsibility is to serve and manage regions. There are tasks such as compactation (which among other things phisically deletes records previously marked to be deleted) that are executed by the RS on each of its regions&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;resources&quot;&gt;Resources&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://hbase.apache.org/book.html#_architecture&quot;&gt;Hbase Architecture&lt;/a&gt;: Official Hbase documentation on architecture&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://hbase.apache.org/book.html#ops.capacity.regions&quot;&gt;Regions guidelines&lt;/a&gt;: documentation on how to determine region count and size&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;next&quot;&gt;Next&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;/blog/2021/08/hbase_series_03.html&quot;&gt;Hbase Data Model&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
+    <entry>
+        <title>Hbase series: Intro</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2021/08/hbase_series_01.html"/>
+        <updated>2021-08-06T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2021/08/hbase_series_01.html</id>
+        <category term="nosql"/>
+        <category term="bigdata"/>
+        <category term="hbase"/>
+        <content type="html">
+            &lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2021/08/hbase/hbase_logo_with_orca_large.png&quot; alt=&quot;Hbase&quot; width=&quot;50%&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 1. Hbase logo&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;introduction&quot;&gt;Introduction&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;After a month of playing with Hbase I would like to write down my thoughts and impressions on Hbase. I&amp;#8217;m covering the following topics.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Introduction&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;/blog/2021/08/hbase_series_02.html&quot;&gt;Components&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;/blog/2021/08/hbase_series_03.html&quot;&gt;Data Model&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Query model&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;API Client&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Region partition policy&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;why&quot;&gt;Why&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The reason I started evaluating Hbase is because I needed to look for a datastore capable of storing up to &lt;strong&gt;1TB/day&lt;/strong&gt; and be used as a real time query engine. I&amp;#8217;ve got the following requirements:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Quick Random Access&lt;/strong&gt; Data. I&amp;#8217;d like to be able to update, read a specific record&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Quick Writes&lt;/strong&gt; The system is going to be ingesting up to a TB of data a day, so it better be quick&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Decent online query responses&lt;/strong&gt; to be queried in real time by end users. Whatever is ingested should be available to be queried. And if possible responses under the second would be great.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;After a few days of search and asking some friends, I ended up giving &lt;a href=&quot;http://hbase.apache.org/&quot;&gt;Hbase&lt;/a&gt; a go. In theory it seemed to meet all my requirements. According to Hbase site:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;quoteblock&quot;&gt;
+&lt;blockquote&gt;
+Use Apache HBase™ when you need random, realtime read/write access to your Big Data
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;features&quot;&gt;Features&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Lets go through the main features exposed in Hbase site and my initial comments on them:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Strongly consistent reads/writes&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;em&gt;HBase is not an &quot;eventually consistent&quot; DataStore. This makes it very suitable for tasks such as high-speed counter aggregation.&lt;/em&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To keep long story short, to have consistent reads/writes doesn&amp;#8217;t mean it supports transactions, it means just that, for whatever you insert in Hbase, once it has acknowledge about the insertion, it will be visible for anyone reading.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Automatic sharding&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;em&gt;HBase tables are distributed on the cluster via regions, and regions are automatically split and re-distributed as your data grows.&lt;/em&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Hbase uses a distributed storage to store data. By default it uses HDFS, but there&amp;#8217;s also the posibility of using S3. Using S3 comes specially handy as it makes your life easier in terms of disk provisioning. The idea of using a distributed storage system is that, data can be dinamically distributed by the system as it grows, so storage could scale horizontally. The primitive used to distribute data between the nodes is called region. Hbase automatically split and re-distributed regions as your data grows&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Automatic RegionServer failover&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As we&amp;#8217;ll see in the following post entry data resides in regions and region servers make regions available to the world. If a region server fails the master server chooses another region server to take over the regions that were handled by the crashing region server.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Hadoop/HDFS Integration&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;em&gt;HBase supports HDFS out of the box as its distributed file system&lt;/em&gt;. As I already mentioned, using a distributed file system brings several benefits, like auto-sharding.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;MapReduce&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;em&gt;HBase supports massively parallelized processing via MapReduce for using HBase as both source and sink.&lt;/em&gt; Mainly because there&amp;#8217;re operations that cannot be done via the query API, such as aggregations.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Java Client API&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;em&gt;HBase supports an easy to use Java API for programmatic access&lt;/em&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Thrift/REST API&lt;/strong&gt;:&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;em&gt;HBase also supports Thrift and REST for non-Java front-ends.&lt;/em&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I&amp;#8217;ve used Thrift integration with Python. The Thrift server is not up by default so you have to make sure is up and running before using your Hbase-Thrift client.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Block Cache and Bloom Filters&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;em&gt;HBase supports a Block Cache and Bloom Filters for high volume query optimization&lt;/em&gt; These works like a charm, but believe me, nothing is gonna save you from wait forever if you do a query against a billion row database if you don&amp;#8217;t make use of indexing.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Operational Management&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;em&gt;HBase provides build-in web-pages for operational insight as well as JMX metrics&lt;/em&gt;. Pretty handy specially when you start learning about Hbase.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;but_keep_in_mind_that&quot;&gt;But keep in mind that&amp;#8230;&amp;#8203;&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Apart from the goodies, there are some ideas that I think are important to keep in mind of before jumping on Hbase:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Hbase only knows about bytes&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;That&amp;#8217;s right, no integers, no text, no jsonb, no decimals&amp;#8230;&amp;#8203; no nothing. Is up to you to serialize/deserialize data from/to Hbase in order to do something with it.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;There is only ONE index&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And it&amp;#8217;s super important to know how build your key, because when you want to get a result from a billion row table, if you don&amp;#8217;t narrow down the search by using the keys, you better go on holidays because that query is going to take forever. This sometimes imply to add some smart information to the key in order to use it for different types of searchs.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Hbase requires Hadoop&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Hbase requires a Hadoop infrastructure to operate (HDFS, MapReduce). If you are already using Hadoop great, if not, it could be hard to swallow.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Proper Installation could be cumbersome&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Partly because the Hadoop ecosystem, it&amp;#8217;s painful to install even a simple Hadoop cluster if you&amp;#8217;re not using a commercial solution like Cloudera or Amazon EMR.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;installation_options&quot;&gt;Installation options&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Although HBase could be executed &lt;a href=&quot;http://hbase.apache.org/book.html#quickstart&quot;&gt;in standalone version for testing purposes&lt;/a&gt;, a production environment requires a minimal infrastructure, and unless you&amp;#8217;ve got a dedicated sysadmin team and/or a good devops environment you&amp;#8217;re going end up paying whether is on premises or on cloud.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;on_premises&quot;&gt;On premises&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It sucks but, until 2019 the &lt;a href=&quot;https://ambari.apache.org/&quot;&gt;Project Ambari&lt;/a&gt; provided an easy and powerful way of installing any part of the Hadoop ecosystem on premises, unfortunately with &lt;a href=&quot;https://www.cloudera.com/about/news-and-blogs/press-releases/2019-01-03-cloudera-and-hortonworks-complete-planned-merger.html&quot;&gt;the merge of Hortonworks and Cloudera&lt;/a&gt;, that&amp;#8217;s not the case anymore. Now Ambari requires some of the Cloudera modules, which are not open sourced. THe comercial version of Ambari has become &lt;a href=&quot;https://es.cloudera.com/products/hdp.html&quot;&gt;Hortonworks Data Platform&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;on_cloud&quot;&gt;On cloud&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The only service I&amp;#8217;ve checked so far is &lt;a href=&quot;https://aws.amazon.com/emr/&quot;&gt;Amazon EMR&lt;/a&gt;. Amazon EMR is a service that allows you to create a Hadoop ecosystem in the cloud quickly and easily. &lt;a href=&quot;https://aws.amazon.com/emr/pricing/?nc=sn&amp;amp;loc=4&quot;&gt;The cost&lt;/a&gt; of creating an EMR cluster depends on a fixed cost, the computation usage and disk requirements of your application. You can either use the AWS UI console or also use the &lt;a href=&quot;https://registry.terraform.io/providers/hashicorp/aws/latest/docs&quot;&gt;Terraform AWS provider&lt;/a&gt; if you have Terraform as part of your toolbox.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;resources&quot;&gt;Resources&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://hbase.apache.org/&quot;&gt;Hbase site&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://hbase.apache.org/book.html&quot;&gt;Hbase guide&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;next&quot;&gt;Next&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;/blog/2021/08/hbase_series_02.html&quot;&gt;Hbase Components&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
     <entry>
         <title>Bintray is dead! long live Sonatype!</title>
         <author>
@@ -1270,6 +1800,458 @@ maven.password=alternativepassword&lt;/code&gt;&lt;/pre&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;&lt;a href=&quot;#index&quot;&gt;Back to Index&lt;/a&gt;&lt;/p&gt;
 &lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
+    <entry>
+        <title>NLP: Clustering Inception</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2021/04/nlp_clustering_topics.html"/>
+        <updated>2021-04-29T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2021/04/nlp_clustering_topics.html</id>
+        <category term="nlp"/>
+        <category term="ml"/>
+        <content type="html">
+            &lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;When using supervised learning for classifying data you normally begin with some labelled dataset. These labels help in the evaluation phase model to assess how probable it is that a given sample belongs to a specific target class.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;But sometimes you&amp;#8217;d like to classify unlabelled data. That usually suggests the use of unsupervised learning techniques such as clustering or grouping data by some common feature. Then imagine you&amp;#8217;ve got a bunch of unclassified text documents and get some groups by clustering and finally use those groups to classify new documents. That would be great.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In this article I&amp;#8217;m going all the way and take a list of unlabelled texts, clustering them into groups and finally try to classify new documents based on these groups or clusters.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;loading_data&quot;&gt;Loading Data&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I&amp;#8217;m loading some news articles from different sources and about different topics to create a Pandas DataFrame. Although the data has labels, I&amp;#8217;m only using them at the end to check how well the whole process worked.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;loading data&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import numpy as np
+import pandas as pd
+import xml.etree.ElementTree as ET
+
+from os import walk
+
+_, _, filenames = next(walk(&apos;news&apos;))
+df       = pd.DataFrame()
+
+for file in filenames:
+    xml = ET.parse(&quot;news/&quot; + file).getroot()
+    for entry in xml.findall(&apos;entry&apos;):
+        title= entry.find(&quot;title&quot;).text
+        text = entry.find(&quot;text&quot;).text
+        site = entry.find(&quot;link&quot;).text
+        tag  = entry.find(&quot;tag&quot;).text
+
+        df = df.append({&quot;title&quot;: title, &quot;text&quot;: text, &quot;tag&quot;: tag, &quot;site&quot;: site}, ignore_index=True)
+
+df.head()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2021/04/nlp_clustering/nlp_loaded_data.png&quot; alt=&quot;loaded dataframe&quot; width=&quot;80%&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;cleaning_data&quot;&gt;Cleaning Data&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In this section, I&amp;#8217;m going to normalize the text. There are several tasks that people normally do to normalize data, such getting rid of stop-words, removing extra white spaces&amp;#8230;&amp;#8203;etc. A couple of weeks ago I heard about &lt;a href=&quot;https://texthero.org/&quot;&gt;TextHero&lt;/a&gt; which among other things it provides a solid pipeline to clean data. &lt;strong&gt;With TextHero I can very easily do some basic cleaning&lt;/strong&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Replace not assigned values with empty spaces.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Lowercase all text.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Remove all blocks of digits.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Remove all string.punctuation (!&quot;#$%&amp;amp;&apos;()*+,-./:;&amp;lt;&amp;#8658;?@[\]^_`{|}~).&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Remove all accents from strings.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Remove all stop words.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Remove all white space between words.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sidebarblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;download dependencies&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;One of the ways to download dependencies in a Python Jupyter Notebook is to use &lt;strong&gt;sys&lt;/strong&gt; module. Here you have how to download TextHero and Gensim dependencies:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;dependencies&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import sys
+!{sys.executable} -m pip install -U texthero
+!{sys.executable} -m pip install &quot;gensim==3.8.1&quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now we can keep going with the article.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Apart from the basic cleaning tasks &lt;strong&gt;I needed to remove some stuff that I think could be considered as data leakage&lt;/strong&gt; such as:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;The web site of the article&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The topic the newspaper grouped the article&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;some other words that I could consider noise&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;extra words to delete&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;# creating a copy of source dataset
+articles_df = df.copy()
+
+# article topics
+topics          = articles_df[&apos;tag&apos;].unique()
+
+# some words under my consideration
+words_to_delete = [&apos;said&apos;, &apos;also&apos;, &apos;year&apos;, &apos;would&apos;]
+
+# sites of the articles
+sites           = articles_df[&apos;site&apos;]\
+    .str.extractall(r&apos;https://.*\.(?P&amp;lt;www&amp;gt;\w*)\..*&apos;)\
+    .reset_index(col_fill=&apos;origin&apos;)[&apos;www&apos;]\
+    .unique()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The nice thing about TextHero is that I can create a pipeline of different functions that will be applied to every sample to clean the data:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;creating custom pipeline&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import texthero as hero
+from texthero import preprocessing as pre
+
+# custom pipeline
+custom_pipeline = [
+    # default cleaning functions
+    pre.fillna,
+    pre.lowercase,
+    pre.remove_digits,
+    pre.remove_punctuation,
+    pre.remove_diacritics,
+    pre.remove_stopwords,
+    pre.remove_whitespace,
+    # extra cleaning tasks
+    remove(topics),
+    remove(sites),
+    remove(words_to_delete)
+]
+
+# cleaning text with custom pipeline
+articles_df[&apos;text&apos;] = articles_df[&apos;text&apos;].pipe(hero.clean, custom_pipeline)
+articles_df[&apos;text&apos;].head()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-left&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2021/04/nlp_clustering/nlp_cleaned_text.png&quot; alt=&quot;cleaned text&quot; width=&quot;40%&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Here&amp;#8217;s the source of the &lt;strong&gt;remove(&amp;#8230;&amp;#8203;)&lt;/strong&gt; function:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;reusable function to remove words from string series&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from functools import reduce
+
+def remove(words):
+    def remove_from_series(s):
+        return reduce(lambda acc, val: acc.str.replace(val, &quot;&quot;), words, s)
+    return remove_from_series&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;splitting_data&quot;&gt;Splitting Data&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ok, I&amp;#8217;ve got my data cleaned, or at least, sort of. It&amp;#8217;s time to split the data in two datasets:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Half of the data will be used for &lt;strong&gt;training the clustering model&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The other half will be used for &lt;strong&gt;testing the classifier created from the clustering model&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;creating training / testing datasets&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;articles_df[&apos;business&apos;] = np.where(articles_df[&apos;tag&apos;] == &apos;business&apos;, 1, 0)
+
+groups    = articles_df.groupby(&apos;business&apos;)
+busi      = groups.get_group(1)
+busi_half = round(len(busi) / 2)
+
+non_busi      = groups.get_group(0)
+non_busi_half = round(len(non_busi) / 2)
+
+train = pd\
+    .concat([busi[:busi_half], non_busi[:non_busi_half]])\
+    .sample(frac=1)\
+    .reset_index(drop=True)
+
+tests = pd\
+    .concat([busi[busi_half:], non_busi[non_busi_half:]])\
+    .sample(frac=1)\
+    .reset_index(drop=True)
+
+len(train), len(tests)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Splitting by half&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;(478, 479)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;clustering&quot;&gt;Clustering&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Before asking the model to group all news into two topics, I need to:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Transform text to something that the model can work with&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Create a corpus&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Create a dictionary&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;creating corpus and dictionary&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import gensim
+from sklearn.feature_extraction.text import CountVectorizer
+
+txt = train[&apos;text&apos;]
+vec = CountVectorizer()
+X   = vec.fit_transform(txt)
+
+# Convert sparse matrix to gensim corpus.
+corpus = gensim.matutils.Sparse2Corpus(X, documents_columns=False)
+
+# Mapping from word IDs to words (To be used in LdaModel&apos;s id2word parameter)
+dictionary = dict((v, k) for k, v in vec.vocabulary_.items())&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;ldamodel&quot;&gt;LdaModel&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To create the clustering model I&amp;#8217;m using &lt;a href=&quot;https://radimrehurek.com/gensim/&quot;&gt;Gensim&lt;/a&gt; and its &lt;a href=&quot;https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation&quot;&gt;LDA&lt;/a&gt; model implementation. According to Gensim&amp;#8217;s documentation: &lt;em&gt;This module allows both LDA model estimation from a training corpus and inference of topic distribution on new, unseen documents. The model can also be updated with new documents for online training&lt;/em&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;LDA Model&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;# Use the gensim.models.ldamodel.LdaModel constructor to estimate
+# LDA model parameters on the corpus, and save to the variable `ldamodel`
+from gensim.models.ldamodel import LdaModel
+
+# Your code here:
+ldamodel = LdaModel(corpus, id2word=id_map, num_topics=2)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Invoking the model&amp;#8217;s &lt;strong&gt;show_topics&lt;/strong&gt; function will show us the two topics found and the terms or tokens related to them with their weight. In other words, how important these terms are to consider that a given article belongs to that topic.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;showing discovered topics&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;ldamodel.show_topics()&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;topics and their related terms&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;[(0,
+  &apos;0.004*&quot;biden&quot; + 0.004*&quot;last&quot; + 0.004*&quot;new&quot; + 0.003*&quot;one&quot; + 0.003*&quot;like&quot; + 0.003*&quot;people&quot; + 0.003*&quot;president&quot; + ...&apos;),
+ (1,
+  &apos;0.004*&quot;first&quot; + 0.003*&quot;mpany&quot; + 0.003*&quot;new&quot; + 0.003*&quot;one&quot; + 0.003*&quot;back&quot; + 0.003*&quot;people&quot; + 0.003*&quot;get&quot; + 0.003...&apos;)]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So if a given article has &lt;strong&gt;biden&lt;/strong&gt; or &lt;strong&gt;president&lt;/strong&gt; is more likely to belong to the topic &lt;strong&gt;0&lt;/strong&gt; whereas if another article has &lt;strong&gt;company&lt;/strong&gt; is more likely to belong to the topic &lt;strong&gt;1&lt;/strong&gt;. At this point we could manually label those topics, for example, topic &lt;strong&gt;0&lt;/strong&gt; could become &lt;strong&gt;non_business&lt;/strong&gt; and topic &lt;strong&gt;1&lt;/strong&gt; could become &lt;strong&gt;business&lt;/strong&gt;, and then just use those labels in a binary classification.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;binary_classification_using_lda_model&quot;&gt;Binary classification using LDA model&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The cluster model created two topics, which means that we can label samples by looking at the distribution of the topics for each document. Because we only have two topics If the distribution of a given topic is greater than the other then I&amp;#8217;ll assume it belongs to that topic. We can get the distribution of topics for a given document by invoking &lt;strong&gt;get_document_topics(&amp;#8230;&amp;#8203;)&lt;/strong&gt; from the LDA model we&amp;#8217;ve created previously.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This way I&amp;#8217;ve created a labelled dataset from a bunch of unlabelled articles and now I&amp;#8217;d like to use this new labelled dataset to classify the other half of the articles we left for testing purposes.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;binary classification&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;# transforming raw data
+X      = vec.transform(tests[&apos;text&apos;])
+
+# creating a new corpus to cluster
+corpus = gensim.matutils.Sparse2Corpus(X, documents_columns=False)
+
+# creating a series to compare results with initial labels
+results = []
+for next_doc in ldamodel.get_document_topics(corpus):
+    if len(next_doc) == 2:
+        _, pct_zero = next_doc[0]
+        _, pct_one  = next_doc[1]
+
+        results.append(1 if pct_one &amp;gt; pct_zero else 0)
+    else:
+        target, pct = next_doc[0]
+        results.append(target)
+
+check = tests.copy()
+check[&apos;classified&apos;] = pd.Series(results)
+check.loc[10:20, [&apos;title&apos;, &apos;business&apos;, &apos;classified&apos;]]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-left&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/2021/04/nlp_clustering/nlp_classified_sample.png&quot; alt=&quot;classified samples&quot; width=&quot;40%&quot;&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Well just by looking at the picture, it doesn&amp;#8217;t seem great, but, How accurate is how classification model in reality ? Lets figure out the accuracy score with sklearn&amp;#8217;s &lt;strong&gt;accuracy_score(&amp;#8230;&amp;#8203;)&lt;/strong&gt; function:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;from sklearn.metrics import accuracy_score
+
+accuracy_score(check[&apos;business&apos;], check[&apos;classified&apos;])&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;0.732776617954071&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Well, more than I expected.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://texthero.org/&quot;&gt;Text Hero&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://towardsdatascience.com/unsupervised-nlp-topic-models-as-a-supervised-learning-input-cf8ee9e5cf28&quot;&gt;Unsupervised NLP Topics as supervised learning input&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://towardsdatascience.com/2-latent-methods-for-dimension-reduction-and-topic-modeling-20ff6d7d547&quot;&gt;Dimension Reduction in Topic Modeling&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
+    <entry>
+        <title>Links of the week</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2021/04/links_otw_20210426.html"/>
+        <updated>2021-04-26T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2021/04/links_otw_20210426.html</id>
+        <category term="ds"/>
+        <category term="jupyter"/>
+        <content type="html">
+            &lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;data_science&quot;&gt;Data Science&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://analyticsindiamag.com/top-mlops-tools-github-repos/&quot;&gt;MLOps Tools&lt;/a&gt;: List of different machine learning deployment frameworks. Interesting tools to deploy machine learning workflows.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://towardsdatascience.com/3-python-pandas-tricks-for-efficient-data-analysis-6324d013ef39&quot;&gt;Some Pandas Tricks&lt;/a&gt;: Some tricks worth knowing to be more efficient when doing data analysis using Pandas.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://machinelearningmastery.com/weighted-average-ensemble-with-python/&quot;&gt;Weighted Average Ensemble models&lt;/a&gt;: Article about mixing different machine learning models to tackle classification or regression problems.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://texthero.org/&quot;&gt;Text Hero&lt;/a&gt;: NLP related library. Texthero is a python package to work with text data efficiently&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;python&quot;&gt;Python&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/johnbywater/eventsourcing&quot; class=&quot;bare&quot;&gt;https://github.com/johnbywater/eventsourcing&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/tiangolo/full-stack-fastapi-postgresql&quot; class=&quot;bare&quot;&gt;https://github.com/tiangolo/full-stack-fastapi-postgresql&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -4489,18 +5471,18 @@ the model are classified in different quadrants&lt;/strong&gt;. Depending on whi
 &lt;/div&gt;
 &lt;div class=&quot;imageblock text-center&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/diag-b9576e02d6f87bbe683b9b888762b778.png&quot; alt=&quot;Confusion matrix&quot; width=&quot;370&quot; height=&quot;308&quot;&gt;
+&lt;img src=&quot;/img/diag-d6c7574b75c4cbbab4321be48cecea13.png&quot; alt=&quot;diag d6c7574b75c4cbbab4321be48cecea13&quot; width=&quot;370&quot; height=&quot;308&quot;&gt;
 &lt;/div&gt;
-&lt;div class=&quot;title&quot;&gt;Confusion matrix&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 2. Confusion matrix&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Lets create a theoretical example. Lets say we have a binary classification problem. We&amp;#8217;re classifying images, and we need to classify 100 images between cats and dogs. The confusion matrix for my actual model is the following:&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;imageblock&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/diag-37ba68dacf2cfa390df4dfc1ea237905.png&quot; alt=&quot;Binary classification&quot; width=&quot;230&quot; height=&quot;182&quot;&gt;
+&lt;img src=&quot;/img/diag-85c43faa821d8ed8acab35e8be805d4e.png&quot; alt=&quot;diag 85c43faa821d8ed8acab35e8be805d4e&quot; width=&quot;230&quot; height=&quot;182&quot;&gt;
 &lt;/div&gt;
-&lt;div class=&quot;title&quot;&gt;Binary classification&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 3. Binary classification&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;If we establish that the positive class (1) is to find a dog and a negative class (0) is to find a cat, according to this confusion matrix of a 100 samples we can make certain assumptions:&lt;/p&gt;
@@ -4526,9 +5508,9 @@ the model are classified in different quadrants&lt;/strong&gt;. Depending on whi
 &lt;/div&gt;
 &lt;div class=&quot;imageblock&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/diag-89a77d67a4b8a56ee372c45cf6f23bd1.png&quot; alt=&quot;Accuracy metric&quot; width=&quot;230&quot; height=&quot;182&quot;&gt;
+&lt;img src=&quot;/img/diag-cc13dee039c79ee2e5b0e367f3d57e7e.png&quot; alt=&quot;diag cc13dee039c79ee2e5b0e367f3d57e7e&quot; width=&quot;230&quot; height=&quot;182&quot;&gt;
 &lt;/div&gt;
-&lt;div class=&quot;title&quot;&gt;Accuracy metric&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 4. Accuracy metric&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;But as we&amp;#8217;re mentioned so far, we may want to prioritize some other type of metric. Other metrics could be: &lt;strong&gt;precision, recall or specificity&lt;/strong&gt;.&lt;/p&gt;
@@ -4547,25 +5529,25 @@ the model are classified in different quadrants&lt;/strong&gt;. Depending on whi
 &lt;div class=&quot;content&quot;&gt;
 &lt;img src=&quot;/img/96d2dbcd621a2da7cff58eaed68d87c2.png&quot; alt=&quot;96d2dbcd621a2da7cff58eaed68d87c2.png&quot; height=&quot;50&quot;&gt;
 &lt;/div&gt;
-&lt;div class=&quot;title&quot;&gt;Figure 2. precision formula&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 5. precision formula&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;In our example our first model was performing like this:&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;imageblock&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/diag-68d1981304602339732316ef075af471.png&quot; alt=&quot;Precision&quot; width=&quot;230&quot; height=&quot;182&quot;&gt;
+&lt;img src=&quot;/img/diag-85c43faa821d8ed8acab35e8be805d4e.png&quot; alt=&quot;diag 85c43faa821d8ed8acab35e8be805d4e&quot; width=&quot;230&quot; height=&quot;182&quot;&gt;
 &lt;/div&gt;
-&lt;div class=&quot;title&quot;&gt;Precision&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 6. Precision&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Calculating the precision would give us 31 / 31 + 19 = 0.62, 62% precision. A model that improves precision would look like the following:&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;imageblock&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/diag-4f5e940fa1cc0908c1d1c91a57c7e629.png&quot; alt=&quot;Improved precission&quot; width=&quot;230&quot; height=&quot;182&quot;&gt;
+&lt;img src=&quot;/img/diag-f7b708d44c46c7a0de4ec56588f13bad.png&quot; alt=&quot;diag f7b708d44c46c7a0de4ec56588f13bad&quot; width=&quot;230&quot; height=&quot;182&quot;&gt;
 &lt;/div&gt;
-&lt;div class=&quot;title&quot;&gt;Improved precission&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 7. Improved precission&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Which would give us a precision of: 41 / 41 + 0 = 1, 100% precision. Notice we are still missing some dogs (49 dogs are classified as false negatives), but here &lt;strong&gt;the point is that whenever the model say it&amp;#8217;s a dog, it&amp;#8217;s a dog&lt;/strong&gt;.&lt;/p&gt;
@@ -4601,25 +5583,25 @@ the model are classified in different quadrants&lt;/strong&gt;. Depending on whi
 &lt;div class=&quot;content&quot;&gt;
 &lt;img src=&quot;/img/9fc030ab004eb3b12a815227ce62da52.png&quot; alt=&quot;9fc030ab004eb3b12a815227ce62da52.png&quot; height=&quot;50&quot;&gt;
 &lt;/div&gt;
-&lt;div class=&quot;title&quot;&gt;Figure 3. recall formula&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 8. recall formula&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;We start with a model that performs like this:&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;imageblock&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/diag-5617d16bad9ec93391f16c79749a657c.png&quot; alt=&quot;Recall&quot; width=&quot;230&quot; height=&quot;182&quot;&gt;
+&lt;img src=&quot;/img/diag-85c43faa821d8ed8acab35e8be805d4e.png&quot; alt=&quot;diag 85c43faa821d8ed8acab35e8be805d4e&quot; width=&quot;230&quot; height=&quot;182&quot;&gt;
 &lt;/div&gt;
-&lt;div class=&quot;title&quot;&gt;Recall&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 9. Recall&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Calculating the recall we end up with: 31 / 31 + 30 = 0.508, around 50% of time time when we say it&amp;#8217;s a dog it&amp;#8217;s a dog, that&amp;#8217;s not better than flipping a coin. Let&amp;#8217;s checkout another model:&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;imageblock&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/diag-17d45278c488a99230a68ffe7a7f7708.png&quot; alt=&quot;Improved recall&quot; width=&quot;230&quot; height=&quot;182&quot;&gt;
+&lt;img src=&quot;/img/diag-43d86b0d4c9951ad53a248b51efbd5a7.png&quot; alt=&quot;diag 43d86b0d4c9951ad53a248b51efbd5a7&quot; width=&quot;230&quot; height=&quot;182&quot;&gt;
 &lt;/div&gt;
-&lt;div class=&quot;title&quot;&gt;Improved recall&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 10. Improved recall&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;In this ocassion we&amp;#8217;ve got that: 31 / 31 + 0 = 1, 100% of recall. This time this would mean that every time we say a dog is a dog we may get a cat, but we are completely sure, that no dogs have been classified as cats. Looking at the matrix:&lt;/p&gt;
@@ -4671,7 +5653,7 @@ the model are classified in different quadrants&lt;/strong&gt;. Depending on whi
 &lt;div class=&quot;content&quot;&gt;
 &lt;img src=&quot;/img/f7ce964042ecded59c4495ac23e5e10b.png&quot; alt=&quot;f7ce964042ecded59c4495ac23e5e10b.png&quot; height=&quot;50&quot;&gt;
 &lt;/div&gt;
-&lt;div class=&quot;title&quot;&gt;Figure 4. f1 score formula&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 11. f1 score formula&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;As it&amp;#8217;s mentioned &lt;a href=&quot;https://towardsdatascience.com/accuracy-precision-recall-or-f1-331fb37c5cb9&quot;&gt;this article&lt;/a&gt; F1 Score might be a better measure to use &lt;strong&gt;if we need to seek a balance between Precision and Recall AND there is an uneven class distribution&lt;/strong&gt; (large number of Actual Negatives).&lt;/p&gt;
@@ -4758,9 +5740,9 @@ for clsf in classifiers:
 &lt;/div&gt;
 &lt;div class=&quot;imageblock&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/diag-83c2392ea6863c27796bbacd74ed2018.png&quot; alt=&quot;Confusion matrices&quot; width=&quot;860&quot; height=&quot;350&quot;&gt;
+&lt;img src=&quot;/img/diag-ca0c55ac6ede9997ec25f87b8f510c9d.png&quot; alt=&quot;diag ca0c55ac6ede9997ec25f87b8f510c9d&quot; width=&quot;860&quot; height=&quot;350&quot;&gt;
 &lt;/div&gt;
-&lt;div class=&quot;title&quot;&gt;Confusion matrices&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 12. Confusion matrices&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;First impressions:&lt;/p&gt;
@@ -5774,9 +6756,9 @@ TODO&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;imageblock text-center&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/diag-d33b4b7e5f331db6af3c5f0aeb387b79.png&quot; alt=&quot;process steps&quot; width=&quot;90%&quot; height=&quot;196&quot;&gt;
+&lt;img src=&quot;/img/diag-aa60cc97f12afddbac7aacbb9e3378c8.png&quot; alt=&quot;diag aa60cc97f12afddbac7aacbb9e3378c8&quot; width=&quot;90%&quot; height=&quot;196&quot;&gt;
 &lt;/div&gt;
-&lt;div class=&quot;title&quot;&gt;process steps&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 1. process steps&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;sect2&quot;&gt;
 &lt;h3 id=&quot;loading_and_preparing_data&quot;&gt;Loading and preparing data&lt;/h3&gt;
@@ -5820,7 +6802,7 @@ credit.head()&lt;/code&gt;&lt;/pre&gt;
 &lt;div class=&quot;content&quot;&gt;
 &lt;img src=&quot;/img/2020/11/ml_svm_german_credit/svm_loading_data.png&quot; alt=&quot;data&quot; width=&quot;90%&quot;&gt;
 &lt;/div&gt;
-&lt;div class=&quot;title&quot;&gt;Figure 1. raw data&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 2. raw data&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;The problem is that I need to get rid of categorical data and convert everything into numerical data. I&amp;#8217;m creating a function that takes all unique values of a given series and maps every categorical value to a given number.&lt;/p&gt;
@@ -5862,7 +6844,7 @@ credit.head()&lt;/code&gt;&lt;/pre&gt;
 &lt;div class=&quot;content&quot;&gt;
 &lt;img src=&quot;/img/2020/11/ml_svm_german_credit/svm_to_numerical.png&quot; alt=&quot;to_numerical&quot; width=&quot;90%&quot;&gt;
 &lt;/div&gt;
-&lt;div class=&quot;title&quot;&gt;Figure 2. numerical data&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 3. numerical data&lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;sect2&quot;&gt;
@@ -5894,7 +6876,7 @@ sns.heatmap(
 &lt;div class=&quot;content&quot;&gt;
 &lt;img src=&quot;/img/2020/11/ml_svm_german_credit/svm_correlation_matrix.png&quot; alt=&quot;correlation&quot; width=&quot;40%&quot;&gt;
 &lt;/div&gt;
-&lt;div class=&quot;title&quot;&gt;Figure 3. correlation matrix&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 4. correlation matrix&lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;sect2&quot;&gt;
@@ -5971,7 +6953,7 @@ gamma_dataframe.head()&lt;/code&gt;&lt;/pre&gt;
 &lt;div class=&quot;content&quot;&gt;
 &lt;img src=&quot;/img/2020/11/ml_svm_german_credit/svm_cross_validation_gamma_values.png&quot; alt=&quot;gamma&quot; width=&quot;20%&quot;&gt;
 &lt;/div&gt;
-&lt;div class=&quot;title&quot;&gt;Figure 4. Gamma values&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 5. Gamma values&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;I wanted to show visually how training and test datasets were behaving depending on the gamma values provided.&lt;/p&gt;
@@ -6009,7 +6991,7 @@ show_svc_param_performance(gamma_dataframe, &quot;gamma&quot;)&lt;/code&gt;&lt;/
 &lt;div class=&quot;content&quot;&gt;
 &lt;img src=&quot;/img/2020/11/ml_svm_german_credit/svm_cross_validation_gamma_chart.png&quot; alt=&quot;gamma_chart&quot; width=&quot;50%&quot;&gt;
 &lt;/div&gt;
-&lt;div class=&quot;title&quot;&gt;Figure 5. Gamma evolution chart&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 6. Gamma evolution chart&lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;sect2&quot;&gt;
@@ -7155,9 +8137,9 @@ best_feature&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div class=&quot;imageblock text-center&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/diag-76efed66a451856f2944041b54f7e48a.png&quot; alt=&quot;representation &amp;#8594; evaluation &amp;#8594; optimization&quot; width=&quot;760&quot; height=&quot;210&quot;&gt;
+&lt;img src=&quot;/img/diag-ac57dbfd1bf007c05a3714233236156b.png&quot; alt=&quot;diag ac57dbfd1bf007c05a3714233236156b&quot; width=&quot;760&quot; height=&quot;210&quot;&gt;
 &lt;/div&gt;
-&lt;div class=&quot;title&quot;&gt;representation &amp;#8594; evaluation &amp;#8594; optimization&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 1. representation &amp;#8594; evaluation &amp;#8594; optimization&lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -7185,7 +8167,7 @@ food.head()&lt;/code&gt;&lt;/pre&gt;
 &lt;div class=&quot;content&quot;&gt;
 &lt;img src=&quot;/img/2020/11/ml_slc_getting_started/food_dataset.png&quot; alt=&quot;header&quot; width=&quot;80%&quot;&gt;
 &lt;/div&gt;
-&lt;div class=&quot;title&quot;&gt;Figure 1. food dataset&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 2. food dataset&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Each entry has a series of possible features and it&amp;#8217;s labeled with a color value (TRAFFICLIGH VALUE) which depends on whether it is a healthy food, not so healthy food or junk food. Next I should choose every column that can be eligible as a feature, for example the name of the food is not a good feature if you&amp;#8217;d like to generalize the results.&lt;/p&gt;
@@ -7218,7 +8200,7 @@ df.head()&lt;/code&gt;&lt;/pre&gt;
 &lt;div class=&quot;content&quot;&gt;
 &lt;img src=&quot;/img/2020/11/ml_slc_getting_started/food_features_all.png&quot; alt=&quot;dataset&quot; width=&quot;80%&quot;&gt;
 &lt;/div&gt;
-&lt;div class=&quot;title&quot;&gt;Figure 2. possible features&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 3. possible features&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;&lt;strong&gt;However the goal is to choose the minimum set of features that maximizes the classification&lt;/strong&gt;. Too many could classify well but it would become too hard to use, too few would not classify well enough. I need to find the balance between the two. Once I&amp;#8217;ve found the balance I can use both, features and labels to create a training and test datasets. For that I use the &lt;a href=&quot;https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html&quot;&gt;train_test_split function&lt;/a&gt; from scikit-learn library.&lt;/p&gt;
@@ -7257,7 +8239,7 @@ plt.show()&lt;/code&gt;&lt;/pre&gt;
 &lt;div class=&quot;content&quot;&gt;
 &lt;img src=&quot;/img/2020/11/ml_slc_getting_started/matrix_plot.png&quot; alt=&quot;header&quot; width=&quot;25%&quot;&gt;
 &lt;/div&gt;
-&lt;div class=&quot;title&quot;&gt;Figure 3. matrix plot&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 4. matrix plot&lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;sect2&quot;&gt;
@@ -7562,9 +8544,9 @@ Is an area of AI focused on building software capable of improving over time thr
 &lt;/div&gt;
 &lt;div class=&quot;imageblock text-center&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
-&lt;img src=&quot;/img/diag-ee54226f3e64668152bfd7efafad0f7b.png&quot; alt=&quot;ML processes are iterative&quot; width=&quot;1070&quot; height=&quot;308&quot;&gt;
+&lt;img src=&quot;/img/diag-c91c3d92f1c99ec375c8ea4d4dd4a83b.png&quot; alt=&quot;diag c91c3d92f1c99ec375c8ea4d4dd4a83b&quot; width=&quot;1070&quot; height=&quot;308&quot;&gt;
 &lt;/div&gt;
-&lt;div class=&quot;title&quot;&gt;ML processes are iterative&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 1. ML processes are iterative&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;sect2&quot;&gt;
 &lt;h3 id=&quot;representation&quot;&gt;Representation&lt;/h3&gt;
@@ -7789,7 +8771,7 @@ Classification is about discrete values
 &lt;div class=&quot;content&quot;&gt;
 &lt;img src=&quot;/img/2020/10/ml_key_concepts/regression.png&quot; alt=&quot;regression&quot; width=&quot;60%&quot;&gt;
 &lt;/div&gt;
-&lt;div class=&quot;title&quot;&gt;Figure 1. Regression&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 2. Regression&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;quoteblock&quot;&gt;
 &lt;blockquote&gt;

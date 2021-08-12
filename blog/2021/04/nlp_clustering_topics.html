@@ -1,0 +1,466 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="/feed.xml" class="icon fa-rss">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><div class="metadata"><em class="fa fa-calendar-o"></em><b>2021-04-29</b></div><h1>NLP: Clustering Inception</h1></header><yieldScaped><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>When using supervised learning for classifying data you normally begin with some labelled dataset. These labels help in the evaluation phase model to assess how probable it is that a given sample belongs to a specific target class.</p>
+</div>
+<div class="paragraph">
+<p>But sometimes you&#8217;d like to classify unlabelled data. That usually suggests the use of unsupervised learning techniques such as clustering or grouping data by some common feature. Then imagine you&#8217;ve got a bunch of unclassified text documents and get some groups by clustering and finally use those groups to classify new documents. That would be great.</p>
+</div>
+<div class="paragraph">
+<p>In this article I&#8217;m going all the way and take a list of unlabelled texts, clustering them into groups and finally try to classify new documents based on these groups or clusters.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="loading_data">Loading Data</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I&#8217;m loading some news articles from different sources and about different topics to create a Pandas DataFrame. Although the data has labels, I&#8217;m only using them at the end to check how well the whole process worked.</p>
+</div>
+<div class="listingblock">
+<div class="title">loading data</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import numpy as np
+import pandas as pd
+import xml.etree.ElementTree as ET
+
+from os import walk
+
+_, _, filenames = next(walk('news'))
+df       = pd.DataFrame()
+
+for file in filenames:
+    xml = ET.parse("news/" + file).getroot()
+    for entry in xml.findall('entry'):
+        title= entry.find("title").text
+        text = entry.find("text").text
+        site = entry.find("link").text
+        tag  = entry.find("tag").text
+
+        df = df.append({"title": title, "text": text, "tag": tag, "site": site}, ignore_index=True)
+
+df.head()</code></pre>
+</div>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/2021/04/nlp_clustering/nlp_loaded_data.png" alt="loaded dataframe" width="80%">
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="cleaning_data">Cleaning Data</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this section, I&#8217;m going to normalize the text. There are several tasks that people normally do to normalize data, such getting rid of stop-words, removing extra white spaces&#8230;&#8203;etc. A couple of weeks ago I heard about <a href="https://texthero.org/">TextHero</a> which among other things it provides a solid pipeline to clean data. <strong>With TextHero I can very easily do some basic cleaning</strong>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Replace not assigned values with empty spaces.</p>
+</li>
+<li>
+<p>Lowercase all text.</p>
+</li>
+<li>
+<p>Remove all blocks of digits.</p>
+</li>
+<li>
+<p>Remove all string.punctuation (!"#$%&amp;'()*+,-./:;&lt;&#8658;?@[\]^_`{|}~).</p>
+</li>
+<li>
+<p>Remove all accents from strings.</p>
+</li>
+<li>
+<p>Remove all stop words.</p>
+</li>
+<li>
+<p>Remove all white space between words.</p>
+</li>
+</ul>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">download dependencies</div>
+<div class="paragraph">
+<p>One of the ways to download dependencies in a Python Jupyter Notebook is to use <strong>sys</strong> module. Here you have how to download TextHero and Gensim dependencies:</p>
+</div>
+<div class="listingblock">
+<div class="title">dependencies</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import sys
+!{sys.executable} -m pip install -U texthero
+!{sys.executable} -m pip install "gensim==3.8.1"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now we can keep going with the article.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Apart from the basic cleaning tasks <strong>I needed to remove some stuff that I think could be considered as data leakage</strong> such as:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The web site of the article</p>
+</li>
+<li>
+<p>The topic the newspaper grouped the article</p>
+</li>
+<li>
+<p>some other words that I could consider noise</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="title">extra words to delete</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python"># creating a copy of source dataset
+articles_df = df.copy()
+
+# article topics
+topics          = articles_df['tag'].unique()
+
+# some words under my consideration
+words_to_delete = ['said', 'also', 'year', 'would']
+
+# sites of the articles
+sites           = articles_df['site']\
+    .str.extractall(r'https://.*\.(?P&lt;www&gt;\w*)\..*')\
+    .reset_index(col_fill='origin')['www']\
+    .unique()</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The nice thing about TextHero is that I can create a pipeline of different functions that will be applied to every sample to clean the data:</p>
+</div>
+<div class="listingblock">
+<div class="title">creating custom pipeline</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import texthero as hero
+from texthero import preprocessing as pre
+
+# custom pipeline
+custom_pipeline = [
+    # default cleaning functions
+    pre.fillna,
+    pre.lowercase,
+    pre.remove_digits,
+    pre.remove_punctuation,
+    pre.remove_diacritics,
+    pre.remove_stopwords,
+    pre.remove_whitespace,
+    # extra cleaning tasks
+    remove(topics),
+    remove(sites),
+    remove(words_to_delete)
+]
+
+# cleaning text with custom pipeline
+articles_df['text'] = articles_df['text'].pipe(hero.clean, custom_pipeline)
+articles_df['text'].head()</code></pre>
+</div>
+</div>
+<div class="imageblock text-left">
+<div class="content">
+<img src="/img/2021/04/nlp_clustering/nlp_cleaned_text.png" alt="cleaned text" width="40%">
+</div>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s the source of the <strong>remove(&#8230;&#8203;)</strong> function:</p>
+</div>
+<div class="listingblock">
+<div class="title">reusable function to remove words from string series</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from functools import reduce
+
+def remove(words):
+    def remove_from_series(s):
+        return reduce(lambda acc, val: acc.str.replace(val, ""), words, s)
+    return remove_from_series</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="splitting_data">Splitting Data</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Ok, I&#8217;ve got my data cleaned, or at least, sort of. It&#8217;s time to split the data in two datasets:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Half of the data will be used for <strong>training the clustering model</strong></p>
+</li>
+<li>
+<p>The other half will be used for <strong>testing the classifier created from the clustering model</strong></p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="title">creating training / testing datasets</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">articles_df['business'] = np.where(articles_df['tag'] == 'business', 1, 0)
+
+groups    = articles_df.groupby('business')
+busi      = groups.get_group(1)
+busi_half = round(len(busi) / 2)
+
+non_busi      = groups.get_group(0)
+non_busi_half = round(len(non_busi) / 2)
+
+train = pd\
+    .concat([busi[:busi_half], non_busi[:non_busi_half]])\
+    .sample(frac=1)\
+    .reset_index(drop=True)
+
+tests = pd\
+    .concat([busi[busi_half:], non_busi[non_busi_half:]])\
+    .sample(frac=1)\
+    .reset_index(drop=True)
+
+len(train), len(tests)</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Splitting by half</div>
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">(478, 479)</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="clustering">Clustering</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Before asking the model to group all news into two topics, I need to:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Transform text to something that the model can work with</p>
+</li>
+<li>
+<p>Create a corpus</p>
+</li>
+<li>
+<p>Create a dictionary</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="title">creating corpus and dictionary</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import gensim
+from sklearn.feature_extraction.text import CountVectorizer
+
+txt = train['text']
+vec = CountVectorizer()
+X   = vec.fit_transform(txt)
+
+# Convert sparse matrix to gensim corpus.
+corpus = gensim.matutils.Sparse2Corpus(X, documents_columns=False)
+
+# Mapping from word IDs to words (To be used in LdaModel's id2word parameter)
+dictionary = dict((v, k) for k, v in vec.vocabulary_.items())</code></pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="ldamodel">LdaModel</h3>
+<div class="paragraph">
+<p>To create the clustering model I&#8217;m using <a href="https://radimrehurek.com/gensim/">Gensim</a> and its <a href="https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation">LDA</a> model implementation. According to Gensim&#8217;s documentation: <em>This module allows both LDA model estimation from a training corpus and inference of topic distribution on new, unseen documents. The model can also be updated with new documents for online training</em>.</p>
+</div>
+<div class="listingblock">
+<div class="title">LDA Model</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python"># Use the gensim.models.ldamodel.LdaModel constructor to estimate
+# LDA model parameters on the corpus, and save to the variable `ldamodel`
+from gensim.models.ldamodel import LdaModel
+
+# Your code here:
+ldamodel = LdaModel(corpus, id2word=id_map, num_topics=2)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Invoking the model&#8217;s <strong>show_topics</strong> function will show us the two topics found and the terms or tokens related to them with their weight. In other words, how important these terms are to consider that a given article belongs to that topic.</p>
+</div>
+<div class="listingblock">
+<div class="title">showing discovered topics</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">ldamodel.show_topics()</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">topics and their related terms</div>
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">[(0,
+  '0.004*"biden" + 0.004*"last" + 0.004*"new" + 0.003*"one" + 0.003*"like" + 0.003*"people" + 0.003*"president" + ...'),
+ (1,
+  '0.004*"first" + 0.003*"mpany" + 0.003*"new" + 0.003*"one" + 0.003*"back" + 0.003*"people" + 0.003*"get" + 0.003...')]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>So if a given article has <strong>biden</strong> or <strong>president</strong> is more likely to belong to the topic <strong>0</strong> whereas if another article has <strong>company</strong> is more likely to belong to the topic <strong>1</strong>. At this point we could manually label those topics, for example, topic <strong>0</strong> could become <strong>non_business</strong> and topic <strong>1</strong> could become <strong>business</strong>, and then just use those labels in a binary classification.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="binary_classification_using_lda_model">Binary classification using LDA model</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The cluster model created two topics, which means that we can label samples by looking at the distribution of the topics for each document. Because we only have two topics If the distribution of a given topic is greater than the other then I&#8217;ll assume it belongs to that topic. We can get the distribution of topics for a given document by invoking <strong>get_document_topics(&#8230;&#8203;)</strong> from the LDA model we&#8217;ve created previously.</p>
+</div>
+<div class="paragraph">
+<p>This way I&#8217;ve created a labelled dataset from a bunch of unlabelled articles and now I&#8217;d like to use this new labelled dataset to classify the other half of the articles we left for testing purposes.</p>
+</div>
+<div class="listingblock">
+<div class="title">binary classification</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python"># transforming raw data
+X      = vec.transform(tests['text'])
+
+# creating a new corpus to cluster
+corpus = gensim.matutils.Sparse2Corpus(X, documents_columns=False)
+
+# creating a series to compare results with initial labels
+results = []
+for next_doc in ldamodel.get_document_topics(corpus):
+    if len(next_doc) == 2:
+        _, pct_zero = next_doc[0]
+        _, pct_one  = next_doc[1]
+
+        results.append(1 if pct_one &gt; pct_zero else 0)
+    else:
+        target, pct = next_doc[0]
+        results.append(target)
+
+check = tests.copy()
+check['classified'] = pd.Series(results)
+check.loc[10:20, ['title', 'business', 'classified']]</code></pre>
+</div>
+</div>
+<div class="imageblock text-left">
+<div class="content">
+<img src="/img/2021/04/nlp_clustering/nlp_classified_sample.png" alt="classified samples" width="40%">
+</div>
+</div>
+<div class="paragraph">
+<p>Well just by looking at the picture, it doesn&#8217;t seem great, but, How accurate is how classification model in reality ? Lets figure out the accuracy score with sklearn&#8217;s <strong>accuracy_score(&#8230;&#8203;)</strong> function:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from sklearn.metrics import accuracy_score
+
+accuracy_score(check['business'], check['classified'])</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">0.732776617954071</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Well, more than I expected.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="references">References</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://texthero.org/">Text Hero</a></p>
+</li>
+<li>
+<p><a href="https://towardsdatascience.com/unsupervised-nlp-topic-models-as-a-supervised-learning-input-cf8ee9e5cf28">Unsupervised NLP Topics as supervised learning input</a></p>
+</li>
+<li>
+<p><a href="https://towardsdatascience.com/2-latent-methods-for-dimension-reduction-and-topic-modeling-20ff6d7d547">Dimension Reduction in Topic Modeling</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/stats.html">Statistics</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>

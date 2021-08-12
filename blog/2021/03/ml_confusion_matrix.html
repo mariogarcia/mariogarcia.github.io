@@ -91,18 +91,18 @@ the model are classified in different quadrants</strong>. Depending on which qua
 </div>
 <div class="imageblock text-center">
 <div class="content">
-<img src="/img/diag-b9576e02d6f87bbe683b9b888762b778.png" alt="Confusion matrix" width="370" height="308">
+<img src="/img/diag-d6c7574b75c4cbbab4321be48cecea13.png" alt="diag d6c7574b75c4cbbab4321be48cecea13" width="370" height="308">
 </div>
-<div class="title">Confusion matrix</div>
+<div class="title">Figure 2. Confusion matrix</div>
 </div>
 <div class="paragraph">
 <p>Lets create a theoretical example. Lets say we have a binary classification problem. We&#8217;re classifying images, and we need to classify 100 images between cats and dogs. The confusion matrix for my actual model is the following:</p>
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="/img/diag-37ba68dacf2cfa390df4dfc1ea237905.png" alt="Binary classification" width="230" height="182">
+<img src="/img/diag-85c43faa821d8ed8acab35e8be805d4e.png" alt="diag 85c43faa821d8ed8acab35e8be805d4e" width="230" height="182">
 </div>
-<div class="title">Binary classification</div>
+<div class="title">Figure 3. Binary classification</div>
 </div>
 <div class="paragraph">
 <p>If we establish that the positive class (1) is to find a dog and a negative class (0) is to find a cat, according to this confusion matrix of a 100 samples we can make certain assumptions:</p>
@@ -128,9 +128,9 @@ the model are classified in different quadrants</strong>. Depending on which qua
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="/img/diag-89a77d67a4b8a56ee372c45cf6f23bd1.png" alt="Accuracy metric" width="230" height="182">
+<img src="/img/diag-cc13dee039c79ee2e5b0e367f3d57e7e.png" alt="diag cc13dee039c79ee2e5b0e367f3d57e7e" width="230" height="182">
 </div>
-<div class="title">Accuracy metric</div>
+<div class="title">Figure 4. Accuracy metric</div>
 </div>
 <div class="paragraph">
 <p>But as we&#8217;re mentioned so far, we may want to prioritize some other type of metric. Other metrics could be: <strong>precision, recall or specificity</strong>.</p>
@@ -149,25 +149,25 @@ the model are classified in different quadrants</strong>. Depending on which qua
 <div class="content">
 <img src="/img/96d2dbcd621a2da7cff58eaed68d87c2.png" alt="96d2dbcd621a2da7cff58eaed68d87c2.png" height="50">
 </div>
-<div class="title">Figure 2. precision formula</div>
+<div class="title">Figure 5. precision formula</div>
 </div>
 <div class="paragraph">
 <p>In our example our first model was performing like this:</p>
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="/img/diag-68d1981304602339732316ef075af471.png" alt="Precision" width="230" height="182">
+<img src="/img/diag-85c43faa821d8ed8acab35e8be805d4e.png" alt="diag 85c43faa821d8ed8acab35e8be805d4e" width="230" height="182">
 </div>
-<div class="title">Precision</div>
+<div class="title">Figure 6. Precision</div>
 </div>
 <div class="paragraph">
 <p>Calculating the precision would give us 31 / 31 + 19 = 0.62, 62% precision. A model that improves precision would look like the following:</p>
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="/img/diag-4f5e940fa1cc0908c1d1c91a57c7e629.png" alt="Improved precission" width="230" height="182">
+<img src="/img/diag-f7b708d44c46c7a0de4ec56588f13bad.png" alt="diag f7b708d44c46c7a0de4ec56588f13bad" width="230" height="182">
 </div>
-<div class="title">Improved precission</div>
+<div class="title">Figure 7. Improved precission</div>
 </div>
 <div class="paragraph">
 <p>Which would give us a precision of: 41 / 41 + 0 = 1, 100% precision. Notice we are still missing some dogs (49 dogs are classified as false negatives), but here <strong>the point is that whenever the model say it&#8217;s a dog, it&#8217;s a dog</strong>.</p>
@@ -203,25 +203,25 @@ the model are classified in different quadrants</strong>. Depending on which qua
 <div class="content">
 <img src="/img/9fc030ab004eb3b12a815227ce62da52.png" alt="9fc030ab004eb3b12a815227ce62da52.png" height="50">
 </div>
-<div class="title">Figure 3. recall formula</div>
+<div class="title">Figure 8. recall formula</div>
 </div>
 <div class="paragraph">
 <p>We start with a model that performs like this:</p>
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="/img/diag-5617d16bad9ec93391f16c79749a657c.png" alt="Recall" width="230" height="182">
+<img src="/img/diag-85c43faa821d8ed8acab35e8be805d4e.png" alt="diag 85c43faa821d8ed8acab35e8be805d4e" width="230" height="182">
 </div>
-<div class="title">Recall</div>
+<div class="title">Figure 9. Recall</div>
 </div>
 <div class="paragraph">
 <p>Calculating the recall we end up with: 31 / 31 + 30 = 0.508, around 50% of time time when we say it&#8217;s a dog it&#8217;s a dog, that&#8217;s not better than flipping a coin. Let&#8217;s checkout another model:</p>
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="/img/diag-17d45278c488a99230a68ffe7a7f7708.png" alt="Improved recall" width="230" height="182">
+<img src="/img/diag-43d86b0d4c9951ad53a248b51efbd5a7.png" alt="diag 43d86b0d4c9951ad53a248b51efbd5a7" width="230" height="182">
 </div>
-<div class="title">Improved recall</div>
+<div class="title">Figure 10. Improved recall</div>
 </div>
 <div class="paragraph">
 <p>In this ocassion we&#8217;ve got that: 31 / 31 + 0 = 1, 100% of recall. This time this would mean that every time we say a dog is a dog we may get a cat, but we are completely sure, that no dogs have been classified as cats. Looking at the matrix:</p>
@@ -273,7 +273,7 @@ the model are classified in different quadrants</strong>. Depending on which qua
 <div class="content">
 <img src="/img/f7ce964042ecded59c4495ac23e5e10b.png" alt="f7ce964042ecded59c4495ac23e5e10b.png" height="50">
 </div>
-<div class="title">Figure 4. f1 score formula</div>
+<div class="title">Figure 11. f1 score formula</div>
 </div>
 <div class="paragraph">
 <p>As it&#8217;s mentioned <a href="https://towardsdatascience.com/accuracy-precision-recall-or-f1-331fb37c5cb9">this article</a> F1 Score might be a better measure to use <strong>if we need to seek a balance between Precision and Recall AND there is an uneven class distribution</strong> (large number of Actual Negatives).</p>
@@ -360,9 +360,9 @@ for clsf in classifiers:
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="/img/diag-83c2392ea6863c27796bbacd74ed2018.png" alt="Confusion matrices" width="860" height="350">
+<img src="/img/diag-ca0c55ac6ede9997ec25f87b8f510c9d.png" alt="diag ca0c55ac6ede9997ec25f87b8f510c9d" width="860" height="350">
 </div>
-<div class="title">Confusion matrices</div>
+<div class="title">Figure 12. Confusion matrices</div>
 </div>
 <div class="paragraph">
 <p>First impressions:</p>
