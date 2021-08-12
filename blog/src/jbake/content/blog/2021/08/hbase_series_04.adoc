@@ -1,0 +1,15 @@
+= Hbase series: Query Model
+@marioggar
+2021-08-13
+:jbake-type: post
+:jbake-status: draft
+:jbake-tags: nosql, bigdata, hbase
+:idprefix:
+:summary: Hbase, NoSQL
+:summary_image: data.jpg
+
+TODO
+
+== Next
+
+link:/blog/2021/08/hbase_series_05.html[API Clients]

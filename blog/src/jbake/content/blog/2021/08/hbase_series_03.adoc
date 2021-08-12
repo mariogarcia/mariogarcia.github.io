@@ -1,0 +1,107 @@
+= Hbase series: Data Model
+@marioggar
+2021-08-10
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: nosql, bigdata, hbase
+:idprefix:
+:summary: Hbase, NoSQL
+:summary_image: data.jpg
+
+== Data Model
+
+How data is stored in Hbase differs from what we are used to from relational databases. Although terminology is similar the meaning is not. So lets walk through the different pieces of the data model:
+
+- Table
+- Row
+- Column Family
+- Column qualifier
+- Cell
+
+A **Table** is the top hierarchical aggregation in Hbase. **A table have rows**, and these rows can have the **rowkey**, the **timestamp**, and the data, grouped in what is called **column families**. Finally a **cell** is the unit of storage in HBase consisting of the following fields: row, column family, column qualifier, timestamp, type, MVCC version, and value. The concept of cell is important because introduces the topic of versioning, but lets leave that topic for another day.
+ 
+
+[ditaa, align="center"]
+....
++----------------------------------------------------------------------------+
+|cYEL                                   TABLE                                |
++-----------+------------+-------------------------+-------------------------+
+| ROWKEY1   | TIMESTAMP0 |   COLUMN FAMILY A DATA  |   COLUMN FAMILY B DATA  |
++-----------+------------+-------------------------+-------------------------+
+| ROWKEY2   | TIMESTAMP1 |   COLUMN FAMILY A DATA  |   COLUMN FAMILY B DATA  |
++-----------+------------+-------------------------+-------------------------+
+....
+
+Imagine I've got the information about all taxi trips in Madrid during the past year and I would like to store them in Hbase. I would like to keep the data regarding the trip (price, number of passengers) apart from the data regarding the attributes of the taxi (car brand, taxi driver license number):
+
+
+.Table taxi-trip
+|===
+|rowkey| timestamp |column_family "trip"|column_family "taxi"
+
+|"mad01"
+| T0 
+| trip:price="23", trip:passengers="2"
+| taxi:brand="ford", taxi:driver="0001"
+
+|"mad02"
+| T1 
+| trip:price="12", trip:passengers="4"
+| taxi:brand="ford", taxi:driver="0010"
+|===
+
+As you can see, trip information is stored in the column family **"trip"** and the taxi information is stored within the **"taxi"** column family. The **"taxi:"or "trip:" prefixes** are called **column qualifiers** and they tell Hbase which column family the data belongs to. 
+
+Now, in terms of building a query, How would I get the trip price and taxi driver license in those trips where the number of passengers was greater than 2 ? A basic approach could be:
+
+[source, bash]
+.dangerous query
+----
+scan 'taxi-trip', {
+    LIMIT => 10,
+    COLUMNS => ['trip:price', 'taxi:driver'],
+    FILTER => "SingleColumnValueFilter('trip', 'passengers', >=, 'binary:2')"
+}
+----
+
+Don't worry about the query syntax, that's not important for now, the takeaway point here is why this query doesn't scale well. That query could work well _for a few records_, but remember that **the only index available in Hbase is the row key**. If my database has billions of rows, this query will wait forever because **it will do a full scan**. That's why it's crucial to have a rowkey policy to allow certain queries to be performant. Now I've changed how I'm writing the rowkey, so that I can use it to narrow down results:
+
+.Table taxi-trip
+|===
+|rowkey| timestamp |column_family "trip"|column_family "taxi"
+
+|"mad20200101-01"
+| T0 
+| trip:price="23", trip:passengers="2"
+| taxi:brand="ford", taxi:driver="0001"
+
+|"mad20200102-02"
+| T1 
+| trip:price="12", trip:passengers="4"
+| taxi:brand="ford", taxi:driver="0010"
+|===
+
+Now in my queries I can use the rowkey as a filter, and because it is indexed, Hbase will know which partitions it has to look at to get the data, avoiding a full scan.
+
+[source, bash]
+.optimized query
+----
+scan 'taxi-trip', {
+    LIMIT => 10,
+    COLUMNS => ['trip:price', 'taxi:driver'],
+    STARTROW => "mad202001-01",
+    STOPROW => "mad202001-03",
+    FILTER => "SingleColumnValueFilter('trip', 'passengers', >=, 'binary:2')"
+}
+----
+
+There're at least a couple of row key filters available so you can create a more flexible searches based on rowkeys. But as a joke I would say that... the key in Hbase is the key X)
+
+=== Resources
+
+- http://hbase.apache.org/book.html#datamodel[Hbase Data Model]: Official Hbase documentation about its data model
+- https://www.dezyre.com/article/overview-of-hbase-architecture-and-its-components/295[Hbase architecture]: Article describing the different Hbase components.
+
+== Next
+
+link:/blog/2021/08/hbase_series_04.html[Query Model]

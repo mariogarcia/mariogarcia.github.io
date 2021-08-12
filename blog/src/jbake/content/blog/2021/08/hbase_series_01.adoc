@@ -1,0 +1,123 @@
+= Hbase series: Intro
+@marioggar
+2021-08-06
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: nosql, bigdata, hbase
+:idprefix:
+:summary: Hbase, NoSQL
+:summary_image: data.jpg
+
+.Hbase logo
+image::2021/08/hbase/hbase_logo_with_orca_large.png[alt="Hbase", align="center", width="50%"]
+
+== Introduction
+
+After a month of playing with Hbase I would like to write down my thoughts and impressions on Hbase. I'm covering the following topics.
+
+- Introduction
+- link:/blog/2021/08/hbase_series_02.html[Components]
+- link:/blog/2021/08/hbase_series_03.html[Data Model]
+- Query model
+- API Client
+- Region partition policy
+
+== Why
+
+The reason I started evaluating Hbase is because I needed to look for a datastore capable of storing up to **1TB/day** and be used as a real time query engine. I've got the following requirements:
+
+- **Quick Random Access** Data. I'd like to be able to update, read a specific record
+- **Quick Writes** The system is going to be ingesting up to a TB of data a day, so it better be quick
+- **Decent online query responses** to be queried in real time by end users. Whatever is ingested should be available to be queried. And if possible responses under the second would be great.
+
+After a few days of search and asking some friends, I ended up giving http://hbase.apache.org/[Hbase] a go. In theory it seemed to meet all my requirements. According to Hbase site:
+
+[quote]
+Use Apache HBase™ when you need random, realtime read/write access to your Big Data
+
+== Features
+
+Lets go through the main features exposed in Hbase site and my initial comments on them:
+
+- **Strongly consistent reads/writes**
+
+_HBase is not an "eventually consistent" DataStore. This makes it very suitable for tasks such as high-speed counter aggregation._
+
+To keep long story short, to have consistent reads/writes doesn't mean it supports transactions, it means just that, for whatever you insert in Hbase, once it has acknowledge about the insertion, it will be visible for anyone reading.
+
+- **Automatic sharding**
+
+_HBase tables are distributed on the cluster via regions, and regions are automatically split and re-distributed as your data grows._
+
+Hbase uses a distributed storage to store data. By default it uses HDFS, but there's also the posibility of using S3. Using S3 comes specially handy as it makes your life easier in terms of disk provisioning. The idea of using a distributed storage system is that, data can be dinamically distributed by the system as it grows, so storage could scale horizontally. The primitive used to distribute data between the nodes is called region. Hbase automatically split and re-distributed regions as your data grows
+
+- **Automatic RegionServer failover**
+
+As we'll see in the following post entry data resides in regions and region servers make regions available to the world. If a region server fails the master server chooses another region server to take over the regions that were handled by the crashing region server. 
+
+- **Hadoop/HDFS Integration**
+
+_HBase supports HDFS out of the box as its distributed file system_. As I already mentioned, using a distributed file system brings several benefits, like auto-sharding.
+
+- **MapReduce**
+
+_HBase supports massively parallelized processing via MapReduce for using HBase as both source and sink._ Mainly because there're operations that cannot be done via the query API, such as aggregations.
+
+- **Java Client API**
+
+_HBase supports an easy to use Java API for programmatic access_
+
+- **Thrift/REST API**: 
+
+_HBase also supports Thrift and REST for non-Java front-ends._
+
+I've used Thrift integration with Python. The Thrift server is not up by default so you have to make sure is up and running before using your Hbase-Thrift client.
+
+- **Block Cache and Bloom Filters**
+
+_HBase supports a Block Cache and Bloom Filters for high volume query optimization_ These works like a charm, but believe me, nothing is gonna save you from wait forever if you do a query against a billion row database if you don't make use of indexing.
+
+- **Operational Management**
+
+_HBase provides build-in web-pages for operational insight as well as JMX metrics_. Pretty handy specially when you start learning about Hbase.
+
+== But keep in mind that...
+
+Apart from the goodies, there are some ideas that I think are important to keep in mind of before jumping on Hbase:
+
+- **Hbase only knows about bytes**
+
+That's right, no integers, no text, no jsonb, no decimals... no nothing. Is up to you to serialize/deserialize data from/to Hbase in order to do something with it.
+
+- **There is only ONE index**
+
+And it's super important to know how build your key, because when you want to get a result from a billion row table, if you don't narrow down the search by using the keys, you better go on holidays because that query is going to take forever. This sometimes imply to add some smart information to the key in order to use it for different types of searchs.
+
+- **Hbase requires Hadoop**
+
+Hbase requires a Hadoop infrastructure to operate (HDFS, MapReduce). If you are already using Hadoop great, if not, it could be hard to swallow.
+
+- **Proper Installation could be cumbersome**
+
+Partly because the Hadoop ecosystem, it's painful to install even a simple Hadoop cluster if you're not using a commercial solution like Cloudera or Amazon EMR.
+
+== Installation options
+
+Although HBase could be executed http://hbase.apache.org/book.html#quickstart[in standalone version for testing purposes], a production environment requires a minimal infrastructure, and unless you've got a dedicated sysadmin team and/or a good devops environment you're going end up paying whether is on premises or on cloud.
+
+=== On premises
+
+It sucks but, until 2019 the https://ambari.apache.org/[Project Ambari] provided an easy and powerful way of installing any part of the Hadoop ecosystem on premises, unfortunately with https://www.cloudera.com/about/news-and-blogs/press-releases/2019-01-03-cloudera-and-hortonworks-complete-planned-merger.html[the merge of Hortonworks and Cloudera], that's not the case anymore. Now Ambari requires some of the Cloudera modules, which are not open sourced. THe comercial version of Ambari has become https://es.cloudera.com/products/hdp.html[Hortonworks Data Platform]
+
+=== On cloud
+
+The only service I've checked so far is https://aws.amazon.com/emr/[Amazon EMR]. Amazon EMR is a service that allows you to create a Hadoop ecosystem in the cloud quickly and easily. https://aws.amazon.com/emr/pricing/?nc=sn&loc=4[The cost] of creating an EMR cluster depends on a fixed cost, the computation usage and disk requirements of your application. You can either use the AWS UI console or also use the https://registry.terraform.io/providers/hashicorp/aws/latest/docs[Terraform AWS provider] if you have Terraform as part of your toolbox.
+
+== Resources
+
+- http://hbase.apache.org/[Hbase site]
+- http://hbase.apache.org/book.html[Hbase guide]
+
+== Next
+
+link:/blog/2021/08/hbase_series_02.html[Hbase Components]

@@ -8,8 +8,8 @@ buildscript {
 
   dependencies {
       // Jbake + Asciidoctor
-      classpath 'org.asciidoctor:asciidoctorj:1.6.0'
-      classpath 'org.asciidoctor:asciidoctorj-diagram:1.5.0'
+     // classpath 'org.asciidoctor:asciidoctorj:1.6.0'
+      classpath 'org.asciidoctor:asciidoctorj-diagram:2.0.1'
       classpath 'com.github.grooviter:asciidoctor-mathx-extension:0.1.5'
       classpath 'org.ajoberstar:gradle-git:1.7.2'
   }

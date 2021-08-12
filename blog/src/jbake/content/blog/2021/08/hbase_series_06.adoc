@@ -1,0 +1,11 @@
+= Hbase series: Region policies
+@marioggar
+2021-08-15
+:jbake-type: post
+:jbake-status: draft
+:jbake-tags: nosql, bigdata, hbase
+:idprefix:
+:summary: Hbase, NoSQL
+:summary_image: data.jpg
+
+TODO

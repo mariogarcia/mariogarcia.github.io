@@ -1,0 +1,13 @@
+= Hbase series: API clients
+@marioggar
+2021-08-14
+:jbake-type: post
+:jbake-status: draft
+:jbake-tags: nosql, bigdata, hbase
+:idprefix:
+:summary: Hbase, NoSQL
+:summary_image: data.jpg
+
+== Next
+
+link:/blog/2021/08/hbase_series_06.html[Region partition policies]

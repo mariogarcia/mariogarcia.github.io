@@ -1,0 +1,43 @@
+= Hbase series: Components
+@marioggar
+2021-08-09
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: nosql, bigdata, hbase
+:idprefix:
+:summary: Hbase, NoSQL
+:summary_image: data.jpg
+
+.Hbase architecture (Credit: Cloudera)
+image::2021/08/hbase/architecture.webp[alt="Hbase architecture", align="center", width="50%"]
+
+== Hbase Components
+
+As a distributed data store, you can see in the diagram above how tables are spread among the different **Region Servers (RS)**. That's because data can be partitioned and these partitions, called **regions**, are automatically distributed among Region Servers (auto-sharding).
+
+Data is ultimately written and read to and from regions, as I mentioned earlier think of a region as a database partition. Regions are managed by Region Servers (RS) and **Region Servers are handled by the HMaster (HM)** and monitored by **Zookeeper (ZK)**. When a http://hbase.apache.org/book.html#architecture.client[client] wants to read/write data to Hbase it first asks ZooKeeper which Region Server I should send the data to.
+
+NOTE: From version 3.X the master is required by the client http://hbase.apache.org/book.html#_staring_release_3_0_0[in some cases] when reading/writing data
+
+[plantuml, "asciidoctor-diagram-classes", "png", align="center", title="How a client writes data to Hbase"]
+----
+@startuml
+Client -> Zookeeper: Where do I send data ?
+Zookeeper --> Client: This data goes to RS1
+
+Client -> RS1: Here is data!
+RS1 <-- Client: Ack
+@enduml
+----
+
+The **HMaster** main responsibilities are administration tasks and how regions are handled among region servers. **Region Servers** responsibility is to serve and manage regions. There are tasks such as compactation (which among other things phisically deletes records previously marked to be deleted) that are executed by the RS on each of its regions
+
+=== Resources
+
+- http://hbase.apache.org/book.html#_architecture[Hbase Architecture]: Official Hbase documentation on architecture
+- http://hbase.apache.org/book.html#ops.capacity.regions[Regions guidelines]: documentation on how to determine region count and size
+
+== Next
+
+link:/blog/2021/08/hbase_series_03.html[Hbase Data Model]
+
