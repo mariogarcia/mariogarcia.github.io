@@ -18,9 +18,9 @@ After a month of playing with Hbase I would like to write down my thoughts and i
 - Introduction
 - link:/blog/2021/08/hbase_series_02.html[Components]
 - link:/blog/2021/08/hbase_series_03.html[Data Model]
-- Query model
-- API Client
-- Region partition policy
+- link:/blog/2021/08/hbase_series_04.html[Query model]
+- link:/blog/2021/08/hbase_series_05.html[API Client]
+- link:/blog/2021/08/hbase_series_06.html[Region partition policy]
 
 == Why
 

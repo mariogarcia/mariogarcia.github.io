@@ -2,13 +2,382 @@
 @marioggar
 2021-08-13
 :jbake-type: post
-:jbake-status: draft
+:jbake-status: published
 :jbake-tags: nosql, bigdata, hbase
 :idprefix:
 :summary: Hbase, NoSQL
 :summary_image: data.jpg
 
-TODO
+== Querying in Hbase
+
+Although you can use SQL with Hbase via http://phoenix.apache.org/[Apache Phoenix], by default the query language used by Hbase little has to do with SQL. Trying to do a translation between both worlds I would say that:
+
+.Translation between SQL and Hbase
+[cols="^,^"]
+|===
+|SQL | HBASE
+
+| INSERT
+| PUT
+
+| UPDATE
+| PUT
+
+| SELECT
+| SCAN or GET
+
+| DELETE
+| DELETE/DELETEALL
+
+| GROUP BY
+| via MapReduce job
+|===
+
+.First time with Hbase ?
+****
+This blog entry is more like a brain dump for me rather than a exhaustive guide for starting learning Hbase, so if it's your first time and you haven't installed Hbase yet, I'd recommend you to start by the http://hbase.apache.org/book.html#quickstart[Hbase official quickstart section]. It is also worth mentioning that once you are in the hbase shell you can always execute **help** or **help 'command'** and it will show you the information about how to use the different commands available.
+****
+
+== Creating the table
+
+Lets open the Hbase shell and create a table. For now I'm not interested in applying advanced features for this table such as compression for example. I'm creating a table named **sensors** with two column families **attrs** and **metric**. 
+
+- **attrs**: sensors' attributes: model, brand
+- **metric**: data produced by sensors: temperature
+
+[source, groovy]
+.create a table with two column families
+----
+hbase:019:0> create 'sensors', 'attrs', 'metric'
+Created table sensors
+Took 0.6594 seconds                                                                                                            
+=> Hbase::Table - sensors
+----
+
+If we're interested on reviewing the characteristics about the table we've just created we can use the **describe** command:
+
+[source, groovy]
+.describing table
+----
+hbase:031:0> describe 'sensors'
+Table sensors is ENABLED                                                                                                       
+sensors                                                                                                                        
+COLUMN FAMILIES DESCRIPTION                                                                                                    
+{NAME => 'metric', BLOOMFILTER => 'ROW', IN_MEMORY => 'false', VERSIONS => '1', KEEP_DELETED_CELLS => 'FALSE', DATA_BLOCK_ENCOD
+ING => 'NONE', COMPRESSION => 'NONE', TTL => 'FOREVER', MIN_VERSIONS => '0', BLOCKCACHE => 'true', BLOCKSIZE => '65536', REPLIC
+ATION_SCOPE => '0'}                                                                                                            
+
+{NAME => 'attrs', BLOOMFILTER => 'ROW', IN_MEMORY => 'false', VERSIONS => '1', KEEP_DELETED_CELLS => 'FALSE', DATA_BLOCK_ENC
+ODING => 'NONE', COMPRESSION => 'NONE', TTL => 'FOREVER', MIN_VERSIONS => '0', BLOCKCACHE => 'true', BLOCKSIZE => '65536', REPL
+ICATION_SCOPE => '0'}
+----
+
+.Compression
+****
+As a good practice, it would be nice to activate the table compression, there are different available algorithms depending on the availability/speed requirements for accessing the table's data. You can activate compression after creating the table, but unless you apply compaction (which requires your table to be offline) old data won't be compressed.
+
+You can check out more about compression http://hbase.apache.org/book.html#compression[in the official guide].
+****
+
+== Insert (PUT)
+
+Now it's time to insert our first two records. I'm adding two values identifying a specific sensor. Every value is going to be added to different column families. One column family takes care of sensor attributes (sensor) and the other one takes care of metrics values (metric)
+
+[source, groovy]
+.insert a new value
+----
+hbase:032:0> put 'sensors', '20210801100001001KIT', 'attrs:name', 'kitchen'
+Took 0.0375 seconds                                                                                                            
+hbase:033:0> put 'sensors', '20210801100001001KIT', 'metric:temp', '25'
+Took 0.0022 seconds                                                                                                 
+----
+
+The syntax I'm using here is:
+
+`put` `'tablename'`, `'rowkey'`, `'columnidentifier:label'`, `'value'`
+
+It's also important to notice how the rowkey in this case is composed by:
+
+- the second the sample was taken: `20210801100001`
+- an id of the room: `001`
+- an human friendly shortcut for the room name `KIT` for kitchen
+
+NOTE: We should save as much as we can when creating a key policy, so probably in this example, `KIT` would be redundant and it would worth removing it from the key.
+
+Lets see how this 1 row look like, **yes it is 1 row**, look at the row key:
+
+[source, groovy]
+----
+hbase:034:0> scan 'sensors'
+ROW                              COLUMN+CELL
+ 20210801100001001KIT                  column=metric:temp, timestamp=2021-08-13T00:13:06.888, value=25                               
+ 20210801100001001KIT                  column=attrs:name, timestamp=2021-08-13T00:12:35.727, value=kitchen
+----
+
+IMPORTANT: Here I'm using `scan` without any boundaries because there's only 1 row in the database. Beware of doing that with hundreds of millions of rows!
+
+== Update (PUT)
+
+Updating uses the same command `put` because everytime you use the same **rowkey** if you use the same column qualifier and a different value, the previous value will be changed. Here I'm changing the temperature for the same row:
+
+[source, groovy]
+.updating temperature
+----
+hbase:035:0> put 'sensors', '20210801100001001KIT', 'metric:temp', '32'
+Took 0.0109 seconds                                                                                                                            
+----
+
+We can now see how the temperature value has changed:
+
+[source, groovy]
+.temperature changed using same rowkey+columnqualifier
+----
+hbase:036:0> scan 'sensors'
+ROW                                      COLUMN+CELL
+ 20210801100001001KIT                          column=metric:temp, timestamp=2021-08-13T00:35:55.662, value=32                                                      
+ 20210801100001001KIT                          column=personal:name, timestamp=2021-08-13T00:12:35.727, value=kitchen
+----
+
+.Versioning
+****
+According to the http://hbase.apache.org/book.html#versions[Hbase docs]: A {row, column, version} tuple exactly specifies a cell in HBase. It’s possible to have an unbounded number of cells where the row and column are the same but the cell address differs only in its version dimension
+
+Which means that we could have different versions for "metric:temp" for the same "rowkey" if we include the insertion timestamp attribute (different from the timestamp included in the rowkey) and we configure the table to keep more than 1 version of every cell.
+****
+
+== Select (SCAN)
+
+So far we only had 1 row, lets add more entries (notice that the first three lines are updating the row we already entered):
+
+[source, groovy]
+----
+put 'sensors', '20210801100001001KIT', 'attrs:name', 'kitchen'
+put 'sensors', '20210801100001001KIT', 'metric:temp', '32'
+put 'sensors', '20210801100001001KIT', 'metric:timestamp', '20210801100001'
+put 'sensors', '20210801100001002DIN', 'attrs:name', 'dinning'
+put 'sensors', '20210801100001002DIN', 'metric:temp', '30'
+put 'sensors', '20210801100001002DIN', 'metric:timestamp', '20210801100001'
+put 'sensors', '20210801100010003LIV', 'attrs:name', 'living'
+put 'sensors', '20210801100010003LIV', 'metric:temp', '30'
+put 'sensors', '20210801100010003LIV', 'metric:timestamp', '20210801100010'
+put 'sensors', '20210801100020004MAS', 'attrs:name', 'master'
+put 'sensors', '20210801100020004MAS', 'metric:temp', '26'
+put 'sensors', '20210801100020004MAS', 'metric:timestamp', '20210801100020'
+put 'sensors', '20210801100030004BED', 'attrs:name', 'bedroom'
+put 'sensors', '20210801100030004BED', 'metric:temp', '25'
+put 'sensors', '20210801100030004BED', 'metric:timestamp', '20210801100030'
+----
+
+I think **scan** represents better the idea that we could potentially be scanning the whole dataset. And that's a mistake really easy to make. To avoid that situation we should always use a rowkey filter first, and then any other filter over the columns that could narrow our results.
+
+=== Filters
+
+WARNING: Unfortunately filtering **is not as documented as anyone would like to see**. I'm including as many links as possible in the end.
+
+More over the problem of using a filter other than a rowkey filter, is that **you're literally scanning the whole database**. A way of avoiding doing full scan is to use row keys. Row keys are the only column indexed in Hbase, so they are normally used to make queries efficient. The following query seems to be searching for results in a time range with a temperature between 37 and 39:
+
+[source, groovy]
+----
+scan 'sensors', {
+    LIMIT => 5,
+    COLUMNS => ['attrs:name', 'metric:timestamp'],
+    FILTER => "\
+    SingleColumnValueFilter('metric', 'timestamp', >=, 'binary:20210801100010') AND \
+    SingleColumnValueFilter('metric', 'timestamp', <,'binary:20210801100020') AND \
+    SingleColumnValueFilter('metric', 'temp', >=, 'binary:37') AND \
+    SingleColumnValueFilter('metric', 'temp', <=, 'binary:39')"
+}   
+----
+
+WARNING: Is a good practice to always include a **LIMIT => number** to any query
+
+We've got the following result:
+
+[source, shell]
+---
+ROW                                      COLUMN+CELL                                                                                                          
+ 20210801100010003LIV                    column=attrs:name, timestamp=2021-08-14T00:45:03.237, value=living
+ 20210801100010003LIV                    column=metric:timestamp, timestamp=2021-08-14T00:45:03.273, value=20210801100010
+1 row(s)
+Took 0.0151 seconds
+---
+
+A couple of things worth mentioning:
+
+- Don't even think that, because there are only a few records with very unique values, the engine is going to find them because a clever filter. The filter is just that a filter, meaning that is going to read from the beginning to the end asking every single record if it matches these criterias.
+
+For that **you have to use a key filter first**, the key is going to help the database to limit the search to a specific subset/partition/region, which could reduce the search various orders of magnitude.
+
+- There were no cells with temperatures that high, so Why is still returning results ?
+
+To answer this question, let me redo the query:
+
+[source, groovy]
+----
+scan 'sensors', {
+    LIMIT => 5,
+    COLUMNS => ['attrs:name', 'metric:timestamp', 'metric:temp'],
+    FILTER => "\
+    SingleColumnValueFilter('metric', 'timestamp', >=, 'binary:20210801100010') AND \
+    SingleColumnValueFilter('metric', 'timestamp', <,'binary:20210801100020') AND \
+    SingleColumnValueFilter('metric', 'temp', >=, 'binary:37') AND \
+    SingleColumnValueFilter('metric', 'temp', <=, 'binary:39')"
+}   
+----
+
+Now the result makes more sense:
+
+[source, shell]
+----
+ROW                                      COLUMN+CELL
+0 row(s)
+Took 0.0067 seconds
+----
+
+The only difference is that we didn't add the column family **metric:temp** as one of the output columns. The lesson here is that **if we add a filter with a reference to a column we don't care about, the query won't care either**.
+
+There are several types of filters available to be used in an Hbase query. One place I found useful to see explanation+examples is in the https://docs.cloudera.com/runtime/7.2.9/managing-hbase/topics/hbase-filter-types.html[Cloudera documentation site].
+
+=== Row boundaries
+
+**Filters will help when the problem to solve by the query engine is little enough**. The way of doing that, is to **add row key boundaries**, Hbase would know which rows are going to be affected by this query and which won't. That would be the difference of searching on 44k rows vs 44M rows. Regions normally contain a portion of the whole table including a row key boundary in the query Hbase will know which regions to look into and which regions to skip.
+
+[ditaa, align="center", with="60"]
+.regions are delimited by rowkey policies
+....
++-----------------------------------------------------------------------+
+|                                  TABLE                                |
++---------------------------------------+-------------------------------+
+|                    RS1                |              RS2              |
++------------------+--------------------+-------------------------------+
+| REGION1          |        REGION2     |             REGION3           |
++------------------+--------------------+-------------------------------+
+|  20200101000000  |  20210101000000    |         20210801000000        |
+|       ...        |        ...         |               ...             |
+|  20201221235959  |  20210730235959    |                               |
++------------------+--------------------+-------------------------------+
+....
+
+
+There are three important reserved words that can be used for putting these boundaries in Hbase:
+
+- ROWPREFIXFILTER
+- STARTROW
+- STOPROW
+
+If we add 
+
+[source, groovy]
+.using key boundaries
+----
+scan 'sensors', {
+    LIMIT => 5,
+    COLUMNS => ['attrs:name', 'metric:temp', 'metric:timestamp'],
+    STARTROW => '20210801100020',
+    STOPROW => '20210801100030',
+    FILTER => "\
+    SingleColumnValueFilter('metric', 'temp', >=, 'binary:25') AND \
+    SingleColumnValueFilter('metric', 'temp', <=, 'binary:26')"
+}
+----
+
+[source, shell]
+.result
+----
+ROW                                      COLUMN+CELL                                                                                                          
+ 20210801100020004MAS                    column=attrs:name, timestamp=2021-08-14T00:45:03.297, value=master
+ 20210801100020004MAS                    column=metric:temp, timestamp=2021-08-14T00:45:03.312, value=26
+ 20210801100020004MAS                    column=metric:timestamp, timestamp=2021-08-14T00:45:03.340, value=20210801100020
+1 row(s)
+Took 0.0077 seconds
+----
+
+I was expecting two results, there's another row with rowkey = 20210801100030 which registered 25 degrees. That's telling me that:
+
+- STARTROW: is inclusive
+- STOPROW: is exclusive
+
+Now if we change **STOPROW => '20210801100030',** to **STOPROW => '20210801100040'** we will get the expected result:
+
+[source, shell]
+.result
+----
+ROW                                      COLUMN+CELL                                                                                                          
+ 20210801100020004MAS                    column=attrs:name, timestamp=2021-08-14T00:45:03.297, value=master
+ 20210801100020004MAS                    column=metric:temp, timestamp=2021-08-14T00:45:03.312, value=26
+ 20210801100020004MAS                    column=metric:timestamp, timestamp=2021-08-14T00:45:03.340, value=20210801100020
+ 20210801100030004BED                    column=attrs:name, timestamp=2021-08-14T00:45:03.360, value=bedroom
+ 20210801100030004BED                    column=metric:temp, timestamp=2021-08-14T00:45:03.375, value=25
+ 20210801100030004BED                    column=metric:timestamp, timestamp=2021-08-14T00:45:04.138, value=20210801100030
+2 row(s)
+Took 0.0053 seconds
+----
+
+.Sorting
+****
+There's something worth knowing when it comes to filtering. **Records can only be sorted by HBASE_ROW_KEY**, that means that when you are filtering by any other column, results could come in the order of their HBASE_ROW_KEY.
+****
+
+== Count
+
+There's a count operator available via the hbase shell, **but is discouraged because of performance reasons**. I tested it with a table with 20M rows and it took a while. You could mitigate the problem with setting a higher interval like the following example, but still is going to take very long time:
+```
+hbase shell
+hbase():> count 'sensors', INTERVAL => 1000000
+```
+
+Executing that count took 8.4 minutes!
+
+```
+20050225 row(s)
+Took 506.6065 seconds
+=> 20050225
+
+```
+
+There's an adhoc tool called **rowcounter** that performs much better than the previous solution:
+
+```
+hbase rowcounter sensors
+```
+
+I've found various solutions at https://stackoverflow.com/questions/11375098/hbase-quickly-count-number-of-rows[StackOverflow]. It seems that the **quickest solutions is to create a counter manually and update it every time** there's new data in a given table.
+
+[quote]
+Aggregation operations are normally done by creating map-reduce applications
+
+There's also the notion of http://hbase.apache.org/book.html#_counters[counters] which allow you to do atomic increments of numbers in Hbase. So a possibility would be to increment a counter every time insertions have been made in a table. That number could be retrieved under the millisecond.
+
+== Drop
+
+It seems that when you execute:
+
+```
+drop 'sensors'
+```
+
+Files in HDFS are not removed automatically. However HBase has some management tools that could take care of it. Just enter Hbase shell:
+
+```
+hbase shell
+```
+
+and then:
+
+```
+cleaner_chore_run
+```
+
+Cleaner chore command for garbage collection of HFiles and WAL files.
+
+== Querying HBase with SQL
+
+Yes my friends, all the previous sections were for nothing, I'm joking... or maybe not XD. Now seriously, although Hbase query language may helps us realizing how queries are executed in Hbase, maybe our application could benefit from interfacing hbase with a more familiar query language such as SQL.
+
+- https://phoenix.apache.org/[Apache Phoenix]: Apache Phoenix enables OLTP and operational analytics in Hadoop for low latency applications by combining the best of both worlds: the power of standard SQL and JDBC APIs with full ACID transaction capabilities and
+the flexibility of late-bound, schema-on-read capabilities from the NoSQL world by leveraging HBase as its backing store
+
+- https://gethue.com/the-web-ui-for-hbase-hbase-browser/[Hive]: The Hive/Hbase integration... allows Hive QL statements to access HBase tables for both read (SELECT) and write (INSERT). It is even possible to combine access to HBase tables with native Hive tables via joins and unions
 
 == Next
 
