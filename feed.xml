@@ -4,8 +4,577 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2021-08-12T15:47:33Z</updated>
+    <updated>2021-08-14T15:46:14Z</updated>
     <id>http://github.com/mariogarcia</id>
+    <entry>
+        <title>Hbase series: Query Model</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2021/08/hbase_series_04.html"/>
+        <updated>2021-08-13T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2021/08/hbase_series_04.html</id>
+        <category term="nosql"/>
+        <category term="bigdata"/>
+        <category term="hbase"/>
+        <content type="html">
+            &lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;querying_in_hbase&quot;&gt;Querying in Hbase&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Although you can use SQL with Hbase via &lt;a href=&quot;http://phoenix.apache.org/&quot;&gt;Apache Phoenix&lt;/a&gt;, by default the query language used by Hbase little has to do with SQL. Trying to do a translation between both worlds I would say that:&lt;/p&gt;
+&lt;/div&gt;
+&lt;table class=&quot;tableblock frame-all grid-all stretch&quot;&gt;
+&lt;caption class=&quot;title&quot;&gt;Table 1. Translation between SQL and Hbase&lt;/caption&gt;
+&lt;colgroup&gt;
+&lt;col style=&quot;width: 50%;&quot;&gt;
+&lt;col style=&quot;width: 50%;&quot;&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th class=&quot;tableblock halign-center valign-top&quot;&gt;SQL&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-center valign-top&quot;&gt;HBASE&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;INSERT&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;PUT&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;UPDATE&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;PUT&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;SELECT&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;SCAN or GET&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;DELETE&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;DELETE/DELETEALL&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;GROUP BY&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;via MapReduce job&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;div class=&quot;sidebarblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;First time with Hbase ?&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This blog entry is more like a brain dump for me rather than a exhaustive guide for starting learning Hbase, so if it&amp;#8217;s your first time and you haven&amp;#8217;t installed Hbase yet, I&amp;#8217;d recommend you to start by the &lt;a href=&quot;http://hbase.apache.org/book.html#quickstart&quot;&gt;Hbase official quickstart section&lt;/a&gt;. It is also worth mentioning that once you are in the hbase shell you can always execute &lt;strong&gt;help&lt;/strong&gt; or &lt;strong&gt;help &apos;command&apos;&lt;/strong&gt; and it will show you the information about how to use the different commands available.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;creating_the_table&quot;&gt;Creating the table&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Lets open the Hbase shell and create a table. For now I&amp;#8217;m not interested in applying advanced features for this table such as compression for example. I&amp;#8217;m creating a table named &lt;strong&gt;sensors&lt;/strong&gt; with two column families &lt;strong&gt;attrs&lt;/strong&gt; and &lt;strong&gt;metric&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;attrs&lt;/strong&gt;: sensors&apos; attributes: model, brand&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;metric&lt;/strong&gt;: data produced by sensors: temperature&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;create a table with two column families&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;hbase:019:0&amp;gt; create &apos;sensors&apos;, &apos;attrs&apos;, &apos;metric&apos;
+Created table sensors
+Took 0.6594 seconds
+=&amp;gt; Hbase::Table - sensors&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If we&amp;#8217;re interested on reviewing the characteristics about the table we&amp;#8217;ve just created we can use the &lt;strong&gt;describe&lt;/strong&gt; command:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;describing table&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;hbase:031:0&amp;gt; describe &apos;sensors&apos;
+Table sensors is ENABLED
+sensors
+COLUMN FAMILIES DESCRIPTION
+{NAME =&amp;gt; &apos;metric&apos;, BLOOMFILTER =&amp;gt; &apos;ROW&apos;, IN_MEMORY =&amp;gt; &apos;false&apos;, VERSIONS =&amp;gt; &apos;1&apos;, KEEP_DELETED_CELLS =&amp;gt; &apos;FALSE&apos;, DATA_BLOCK_ENCOD
+ING =&amp;gt; &apos;NONE&apos;, COMPRESSION =&amp;gt; &apos;NONE&apos;, TTL =&amp;gt; &apos;FOREVER&apos;, MIN_VERSIONS =&amp;gt; &apos;0&apos;, BLOCKCACHE =&amp;gt; &apos;true&apos;, BLOCKSIZE =&amp;gt; &apos;65536&apos;, REPLIC
+ATION_SCOPE =&amp;gt; &apos;0&apos;}
+
+{NAME =&amp;gt; &apos;attrs&apos;, BLOOMFILTER =&amp;gt; &apos;ROW&apos;, IN_MEMORY =&amp;gt; &apos;false&apos;, VERSIONS =&amp;gt; &apos;1&apos;, KEEP_DELETED_CELLS =&amp;gt; &apos;FALSE&apos;, DATA_BLOCK_ENC
+ODING =&amp;gt; &apos;NONE&apos;, COMPRESSION =&amp;gt; &apos;NONE&apos;, TTL =&amp;gt; &apos;FOREVER&apos;, MIN_VERSIONS =&amp;gt; &apos;0&apos;, BLOCKCACHE =&amp;gt; &apos;true&apos;, BLOCKSIZE =&amp;gt; &apos;65536&apos;, REPL
+ICATION_SCOPE =&amp;gt; &apos;0&apos;}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sidebarblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Compression&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As a good practice, it would be nice to activate the table compression, there are different available algorithms depending on the availability/speed requirements for accessing the table&amp;#8217;s data. You can activate compression after creating the table, but unless you apply compaction (which requires your table to be offline) old data won&amp;#8217;t be compressed.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You can check out more about compression &lt;a href=&quot;http://hbase.apache.org/book.html#compression&quot;&gt;in the official guide&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;insert_put&quot;&gt;Insert (PUT)&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now it&amp;#8217;s time to insert our first two records. I&amp;#8217;m adding two values identifying a specific sensor. Every value is going to be added to different column families. One column family takes care of sensor attributes (sensor) and the other one takes care of metrics values (metric)&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;insert a new value&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;hbase:032:0&amp;gt; put &apos;sensors&apos;, &apos;20210801100001001KIT&apos;, &apos;attrs:name&apos;, &apos;kitchen&apos;
+Took 0.0375 seconds
+hbase:033:0&amp;gt; put &apos;sensors&apos;, &apos;20210801100001001KIT&apos;, &apos;metric:temp&apos;, &apos;25&apos;
+Took 0.0022 seconds&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The syntax I&amp;#8217;m using here is:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;code&gt;put&lt;/code&gt; &lt;code&gt;&apos;tablename&apos;&lt;/code&gt;, &lt;code&gt;&apos;rowkey&apos;&lt;/code&gt;, &lt;code&gt;&apos;columnidentifier:label&apos;&lt;/code&gt;, &lt;code&gt;&apos;value&apos;&lt;/code&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It&amp;#8217;s also important to notice how the rowkey in this case is composed by:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;the second the sample was taken: &lt;code&gt;20210801100001&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;an id of the room: &lt;code&gt;001&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;an human friendly shortcut for the room name &lt;code&gt;KIT&lt;/code&gt; for kitchen&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock note&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-note&quot; title=&quot;Note&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+We should save as much as we can when creating a key policy, so probably in this example, &lt;code&gt;KIT&lt;/code&gt; would be redundant and it would worth removing it from the key.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Lets see how this 1 row look like, &lt;strong&gt;yes it is 1 row&lt;/strong&gt;, look at the row key:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;hbase:034:0&amp;gt; scan &apos;sensors&apos;
+ROW                              COLUMN+CELL
+ 20210801100001001KIT                  column=metric:temp, timestamp=2021-08-13T00:13:06.888, value=25
+ 20210801100001001KIT                  column=attrs:name, timestamp=2021-08-13T00:12:35.727, value=kitchen&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock important&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-important&quot; title=&quot;Important&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+Here I&amp;#8217;m using &lt;code&gt;scan&lt;/code&gt; without any boundaries because there&amp;#8217;s only 1 row in the database. Beware of doing that with hundreds of millions of rows!
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;update_put&quot;&gt;Update (PUT)&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Updating uses the same command &lt;code&gt;put&lt;/code&gt; because everytime you use the same &lt;strong&gt;rowkey&lt;/strong&gt; if you use the same column qualifier and a different value, the previous value will be changed. Here I&amp;#8217;m changing the temperature for the same row:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;updating temperature&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;hbase:035:0&amp;gt; put &apos;sensors&apos;, &apos;20210801100001001KIT&apos;, &apos;metric:temp&apos;, &apos;32&apos;
+Took 0.0109 seconds&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We can now see how the temperature value has changed:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;temperature changed using same rowkey+columnqualifier&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;hbase:036:0&amp;gt; scan &apos;sensors&apos;
+ROW                                      COLUMN+CELL
+ 20210801100001001KIT                          column=metric:temp, timestamp=2021-08-13T00:35:55.662, value=32
+ 20210801100001001KIT                          column=personal:name, timestamp=2021-08-13T00:12:35.727, value=kitchen&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sidebarblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Versioning&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;According to the &lt;a href=&quot;http://hbase.apache.org/book.html#versions&quot;&gt;Hbase docs&lt;/a&gt;: A {row, column, version} tuple exactly specifies a cell in HBase. It’s possible to have an unbounded number of cells where the row and column are the same but the cell address differs only in its version dimension&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Which means that we could have different versions for &quot;metric:temp&quot; for the same &quot;rowkey&quot; if we include the insertion timestamp attribute (different from the timestamp included in the rowkey) and we configure the table to keep more than 1 version of every cell.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;select_scan&quot;&gt;Select (SCAN)&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So far we only had 1 row, lets add more entries (notice that the first three lines are updating the row we already entered):&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;put &apos;sensors&apos;, &apos;20210801100001001KIT&apos;, &apos;attrs:name&apos;, &apos;kitchen&apos;
+put &apos;sensors&apos;, &apos;20210801100001001KIT&apos;, &apos;metric:temp&apos;, &apos;32&apos;
+put &apos;sensors&apos;, &apos;20210801100001001KIT&apos;, &apos;metric:timestamp&apos;, &apos;20210801100001&apos;
+put &apos;sensors&apos;, &apos;20210801100001002DIN&apos;, &apos;attrs:name&apos;, &apos;dinning&apos;
+put &apos;sensors&apos;, &apos;20210801100001002DIN&apos;, &apos;metric:temp&apos;, &apos;30&apos;
+put &apos;sensors&apos;, &apos;20210801100001002DIN&apos;, &apos;metric:timestamp&apos;, &apos;20210801100001&apos;
+put &apos;sensors&apos;, &apos;20210801100010003LIV&apos;, &apos;attrs:name&apos;, &apos;living&apos;
+put &apos;sensors&apos;, &apos;20210801100010003LIV&apos;, &apos;metric:temp&apos;, &apos;30&apos;
+put &apos;sensors&apos;, &apos;20210801100010003LIV&apos;, &apos;metric:timestamp&apos;, &apos;20210801100010&apos;
+put &apos;sensors&apos;, &apos;20210801100020004MAS&apos;, &apos;attrs:name&apos;, &apos;master&apos;
+put &apos;sensors&apos;, &apos;20210801100020004MAS&apos;, &apos;metric:temp&apos;, &apos;26&apos;
+put &apos;sensors&apos;, &apos;20210801100020004MAS&apos;, &apos;metric:timestamp&apos;, &apos;20210801100020&apos;
+put &apos;sensors&apos;, &apos;20210801100030004BED&apos;, &apos;attrs:name&apos;, &apos;bedroom&apos;
+put &apos;sensors&apos;, &apos;20210801100030004BED&apos;, &apos;metric:temp&apos;, &apos;25&apos;
+put &apos;sensors&apos;, &apos;20210801100030004BED&apos;, &apos;metric:timestamp&apos;, &apos;20210801100030&apos;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I think &lt;strong&gt;scan&lt;/strong&gt; represents better the idea that we could potentially be scanning the whole dataset. And that&amp;#8217;s a mistake really easy to make. To avoid that situation we should always use a rowkey filter first, and then any other filter over the columns that could narrow our results.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;filters&quot;&gt;Filters&lt;/h3&gt;
+&lt;div class=&quot;admonitionblock warning&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-warning&quot; title=&quot;Warning&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+Unfortunately filtering &lt;strong&gt;is not as documented as anyone would like to see&lt;/strong&gt;. I&amp;#8217;m including as many links as possible in the end.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;More over the problem of using a filter other than a rowkey filter, is that &lt;strong&gt;you&amp;#8217;re literally scanning the whole database&lt;/strong&gt;. A way of avoiding doing full scan is to use row keys. Row keys are the only column indexed in Hbase, so they are normally used to make queries efficient. The following query seems to be searching for results in a time range with a temperature between 37 and 39:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;scan &apos;sensors&apos;, {
+    LIMIT =&amp;gt; 5,
+    COLUMNS =&amp;gt; [&apos;attrs:name&apos;, &apos;metric:timestamp&apos;],
+    FILTER =&amp;gt; &quot;\
+    SingleColumnValueFilter(&apos;metric&apos;, &apos;timestamp&apos;, &amp;gt;=, &apos;binary:20210801100010&apos;) AND \
+    SingleColumnValueFilter(&apos;metric&apos;, &apos;timestamp&apos;, &amp;lt;,&apos;binary:20210801100020&apos;) AND \
+    SingleColumnValueFilter(&apos;metric&apos;, &apos;temp&apos;, &amp;gt;=, &apos;binary:37&apos;) AND \
+    SingleColumnValueFilter(&apos;metric&apos;, &apos;temp&apos;, &amp;lt;=, &apos;binary:39&apos;)&quot;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock warning&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-warning&quot; title=&quot;Warning&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+Is a good practice to always include a &lt;strong&gt;LIMIT &amp;#8658; number&lt;/strong&gt; to any query
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We&amp;#8217;ve got the following result:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;---
+ROW                                      COLUMN+CELL
+ 20210801100010003LIV                    column=attrs:name, timestamp=2021-08-14T00:45:03.237, value=living
+ 20210801100010003LIV                    column=metric:timestamp, timestamp=2021-08-14T00:45:03.273, value=20210801100010
+1 row(s)
+Took 0.0151 seconds
+---&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A couple of things worth mentioning:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Don&amp;#8217;t even think that, because there are only a few records with very unique values, the engine is going to find them because a clever filter. The filter is just that a filter, meaning that is going to read from the beginning to the end asking every single record if it matches these criterias.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For that &lt;strong&gt;you have to use a key filter first&lt;/strong&gt;, the key is going to help the database to limit the search to a specific subset/partition/region, which could reduce the search various orders of magnitude.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;There were no cells with temperatures that high, so Why is still returning results ?&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To answer this question, let me redo the query:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;scan &apos;sensors&apos;, {
+    LIMIT =&amp;gt; 5,
+    COLUMNS =&amp;gt; [&apos;attrs:name&apos;, &apos;metric:timestamp&apos;, &apos;metric:temp&apos;],
+    FILTER =&amp;gt; &quot;\
+    SingleColumnValueFilter(&apos;metric&apos;, &apos;timestamp&apos;, &amp;gt;=, &apos;binary:20210801100010&apos;) AND \
+    SingleColumnValueFilter(&apos;metric&apos;, &apos;timestamp&apos;, &amp;lt;,&apos;binary:20210801100020&apos;) AND \
+    SingleColumnValueFilter(&apos;metric&apos;, &apos;temp&apos;, &amp;gt;=, &apos;binary:37&apos;) AND \
+    SingleColumnValueFilter(&apos;metric&apos;, &apos;temp&apos;, &amp;lt;=, &apos;binary:39&apos;)&quot;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now the result makes more sense:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;ROW                                      COLUMN+CELL
+0 row(s)
+Took 0.0067 seconds&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The only difference is that we didn&amp;#8217;t add the column family &lt;strong&gt;metric:temp&lt;/strong&gt; as one of the output columns. The lesson here is that &lt;strong&gt;if we add a filter with a reference to a column we don&amp;#8217;t care about, the query won&amp;#8217;t care either&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There are several types of filters available to be used in an Hbase query. One place I found useful to see explanation+examples is in the &lt;a href=&quot;https://docs.cloudera.com/runtime/7.2.9/managing-hbase/topics/hbase-filter-types.html&quot;&gt;Cloudera documentation site&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;row_boundaries&quot;&gt;Row boundaries&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;Filters will help when the problem to solve by the query engine is little enough&lt;/strong&gt;. The way of doing that, is to &lt;strong&gt;add row key boundaries&lt;/strong&gt;, Hbase would know which rows are going to be affected by this query and which won&amp;#8217;t. That would be the difference of searching on 44k rows vs 44M rows. Regions normally contain a portion of the whole table including a row key boundary in the query Hbase will know which regions to look into and which regions to skip.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock text-center&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/img/diag-fca9c36609e240d0837ebe7ae3d604b0.png&quot; alt=&quot;diag fca9c36609e240d0837ebe7ae3d604b0&quot; width=&quot;770&quot; height=&quot;210&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 1. regions are delimited by rowkey policies&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There are three important reserved words that can be used for putting these boundaries in Hbase:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;ROWPREFIXFILTER&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;STARTROW&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;STOPROW&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If we add&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;using key boundaries&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-groovy&quot; data-lang=&quot;groovy&quot;&gt;scan &apos;sensors&apos;, {
+    LIMIT =&amp;gt; 5,
+    COLUMNS =&amp;gt; [&apos;attrs:name&apos;, &apos;metric:temp&apos;, &apos;metric:timestamp&apos;],
+    STARTROW =&amp;gt; &apos;20210801100020&apos;,
+    STOPROW =&amp;gt; &apos;20210801100030&apos;,
+    FILTER =&amp;gt; &quot;\
+    SingleColumnValueFilter(&apos;metric&apos;, &apos;temp&apos;, &amp;gt;=, &apos;binary:25&apos;) AND \
+    SingleColumnValueFilter(&apos;metric&apos;, &apos;temp&apos;, &amp;lt;=, &apos;binary:26&apos;)&quot;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;result&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;ROW                                      COLUMN+CELL
+ 20210801100020004MAS                    column=attrs:name, timestamp=2021-08-14T00:45:03.297, value=master
+ 20210801100020004MAS                    column=metric:temp, timestamp=2021-08-14T00:45:03.312, value=26
+ 20210801100020004MAS                    column=metric:timestamp, timestamp=2021-08-14T00:45:03.340, value=20210801100020
+1 row(s)
+Took 0.0077 seconds&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I was expecting two results, there&amp;#8217;s another row with rowkey = 20210801100030 which registered 25 degrees. That&amp;#8217;s telling me that:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;STARTROW: is inclusive&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;STOPROW: is exclusive&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now if we change &lt;strong&gt;STOPROW &amp;#8658; &apos;20210801100030&apos;,&lt;/strong&gt; to &lt;strong&gt;STOPROW &amp;#8658; &apos;20210801100040&apos;&lt;/strong&gt; we will get the expected result:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;result&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;ROW                                      COLUMN+CELL
+ 20210801100020004MAS                    column=attrs:name, timestamp=2021-08-14T00:45:03.297, value=master
+ 20210801100020004MAS                    column=metric:temp, timestamp=2021-08-14T00:45:03.312, value=26
+ 20210801100020004MAS                    column=metric:timestamp, timestamp=2021-08-14T00:45:03.340, value=20210801100020
+ 20210801100030004BED                    column=attrs:name, timestamp=2021-08-14T00:45:03.360, value=bedroom
+ 20210801100030004BED                    column=metric:temp, timestamp=2021-08-14T00:45:03.375, value=25
+ 20210801100030004BED                    column=metric:timestamp, timestamp=2021-08-14T00:45:04.138, value=20210801100030
+2 row(s)
+Took 0.0053 seconds&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sidebarblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Sorting&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There&amp;#8217;s something worth knowing when it comes to filtering. &lt;strong&gt;Records can only be sorted by HBASE_ROW_KEY&lt;/strong&gt;, that means that when you are filtering by any other column, results could come in the order of their HBASE_ROW_KEY.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;count&quot;&gt;Count&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There&amp;#8217;s a count operator available via the hbase shell, &lt;strong&gt;but is discouraged because of performance reasons&lt;/strong&gt;. I tested it with a table with 20M rows and it took a while. You could mitigate the problem with setting a higher interval like the following example, but still is going to take very long time:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;hbase shell
+hbase():&amp;gt; count &apos;sensors&apos;, INTERVAL =&amp;gt; 1000000&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Executing that count took 8.4 minutes!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;20050225 row(s)
+Took 506.6065 seconds
+=&amp;gt; 20050225&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There&amp;#8217;s an adhoc tool called &lt;strong&gt;rowcounter&lt;/strong&gt; that performs much better than the previous solution:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;hbase rowcounter sensors&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I&amp;#8217;ve found various solutions at &lt;a href=&quot;https://stackoverflow.com/questions/11375098/hbase-quickly-count-number-of-rows&quot;&gt;StackOverflow&lt;/a&gt;. It seems that the &lt;strong&gt;quickest solutions is to create a counter manually and update it every time&lt;/strong&gt; there&amp;#8217;s new data in a given table.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;quoteblock&quot;&gt;
+&lt;blockquote&gt;
+Aggregation operations are normally done by creating map-reduce applications
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There&amp;#8217;s also the notion of &lt;a href=&quot;http://hbase.apache.org/book.html#_counters&quot;&gt;counters&lt;/a&gt; which allow you to do atomic increments of numbers in Hbase. So a possibility would be to increment a counter every time insertions have been made in a table. That number could be retrieved under the millisecond.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;drop&quot;&gt;Drop&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It seems that when you execute:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;drop &apos;sensors&apos;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Files in HDFS are not removed automatically. However HBase has some management tools that could take care of it. Just enter Hbase shell:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;hbase shell&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;and then:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;cleaner_chore_run&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Cleaner chore command for garbage collection of HFiles and WAL files.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;querying_hbase_with_sql&quot;&gt;Querying HBase with SQL&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Yes my friends, all the previous sections were for nothing, I&amp;#8217;m joking&amp;#8230;&amp;#8203; or maybe not XD. Now seriously, although Hbase query language may helps us realizing how queries are executed in Hbase, maybe our application could benefit from interfacing hbase with a more familiar query language such as SQL.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://phoenix.apache.org/&quot;&gt;Apache Phoenix&lt;/a&gt;: Apache Phoenix enables OLTP and operational analytics in Hadoop for low latency applications by combining the best of both worlds: the power of standard SQL and JDBC APIs with full ACID transaction capabilities and
+the flexibility of late-bound, schema-on-read capabilities from the NoSQL world by leveraging HBase as its backing store&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://gethue.com/the-web-ui-for-hbase-hbase-browser/&quot;&gt;Hive&lt;/a&gt;: The Hive/Hbase integration&amp;#8230;&amp;#8203; allows Hive QL statements to access HBase tables for both read (SELECT) and write (INSERT). It is even possible to combine access to HBase tables with native Hive tables via joins and unions&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;next&quot;&gt;Next&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;/blog/2021/08/hbase_series_05.html&quot;&gt;API Clients&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
     <entry>
         <title>Hbase series: Data Model</title>
         <author>
@@ -295,13 +864,13 @@ From version 3.X the master is required by the client &lt;a href=&quot;http://hb
 &lt;p&gt;&lt;a href=&quot;/blog/2021/08/hbase_series_03.html&quot;&gt;Data Model&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;Query model&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;/blog/2021/08/hbase_series_04.html&quot;&gt;Query model&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;API Client&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;/blog/2021/08/hbase_series_05.html&quot;&gt;API Client&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;Region partition policy&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;/blog/2021/08/hbase_series_06.html&quot;&gt;Region partition policy&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;

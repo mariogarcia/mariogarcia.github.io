@@ -1,0 +1,631 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="/feed.xml" class="icon fa-rss">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><div class="metadata"><em class="fa fa-calendar-o"></em><b>2021-08-13</b></div><h1>Hbase series: Query Model</h1></header><yieldScaped><div class="sect1">
+<h2 id="querying_in_hbase">Querying in Hbase</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Although you can use SQL with Hbase via <a href="http://phoenix.apache.org/">Apache Phoenix</a>, by default the query language used by Hbase little has to do with SQL. Trying to do a translation between both worlds I would say that:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. Translation between SQL and Hbase</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-center valign-top">SQL</th>
+<th class="tableblock halign-center valign-top">HBASE</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock">INSERT</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">PUT</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock">UPDATE</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">PUT</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock">SELECT</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">SCAN or GET</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock">DELETE</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">DELETE/DELETEALL</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock">GROUP BY</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">via MapReduce job</p></td>
+</tr>
+</tbody>
+</table>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">First time with Hbase ?</div>
+<div class="paragraph">
+<p>This blog entry is more like a brain dump for me rather than a exhaustive guide for starting learning Hbase, so if it&#8217;s your first time and you haven&#8217;t installed Hbase yet, I&#8217;d recommend you to start by the <a href="http://hbase.apache.org/book.html#quickstart">Hbase official quickstart section</a>. It is also worth mentioning that once you are in the hbase shell you can always execute <strong>help</strong> or <strong>help 'command'</strong> and it will show you the information about how to use the different commands available.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="creating_the_table">Creating the table</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Lets open the Hbase shell and create a table. For now I&#8217;m not interested in applying advanced features for this table such as compression for example. I&#8217;m creating a table named <strong>sensors</strong> with two column families <strong>attrs</strong> and <strong>metric</strong>.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>attrs</strong>: sensors' attributes: model, brand</p>
+</li>
+<li>
+<p><strong>metric</strong>: data produced by sensors: temperature</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="title">create a table with two column families</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">hbase:019:0&gt; create 'sensors', 'attrs', 'metric'
+Created table sensors
+Took 0.6594 seconds
+=&gt; Hbase::Table - sensors</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If we&#8217;re interested on reviewing the characteristics about the table we&#8217;ve just created we can use the <strong>describe</strong> command:</p>
+</div>
+<div class="listingblock">
+<div class="title">describing table</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">hbase:031:0&gt; describe 'sensors'
+Table sensors is ENABLED
+sensors
+COLUMN FAMILIES DESCRIPTION
+{NAME =&gt; 'metric', BLOOMFILTER =&gt; 'ROW', IN_MEMORY =&gt; 'false', VERSIONS =&gt; '1', KEEP_DELETED_CELLS =&gt; 'FALSE', DATA_BLOCK_ENCOD
+ING =&gt; 'NONE', COMPRESSION =&gt; 'NONE', TTL =&gt; 'FOREVER', MIN_VERSIONS =&gt; '0', BLOCKCACHE =&gt; 'true', BLOCKSIZE =&gt; '65536', REPLIC
+ATION_SCOPE =&gt; '0'}
+
+{NAME =&gt; 'attrs', BLOOMFILTER =&gt; 'ROW', IN_MEMORY =&gt; 'false', VERSIONS =&gt; '1', KEEP_DELETED_CELLS =&gt; 'FALSE', DATA_BLOCK_ENC
+ODING =&gt; 'NONE', COMPRESSION =&gt; 'NONE', TTL =&gt; 'FOREVER', MIN_VERSIONS =&gt; '0', BLOCKCACHE =&gt; 'true', BLOCKSIZE =&gt; '65536', REPL
+ICATION_SCOPE =&gt; '0'}</code></pre>
+</div>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Compression</div>
+<div class="paragraph">
+<p>As a good practice, it would be nice to activate the table compression, there are different available algorithms depending on the availability/speed requirements for accessing the table&#8217;s data. You can activate compression after creating the table, but unless you apply compaction (which requires your table to be offline) old data won&#8217;t be compressed.</p>
+</div>
+<div class="paragraph">
+<p>You can check out more about compression <a href="http://hbase.apache.org/book.html#compression">in the official guide</a>.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="insert_put">Insert (PUT)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Now it&#8217;s time to insert our first two records. I&#8217;m adding two values identifying a specific sensor. Every value is going to be added to different column families. One column family takes care of sensor attributes (sensor) and the other one takes care of metrics values (metric)</p>
+</div>
+<div class="listingblock">
+<div class="title">insert a new value</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">hbase:032:0&gt; put 'sensors', '20210801100001001KIT', 'attrs:name', 'kitchen'
+Took 0.0375 seconds
+hbase:033:0&gt; put 'sensors', '20210801100001001KIT', 'metric:temp', '25'
+Took 0.0022 seconds</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The syntax I&#8217;m using here is:</p>
+</div>
+<div class="paragraph">
+<p><code>put</code> <code>'tablename'</code>, <code>'rowkey'</code>, <code>'columnidentifier:label'</code>, <code>'value'</code></p>
+</div>
+<div class="paragraph">
+<p>It&#8217;s also important to notice how the rowkey in this case is composed by:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>the second the sample was taken: <code>20210801100001</code></p>
+</li>
+<li>
+<p>an id of the room: <code>001</code></p>
+</li>
+<li>
+<p>an human friendly shortcut for the room name <code>KIT</code> for kitchen</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+We should save as much as we can when creating a key policy, so probably in this example, <code>KIT</code> would be redundant and it would worth removing it from the key.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Lets see how this 1 row look like, <strong>yes it is 1 row</strong>, look at the row key:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">hbase:034:0&gt; scan 'sensors'
+ROW                              COLUMN+CELL
+ 20210801100001001KIT                  column=metric:temp, timestamp=2021-08-13T00:13:06.888, value=25
+ 20210801100001001KIT                  column=attrs:name, timestamp=2021-08-13T00:12:35.727, value=kitchen</code></pre>
+</div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Here I&#8217;m using <code>scan</code> without any boundaries because there&#8217;s only 1 row in the database. Beware of doing that with hundreds of millions of rows!
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="update_put">Update (PUT)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Updating uses the same command <code>put</code> because everytime you use the same <strong>rowkey</strong> if you use the same column qualifier and a different value, the previous value will be changed. Here I&#8217;m changing the temperature for the same row:</p>
+</div>
+<div class="listingblock">
+<div class="title">updating temperature</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">hbase:035:0&gt; put 'sensors', '20210801100001001KIT', 'metric:temp', '32'
+Took 0.0109 seconds</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can now see how the temperature value has changed:</p>
+</div>
+<div class="listingblock">
+<div class="title">temperature changed using same rowkey+columnqualifier</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">hbase:036:0&gt; scan 'sensors'
+ROW                                      COLUMN+CELL
+ 20210801100001001KIT                          column=metric:temp, timestamp=2021-08-13T00:35:55.662, value=32
+ 20210801100001001KIT                          column=personal:name, timestamp=2021-08-13T00:12:35.727, value=kitchen</code></pre>
+</div>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Versioning</div>
+<div class="paragraph">
+<p>According to the <a href="http://hbase.apache.org/book.html#versions">Hbase docs</a>: A {row, column, version} tuple exactly specifies a cell in HBase. It’s possible to have an unbounded number of cells where the row and column are the same but the cell address differs only in its version dimension</p>
+</div>
+<div class="paragraph">
+<p>Which means that we could have different versions for "metric:temp" for the same "rowkey" if we include the insertion timestamp attribute (different from the timestamp included in the rowkey) and we configure the table to keep more than 1 version of every cell.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="select_scan">Select (SCAN)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>So far we only had 1 row, lets add more entries (notice that the first three lines are updating the row we already entered):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">put 'sensors', '20210801100001001KIT', 'attrs:name', 'kitchen'
+put 'sensors', '20210801100001001KIT', 'metric:temp', '32'
+put 'sensors', '20210801100001001KIT', 'metric:timestamp', '20210801100001'
+put 'sensors', '20210801100001002DIN', 'attrs:name', 'dinning'
+put 'sensors', '20210801100001002DIN', 'metric:temp', '30'
+put 'sensors', '20210801100001002DIN', 'metric:timestamp', '20210801100001'
+put 'sensors', '20210801100010003LIV', 'attrs:name', 'living'
+put 'sensors', '20210801100010003LIV', 'metric:temp', '30'
+put 'sensors', '20210801100010003LIV', 'metric:timestamp', '20210801100010'
+put 'sensors', '20210801100020004MAS', 'attrs:name', 'master'
+put 'sensors', '20210801100020004MAS', 'metric:temp', '26'
+put 'sensors', '20210801100020004MAS', 'metric:timestamp', '20210801100020'
+put 'sensors', '20210801100030004BED', 'attrs:name', 'bedroom'
+put 'sensors', '20210801100030004BED', 'metric:temp', '25'
+put 'sensors', '20210801100030004BED', 'metric:timestamp', '20210801100030'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I think <strong>scan</strong> represents better the idea that we could potentially be scanning the whole dataset. And that&#8217;s a mistake really easy to make. To avoid that situation we should always use a rowkey filter first, and then any other filter over the columns that could narrow our results.</p>
+</div>
+<div class="sect2">
+<h3 id="filters">Filters</h3>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Unfortunately filtering <strong>is not as documented as anyone would like to see</strong>. I&#8217;m including as many links as possible in the end.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>More over the problem of using a filter other than a rowkey filter, is that <strong>you&#8217;re literally scanning the whole database</strong>. A way of avoiding doing full scan is to use row keys. Row keys are the only column indexed in Hbase, so they are normally used to make queries efficient. The following query seems to be searching for results in a time range with a temperature between 37 and 39:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">scan 'sensors', {
+    LIMIT =&gt; 5,
+    COLUMNS =&gt; ['attrs:name', 'metric:timestamp'],
+    FILTER =&gt; "\
+    SingleColumnValueFilter('metric', 'timestamp', &gt;=, 'binary:20210801100010') AND \
+    SingleColumnValueFilter('metric', 'timestamp', &lt;,'binary:20210801100020') AND \
+    SingleColumnValueFilter('metric', 'temp', &gt;=, 'binary:37') AND \
+    SingleColumnValueFilter('metric', 'temp', &lt;=, 'binary:39')"
+}</code></pre>
+</div>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Is a good practice to always include a <strong>LIMIT &#8658; number</strong> to any query
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>We&#8217;ve got the following result:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">---
+ROW                                      COLUMN+CELL
+ 20210801100010003LIV                    column=attrs:name, timestamp=2021-08-14T00:45:03.237, value=living
+ 20210801100010003LIV                    column=metric:timestamp, timestamp=2021-08-14T00:45:03.273, value=20210801100010
+1 row(s)
+Took 0.0151 seconds
+---</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A couple of things worth mentioning:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Don&#8217;t even think that, because there are only a few records with very unique values, the engine is going to find them because a clever filter. The filter is just that a filter, meaning that is going to read from the beginning to the end asking every single record if it matches these criterias.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For that <strong>you have to use a key filter first</strong>, the key is going to help the database to limit the search to a specific subset/partition/region, which could reduce the search various orders of magnitude.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>There were no cells with temperatures that high, so Why is still returning results ?</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>To answer this question, let me redo the query:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">scan 'sensors', {
+    LIMIT =&gt; 5,
+    COLUMNS =&gt; ['attrs:name', 'metric:timestamp', 'metric:temp'],
+    FILTER =&gt; "\
+    SingleColumnValueFilter('metric', 'timestamp', &gt;=, 'binary:20210801100010') AND \
+    SingleColumnValueFilter('metric', 'timestamp', &lt;,'binary:20210801100020') AND \
+    SingleColumnValueFilter('metric', 'temp', &gt;=, 'binary:37') AND \
+    SingleColumnValueFilter('metric', 'temp', &lt;=, 'binary:39')"
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now the result makes more sense:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">ROW                                      COLUMN+CELL
+0 row(s)
+Took 0.0067 seconds</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The only difference is that we didn&#8217;t add the column family <strong>metric:temp</strong> as one of the output columns. The lesson here is that <strong>if we add a filter with a reference to a column we don&#8217;t care about, the query won&#8217;t care either</strong>.</p>
+</div>
+<div class="paragraph">
+<p>There are several types of filters available to be used in an Hbase query. One place I found useful to see explanation+examples is in the <a href="https://docs.cloudera.com/runtime/7.2.9/managing-hbase/topics/hbase-filter-types.html">Cloudera documentation site</a>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="row_boundaries">Row boundaries</h3>
+<div class="paragraph">
+<p><strong>Filters will help when the problem to solve by the query engine is little enough</strong>. The way of doing that, is to <strong>add row key boundaries</strong>, Hbase would know which rows are going to be affected by this query and which won&#8217;t. That would be the difference of searching on 44k rows vs 44M rows. Regions normally contain a portion of the whole table including a row key boundary in the query Hbase will know which regions to look into and which regions to skip.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="/img/diag-fca9c36609e240d0837ebe7ae3d604b0.png" alt="diag fca9c36609e240d0837ebe7ae3d604b0" width="770" height="210">
+</div>
+<div class="title">Figure 1. regions are delimited by rowkey policies</div>
+</div>
+<div class="paragraph">
+<p>There are three important reserved words that can be used for putting these boundaries in Hbase:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>ROWPREFIXFILTER</p>
+</li>
+<li>
+<p>STARTROW</p>
+</li>
+<li>
+<p>STOPROW</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>If we add</p>
+</div>
+<div class="listingblock">
+<div class="title">using key boundaries</div>
+<div class="content">
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">scan 'sensors', {
+    LIMIT =&gt; 5,
+    COLUMNS =&gt; ['attrs:name', 'metric:temp', 'metric:timestamp'],
+    STARTROW =&gt; '20210801100020',
+    STOPROW =&gt; '20210801100030',
+    FILTER =&gt; "\
+    SingleColumnValueFilter('metric', 'temp', &gt;=, 'binary:25') AND \
+    SingleColumnValueFilter('metric', 'temp', &lt;=, 'binary:26')"
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">result</div>
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">ROW                                      COLUMN+CELL
+ 20210801100020004MAS                    column=attrs:name, timestamp=2021-08-14T00:45:03.297, value=master
+ 20210801100020004MAS                    column=metric:temp, timestamp=2021-08-14T00:45:03.312, value=26
+ 20210801100020004MAS                    column=metric:timestamp, timestamp=2021-08-14T00:45:03.340, value=20210801100020
+1 row(s)
+Took 0.0077 seconds</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I was expecting two results, there&#8217;s another row with rowkey = 20210801100030 which registered 25 degrees. That&#8217;s telling me that:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>STARTROW: is inclusive</p>
+</li>
+<li>
+<p>STOPROW: is exclusive</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Now if we change <strong>STOPROW &#8658; '20210801100030',</strong> to <strong>STOPROW &#8658; '20210801100040'</strong> we will get the expected result:</p>
+</div>
+<div class="listingblock">
+<div class="title">result</div>
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">ROW                                      COLUMN+CELL
+ 20210801100020004MAS                    column=attrs:name, timestamp=2021-08-14T00:45:03.297, value=master
+ 20210801100020004MAS                    column=metric:temp, timestamp=2021-08-14T00:45:03.312, value=26
+ 20210801100020004MAS                    column=metric:timestamp, timestamp=2021-08-14T00:45:03.340, value=20210801100020
+ 20210801100030004BED                    column=attrs:name, timestamp=2021-08-14T00:45:03.360, value=bedroom
+ 20210801100030004BED                    column=metric:temp, timestamp=2021-08-14T00:45:03.375, value=25
+ 20210801100030004BED                    column=metric:timestamp, timestamp=2021-08-14T00:45:04.138, value=20210801100030
+2 row(s)
+Took 0.0053 seconds</code></pre>
+</div>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Sorting</div>
+<div class="paragraph">
+<p>There&#8217;s something worth knowing when it comes to filtering. <strong>Records can only be sorted by HBASE_ROW_KEY</strong>, that means that when you are filtering by any other column, results could come in the order of their HBASE_ROW_KEY.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="count">Count</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>There&#8217;s a count operator available via the hbase shell, <strong>but is discouraged because of performance reasons</strong>. I tested it with a table with 20M rows and it took a while. You could mitigate the problem with setting a higher interval like the following example, but still is going to take very long time:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>hbase shell
+hbase():&gt; count 'sensors', INTERVAL =&gt; 1000000</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Executing that count took 8.4 minutes!</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>20050225 row(s)
+Took 506.6065 seconds
+=&gt; 20050225</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>There&#8217;s an adhoc tool called <strong>rowcounter</strong> that performs much better than the previous solution:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>hbase rowcounter sensors</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I&#8217;ve found various solutions at <a href="https://stackoverflow.com/questions/11375098/hbase-quickly-count-number-of-rows">StackOverflow</a>. It seems that the <strong>quickest solutions is to create a counter manually and update it every time</strong> there&#8217;s new data in a given table.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+Aggregation operations are normally done by creating map-reduce applications
+</blockquote>
+</div>
+<div class="paragraph">
+<p>There&#8217;s also the notion of <a href="http://hbase.apache.org/book.html#_counters">counters</a> which allow you to do atomic increments of numbers in Hbase. So a possibility would be to increment a counter every time insertions have been made in a table. That number could be retrieved under the millisecond.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="drop">Drop</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>It seems that when you execute:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>drop 'sensors'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Files in HDFS are not removed automatically. However HBase has some management tools that could take care of it. Just enter Hbase shell:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>hbase shell</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and then:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>cleaner_chore_run</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Cleaner chore command for garbage collection of HFiles and WAL files.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="querying_hbase_with_sql">Querying HBase with SQL</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Yes my friends, all the previous sections were for nothing, I&#8217;m joking&#8230;&#8203; or maybe not XD. Now seriously, although Hbase query language may helps us realizing how queries are executed in Hbase, maybe our application could benefit from interfacing hbase with a more familiar query language such as SQL.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://phoenix.apache.org/">Apache Phoenix</a>: Apache Phoenix enables OLTP and operational analytics in Hadoop for low latency applications by combining the best of both worlds: the power of standard SQL and JDBC APIs with full ACID transaction capabilities and
+the flexibility of late-bound, schema-on-read capabilities from the NoSQL world by leveraging HBase as its backing store</p>
+</li>
+<li>
+<p><a href="https://gethue.com/the-web-ui-for-hbase-hbase-browser/">Hive</a>: The Hive/Hbase integration&#8230;&#8203; allows Hive QL statements to access HBase tables for both read (SELECT) and write (INSERT). It is even possible to combine access to HBase tables with native Hive tables via joins and unions</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="next">Next</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="/blog/2021/08/hbase_series_05.html">API Clients</a></p>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/stats.html">Statistics</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>
