@@ -4,7 +4,7 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2021-08-14T15:46:14Z</updated>
+    <updated>2021-08-18T12:00:26Z</updated>
     <id>http://github.com/mariogarcia</id>
     <entry>
         <title>Hbase series: Query Model</title>
@@ -117,7 +117,7 @@ ICATION_SCOPE =&amp;gt; &apos;0&apos;}&lt;/code&gt;&lt;/pre&gt;
 &lt;div class=&quot;content&quot;&gt;
 &lt;div class=&quot;title&quot;&gt;Compression&lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;As a good practice, it would be nice to activate the table compression, there are different available algorithms depending on the availability/speed requirements for accessing the table&amp;#8217;s data. You can activate compression after creating the table, but unless you apply compaction (which requires your table to be offline) old data won&amp;#8217;t be compressed.&lt;/p&gt;
+&lt;p&gt;As a good practice, it would be nice to activate the table compression, there are different available algorithms depending on the availability/speed requirements for accessing the table&amp;#8217;s data. You can activate compression after creating the table, but unless you apply compaction old data won&amp;#8217;t be compressed.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;You can check out more about compression &lt;a href=&quot;http://hbase.apache.org/book.html#compression&quot;&gt;in the official guide&lt;/a&gt;.&lt;/p&gt;
