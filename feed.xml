@@ -4,8 +4,264 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2021-08-18T12:00:26Z</updated>
+    <updated>2021-08-18T15:46:58Z</updated>
     <id>http://github.com/mariogarcia</id>
+    <entry>
+        <title>Hbase series: Python clients</title>
+        <author>
+            <name>@marioggar</name>
+        </author>
+        <link href="http://github.com/mariogarcia/blog/2021/08/hbase_series_05.html"/>
+        <updated>2021-08-17T00:00:00Z</updated>
+        <id>http://github.com/mariogarcia/blog/2021/08/hbase_series_05.html</id>
+        <category term="nosql"/>
+        <category term="bigdata"/>
+        <category term="hbase"/>
+        <content type="html">
+            &lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Well so I&amp;#8217;ve got a Hbase database ready to go. Lets add some data through my brand new Python application. I need a client library to connect to Hbase.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;happybase&quot;&gt;Happybase&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/python-happybase/happybase&quot;&gt;Happybase&lt;/a&gt; is a Python Hbase client. I think that most important feature of Happybase is simplicity specially when comparing it with the Java client library, which is more of a low level library. Happybase makes dealing with Hbase as if you were using a dictionary (or a map). We&amp;#8217;ll see that in a moment.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To install it the pip dependency is &lt;code&gt;happybase&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sidebarblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Poetry FTW!&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;span class=&quot;image left&quot;&gt;&lt;img src=&quot;/img/2021/08/hbase/happy.svg&quot; alt=&quot;Poetry FTW&quot; height=&quot;100&quot;&gt;&lt;/span&gt;
+As usual, I&amp;#8217;m not creating a virtualenv and installing the libraries manually afterwards with pip. Nowadays for every new Python project I&amp;#8217;m using &lt;a href=&quot;https://python-poetry.org/&quot;&gt;Poetry&lt;/a&gt;. It was one of the things I was missing the most when I started doing Python stuff coming from the Java world. According to the documentation Poetry is a tool for dependency management and packaging in Python. It allows you to declare the libraries your project depends on and it will manage (install/update) them for you.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Before doing anything we need to make sure the Hbase server is running, and also that the Hbase Thrift server is up as well. Specially when you are using a standalone Hbase installation, the thrift server is disabled by default.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;starting Hbase and the Thrift server&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;mario@computer&amp;gt; cd hbase
+mario@computer&amp;gt; ./bin/start-hbase.sh
+...
+mario@computer&amp;gt; ./bin/hbase-daemon.sh start thrift
+running thrift, logging to /home/mario/../logs/hbase-mario-thrift-mario-computer.out&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now we can create our first table using Happybase. The table &lt;code&gt;iot&lt;/code&gt; is going to register temperature and humidity from different devices located inside a house. This table will have two different column families:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;span class=&quot;image right&quot;&gt;&lt;img src=&quot;/img/2021/08/hbase/house.svg&quot; alt=&quot;Poetry FTW&quot; height=&quot;150&quot;&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;device&lt;/strong&gt; will store device attributes such as ip, logical name&amp;#8230;&amp;#8203;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;metric&lt;/strong&gt; will store device temperature and humidity values&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Using HappyBase API you can set column families attributes, for example, which compression algorithm to use for a specific column family. Here I&amp;#8217;m using &lt;code&gt;GZ&lt;/code&gt; compression for the &lt;strong&gt;metric&lt;/strong&gt; column family:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;create table&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import random
+import happybase
+import datetime as dt
+
+def hbase_create():
+    connection = happybase.Connection(&apos;localhost&apos;)
+    connection.create_table(
+        &apos;iot&apos;,
+        {
+            &apos;device&apos;: dict(),
+            &apos;metric&apos;: dict({
+                &quot;COMPRESSION&quot;: &quot;GZ&quot;
+            })
+        })&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Once I&amp;#8217;ve created the table, I can start adding rows to it. The following example adds 5M rows to Hbase. Instead of writing every row one by one I&amp;#8217;m inserting rows in batches to improve performance. Every rowkey will be built out of:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;timestamp&lt;/strong&gt;: 20210818100000 (YYYMMddHHmmSS)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;house id&lt;/strong&gt;: 001 (there are 100 houses)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;device id&lt;/strong&gt;: 01 (there are 05 devices per house)&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So an example of a row key could be &lt;strong&gt;20210818100000-001-01&lt;/strong&gt; which is all the information of the device &lt;strong&gt;01&lt;/strong&gt; of the house &lt;strong&gt;001&lt;/strong&gt; at a specific point in time &lt;strong&gt;20210818100000&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;insert data&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import random
+import happybase
+import datetime as dt
+
+def hbase_put():
+    connection = happybase.Connection(&apos;localhost&apos;)
+    iot_table  = connection.table(&quot;iot&quot;)
+    initial_dt = dt.datetime.now()
+
+    with iot_table.batch(batch_size=100) as batch: # (1)
+        for second in range(0, 10000):
+            for house in range(0, 100):
+                for device in range(0, 5):
+                    moment   = (initial_dt + dt.timedelta(seconds=second)).strftime(&apos;%Y%m%d%H%M%S&apos;)
+                    rowkey   = bytes(&quot;{0}-{1:03}-{2:02}&quot;.format(moment, house, device), &apos;UTF-8&apos;) # (2)
+                    dev_ip   = &quot;192.168.1.14{}&quot;.format(device)
+                    dev_type = str(device)
+                    dev_temp = str(random.randint(20, 30))
+                    dev_humi = str(random.randint(30, 40) / 100)
+
+                    batch.put(rowkey, { # (3)
+                        b&quot;device:ip&quot;: bytes(dev_ip, &apos;UTF-8&apos;),
+                        b&quot;device:type&quot;: bytes(dev_type, &apos;UTF-8&apos;),
+                        b&quot;metric:temp&quot;: bytes(dev_temp, &apos;UTF-8&apos;),
+                        b&quot;metric:humidity&quot;: bytes(dev_humi, &apos;UTF-8&apos;)
+                    })&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;colist arabic&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;1&quot;&gt;&lt;/i&gt;&lt;b&gt;1&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;Using batching mechanism to improve performance when writing to Hbase&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;2&quot;&gt;&lt;/i&gt;&lt;b&gt;2&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;building a rowkey with &lt;code&gt;timestamp-houseid-deviceid&lt;/code&gt;, e.g: &lt;code&gt;20210818000000-001-01&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;i class=&quot;conum&quot; data-value=&quot;3&quot;&gt;&lt;/i&gt;&lt;b&gt;3&lt;/b&gt;&lt;/td&gt;
+&lt;td&gt;Inserts a series of cells under the same rowkey&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;span class=&quot;image left&quot;&gt;&lt;img src=&quot;/img/2021/08/hbase/temperature.svg&quot; alt=&quot;Poetry FTW&quot; height=&quot;150&quot;&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now that I have some data, lets find all devices&apos; ip, type, and temperature of house 001 with temperature greater than 25 degrees celsius. In Hbase is always, always better to query by using a rowkey range rather than querying using filters, or at least use a filter once you&amp;#8217;ve narrow down the area of the search by applying a rowkey range.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In HappyBase you query using scan method, you can narrow down rowkey range via &lt;strong&gt;row_start&lt;/strong&gt; and &lt;strong&gt;row_stop&lt;/strong&gt;, and if you would like to apply a filter then use the filter attribute.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;scanning with filters&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import random
+import happybase
+import datetime as dt
+
+def hbase_scan():
+    connection = happybase.Connection(&apos;localhost&apos;)
+    iot_table  = connection.table(&quot;iot&quot;)
+    initial_dt = dt.datetime.now()
+    initial_dt_str = initial_dt.strftime(&apos;%Y%m%d%H%M%S&apos;)
+    row_key_from = &quot;{}-001-00&quot;.format(initial_dt_str)
+    row_key_to   = &quot;{}-001-05&quot;.format(initial_dt_str)
+
+    results = iot_table.scan(
+        limit=100,
+        row_start=bytes(row_key_from, &apos;UTF-8&apos;),
+        row_stop=bytes(row_key_to, &apos;UTF-8&apos;),
+        columns=[b&quot;device:ip&quot;, b&quot;device:type&quot;, b&quot;metric:temp&quot;],
+        filter=b&quot;SingleColumnValueFilter(&apos;metric&apos;, &apos;temp&apos;, &amp;gt;, &apos;binary:25&apos;)&quot;
+    )
+
+    for row in results:
+        print(row)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This is not meant to be an exhaustive guide of using HappyBase, specially because the HappyBase use guide is full of examples. That&amp;#8217;s why if you&amp;#8217;d like to go deeper I&amp;#8217;d recommend you to visit the &lt;a href=&quot;https://happybase.readthedocs.io/en/latest/&quot;&gt;HappyBase readthedocs&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;conclusion_and_gotchas&quot;&gt;Conclusion and Gotchas&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In general HappyBase is a very friendly library to start using with Hbase. However there are pitfalls I&amp;#8217;ve found myself doing and I think are worth mentioning:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Make sure the Hbase Thrift server is up and running&lt;/strong&gt; before executing any HappyBase client&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Because Hbase only knows about bytes, &lt;strong&gt;bytes is what HappyBase expects as values&lt;/strong&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Batching operations&lt;/strong&gt; require you to either explicitly call to batch.send() or to establish a batch_size when calling to &lt;strong&gt;table.batch(batch_size=128)&lt;/strong&gt; otherwise HappyBase will be storing rows in memory until the &lt;strong&gt;with&lt;/strong&gt; scope has ended.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Filters are nice but they should be only be applied once you have set a good row boundary&lt;/strong&gt;, otherwise you will be scanning through the whole database.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;aiohappybase&quot;&gt;AIOHappyBase&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There are use cases where you may benefit from asynchronous query execution. Lets imagine you have to execute 4 queries and one of them takes longer than the others. You could be executing that query in background while executing the other three to reduce the execution time. This kind of scenario is what &lt;a href=&quot;https://github.com/python-happybase/aiohappybase&quot;&gt;AIOHappyBase&lt;/a&gt; tries to solve, it was born as a necessity to take HappyBase to the asynchronous arena.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;resources&quot;&gt;Resources&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://happybase.readthedocs.io/en/latest/&quot;&gt;HappyBase Site&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://aiohappybase.readthedocs.io/en/latest/&quot;&gt;AIOHappyBase Site&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://docs.cloudera.com/runtime/7.2.9/managing-hbase/topics/hbase-filter-types.html&quot;&gt;Cloudera Hbase Filter reference&lt;/a&gt;: Good place to know how to build the different filters Hbase supports in its queries.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://cocomaterial.com&quot;&gt;Coco Material&lt;/a&gt;: All drawings in this entry are from this wonderful site!&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;next&quot;&gt;Next&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;/blog/2021/08/hbase_series_06.html&quot;&gt;Region partition policies&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+        </content>
+    </entry>
     <entry>
         <title>Hbase series: Query Model</title>
         <author>

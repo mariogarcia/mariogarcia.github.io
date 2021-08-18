@@ -1,0 +1,318 @@
+<!DOCTYPE html><html lang="en">
+    <head>
+<meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no"/>
+        <title>Working in Progress</title>
+        <link rel="stylesheet" href="/css/main.css"/>
+        <link rel="stylesheet" href="/css/zenburn.css"/>
+        
+        
+    </head><body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="/index.html" class="logo">
+                            <strong>
+                                WORKING IN PROGRESS
+                            </strong> - POST
+                        </a><ul class="icons">
+                            <li>
+                                <a href="/feed.xml" class="icon fa-rss">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://twitter.com/marioggar" class="icon fa-twitter">
+                                    <span class="label">
+                                        Twitter
+                                    </span>
+                                </a>
+                            </li><li>
+                                <a href="https://github.com/mariogarcia" class="icon fa-github">
+                                    <span class="label">
+                                        Github
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </header><section><header class="main"><div class="metadata"><em class="fa fa-calendar-o"></em><b>2021-08-17</b></div><h1>Hbase series: Python clients</h1></header><yieldScaped><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Well so I&#8217;ve got a Hbase database ready to go. Lets add some data through my brand new Python application. I need a client library to connect to Hbase.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="happybase">Happybase</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="https://github.com/python-happybase/happybase">Happybase</a> is a Python Hbase client. I think that most important feature of Happybase is simplicity specially when comparing it with the Java client library, which is more of a low level library. Happybase makes dealing with Hbase as if you were using a dictionary (or a map). We&#8217;ll see that in a moment.</p>
+</div>
+<div class="paragraph">
+<p>To install it the pip dependency is <code>happybase</code>.</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Poetry FTW!</div>
+<div class="paragraph">
+<p><span class="image left"><img src="/img/2021/08/hbase/happy.svg" alt="Poetry FTW" height="100"></span>
+As usual, I&#8217;m not creating a virtualenv and installing the libraries manually afterwards with pip. Nowadays for every new Python project I&#8217;m using <a href="https://python-poetry.org/">Poetry</a>. It was one of the things I was missing the most when I started doing Python stuff coming from the Java world. According to the documentation Poetry is a tool for dependency management and packaging in Python. It allows you to declare the libraries your project depends on and it will manage (install/update) them for you.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Before doing anything we need to make sure the Hbase server is running, and also that the Hbase Thrift server is up as well. Specially when you are using a standalone Hbase installation, the thrift server is disabled by default.</p>
+</div>
+<div class="listingblock">
+<div class="title">starting Hbase and the Thrift server</div>
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">mario@computer&gt; cd hbase
+mario@computer&gt; ./bin/start-hbase.sh
+...
+mario@computer&gt; ./bin/hbase-daemon.sh start thrift
+running thrift, logging to /home/mario/../logs/hbase-mario-thrift-mario-computer.out</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now we can create our first table using Happybase. The table <code>iot</code> is going to register temperature and humidity from different devices located inside a house. This table will have two different column families:</p>
+</div>
+<div class="paragraph">
+<p><span class="image right"><img src="/img/2021/08/hbase/house.svg" alt="Poetry FTW" height="150"></span></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>device</strong> will store device attributes such as ip, logical name&#8230;&#8203;</p>
+</li>
+<li>
+<p><strong>metric</strong> will store device temperature and humidity values</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Using HappyBase API you can set column families attributes, for example, which compression algorithm to use for a specific column family. Here I&#8217;m using <code>GZ</code> compression for the <strong>metric</strong> column family:</p>
+</div>
+<div class="listingblock">
+<div class="title">create table</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import random
+import happybase
+import datetime as dt
+
+def hbase_create():
+    connection = happybase.Connection('localhost')
+    connection.create_table(
+        'iot',
+        {
+            'device': dict(),
+            'metric': dict({
+                "COMPRESSION": "GZ"
+            })
+        })</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Once I&#8217;ve created the table, I can start adding rows to it. The following example adds 5M rows to Hbase. Instead of writing every row one by one I&#8217;m inserting rows in batches to improve performance. Every rowkey will be built out of:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>timestamp</strong>: 20210818100000 (YYYMMddHHmmSS)</p>
+</li>
+<li>
+<p><strong>house id</strong>: 001 (there are 100 houses)</p>
+</li>
+<li>
+<p><strong>device id</strong>: 01 (there are 05 devices per house)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>So an example of a row key could be <strong>20210818100000-001-01</strong> which is all the information of the device <strong>01</strong> of the house <strong>001</strong> at a specific point in time <strong>20210818100000</strong>.</p>
+</div>
+<div class="listingblock">
+<div class="title">insert data</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import random
+import happybase
+import datetime as dt
+
+def hbase_put():
+    connection = happybase.Connection('localhost')
+    iot_table  = connection.table("iot")
+    initial_dt = dt.datetime.now()
+
+    with iot_table.batch(batch_size=100) as batch: # (1)
+        for second in range(0, 10000):
+            for house in range(0, 100):
+                for device in range(0, 5):
+                    moment   = (initial_dt + dt.timedelta(seconds=second)).strftime('%Y%m%d%H%M%S')
+                    rowkey   = bytes("{0}-{1:03}-{2:02}".format(moment, house, device), 'UTF-8') # (2)
+                    dev_ip   = "192.168.1.14{}".format(device)
+                    dev_type = str(device)
+                    dev_temp = str(random.randint(20, 30))
+                    dev_humi = str(random.randint(30, 40) / 100)
+
+                    batch.put(rowkey, { # (3)
+                        b"device:ip": bytes(dev_ip, 'UTF-8'),
+                        b"device:type": bytes(dev_type, 'UTF-8'),
+                        b"metric:temp": bytes(dev_temp, 'UTF-8'),
+                        b"metric:humidity": bytes(dev_humi, 'UTF-8')
+                    })</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Using batching mechanism to improve performance when writing to Hbase</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>building a rowkey with <code>timestamp-houseid-deviceid</code>, e.g: <code>20210818000000-001-01</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Inserts a series of cells under the same rowkey</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p><span class="image left"><img src="/img/2021/08/hbase/temperature.svg" alt="Poetry FTW" height="150"></span></p>
+</div>
+<div class="paragraph">
+<p>Now that I have some data, lets find all devices' ip, type, and temperature of house 001 with temperature greater than 25 degrees celsius. In Hbase is always, always better to query by using a rowkey range rather than querying using filters, or at least use a filter once you&#8217;ve narrow down the area of the search by applying a rowkey range.</p>
+</div>
+<div class="paragraph">
+<p>In HappyBase you query using scan method, you can narrow down rowkey range via <strong>row_start</strong> and <strong>row_stop</strong>, and if you would like to apply a filter then use the filter attribute.</p>
+</div>
+<div class="listingblock">
+<div class="title">scanning with filters</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">import random
+import happybase
+import datetime as dt
+
+def hbase_scan():
+    connection = happybase.Connection('localhost')
+    iot_table  = connection.table("iot")
+    initial_dt = dt.datetime.now()
+    initial_dt_str = initial_dt.strftime('%Y%m%d%H%M%S')
+    row_key_from = "{}-001-00".format(initial_dt_str)
+    row_key_to   = "{}-001-05".format(initial_dt_str)
+
+    results = iot_table.scan(
+        limit=100,
+        row_start=bytes(row_key_from, 'UTF-8'),
+        row_stop=bytes(row_key_to, 'UTF-8'),
+        columns=[b"device:ip", b"device:type", b"metric:temp"],
+        filter=b"SingleColumnValueFilter('metric', 'temp', &gt;, 'binary:25')"
+    )
+
+    for row in results:
+        print(row)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This is not meant to be an exhaustive guide of using HappyBase, specially because the HappyBase use guide is full of examples. That&#8217;s why if you&#8217;d like to go deeper I&#8217;d recommend you to visit the <a href="https://happybase.readthedocs.io/en/latest/">HappyBase readthedocs</a>.</p>
+</div>
+<div class="sect2">
+<h3 id="conclusion_and_gotchas">Conclusion and Gotchas</h3>
+<div class="paragraph">
+<p>In general HappyBase is a very friendly library to start using with Hbase. However there are pitfalls I&#8217;ve found myself doing and I think are worth mentioning:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Make sure the Hbase Thrift server is up and running</strong> before executing any HappyBase client</p>
+</li>
+<li>
+<p>Because Hbase only knows about bytes, <strong>bytes is what HappyBase expects as values</strong></p>
+</li>
+<li>
+<p><strong>Batching operations</strong> require you to either explicitly call to batch.send() or to establish a batch_size when calling to <strong>table.batch(batch_size=128)</strong> otherwise HappyBase will be storing rows in memory until the <strong>with</strong> scope has ended.</p>
+</li>
+<li>
+<p><strong>Filters are nice but they should be only be applied once you have set a good row boundary</strong>, otherwise you will be scanning through the whole database.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="aiohappybase">AIOHappyBase</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>There are use cases where you may benefit from asynchronous query execution. Lets imagine you have to execute 4 queries and one of them takes longer than the others. You could be executing that query in background while executing the other three to reduce the execution time. This kind of scenario is what <a href="https://github.com/python-happybase/aiohappybase">AIOHappyBase</a> tries to solve, it was born as a necessity to take HappyBase to the asynchronous arena.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="resources">Resources</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://happybase.readthedocs.io/en/latest/">HappyBase Site</a></p>
+</li>
+<li>
+<p><a href="https://aiohappybase.readthedocs.io/en/latest/">AIOHappyBase Site</a></p>
+</li>
+<li>
+<p><a href="https://docs.cloudera.com/runtime/7.2.9/managing-hbase/topics/hbase-filter-types.html">Cloudera Hbase Filter reference</a>: Good place to know how to build the different filters Hbase supports in its queries.</p>
+</li>
+<li>
+<p><a href="https://cocomaterial.com">Coco Material</a>: All drawings in this entry are from this wonderful site!</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="next">Next</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="/blog/2021/08/hbase_series_06.html">Region partition policies</a></p>
+</div>
+</div>
+</div></yieldScaped></section>
+                </div>
+            </div><div id="sidebar">
+                <div class="inner">
+                    <!--Menu--><nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header><ul>
+                            <li>
+                                <a href="/index.html">Latests entries</a>
+                            </li><li>
+                                <a href="/archive.html">Archive</a>
+                            </li><li>
+                                <a href="/stats.html">Statistics</a>
+                            </li><li>
+                                <a href="/about.html">About</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div><script src="/js/jquery.min.js"></script>
+            <script src="/js/browser.min.js"></script>
+            <script src="/js/breakpoints.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+            <script type="text/javascript">
+                
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    
+            </script>
+        </div>
+    </body>
+</html>
