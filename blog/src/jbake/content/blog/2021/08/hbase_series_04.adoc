@@ -74,7 +74,7 @@ ICATION_SCOPE => '0'}
 
 .Compression
 ****
-As a good practice, it would be nice to activate the table compression, there are different available algorithms depending on the availability/speed requirements for accessing the table's data. You can activate compression after creating the table, but unless you apply compaction (which requires your table to be offline) old data won't be compressed.
+As a good practice, it would be nice to activate the table compression, there are different available algorithms depending on the availability/speed requirements for accessing the table's data. You can activate compression after creating the table, but unless you apply compaction old data won't be compressed.
 
 You can check out more about compression http://hbase.apache.org/book.html#compression[in the official guide].
 ****
