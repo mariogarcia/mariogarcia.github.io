@@ -4,7 +4,7 @@
     <link href="http://github.com/mariogarcia/"/>
     <link rel="self" type="application/atom+xml" href="http://github.com/mariogarcia/feed.xml"/>
     <subtitle>null</subtitle>
-    <updated>2021-08-18T15:46:58Z</updated>
+    <updated>2021-08-19T10:19:36Z</updated>
     <id>http://github.com/mariogarcia</id>
     <entry>
         <title>Hbase series: Python clients</title>
@@ -227,7 +227,59 @@ def hbase_scan():
 &lt;h2 id=&quot;aiohappybase&quot;&gt;AIOHappyBase&lt;/h2&gt;
 &lt;div class=&quot;sectionbody&quot;&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;There are use cases where you may benefit from asynchronous query execution. Lets imagine you have to execute 4 queries and one of them takes longer than the others. You could be executing that query in background while executing the other three to reduce the execution time. This kind of scenario is what &lt;a href=&quot;https://github.com/python-happybase/aiohappybase&quot;&gt;AIOHappyBase&lt;/a&gt; tries to solve, it was born as a necessity to take HappyBase to the asynchronous arena.&lt;/p&gt;
+&lt;p&gt;&lt;span class=&quot;image left&quot;&gt;&lt;img src=&quot;/img/2021/08/hbase/staff_employees_coworkers_professionals.svg&quot; alt=&quot;Multi tasking&quot; height=&quot;150&quot;&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There are use cases where you may benefit from asynchronous query execution. This kind of scenario is what &lt;a href=&quot;https://github.com/python-happybase/aiohappybase&quot;&gt;AIOHappyBase&lt;/a&gt; tries to solve, it was born as a necessity to take HappyBase to the asynchronous arena.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Lets imagine you have to execute 3 queries and one of them takes longer than the other two. In the following example I&amp;#8217;m creating three tasks with &lt;a href=&quot;https://docs.python.org/3/library/asyncio.html&quot;&gt;Python&amp;#8217;s asyncio&lt;/a&gt; and &lt;a href=&quot;https://github.com/python-happybase/aiohappybase&quot;&gt;AIOHappyBase&lt;/a&gt;. Because the heavy operations takes longer thanks to asyncio and HappyBase the two other tasks are not blocked and can be executed in the meantime.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;async query execution&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;async def heavy_operation_aio():
+    async with ConnectionPool(host=&quot;localhost&quot;, size=10) as pool:
+        heavy_1_task = asyncio.Task(heavy_operation_1(pool))
+        light_1_task = asyncio.Task(light_op_1(pool))
+        light_2_task = asyncio.Task(light_op_2(pool))
+
+        heavy_res, light_1_res, light_2_res = await asyncio.gather(
+            heavy_1_task,
+            light_1_task,
+            light_2_task)
+
+        print_results(&quot;HEAVY&quot;, heavy_res)
+        print_results(&quot;LIGHT (1)&quot;, light_1_res)
+        print_results(&quot;LIGHT (2)&quot;, light_2_res)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It&amp;#8217;s clearly shown in the output.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;(hbasegs-MTmhc8Pq-py3.9) mario@computer:~/hbasegs$ poetry run async_search
+light_op_1 executing!
+light_op_2 executing!
+heavy_operation_1 executing!
+
+HEAVY RESULTS
+=============
+(b&apos;20210819113524-001-00&apos;, {b&apos;device:ip&apos;: b&apos;192.168.1.140&apos;, b&apos;device:type&apos;: b&apos;0&apos;, b&apos;metric:temp&apos;: b&apos;29&apos;})
+
+LIGHT (1) RESULTS
+=================
+(b&apos;20210819113522-001-00&apos;, {b&apos;device:ip&apos;: b&apos;192.168.1.140&apos;, b&apos;device:type&apos;: b&apos;0&apos;, b&apos;metric:temp&apos;: b&apos;28&apos;})
+
+LIGHT (2) RESULTS
+=================
+(b&apos;20210819113522-001-00&apos;, {b&apos;device:ip&apos;: b&apos;192.168.1.140&apos;, b&apos;device:type&apos;: b&apos;0&apos;, b&apos;metric:temp&apos;: b&apos;28&apos;})
+secs: 2&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You can find the full source code at &lt;a href=&quot;https://github.com/mariogarcia/hbase_python_clients&quot;&gt;Github&lt;/a&gt;.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -237,10 +289,19 @@ def hbase_scan():
 &lt;div class=&quot;ulist&quot;&gt;
 &lt;ul&gt;
 &lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/mariogarcia/hbase_python_clients&quot;&gt;Source Code At Github&lt;/a&gt;: source code used in this entry&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
 &lt;p&gt;&lt;a href=&quot;https://happybase.readthedocs.io/en/latest/&quot;&gt;HappyBase Site&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;a href=&quot;https://aiohappybase.readthedocs.io/en/latest/&quot;&gt;AIOHappyBase Site&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://docs.python.org/3/library/asyncio.html&quot;&gt;Python&amp;#8217;s AsyncIO Documentation&lt;/a&gt;: Official Python 3 AsyncIO documentation&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://realpython.com/async-io-python/&quot;&gt;AsyncIO Tutorial&lt;/a&gt;: An introduction to AsyncIO tutorial&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;a href=&quot;https://docs.cloudera.com/runtime/7.2.9/managing-hbase/topics/hbase-filter-types.html&quot;&gt;Cloudera Hbase Filter reference&lt;/a&gt;: Good place to know how to build the different filters Hbase supports in its queries.&lt;/p&gt;

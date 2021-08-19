@@ -246,7 +246,59 @@ def hbase_scan():
 <h2 id="aiohappybase">AIOHappyBase</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>There are use cases where you may benefit from asynchronous query execution. Lets imagine you have to execute 4 queries and one of them takes longer than the others. You could be executing that query in background while executing the other three to reduce the execution time. This kind of scenario is what <a href="https://github.com/python-happybase/aiohappybase">AIOHappyBase</a> tries to solve, it was born as a necessity to take HappyBase to the asynchronous arena.</p>
+<p><span class="image left"><img src="/img/2021/08/hbase/staff_employees_coworkers_professionals.svg" alt="Multi tasking" height="150"></span></p>
+</div>
+<div class="paragraph">
+<p>There are use cases where you may benefit from asynchronous query execution. This kind of scenario is what <a href="https://github.com/python-happybase/aiohappybase">AIOHappyBase</a> tries to solve, it was born as a necessity to take HappyBase to the asynchronous arena.</p>
+</div>
+<div class="paragraph">
+<p>Lets imagine you have to execute 3 queries and one of them takes longer than the other two. In the following example I&#8217;m creating three tasks with <a href="https://docs.python.org/3/library/asyncio.html">Python&#8217;s asyncio</a> and <a href="https://github.com/python-happybase/aiohappybase">AIOHappyBase</a>. Because the heavy operations takes longer thanks to asyncio and HappyBase the two other tasks are not blocked and can be executed in the meantime.</p>
+</div>
+<div class="listingblock">
+<div class="title">async query execution</div>
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">async def heavy_operation_aio():
+    async with ConnectionPool(host="localhost", size=10) as pool:
+        heavy_1_task = asyncio.Task(heavy_operation_1(pool))
+        light_1_task = asyncio.Task(light_op_1(pool))
+        light_2_task = asyncio.Task(light_op_2(pool))
+
+        heavy_res, light_1_res, light_2_res = await asyncio.gather(
+            heavy_1_task,
+            light_1_task,
+            light_2_task)
+
+        print_results("HEAVY", heavy_res)
+        print_results("LIGHT (1)", light_1_res)
+        print_results("LIGHT (2)", light_2_res)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It&#8217;s clearly shown in the output.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">(hbasegs-MTmhc8Pq-py3.9) mario@computer:~/hbasegs$ poetry run async_search
+light_op_1 executing!
+light_op_2 executing!
+heavy_operation_1 executing!
+
+HEAVY RESULTS
+=============
+(b'20210819113524-001-00', {b'device:ip': b'192.168.1.140', b'device:type': b'0', b'metric:temp': b'29'})
+
+LIGHT (1) RESULTS
+=================
+(b'20210819113522-001-00', {b'device:ip': b'192.168.1.140', b'device:type': b'0', b'metric:temp': b'28'})
+
+LIGHT (2) RESULTS
+=================
+(b'20210819113522-001-00', {b'device:ip': b'192.168.1.140', b'device:type': b'0', b'metric:temp': b'28'})
+secs: 2</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can find the full source code at <a href="https://github.com/mariogarcia/hbase_python_clients">Github</a>.</p>
 </div>
 </div>
 </div>
@@ -256,10 +308,19 @@ def hbase_scan():
 <div class="ulist">
 <ul>
 <li>
+<p><a href="https://github.com/mariogarcia/hbase_python_clients">Source Code At Github</a>: source code used in this entry</p>
+</li>
+<li>
 <p><a href="https://happybase.readthedocs.io/en/latest/">HappyBase Site</a></p>
 </li>
 <li>
 <p><a href="https://aiohappybase.readthedocs.io/en/latest/">AIOHappyBase Site</a></p>
+</li>
+<li>
+<p><a href="https://docs.python.org/3/library/asyncio.html">Python&#8217;s AsyncIO Documentation</a>: Official Python 3 AsyncIO documentation</p>
+</li>
+<li>
+<p><a href="https://realpython.com/async-io-python/">AsyncIO Tutorial</a>: An introduction to AsyncIO tutorial</p>
 </li>
 <li>
 <p><a href="https://docs.cloudera.com/runtime/7.2.9/managing-hbase/topics/hbase-filter-types.html">Cloudera Hbase Filter reference</a>: Good place to know how to build the different filters Hbase supports in its queries.</p>
