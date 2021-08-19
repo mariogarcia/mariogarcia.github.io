@@ -152,12 +152,63 @@ In general HappyBase is a very friendly library to start using with Hbase. Howev
 
 == AIOHappyBase
 
-There are use cases where you may benefit from asynchronous query execution. Lets imagine you have to execute 4 queries and one of them takes longer than the others. You could be executing that query in background while executing the other three to reduce the execution time. This kind of scenario is what https://github.com/python-happybase/aiohappybase[AIOHappyBase] tries to solve, it was born as a necessity to take HappyBase to the asynchronous arena.
+image:2021/08/hbase/staff_employees_coworkers_professionals.svg[alt="Multi tasking", role="left", height="150"]
+
+There are use cases where you may benefit from asynchronous query execution. This kind of scenario is what https://github.com/python-happybase/aiohappybase[AIOHappyBase] tries to solve, it was born as a necessity to take HappyBase to the asynchronous arena.
+
+Lets imagine you have to execute 3 queries and one of them takes longer than the other two. In the following example I'm creating three tasks with https://docs.python.org/3/library/asyncio.html[Python's asyncio] and https://github.com/python-happybase/aiohappybase[AIOHappyBase]. Because the heavy operations takes longer thanks to asyncio and HappyBase the two other tasks are not blocked and can be executed in the meantime.
+
+[source, python]
+.async query execution
+----
+async def heavy_operation_aio():
+    async with ConnectionPool(host="localhost", size=10) as pool:
+        heavy_1_task = asyncio.Task(heavy_operation_1(pool))
+        light_1_task = asyncio.Task(light_op_1(pool))
+        light_2_task = asyncio.Task(light_op_2(pool))
+
+        heavy_res, light_1_res, light_2_res = await asyncio.gather(
+            heavy_1_task, 
+            light_1_task, 
+            light_2_task)
+
+        print_results("HEAVY", heavy_res)
+        print_results("LIGHT (1)", light_1_res)
+        print_results("LIGHT (2)", light_2_res)
+----
+
+It's clearly shown in the output.
+
+[source, shell]
+----
+(hbasegs-MTmhc8Pq-py3.9) mario@computer:~/hbasegs$ poetry run async_search
+light_op_1 executing!
+light_op_2 executing!
+heavy_operation_1 executing!
+
+HEAVY RESULTS
+=============
+(b'20210819113524-001-00', {b'device:ip': b'192.168.1.140', b'device:type': b'0', b'metric:temp': b'29'})
+
+LIGHT (1) RESULTS
+=================
+(b'20210819113522-001-00', {b'device:ip': b'192.168.1.140', b'device:type': b'0', b'metric:temp': b'28'})
+
+LIGHT (2) RESULTS
+=================
+(b'20210819113522-001-00', {b'device:ip': b'192.168.1.140', b'device:type': b'0', b'metric:temp': b'28'})
+secs: 2
+----
+
+You can find the full source code at https://github.com/mariogarcia/hbase_python_clients[Github].
 
 == Resources
 
+- https://github.com/mariogarcia/hbase_python_clients[Source Code At Github]: source code used in this entry
 - https://happybase.readthedocs.io/en/latest/[HappyBase Site]
 - https://aiohappybase.readthedocs.io/en/latest/[AIOHappyBase Site]
+- https://docs.python.org/3/library/asyncio.html[Python's AsyncIO Documentation]: Official Python 3 AsyncIO documentation
+- https://realpython.com/async-io-python/[AsyncIO Tutorial]: An introduction to AsyncIO tutorial
 - https://docs.cloudera.com/runtime/7.2.9/managing-hbase/topics/hbase-filter-types.html[Cloudera Hbase Filter reference]: Good place to know how to build the different filters Hbase supports in its queries.
 - https://cocomaterial.com[Coco Material]: All drawings in this entry are from this wonderful site!
 
